@@ -1,0 +1,167 @@
+import React, { useState } from 'react';
+import { X, Plus, Trash2 } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
+
+export const SettingsModal = ({ onClose }) => {
+  const { settings, updateTheme, toggleSounds, addClass, updateClass, deleteClass } = useSettings();
+  const [newClassName, setNewClassName] = useState('');
+  const [newClassStudents, setNewClassStudents] = useState('');
+
+  const handleAddClass = () => {
+    if (!newClassName.trim() || !newClassStudents.trim()) return;
+
+    const studentsList = newClassStudents
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    if (studentsList.length === 0) return;
+
+    addClass({
+      id: `class-${Date.now()}`,
+      name: newClassName.trim(),
+      students: studentsList
+    });
+
+    setNewClassName('');
+    setNewClassStudents('');
+  };
+
+  const handleUpdateClass = (id, newStudentsString) => {
+    const studentsList = newStudentsString
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    const cls = settings.classes.find(c => c.id === id);
+    if (cls) {
+      updateClass({ ...cls, students: studentsList });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-2xl font-bold text-text">Settings</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Theme Selection */}
+          <section>
+            <h3 className="text-lg font-semibold mb-4 text-text">Theme</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { id: 'early-years', name: 'Early Years', desc: 'Primary colours + emojis', emoji: '🎨' },
+                { id: 'primary', name: 'Primary', desc: 'Very Colourful' },
+                { id: 'secondary', name: 'Secondary', desc: 'Colourful & Clean' },
+              ].map(theme => (
+                <button
+                  key={theme.id}
+                  onClick={() => updateTheme(theme.id)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    settings.theme === theme.id
+                      ? 'border-primary bg-primary/5'
+                      : 'border-gray-200 hover:border-primary/50'
+                  }`}
+                >
+                  <div className="font-semibold text-text">
+                    {theme.emoji && <span className="mr-2">{theme.emoji}</span>}
+                    {theme.name}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">{theme.desc}</div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Sound Settings */}
+          <section>
+            <h3 className="text-lg font-semibold mb-4 text-text">Audio</h3>
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.soundsEnabled}
+                onChange={toggleSounds}
+                className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary"
+              />
+              <span className="text-text font-medium">Enable sounds & sound effects</span>
+            </label>
+          </section>
+
+          {/* Class Management */}
+          <section>
+            <h3 className="text-lg font-semibold mb-4 text-text">Manage Classes</h3>
+            <div className="space-y-6">
+              {/* Add New Class */}
+              <div className="bg-gray-50 p-4 rounded-xl space-y-4 border border-gray-200">
+                <h4 className="font-medium text-text">Add New Class</h4>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Class Name</label>
+                  <input
+                    type="text"
+                    value={newClassName}
+                    onChange={(e) => setNewClassName(e.target.value)}
+                    placeholder="e.g. Year 3 Red"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Students (One per line)</label>
+                  <textarea
+                    value={newClassStudents}
+                    onChange={(e) => setNewClassStudents(e.target.value)}
+                    placeholder="Alice&#10;Bob&#10;Charlie"
+                    rows={4}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+                <button
+                  onClick={handleAddClass}
+                  disabled={!newClassName.trim() || !newClassStudents.trim()}
+                  className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus size={20} />
+                  <span>Add Class</span>
+                </button>
+              </div>
+
+              {/* Existing Classes */}
+              {settings.classes.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="font-medium text-text">Existing Classes</h4>
+                  {settings.classes.map(cls => (
+                    <div key={cls.id} className="border border-gray-200 p-4 rounded-xl flex gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="font-semibold text-text">{cls.name}</h5>
+                          <span className="text-sm text-gray-500">{cls.students.length} students</span>
+                        </div>
+                        <textarea
+                          defaultValue={cls.students.join('\n')}
+                          onBlur={(e) => handleUpdateClass(cls.id, e.target.value)}
+                          rows={3}
+                          className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-gray-50"
+                        />
+                      </div>
+                      <button
+                        onClick={() => deleteClass(cls.id)}
+                        className="self-start p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Class"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+};

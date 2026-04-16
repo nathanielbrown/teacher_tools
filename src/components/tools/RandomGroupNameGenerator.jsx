@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, RefreshCw } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ADJECTIVES = [
@@ -64,7 +65,6 @@ export const RandomGroupNameGenerator = () => {
                 key={`${groupName}-${index}`}
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
                 className="w-full p-6 bg-gradient-to-r from-primary/5 to-transparent border-l-4 border-primary rounded-r-xl shadow-sm flex items-center gap-4"
               >

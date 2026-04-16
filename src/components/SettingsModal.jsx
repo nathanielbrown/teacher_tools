@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Plus, Trash2, Download, Upload } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
 export const SettingsModal = ({ onClose }) => {
-  const { settings, updateTheme, toggleSounds, addClass, updateClass, deleteClass } = useSettings();
+  const { settings, updateTheme, toggleSounds, addClass, updateClass, deleteClass, setSettings } = useSettings();
+  const fileInputRef = useRef(null);
   const [newClassName, setNewClassName] = useState('');
   const [newClassStudents, setNewClassStudents] = useState('');
 
@@ -37,6 +38,55 @@ export const SettingsModal = ({ onClose }) => {
     if (cls) {
       updateClass({ ...cls, students: studentsList });
     }
+  };
+
+  const handleExport = () => {
+    const dataToExport = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('teacherTools')) {
+        dataToExport[key] = JSON.parse(localStorage.getItem(key));
+      }
+    }
+
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `teacher_tools_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.result);
+
+        Object.keys(importedData).forEach(key => {
+           if (key.startsWith('teacherTools')) {
+               localStorage.setItem(key, JSON.stringify(importedData[key]));
+           }
+        });
+
+        if (importedData['teacherToolsSettings']) {
+            setSettings(importedData['teacherToolsSettings']);
+        }
+
+        window.location.reload();
+      } catch (err) {
+        alert("Failed to parse the imported JSON file. Please make sure it's a valid backup.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   return (
@@ -90,6 +140,35 @@ export const SettingsModal = ({ onClose }) => {
               />
               <span className="text-text font-medium">Enable sounds & sound effects</span>
             </label>
+          </section>
+
+          {/* Data Backup */}
+          <section>
+            <h3 className="text-lg font-semibold mb-4 text-text">Data Backup</h3>
+            <div className="flex gap-4">
+              <button
+                onClick={handleExport}
+                className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Download size={20} />
+                <span>Export Data</span>
+              </button>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Upload size={20} />
+                <span>Import Data</span>
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImport}
+                accept=".json,application/json"
+                className="hidden"
+              />
+            </div>
           </section>
 
           {/* Class Management */}

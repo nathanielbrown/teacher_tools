@@ -32,16 +32,6 @@ export const FlipCoin = () => {
     }, 1500); // Wait for animation
   };
 
-  // Create a continuous rotation string for framer motion based on result
-  // If heads, it needs to end on a multiple of 360. If tails, on 180 (or 180 + multiple of 360).
-  const getRotation = () => {
-    const baseRotations = 5 * 360; // Spin 5 times
-    if (isFlipping) {
-        return baseRotations + (Math.random() > 0.5 ? 0 : 180); // Just animate to something during flip
-    }
-    return result === 'heads' ? 0 : 180;
-  };
-
   return (
     <div className="flex flex-col items-center justify-center space-y-12">
       <h2 className="text-3xl font-bold text-primary">Flip a Coin</h2>
@@ -52,31 +42,36 @@ export const FlipCoin = () => {
       >
         <motion.div
           animate={{
-            rotateY: isFlipping ? flipCount * 1800 + 1800 : (result === 'heads' ? flipCount * 1800 : flipCount * 1800 + 180),
-            y: isFlipping ? [0, -200, 0] : 0,
-            scale: isFlipping ? [1, 1.5, 1] : 1
+            rotateX: isFlipping ? flipCount * 1800 + 1800 : (result === 'heads' ? flipCount * 1800 : flipCount * 1800 + 180),
+            y: isFlipping ? [0, -250, 0] : 0,
+            scale: isFlipping ? [1, 1.2, 1] : 1,
+            z: isFlipping ? [0, 50, 0] : 0
           }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
           className="w-full h-full relative"
           style={{ transformStyle: 'preserve-3d' }}
         >
+          {/* Edge of the coin to give it 3D depth */}
+          <div className="absolute inset-0 rounded-full bg-yellow-600" style={{ transform: 'translateZ(-10px)' }} />
+          <div className="absolute inset-0 rounded-full bg-yellow-600" style={{ transform: 'translateZ(-5px)' }} />
+
           {/* Heads Side */}
           <div
-            className="absolute inset-0 bg-yellow-400 rounded-full border-8 border-yellow-500 shadow-2xl flex items-center justify-center backface-hidden"
-            style={{ backfaceVisibility: 'hidden' }}
+            className="absolute inset-0 bg-yellow-400 rounded-full border-[12px] border-yellow-500 shadow-xl flex items-center justify-center"
+            style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0px)' }}
           >
-            <div className="w-48 h-48 rounded-full border-4 border-yellow-500/30 flex items-center justify-center">
-               <span className="text-6xl font-bold text-yellow-600">H</span>
+            <div className="w-44 h-44 rounded-full border-4 border-yellow-500/30 flex items-center justify-center shadow-inner">
+               <span className="text-7xl font-bold text-yellow-600 drop-shadow-sm">H</span>
             </div>
           </div>
 
           {/* Tails Side */}
           <div
-            className="absolute inset-0 bg-gray-300 rounded-full border-8 border-gray-400 shadow-2xl flex items-center justify-center"
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+            className="absolute inset-0 bg-gray-300 rounded-full border-[12px] border-gray-400 shadow-xl flex items-center justify-center"
+            style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg) translateZ(10px)' }}
           >
-            <div className="w-48 h-48 rounded-full border-4 border-gray-400/30 flex items-center justify-center">
-               <span className="text-6xl font-bold text-gray-600">T</span>
+            <div className="w-44 h-44 rounded-full border-4 border-gray-400/30 flex items-center justify-center shadow-inner">
+               <span className="text-7xl font-bold text-gray-600 drop-shadow-sm">T</span>
             </div>
           </div>
         </motion.div>

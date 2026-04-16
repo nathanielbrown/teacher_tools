@@ -31,8 +31,18 @@ export const NumberSpinner = () => {
       }, 100);
     }
 
-    // Calculate rotation: spin 5 times (1800deg) + random angle
-    const newRotation = rotation + 1800 + Math.random() * 360;
+    const numSegments = max - min + 1;
+    const degreesPerSegment = 360 / numSegments;
+    const selectedIndex = selectedNumber - min;
+    const segmentCenterAngle = (selectedIndex * degreesPerSegment) + (degreesPerSegment / 2);
+    const jitter = (Math.random() - 0.5) * (degreesPerSegment * 0.8);
+    const targetRotation = 360 - segmentCenterAngle + jitter;
+    const spins = 5 * 360;
+    const currentRotMod = rotation % 360;
+    let rotationDiff = targetRotation - currentRotMod;
+    if (rotationDiff < 0) rotationDiff += 360;
+
+    const newRotation = rotation + spins + rotationDiff;
     setRotation(newRotation);
 
     setTimeout(() => {
@@ -42,8 +52,11 @@ export const NumberSpinner = () => {
     }, 3000);
   };
 
+  const numSegments = max - min + 1;
+  const numbers = Array.from({ length: numSegments }, (_, i) => min + i);
   // Generate colors for wheel segments
   const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+  const segmentAngle = 360 / numSegments;
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
@@ -83,14 +96,30 @@ export const NumberSpinner = () => {
           className="w-full h-full rounded-full border-8 border-gray-800 shadow-2xl relative overflow-hidden"
           style={{
             background: `conic-gradient(${
-              Array.from({ length: 6 }).map((_, i) =>
-                `${colors[i % colors.length]} ${i * 60}deg ${(i + 1) * 60}deg`
+              numbers.map((_, i) =>
+                `${colors[i % colors.length]} ${i * segmentAngle}deg ${(i + 1) * segmentAngle}deg`
               ).join(', ')
             })`
           }}
         >
+          {/* Numbers */}
+          {numbers.map((num, i) => {
+            const rotationAngle = (i * segmentAngle) + (segmentAngle / 2);
+            return (
+              <div
+                key={i}
+                className="absolute inset-0 flex items-start justify-center pt-4"
+                style={{ transform: `rotate(${rotationAngle}deg)` }}
+              >
+                <span className="text-white font-bold text-2xl drop-shadow-md" style={{ transform: 'rotate(180deg)' }}>
+                   {num}
+                </span>
+              </div>
+            );
+          })}
+
           {/* Inner circle for aesthetics */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full z-10 border-4 border-gray-800 flex items-center justify-center">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full z-10 border-4 border-gray-800 flex items-center justify-center shadow-inner">
             <div className="w-4 h-4 bg-gray-800 rounded-full" />
           </div>
         </motion.div>

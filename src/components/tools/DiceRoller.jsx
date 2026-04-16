@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
@@ -15,21 +15,47 @@ const diceDotPositions = {
 };
 
 const Die = ({ value, isRolling }) => {
+  const [randomOffset, setRandomOffset] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (isRolling) {
+      const timeout = setTimeout(() => {
+        setRandomOffset({
+          x: Math.random() * 90 - 45,
+          y: Math.random() * 90 - 45
+        });
+      }, 0);
+      return () => clearTimeout(timeout);
+    }
+  }, [isRolling]);
+
   return (
-    <motion.div
-      animate={{
-        rotateX: isRolling ? [0, 360, 720, 1080] : 0,
-        rotateY: isRolling ? [0, 360, 720, 1080] : 0,
-        scale: isRolling ? [1, 1.2, 0.8, 1] : 1,
-      }}
-      transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="w-32 h-32 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-4 grid grid-cols-3 grid-rows-3 gap-2"
-      style={{ transformStyle: 'preserve-3d' }}
-    >
-      {diceDotPositions[value].map((pos, i) => (
-        <div key={i} className={`w-full h-full bg-primary rounded-full ${pos} shadow-inner`} />
-      ))}
-    </motion.div>
+    <div className="perspective-1000 w-32 h-32">
+      <motion.div
+        animate={{
+          rotateX: isRolling ? [0, 360, 720, 1080 + randomOffset.x] : 0,
+          rotateY: isRolling ? [0, 360, 720, 1080 + randomOffset.y] : 0,
+          rotateZ: isRolling ? [0, 180, 360] : 0,
+          z: isRolling ? [0, 150, 0] : 0, // Lift off the ground
+          scale: isRolling ? [1, 1.2, 1] : 1,
+        }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
+        className="w-full h-full relative"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-4 grid grid-cols-3 grid-rows-3 gap-2 backface-hidden" style={{ transform: 'translateZ(16px)' }}>
+          {diceDotPositions[value].map((pos, i) => (
+            <div key={i} className={`w-full h-full bg-primary rounded-full ${pos} shadow-inner`} />
+          ))}
+        </div>
+        {/* Adds depth to the dice for 3D effect */}
+        <div className="absolute inset-0 bg-gray-100 rounded-2xl shadow-inner border border-gray-300" style={{ transform: 'translateZ(-16px)' }} />
+        <div className="absolute inset-y-0 right-0 w-[32px] bg-gray-200 shadow-inner border border-gray-300" style={{ transform: 'rotateY(90deg) translateZ(16px)', transformOrigin: 'right' }} />
+        <div className="absolute inset-y-0 left-0 w-[32px] bg-gray-200 shadow-inner border border-gray-300" style={{ transform: 'rotateY(-90deg) translateZ(16px)', transformOrigin: 'left' }} />
+        <div className="absolute inset-x-0 top-0 h-[32px] bg-gray-50 shadow-inner border border-gray-300" style={{ transform: 'rotateX(90deg) translateZ(16px)', transformOrigin: 'top' }} />
+        <div className="absolute inset-x-0 bottom-0 h-[32px] bg-gray-50 shadow-inner border border-gray-300" style={{ transform: 'rotateX(-90deg) translateZ(16px)', transformOrigin: 'bottom' }} />
+      </motion.div>
+    </div>
   );
 };
 

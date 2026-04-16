@@ -30,7 +30,7 @@ const Die = ({ value, isRolling }) => {
   }, [isRolling]);
 
   return (
-    <div className="perspective-1000 w-32 h-32">
+    <div className="w-32 h-32" style={{ perspective: '1000px' }}>
       <motion.div
         animate={{
           rotateX: isRolling ? [0, 360, 720, 1080 + randomOffset.x] : 0,
@@ -43,17 +43,32 @@ const Die = ({ value, isRolling }) => {
         className="w-full h-full relative"
         style={{ transformStyle: 'preserve-3d' }}
       >
-        <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-4 grid grid-cols-3 grid-rows-3 gap-2 backface-hidden" style={{ transform: 'translateZ(16px)' }}>
+        {/* Front Face (Current Value) */}
+        <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-4 grid grid-cols-3 grid-rows-3 gap-2" style={{ transform: 'translateZ(64px)' }}>
           {diceDotPositions[value].map((pos, i) => (
             <div key={i} className={`w-full h-full bg-primary rounded-full ${pos} shadow-inner`} />
           ))}
         </div>
-        {/* Adds depth to the dice for 3D effect */}
-        <div className="absolute inset-0 bg-gray-100 rounded-2xl shadow-inner border border-gray-300" style={{ transform: 'translateZ(-16px)' }} />
-        <div className="absolute inset-y-0 right-0 w-[32px] bg-gray-200 shadow-inner border border-gray-300" style={{ transform: 'rotateY(90deg) translateZ(16px)', transformOrigin: 'right' }} />
-        <div className="absolute inset-y-0 left-0 w-[32px] bg-gray-200 shadow-inner border border-gray-300" style={{ transform: 'rotateY(-90deg) translateZ(16px)', transformOrigin: 'left' }} />
-        <div className="absolute inset-x-0 top-0 h-[32px] bg-gray-50 shadow-inner border border-gray-300" style={{ transform: 'rotateX(90deg) translateZ(16px)', transformOrigin: 'top' }} />
-        <div className="absolute inset-x-0 bottom-0 h-[32px] bg-gray-50 shadow-inner border border-gray-300" style={{ transform: 'rotateX(-90deg) translateZ(16px)', transformOrigin: 'bottom' }} />
+
+        {/* Back Face */}
+        <div className="absolute inset-0 bg-gray-50 rounded-2xl shadow-inner border-2 border-gray-300 p-4 grid grid-cols-3 grid-rows-3 gap-2" style={{ transform: 'rotateY(180deg) translateZ(64px)' }}>
+           {/* For simplicity we show a random generic face when rolling */}
+           {diceDotPositions[7 - value] ? diceDotPositions[7 - value].map((pos, i) => (
+            <div key={i} className={`w-full h-full bg-gray-400 rounded-full ${pos} shadow-inner`} />
+          )) : null}
+        </div>
+
+        {/* Right Face */}
+        <div className="absolute inset-0 bg-gray-100 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateY(90deg) translateZ(64px)' }} />
+
+        {/* Left Face */}
+        <div className="absolute inset-0 bg-gray-200 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateY(-90deg) translateZ(64px)' }} />
+
+        {/* Top Face */}
+        <div className="absolute inset-0 bg-gray-50 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateX(90deg) translateZ(64px)' }} />
+
+        {/* Bottom Face */}
+        <div className="absolute inset-0 bg-gray-300 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateX(-90deg) translateZ(64px)' }} />
       </motion.div>
     </div>
   );

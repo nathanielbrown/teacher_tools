@@ -19,7 +19,7 @@ export const MarbleJar = () => {
     localStorage.setItem('teacherToolsMarbleJar', JSON.stringify(marbles));
 
     if (marbles >= 10 && !isRewarding) {
-      const timeout = setTimeout(triggerReward, 0);
+      const timeout = setTimeout(triggerReward, 500);
       return () => clearTimeout(timeout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,14 +50,14 @@ export const MarbleJar = () => {
 
     (function frame() {
       confetti({
-        particleCount: 5,
+        particleCount: 15,
         angle: 60,
         spread: 55,
         origin: { x: 0 },
         colors: colors
       });
       confetti({
-        particleCount: 5,
+        particleCount: 15,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
@@ -66,6 +66,8 @@ export const MarbleJar = () => {
 
       if (Date.now() < end) {
         requestAnimationFrame(frame);
+      } else {
+        setTimeout(() => resetJar(), 2000); // Reset automatically after animation
       }
     }());
   };
@@ -108,10 +110,10 @@ export const MarbleJar = () => {
                 return (
                   <motion.div
                     key={i}
-                    initial={{ y: -400, x: 0, opacity: 0 }}
+                    initial={{ y: -400, x: '50%', opacity: 0 }}
                     animate={{ y: 0, x: style.left, opacity: 1 }}
                     exit={{ opacity: 0, scale: 0 }}
-                    transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+                    transition={{ type: "spring", bounce: 0.6, duration: 0.8 }}
                     className={`absolute w-12 h-12 rounded-full shadow-md border-2 border-white/20 ${style.colorClass} flex items-center justify-center`}
                     style={{ bottom: style.bottom }}
                   >

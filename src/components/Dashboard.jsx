@@ -1,16 +1,21 @@
 import React from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-import { motion } from 'framer-motion';
+
 import {
-  Clock, Timer, Hourglass, AlertCircle, Dices, Coins, Loader,
-  Palette, Activity, BookOpen, UserCircle, Users
+  Clock, Timer, Hourglass, CalendarDays, CalendarClock, AlertCircle,
+  Trophy, Award, Dices, Coins, Loader, Palette, Activity, BookOpen,
+  UserCircle, Users, Sparkles, Smile
 } from 'lucide-react';
 
 const tools = [
   { id: 'clock', name: 'Analogue & Digital Clock', icon: Clock, emoji: '🕒' },
   { id: 'stopwatch', name: 'Stop Watch', icon: Timer, emoji: '⏱️' },
   { id: 'countdown', name: 'Count Down', icon: Hourglass, emoji: '⏳' },
+  { id: 'eventcountdowns', name: 'Event Countdowns', icon: CalendarClock, emoji: '📅' },
+  { id: 'dailyschedule', name: 'Daily Schedule', icon: CalendarDays, emoji: '🗓️' },
   { id: 'examclock', name: 'Exam Clock', icon: AlertCircle, emoji: '📝' },
+  { id: 'groupscoreboard', name: 'Group Scoreboard', icon: Trophy, emoji: '🏆' },
+  { id: 'marblejar', name: 'Marble Jar Reward', icon: Award, emoji: '🏺' },
   { id: 'diceroller', name: 'Dice Roller', icon: Dices, emoji: '🎲' },
   { id: 'flipcoin', name: 'Flip a Coin', icon: Coins, emoji: '🪙' },
   { id: 'numberspinner', name: 'Number Spinner', icon: Loader, emoji: '🎡' },
@@ -20,6 +25,8 @@ const tools = [
   { id: 'casinospinner', name: 'Name Picker (Casino)', icon: UserCircle, emoji: '🎰' },
   { id: 'wheelspinner', name: 'Name Picker (Wheel)', icon: Loader, emoji: '🎡' },
   { id: 'groupmaker', name: 'Random Group Maker', icon: Users, emoji: '👥' },
+  { id: 'groupnamegenerator', name: 'Random Group Name Generator', icon: Sparkles, emoji: '✨' },
+  { id: 'emotionpicker', name: 'Emotion Picker', icon: Smile, emoji: '😊' },
 ];
 
 const containerVariants = {

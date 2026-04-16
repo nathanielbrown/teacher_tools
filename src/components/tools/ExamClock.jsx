@@ -122,6 +122,14 @@ export const ExamClock = () => {
             <span className="text-8xl md:text-[10rem] font-mono font-bold tabular-nums tracking-tighter leading-none">
               {formatTime(timeLeft)}
             </span>
+            {phase === 'reading' && (
+              <div className="mt-8 flex flex-col items-center opacity-70">
+                <span className="text-lg font-semibold uppercase tracking-wider mb-2">Total Exam Time</span>
+                <span className="text-4xl font-mono font-bold tabular-nums tracking-tighter">
+                  {formatTime(examTime * 60)}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex space-x-4">

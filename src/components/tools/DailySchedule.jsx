@@ -7,6 +7,8 @@ const defaultSchedule = [
   { id: '3', startTime: '10:00', endTime: '10:30', activity: 'Break', emoji: '🥪' },
 ];
 
+const SCHOOL_EMOJIS = ['👋', '🔢', '🥪', '📝', '🏃', '🎨', '🎵', '📖', '💻', '⚽', '🧪', '🍽️', '⚪'];
+
 export const DailySchedule = () => {
   const [schedule, setSchedule] = useState(() => {
     const saved = localStorage.getItem('teacherToolsSchedule');
@@ -52,7 +54,7 @@ export const DailySchedule = () => {
     } else {
       setSchedule(schedule.map(item =>
         item.id === id
-          ? { ...item, activity: 'Empty Task', emoji: '⚪' }
+          ? { ...item, activity: 'Empty Task', emoji: '⚪', startTime: removedItem.startTime, endTime: removedItem.endTime }
           : item
       ));
     }
@@ -80,13 +82,16 @@ export const DailySchedule = () => {
                 className="p-2 border rounded-lg focus:ring-2 focus:ring-primary w-32"
               />
 
-              <input
-                type="text"
+              <select
                 value={item.emoji}
                 onChange={(e) => updateActivity(item.id, 'emoji', e.target.value)}
-                className="p-2 border rounded-lg focus:ring-2 focus:ring-primary w-16 text-center text-xl"
+                className="p-2 border rounded-lg focus:ring-2 focus:ring-primary w-16 text-center text-xl bg-white"
                 title="Emoji"
-              />
+              >
+                {SCHOOL_EMOJIS.map(emoji => (
+                  <option key={emoji} value={emoji}>{emoji}</option>
+                ))}
+              </select>
 
               <input
                 type="text"

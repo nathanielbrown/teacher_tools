@@ -20,13 +20,13 @@
     --color-text: #1e3a8a; /* dark blue text */
   }
 
-  /* Primary Theme */
+  /* Primary Theme - Nature */
   [data-theme="primary"] {
-    --color-primary: #8b5cf6; /* violet */
-    --color-secondary: #ec4899; /* pink */
-    --color-accent: #10b981; /* emerald */
-    --color-background: #fdf4ff; /* light pink bg */
-    --color-text: #4c1d95; /* dark violet text */
+    --color-primary: #059669; /* emerald-600 */
+    --color-secondary: #3b82f6; /* blue-500 */
+    --color-accent: #f59e0b; /* amber-500 (sun) */
+    --color-background: #e0f2fe; /* sky-100 (sky) */
+    --color-text: #064e3b; /* emerald-900 */
   }
 
   /* Secondary Theme */
@@ -46,23 +46,78 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Nature background elements for primary theme */
+.theme-nature-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+[data-theme="primary"] .theme-nature-bg {
+  display: block;
+  background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 60%, #bbf7d0 60%, #86efac 100%);
+}
+
 [data-theme="primary"] body {
-  background: linear-gradient(135deg, rgba(255,0,0,0.1), rgba(255,165,0,0.1), rgba(255,255,0,0.1), rgba(0,128,0,0.1), rgba(0,0,255,0.1), rgba(75,0,130,0.1), rgba(238,130,238,0.1));
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
+  background-color: transparent; /* Rely on nature bg */
 }
 
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.nature-sun {
+  position: absolute;
+  top: 5%;
+  right: 10%;
+  width: 100px;
+  height: 100px;
+  background: #fcd34d;
+  border-radius: 50%;
+  box-shadow: 0 0 40px 20px rgba(253, 224, 71, 0.4);
+  animation: sunPulse 4s ease-in-out infinite alternate;
 }
 
-[data-theme="primary"] button.bg-primary {
-  background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-  color: white;
-  border: none;
+@keyframes sunPulse {
+  from { transform: scale(1); opacity: 0.9; }
+  to { transform: scale(1.05); opacity: 1; }
 }
-[data-theme="primary"] button.bg-primary:hover {
-  opacity: 0.9;
+
+.nature-cloud {
+  position: absolute;
+  background: white;
+  border-radius: 50px;
+  opacity: 0.8;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+}
+
+.nature-cloud::before,
+.nature-cloud::after {
+  content: '';
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+}
+
+.cloud-1 {
+  width: 120px;
+  height: 40px;
+  top: 15%;
+  animation: floatCloud 45s linear infinite;
+}
+.cloud-1::before { width: 50px; height: 50px; top: -20px; left: 15px; }
+.cloud-1::after { width: 60px; height: 60px; top: -30px; right: 15px; }
+
+.cloud-2 {
+  width: 160px;
+  height: 50px;
+  top: 25%;
+  animation: floatCloud 60s linear infinite 15s;
+  opacity: 0.6;
+}
+.cloud-2::before { width: 70px; height: 70px; top: -30px; left: 20px; }
+.cloud-2::after { width: 80px; height: 80px; top: -40px; right: 25px; }
+
+@keyframes floatCloud {
+  from { left: -200px; }
+  to { left: 100vw; }
 }

@@ -16,6 +16,12 @@ import { StoryStarters } from './components/tools/StoryStarters';
 import { CasinoSpinner } from './components/tools/CasinoSpinner';
 import { WheelSpinner } from './components/tools/WheelSpinner';
 import { GroupMaker } from './components/tools/GroupMaker';
+import { EventCountdowns } from './components/tools/EventCountdowns';
+import { DailySchedule } from './components/tools/DailySchedule';
+import { GroupScoreBoard } from './components/tools/GroupScoreBoard';
+import { MarbleJar } from './components/tools/MarbleJar';
+import { EmotionPicker } from './components/tools/EmotionPicker';
+import { RandomGroupNameGenerator } from './components/tools/RandomGroupNameGenerator';
 
 function App() {
   const [currentTool, setCurrentTool] = useState('home');
@@ -36,6 +42,12 @@ function App() {
       case 'casinospinner': return <CasinoSpinner />;
       case 'wheelspinner': return <WheelSpinner />;
       case 'groupmaker': return <GroupMaker />;
+      case 'eventcountdowns': return <EventCountdowns />;
+      case 'dailyschedule': return <DailySchedule />;
+      case 'groupscoreboard': return <GroupScoreBoard />;
+      case 'marblejar': return <MarbleJar />;
+      case 'emotionpicker': return <EmotionPicker />;
+      case 'groupnamegenerator': return <RandomGroupNameGenerator />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">
@@ -53,6 +65,11 @@ function App() {
 
   return (
     <SettingsProvider>
+      <div className="theme-nature-bg">
+        <div className="nature-sun" />
+        <div className="nature-cloud cloud-1" />
+        <div className="nature-cloud cloud-2" />
+      </div>
       <Layout onNavigate={setCurrentTool}>
         {renderTool()}
       </Layout>

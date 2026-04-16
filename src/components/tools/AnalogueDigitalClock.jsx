@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 
 export const AnalogueDigitalClock = () => {
   const [time, setTime] = useState(new Date());
@@ -69,13 +68,38 @@ export const AnalogueDigitalClock = () => {
     return () => window.removeEventListener('pointerup', handlePointerUp);
   }, []);
 
-  const formatDigital = (date) => {
+  const formatDigital = (date, includeSeconds = false) => {
+    if (includeSeconds) {
+      return date.toTimeString().slice(0, 8);
+    }
     return date.toTimeString().slice(0, 5);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-12">
-      <h2 className="text-3xl font-bold text-primary">Interactive Clock</h2>
+    <div className="flex flex-col items-center justify-center space-y-8">
+      <div className="flex flex-col items-center gap-4">
+        <h2 className="text-3xl font-bold text-primary">Interactive Clock</h2>
+        <div className="flex items-center gap-4 bg-white p-2 rounded-xl shadow-sm border-2 border-gray-100">
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setTime(new Date());
+            }}
+            className={`px-4 py-2 rounded-lg font-bold transition-colors ${!isEditing ? 'bg-primary text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+          >
+            Real Time Mode
+          </button>
+          <button
+            onClick={() => {
+              setIsEditing(true);
+              setDigitalInput(formatDigital(time, false));
+            }}
+            className={`px-4 py-2 rounded-lg font-bold transition-colors ${isEditing ? 'bg-primary text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+          >
+            Edit Mode
+          </button>
+        </div>
+      </div>
 
       {/* Analogue Clock */}
       <div className="relative w-80 h-80 bg-white rounded-full shadow-2xl border-4 border-primary/20 flex items-center justify-center">
@@ -105,28 +129,50 @@ export const AnalogueDigitalClock = () => {
           ))}
 
           {/* Hour Hand */}
-          <line
-            x1="50" y1="50" x2="50" y2="25"
-            stroke="#0f172a"
-            strokeWidth="4"
-            strokeLinecap="round"
-            transform={`rotate(${(time.getHours() % 12) * 30 + time.getMinutes() * 0.5} 50 50)`}
-            onPointerDown={handlePointerDown}
-            onPointerMove={(e) => handlePointerMove(e, 'hour')}
-            className="cursor-pointer hover:stroke-primary transition-colors"
-          />
+          <g transform={`rotate(${(time.getHours() % 12) * 30 + time.getMinutes() * 0.5} 50 50)`}>
+            <line
+              x1="50" y1="50" x2="50" y2="25"
+              stroke="#0f172a"
+              strokeWidth="4"
+              strokeLinecap="round"
+              className="transition-colors group-hover:stroke-primary"
+            />
+            {/* Invisible wider line for easier clicking/dragging */}
+            {isEditing && (
+              <line
+                x1="50" y1="50" x2="50" y2="25"
+                stroke="transparent"
+                strokeWidth="15"
+                strokeLinecap="round"
+                onPointerDown={handlePointerDown}
+                onPointerMove={(e) => handlePointerMove(e, 'hour')}
+                className="cursor-pointer"
+              />
+            )}
+          </g>
 
           {/* Minute Hand */}
-          <line
-            x1="50" y1="50" x2="50" y2="15"
-            stroke="#3b82f6"
-            strokeWidth="3"
-            strokeLinecap="round"
-            transform={`rotate(${time.getMinutes() * 6} 50 50)`}
-            onPointerDown={handlePointerDown}
-            onPointerMove={(e) => handlePointerMove(e, 'minute')}
-            className="cursor-pointer hover:stroke-secondary transition-colors"
-          />
+          <g transform={`rotate(${time.getMinutes() * 6} 50 50)`}>
+            <line
+              x1="50" y1="50" x2="50" y2="15"
+              stroke="#3b82f6"
+              strokeWidth="3"
+              strokeLinecap="round"
+              className="transition-colors group-hover:stroke-secondary"
+            />
+            {/* Invisible wider line for easier clicking/dragging */}
+            {isEditing && (
+              <line
+                x1="50" y1="50" x2="50" y2="15"
+                stroke="transparent"
+                strokeWidth="15"
+                strokeLinecap="round"
+                onPointerDown={handlePointerDown}
+                onPointerMove={(e) => handlePointerMove(e, 'minute')}
+                className="cursor-pointer"
+              />
+            )}
+          </g>
 
           {/* Second Hand */}
           {!isEditing && (
@@ -148,29 +194,22 @@ export const AnalogueDigitalClock = () => {
           <form onSubmit={handleDigitalSubmit} className="flex flex-col items-center space-y-4">
             <input
               type="time"
-              value={digitalInput || formatDigital(time)}
+              value={digitalInput || formatDigital(time, false)}
               onChange={(e) => setDigitalInput(e.target.value)}
               className="text-4xl font-bold text-center bg-gray-50 border-2 border-primary/50 rounded-lg p-2 focus:outline-none focus:border-primary"
               autoFocus
             />
             <div className="flex space-x-4">
               <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Set Time</button>
-              <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Cancel</button>
             </div>
           </form>
         ) : (
-          <div
-            className="text-5xl font-mono font-bold text-text cursor-pointer hover:text-primary transition-colors"
-            onClick={() => {
-              setIsEditing(true);
-              setDigitalInput(formatDigital(time));
-            }}
-          >
-            {formatDigital(time)}
+          <div className="text-5xl font-mono font-bold text-text transition-colors">
+            {formatDigital(time, true)}
           </div>
         )}
         <p className="text-center text-sm text-gray-500 mt-2">
-          Click the digital time to edit, or drag the clock hands!
+          {isEditing ? "Edit time below or drag the clock hands!" : "Switch to Edit Mode to change the time!"}
         </p>
       </div>
     </div>

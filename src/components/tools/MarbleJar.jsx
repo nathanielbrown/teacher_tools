@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -72,17 +73,25 @@ export const MarbleJar = () => {
     }());
   };
 
-  // Generate deterministic but seemingly random positions for marbles
+  // Generate deterministic positions for marbles to avoid overlap
   const getMarbleStyle = (index) => {
-    // Math.sin is deterministic based on index, so it won't jump around on re-renders
-    const randomX = Math.sin(index * 12.9898) * 10000;
-    const x = (randomX - Math.floor(randomX)) * 60 + 20; // 20% to 80% width
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+
+    // Spread evenly across the width. Jar is ~256px wide.
+    // Marbles are 48px wide.
+    const spacing = 64; // 256 / 4 = 64
+    const offset = (row % 2 === 0) ? 0 : 12; // Alternate rows slightly offset
+
+    const x = spacing * (col + 1) - 24 + offset; // Position in pixels from left
+    const bottom = row * 40 + 10; // Stacking height
+
     const colorIndex = index % 5;
     const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
 
     return {
-      left: `${x}%`,
-      bottom: `${(marbles - index) * 5 + 10}px`, // Stack them up slightly
+      left: `${x}px`,
+      bottom: `${bottom}px`,
       colorClass: colors[colorIndex]
     };
   };
@@ -100,40 +109,42 @@ export const MarbleJar = () => {
           <Minus size={32} />
         </button>
 
-        <div className="relative" ref={jarRef}>
-          {/* Jar background/back edge */}
-          <div className="w-64 h-80 bg-blue-50/50 rounded-b-[3rem] border-4 border-t-0 border-blue-200/50 shadow-inner relative overflow-hidden" style={{ perspective: '1000px' }}>
-            {/* The marbles */}
-            <AnimatePresence>
-              {Array.from({ length: marbles }).map((_, i) => {
-                const style = getMarbleStyle(i);
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ y: -400, x: '50%', opacity: 0 }}
-                    animate={{ y: 0, x: style.left, opacity: 1 }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    transition={{ type: "spring", bounce: 0.6, duration: 0.8 }}
-                    className={`absolute w-12 h-12 rounded-full shadow-md border-2 border-white/20 ${style.colorClass} flex items-center justify-center`}
-                    style={{ bottom: style.bottom }}
-                  >
-                    {/* Gloss reflection */}
-                    <div className="absolute top-1 left-2 w-4 h-4 bg-white/40 rounded-full" />
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative" ref={jarRef}>
+            {/* Jar background/back edge */}
+            <div className="w-64 h-80 bg-blue-50/50 rounded-b-[3rem] border-4 border-t-0 border-blue-200/50 shadow-inner relative overflow-hidden" style={{ perspective: '1000px' }}>
+              {/* The marbles */}
+              <AnimatePresence>
+                {Array.from({ length: marbles }).map((_, i) => {
+                  const style = getMarbleStyle(i);
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ y: -400, x: style.left, opacity: 0 }}
+                      animate={{ y: 0, x: style.left, opacity: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ type: "spring", bounce: 0.6, duration: 0.8 }}
+                      className={`absolute w-12 h-12 rounded-full shadow-md border-2 border-white/20 ${style.colorClass} flex items-center justify-center`}
+                      style={{ bottom: style.bottom }}
+                    >
+                      {/* Gloss reflection */}
+                      <div className="absolute top-1 left-2 w-4 h-4 bg-white/40 rounded-full" />
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* Jar front/glass overlay */}
+            <div className="absolute inset-0 w-64 h-80 rounded-b-[3rem] border-4 border-t-0 border-blue-300 shadow-[inset_0_-10px_20px_rgba(0,0,0,0.1)] pointer-events-none flex flex-col justify-between">
+              <div className="w-[110%] -ml-[5%] h-8 border-4 border-blue-300 rounded-[100%] border-b-blue-400 bg-white/20" />
+
+              {/* Glass reflection */}
+              <div className="absolute left-4 top-12 bottom-12 w-8 bg-gradient-to-r from-white/30 to-transparent rounded-full filter blur-sm" />
+            </div>
           </div>
 
-          {/* Jar front/glass overlay */}
-          <div className="absolute inset-0 w-64 h-80 rounded-b-[3rem] border-4 border-t-0 border-blue-300 shadow-[inset_0_-10px_20px_rgba(0,0,0,0.1)] pointer-events-none flex flex-col justify-between">
-            <div className="w-[110%] -ml-[5%] h-8 border-4 border-blue-300 rounded-[100%] border-b-blue-400 bg-white/20" />
-
-            {/* Glass reflection */}
-            <div className="absolute left-4 top-12 bottom-12 w-8 bg-gradient-to-r from-white/30 to-transparent rounded-full filter blur-sm" />
-          </div>
-
-          <div className="absolute -right-16 top-1/2 -translate-y-1/2 font-bold text-4xl text-gray-400">
+          <div className="font-bold text-4xl text-gray-400">
             {marbles}/10
           </div>
         </div>

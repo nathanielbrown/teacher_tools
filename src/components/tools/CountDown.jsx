@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Circle, LayoutList, Hourglass, Timer as TimerIcon, Loader2 } from 'lucide-react';
 

@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
 
 import { useSettings } from '../../contexts/SettingsContext';

@@ -14,6 +14,12 @@ export const DailySchedule = () => {
     const saved = localStorage.getItem('teacherToolsSchedule');
     return saved ? JSON.parse(saved) : defaultSchedule;
   });
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('teacherToolsSchedule', JSON.stringify(schedule));
@@ -42,6 +48,25 @@ export const DailySchedule = () => {
     setSchedule(schedule.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
+  const getCompletionPercentage = (startTime, endTime) => {
+    const [startHours, startMins] = startTime.split(':').map(Number);
+    const [endHours, endMins] = endTime.split(':').map(Number);
+
+    const start = new Date(now);
+    start.setHours(startHours, startMins, 0, 0);
+
+    const end = new Date(now);
+    end.setHours(endHours, endMins, 0, 0);
+
+    if (now < start) return 0;
+    if (now >= end) return 100;
+
+    const totalDuration = end - start;
+    const elapsed = now - start;
+
+    return Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
+  };
+
   const removeActivity = (id) => {
     const index = schedule.findIndex(item => item.id === id);
     if (index === -1) return;
@@ -66,8 +91,16 @@ export const DailySchedule = () => {
 
       <div className="w-full bg-white rounded-2xl shadow-lg p-6 space-y-4 border-2 border-gray-100">
         <div className="space-y-4">
-          {schedule.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 border border-gray-100 transition-colors">
+          {schedule.map((item) => {
+            const completion = getCompletionPercentage(item.startTime, item.endTime);
+            return (
+            <div
+              key={item.id}
+              className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 transition-all shadow-sm"
+              style={{
+                background: `linear-gradient(to right, rgba(59, 130, 246, 0.1) ${completion}%, white ${completion}%)`
+              }}
+            >
               <input
                 type="time"
                 value={item.startTime}
@@ -103,13 +136,13 @@ export const DailySchedule = () => {
 
               <button
                 onClick={() => removeActivity(item.id)}
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors bg-white/50"
                 title={item.activity === 'Empty Task' ? "Remove placeholder" : "Clear task"}
               >
                 <Trash2 size={20} />
               </button>
             </div>
-          ))}
+          )})}
         </div>
 
         <button

@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Plus, Minus } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';

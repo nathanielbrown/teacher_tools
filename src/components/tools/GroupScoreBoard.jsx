@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Minus, Trash2, Edit2, Check } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';

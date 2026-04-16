@@ -16,6 +16,12 @@ import { StoryStarters } from './components/tools/StoryStarters';
 import { CasinoSpinner } from './components/tools/CasinoSpinner';
 import { WheelSpinner } from './components/tools/WheelSpinner';
 import { GroupMaker } from './components/tools/GroupMaker';
+import { DailySchedule } from './components/tools/DailySchedule';
+import { EmotionPicker } from './components/tools/EmotionPicker';
+import { EventCountdowns } from './components/tools/EventCountdowns';
+import { GroupScoreBoard } from './components/tools/GroupScoreBoard';
+import { MarbleJar } from './components/tools/MarbleJar';
+import { GroupNameGenerator } from './components/tools/GroupNameGenerator';
 
 function App() {
   const [currentTool, setCurrentTool] = useState('home');
@@ -36,6 +42,12 @@ function App() {
       case 'casinospinner': return <CasinoSpinner />;
       case 'wheelspinner': return <WheelSpinner />;
       case 'groupmaker': return <GroupMaker />;
+      case 'dailyschedule': return <DailySchedule />;
+      case 'emotionpicker': return <EmotionPicker />;
+      case 'eventcountdowns': return <EventCountdowns />;
+      case 'groupscoreboard': return <GroupScoreBoard />;
+      case 'marblejar': return <MarbleJar />;
+      case 'groupnamegenerator': return <GroupNameGenerator />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">

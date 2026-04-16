@@ -1,7 +1,9 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Plus, Minus } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
-import { motion } from 'framer-motion';
+
 
 export const Metronome = () => {
   const [bpm, setBpm] = useState(120);

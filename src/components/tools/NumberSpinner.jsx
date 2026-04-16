@@ -1,5 +1,7 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 

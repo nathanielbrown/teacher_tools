@@ -1,13 +1,15 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-import { motion } from 'framer-motion';
+
 import {
   Clock, Timer, Hourglass, AlertCircle, Dices, Coins, Loader,
   Palette, Activity, BookOpen, UserCircle, Users, CalendarDays, Award, Star, Sparkles
 } from 'lucide-react';
 
 const tools = [
- { id: 'clock', name: 'Analogue & Digital Clock', icon: Clock, emoji: '🕒', section: 'Time Management' },
+  { id: 'clock', name: 'Analogue & Digital Clock', icon: Clock, emoji: '🕒', section: 'Time Management' },
   { id: 'stopwatch', name: 'Stop Watch', icon: Timer, emoji: '⏱️', section: 'Time Management' },
   { id: 'countdown', name: 'Count Down', icon: Hourglass, emoji: '⏳', section: 'Time Management' },
   { id: 'examclock', name: 'Exam Clock', icon: AlertCircle, emoji: '📝', section: 'Time Management' },

@@ -1,6 +1,8 @@
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Circle, LayoutList, Hourglass, Timer as TimerIcon, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 
@@ -94,7 +96,7 @@ export const CountDown = () => {
     if (visualMode === 'circle') {
       const radius = 60;
       const circumference = 2 * Math.PI * radius;
-      const strokeDashoffset = circumference - (remainingProgress / 100) * circumference;
+      const strokeDashoffset = (remainingProgress / 100) * circumference;
 
       return (
         <div className="relative mt-8">
@@ -143,18 +145,34 @@ export const CountDown = () => {
     }
 
     if (visualMode === 'rainbow') {
+      // Need a smaller radius if we use a huge strokeWidth so it doesn't overflow
+      // A circle with cx=80, cy=80, r=40, strokeWidth=80 will have an outer radius of 80 (fills 160x160)
+      const radius = 40;
+      const circumference = 2 * Math.PI * radius;
+      const strokeDashoffset = (remainingProgress / 100) * circumference;
+
+      // Rainbow color logic based on remaining progress
+      // We will map 100->0 to a hue 0->360 to fade through colors
+      const hue = (remainingProgress / 100) * 360;
+
       return (
-        <div className="relative mt-8 flex items-center justify-center w-40 h-40">
-          {isRunning && !isFinished ? (
-             <div className="w-full h-full rounded-full animate-spin border-8 border-transparent"
-                  style={{
-                    borderImage: 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1',
-                    borderRadius: '50%'
-                  }}>
-             </div>
-          ) : (
-            <div className={`w-full h-full rounded-full border-8 ${isFinished ? 'border-red-500' : 'border-gray-200'}`} />
-          )}
+        <div className="relative mt-8">
+          <svg className="transform -rotate-90 w-40 h-40 overflow-visible">
+            <circle cx="80" cy="80" r={radius} stroke="currentColor" strokeWidth="80" fill="transparent" className="text-gray-100" />
+            <motion.circle
+              cx="80" cy="80" r={radius}
+              stroke="currentColor"
+              strokeWidth="80"
+              fill="transparent"
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: 0 }}
+              animate={{ strokeDashoffset }}
+              transition={{ ease: "linear", duration: 1 }}
+              style={{
+                color: isFinished ? '#ef4444' : `hsl(${hue}, 100%, 50%)`
+              }}
+            />
+          </svg>
         </div>
       );
     }

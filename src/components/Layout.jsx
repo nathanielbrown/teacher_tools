@@ -15,7 +15,11 @@ export const Layout = ({ children, onNavigate }) => {
     { id: 'clock', name: 'Analogue & Digital Clock' },
     { id: 'stopwatch', name: 'Stop Watch' },
     { id: 'countdown', name: 'Count Down' },
+    { id: 'eventcountdowns', name: 'Event Countdowns' },
+    { id: 'dailyschedule', name: 'Daily Schedule' },
     { id: 'examclock', name: 'Exam Clock' },
+    { id: 'groupscoreboard', name: 'Group Scoreboard' },
+    { id: 'marblejar', name: 'Marble Jar Reward' },
     { id: 'diceroller', name: 'Dice Roller' },
     { id: 'flipcoin', name: 'Flip a Coin' },
     { id: 'numberspinner', name: 'Number Spinner' },
@@ -25,13 +29,15 @@ export const Layout = ({ children, onNavigate }) => {
     { id: 'casinospinner', name: 'Name Picker (Casino)' },
     { id: 'wheelspinner', name: 'Name Picker (Wheel)' },
     { id: 'groupmaker', name: 'Random Group Maker' },
+    { id: 'groupnamegenerator', name: 'Random Group Name Generator' },
+    { id: 'emotionpicker', name: 'Emotion Picker' },
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-transparent">
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/90 backdrop-blur-sm shadow-xl transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:relative lg:translate-x-0 flex flex-col`}
       >
@@ -62,7 +68,7 @@ export const Layout = ({ children, onNavigate }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* Top Bar */}
-        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-4 z-10">
+        <header className="h-16 bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-between px-4 z-10">
           <div className="flex items-center space-x-4">
             <button onClick={toggleSidebar} className="lg:hidden p-2 rounded-md hover:bg-gray-100 text-text">
               <Menu size={24} />

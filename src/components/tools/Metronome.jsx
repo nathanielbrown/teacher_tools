@@ -38,7 +38,7 @@ export const Metronome = () => {
   };
 
   const playClick = (time, isFirstBeat) => {
-    if (!settings.soundsEnabled) return;
+    if (!settings.soundTheme) return;
 
     const osc = audioCtxRef.current.createOscillator();
     const gain = audioCtxRef.current.createGain();
@@ -86,7 +86,7 @@ export const Metronome = () => {
       setBeat(0);
     }
     return () => clearTimeout(timerIDRef.current);
-  }, [isPlaying, bpm, settings.soundsEnabled]);
+  }, [isPlaying, bpm, settings.soundTheme]);
 
   const handleBpmChange = (e) => {
     setBpm(Math.min(300, Math.max(30, Number(e.target.value))));

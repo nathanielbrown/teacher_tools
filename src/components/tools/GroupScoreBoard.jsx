@@ -36,7 +36,7 @@ export const GroupScoreBoard = () => {
   };
 
   const updateScore = (id, delta) => {
-    if (settings.soundsEnabled) audioEngine.playTick(true);
+    audioEngine.playTick(settings.soundTheme);
     setGroups(groups.map(g => {
       if (g.id === id) {
         return { ...g, score: Math.max(0, g.score + delta) };

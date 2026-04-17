@@ -13,11 +13,11 @@
 
   /* Early Years Theme */
   [data-theme="early-years"] {
-    --color-primary: #ef4444; /* bright red */
-    --color-secondary: #3b82f6; /* bright blue */
-    --color-accent: #eab308; /* bright yellow */
-    --color-background: #fef08a; /* light yellow bg */
-    --color-text: #1e3a8a; /* dark blue text */
+    --color-primary: #ef4444; /* Bright Red */
+    --color-secondary: #22c55e; /* Bright Green */
+    --color-accent: #facc15; /* Bright Yellow */
+    --color-background: #e0f2fe; /* Light Blue BG */
+    --color-text: #1e40af; /* Deep Blue text for readability */
   }
 
   /* Primary Theme - Nature */

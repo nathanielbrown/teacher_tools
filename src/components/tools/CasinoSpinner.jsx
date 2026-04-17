@@ -43,10 +43,10 @@ export const CasinoSpinner = () => {
     containerRef.current.style.transform = 'translateY(0)';
 
     // Play sound
-    if (settings.soundsEnabled) {
+    if (settings.soundTheme !== 'none') {
       let ticks = 0;
       const interval = setInterval(() => {
-        audioEngine.playTick(true);
+        audioEngine.playTick(settings.soundTheme);
         ticks++;
         if (ticks > 25) clearInterval(interval);
       }, 100);
@@ -67,7 +67,7 @@ export const CasinoSpinner = () => {
       setTimeout(() => {
         setWinner(winningStudent);
         setIsSpinning(false);
-        if (settings.soundsEnabled) audioEngine.playAlarm(true);
+        audioEngine.playAlarm(settings.soundTheme);
       }, 3500);
     }, 50);
   };

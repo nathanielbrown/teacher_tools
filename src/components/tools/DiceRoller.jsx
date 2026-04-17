@@ -1,82 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import { Dices } from 'lucide-react';
+import { Canvas } from '@react-three/fiber';
+import { DieShape } from './Dice3D';
 
-// Dot positions for standard 6-sided die
-const diceDotPositions = {
-  1: ['col-start-2 row-start-2'],
-  2: ['col-start-1 row-start-1', 'col-start-3 row-start-3'],
-  3: ['col-start-1 row-start-1', 'col-start-2 row-start-2', 'col-start-3 row-start-3'],
-  4: ['col-start-1 row-start-1', 'col-start-3 row-start-1', 'col-start-1 row-start-3', 'col-start-3 row-start-3'],
-  5: ['col-start-1 row-start-1', 'col-start-3 row-start-1', 'col-start-2 row-start-2', 'col-start-1 row-start-3', 'col-start-3 row-start-3'],
-  6: ['col-start-1 row-start-1', 'col-start-3 row-start-1', 'col-start-1 row-start-2', 'col-start-3 row-start-2', 'col-start-1 row-start-3', 'col-start-3 row-start-3']
-};
 
-const Die = ({ value, isRolling }) => {
-  const [randomOffset, setRandomOffset] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    if (isRolling) {
-      const timeout = setTimeout(() => {
-        setRandomOffset({
-          x: Math.random() * 90 - 45,
-          y: Math.random() * 90 - 45
-        });
-      }, 0);
-      return () => clearTimeout(timeout);
-    }
-  }, [isRolling]);
-
-  return (
-    <div className="w-32 h-32" style={{ perspective: '1000px' }}>
-      <motion.div
-        animate={{
-          rotateX: isRolling ? [0, 360, 720, 1080 + randomOffset.x] : 0,
-          rotateY: isRolling ? [0, 360, 720, 1080 + randomOffset.y] : 0,
-          rotateZ: isRolling ? [0, 180, 360] : 0,
-          z: isRolling ? [0, 150, 0] : 0, // Lift off the ground
-          scale: isRolling ? [1, 1.2, 1] : 1,
-        }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
-        className="w-full h-full relative"
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        {/* Front Face (Current Value) */}
-        <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-4 grid grid-cols-3 grid-rows-3 gap-2" style={{ transform: 'translateZ(64px)' }}>
-          {diceDotPositions[value].map((pos, i) => (
-            <div key={i} className={`w-full h-full bg-primary rounded-full ${pos} shadow-inner`} />
-          ))}
-        </div>
-
-        {/* Back Face */}
-        <div className="absolute inset-0 bg-gray-50 rounded-2xl shadow-inner border-2 border-gray-300 p-4 grid grid-cols-3 grid-rows-3 gap-2" style={{ transform: 'rotateY(180deg) translateZ(64px)' }}>
-           {/* For simplicity we show a random generic face when rolling */}
-           {diceDotPositions[7 - value] ? diceDotPositions[7 - value].map((pos, i) => (
-            <div key={i} className={`w-full h-full bg-gray-400 rounded-full ${pos} shadow-inner`} />
-          )) : null}
-        </div>
-
-        {/* Right Face */}
-        <div className="absolute inset-0 bg-gray-100 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateY(90deg) translateZ(64px)' }} />
-
-        {/* Left Face */}
-        <div className="absolute inset-0 bg-gray-200 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateY(-90deg) translateZ(64px)' }} />
-
-        {/* Top Face */}
-        <div className="absolute inset-0 bg-gray-50 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateX(90deg) translateZ(64px)' }} />
-
-        {/* Bottom Face */}
-        <div className="absolute inset-0 bg-gray-300 rounded-2xl shadow-inner border-2 border-gray-300" style={{ transform: 'rotateX(-90deg) translateZ(64px)' }} />
-      </motion.div>
-    </div>
-  );
-};
 
 export const DiceRoller = () => {
   const [diceCount, setDiceCount] = useState(1);
+  const [sides, setSides] = useState(6);
   const [values, setValues] = useState([1]);
   const [isRolling, setIsRolling] = useState(false);
   const { settings } = useSettings();
@@ -86,17 +21,17 @@ export const DiceRoller = () => {
     setIsRolling(true);
 
     // Play sound quickly multiple times to simulate rolling
-    if (settings.soundsEnabled) {
+    if (settings.soundTheme !== 'none') {
       let rolls = 0;
       const soundInterval = setInterval(() => {
-        audioEngine.playTick(true);
+        audioEngine.playTick(settings.soundTheme);
         rolls++;
         if (rolls > 5) clearInterval(soundInterval);
       }, 100);
     }
 
     setTimeout(() => {
-      const newValues = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+      const newValues = Array.from({ length: diceCount }, () => Math.floor(Math.random() * sides) + 1);
       setValues(newValues);
       setIsRolling(false);
     }, 800);
@@ -115,28 +50,57 @@ export const DiceRoller = () => {
         <Dices /> Dice Roller
       </h2>
 
-      <div className="flex gap-4 mb-8">
-        {[1, 2, 3, 4].map(num => (
-          <button
-            key={num}
-            onClick={() => changeDiceCount(num)}
-            className={`px-6 py-2 rounded-lg font-bold transition-colors ${
-              diceCount === num
-                ? 'bg-primary text-white'
-                : 'bg-white text-text border-2 border-gray-200 hover:border-primary'
-            }`}
-          >
-            {num} {num === 1 ? 'Die' : 'Dice'}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-4 mb-8">
+        <div className="flex gap-4">
+          {[1, 2, 3, 4].map(num => (
+            <button
+              key={`count-${num}`}
+              onClick={() => changeDiceCount(num)}
+              className={`px-6 py-2 rounded-lg font-bold transition-colors ${
+                diceCount === num
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-text border-2 border-gray-200 hover:border-primary'
+              }`}
+            >
+              {num} {num === 1 ? 'Die' : 'Dice'}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap justify-center gap-2 mt-2">
+          {[4, 6, 8, 12, 20].map(num => (
+            <button
+              key={`sides-${num}`}
+              onClick={() => {
+                setSides(num);
+                setValues(Array.from({ length: diceCount }, () => 1));
+              }}
+              className={`px-4 py-1.5 rounded-lg font-bold transition-colors ${
+                sides === num
+                  ? 'bg-primary/10 text-primary border-2 border-primary'
+                  : 'bg-white text-gray-500 border-2 border-gray-200 hover:border-primary/50'
+              }`}
+            >
+              D{num}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-8 min-h-[160px]">
-        <AnimatePresence>
-          {values.map((val, i) => (
-            <Die key={i} value={val} isRolling={isRolling} />
-          ))}
-        </AnimatePresence>
+      <div className="w-full min-h-[300px] md:min-h-[400px] bg-gray-50/50 rounded-2xl overflow-hidden relative shadow-inner">
+        <Canvas camera={{ position: [0, 0, Math.max(5, values.length * 1.8)], fov: 40 }}>
+          <ambientLight intensity={0.7} />
+          <pointLight position={[10, 10, 10]} intensity={1.5} />
+          <directionalLight position={[-5, 5, 5]} intensity={0.5} />
+          {values.map((val, i) => {
+             // Increase spacing between larger dice
+             const xOffset = (i - (values.length - 1) / 2) * 3; 
+             return (
+               <group key={i} position={[xOffset, 0, 0]}>
+                 <DieShape value={val} isRolling={isRolling} sides={sides} index={i} />
+               </group>
+             );
+          })}
+        </Canvas>
       </div>
 
       <div className="text-center space-y-6">

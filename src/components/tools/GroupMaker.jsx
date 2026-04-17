@@ -21,8 +21,8 @@ export const GroupMaker = () => {
     setIsGenerating(true);
     setGroups([]);
 
-    if (settings.soundsEnabled) {
-       audioEngine.playTick(true);
+    if (settings.soundTheme !== 'none') {
+       audioEngine.playTick(settings.soundTheme);
     }
 
     setTimeout(() => {
@@ -47,7 +47,7 @@ export const GroupMaker = () => {
 
       setGroups(newGroups);
       setIsGenerating(false);
-      if (settings.soundsEnabled) audioEngine.playAlarm(true);
+      audioEngine.playAlarm(settings.soundTheme);
     }, 800);
   };
 

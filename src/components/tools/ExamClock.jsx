@@ -19,7 +19,7 @@ export const ExamClock = () => {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            audioEngine.playAlarm(settings.soundsEnabled);
+            audioEngine.playAlarm(settings.soundTheme);
             if (phase === 'reading') {
               setPhase('paused'); // Pause after reading time
               setTimeLeft(examTime * 60);
@@ -33,7 +33,7 @@ export const ExamClock = () => {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [phase, timeLeft, examTime, settings.soundsEnabled]);
+  }, [phase, timeLeft, examTime, settings.soundTheme]);
 
   const startReading = () => {
     setTimeLeft(readingTime * 60);

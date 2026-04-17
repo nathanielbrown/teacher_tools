@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { X, Plus, Trash2, Download, Upload } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { audioEngine } from '../utils/audio';
 
 export const SettingsModal = ({ onClose }) => {
-  const { settings, updateTheme, toggleSounds, addClass, updateClass, deleteClass, setSettings } = useSettings();
+  const { settings, updateTheme, setSoundTheme, addClass, updateClass, deleteClass, setSettings } = useSettings();
   const fileInputRef = useRef(null);
   const [newClassName, setNewClassName] = useState('');
   const [newClassStudents, setNewClassStudents] = useState('');
@@ -70,13 +71,13 @@ export const SettingsModal = ({ onClose }) => {
         const importedData = JSON.parse(event.target.result);
 
         Object.keys(importedData).forEach(key => {
-           if (key.startsWith('teacherTools')) {
-               localStorage.setItem(key, JSON.stringify(importedData[key]));
-           }
+          if (key.startsWith('teacherTools')) {
+            localStorage.setItem(key, JSON.stringify(importedData[key]));
+          }
         });
 
         if (importedData['teacherToolsSettings']) {
-            setSettings(importedData['teacherToolsSettings']);
+          setSettings(importedData['teacherToolsSettings']);
         }
 
         window.location.reload();
@@ -105,18 +106,17 @@ export const SettingsModal = ({ onClose }) => {
             <h3 className="text-lg font-semibold mb-4 text-text">Theme</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { id: 'early-years', name: 'Early Years', desc: 'Primary colours + emojis', emoji: '🎨' },
-                { id: 'primary', name: 'Primary', desc: 'Very Colourful' },
-                { id: 'secondary', name: 'Secondary', desc: 'Colourful & Clean' },
+                { id: 'early-years', name: 'Early Years', desc: 'Bright and colourful.', emoji: '🎨' },
+                { id: 'primary', name: 'Primary', desc: 'Nature' },
+                { id: 'secondary', name: 'Secondary', desc: 'Modern' },
               ].map(theme => (
                 <button
                   key={theme.id}
                   onClick={() => updateTheme(theme.id)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    settings.theme === theme.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 hover:border-primary/50'
-                  }`}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${settings.theme === theme.id
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-200 hover:border-primary/50'
+                    }`}
                 >
                   <div className="font-semibold text-text">
                     {theme.emoji && <span className="mr-2">{theme.emoji}</span>}
@@ -130,16 +130,34 @@ export const SettingsModal = ({ onClose }) => {
 
           {/* Sound Settings */}
           <section>
-            <h3 className="text-lg font-semibold mb-4 text-text">Audio</h3>
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.soundsEnabled}
-                onChange={toggleSounds}
-                className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary"
-              />
-              <span className="text-text font-medium">Enable sounds & sound effects</span>
-            </label>
+            <h3 className="text-lg font-semibold mb-4 text-text">Audio Effects</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {[
+                { id: 'none', name: 'None', emoji: '🔇' },
+                { id: 'classic', name: 'Classic', emoji: '🔔' },
+                { id: 'digital', name: 'Digital', emoji: '🕹️' },
+                { id: 'soft', name: 'Soft', emoji: '🎵' },
+                { id: 'bubbly', name: 'Bubbly', emoji: '🫧' },
+              ].map(theme => (
+                <button
+                  key={theme.id}
+                  onClick={() => {
+                    setSoundTheme(theme.id);
+                    if (theme.id !== 'none') {
+                      audioEngine.playAlarm(theme.id);
+                    }
+                  }}
+                  className={`p-3 rounded-xl border-2 text-center transition-all flex flex-col items-center gap-1 ${
+                    settings.soundTheme === theme.id
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-gray-200 hover:border-primary/50 text-gray-600'
+                  }`}
+                >
+                  <span className="text-2xl">{theme.emoji}</span>
+                  <span className="font-medium text-sm">{theme.name}</span>
+                </button>
+              ))}
+            </div>
           </section>
 
           {/* Data Backup */}

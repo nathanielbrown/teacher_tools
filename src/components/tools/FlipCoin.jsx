@@ -15,10 +15,10 @@ export const FlipCoin = () => {
     if (isFlipping) return;
     setIsFlipping(true);
 
-    if (settings.soundsEnabled) {
-       audioEngine.playTick(true);
-       setTimeout(() => audioEngine.playTick(true), 200);
-       setTimeout(() => audioEngine.playTick(true), 400);
+    if (settings.soundTheme !== 'none') {
+       audioEngine.playTick(settings.soundTheme);
+       setTimeout(() => audioEngine.playTick(settings.soundTheme), 200);
+       setTimeout(() => audioEngine.playTick(settings.soundTheme), 400);
     }
 
     // Determine result early but reveal after animation
@@ -28,8 +28,8 @@ export const FlipCoin = () => {
       setResult(newResult);
       setFlipCount(prev => prev + 1);
       setIsFlipping(false);
-      if (settings.soundsEnabled) {
-         audioEngine.playTick(true); // Final clink
+      if (settings.soundTheme !== 'none') {
+         audioEngine.playTick(settings.soundTheme); // Final clink
       }
     }, 1500); // Wait for animation
   };

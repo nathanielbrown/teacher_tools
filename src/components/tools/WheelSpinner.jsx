@@ -22,10 +22,10 @@ export const WheelSpinner = () => {
     setIsSpinning(true);
     setWinner(null);
 
-    if (settings.soundsEnabled) {
+    if (settings.soundTheme !== 'none') {
       let ticks = 0;
       const interval = setInterval(() => {
-        audioEngine.playTick(true);
+        audioEngine.playTick(settings.soundTheme);
         ticks++;
         if (ticks > 20) clearInterval(interval);
       }, 150);
@@ -56,7 +56,7 @@ export const WheelSpinner = () => {
     setTimeout(() => {
       setWinner(students[winningIndex]);
       setIsSpinning(false);
-      if (settings.soundsEnabled) audioEngine.playAlarm(true);
+      audioEngine.playAlarm(settings.soundTheme);
     }, 4000);
   };
 

@@ -127,7 +127,7 @@ export const ColourPicker = () => {
 
     const animate = () => {
       setActiveIndex(Math.floor(Math.random() * 100));
-      if (settings.soundsEnabled) audioEngine.playTick(true);
+      audioEngine.playTick(settings.soundTheme);
 
       iterations++;
       if (iterations < 20) {
@@ -139,7 +139,7 @@ export const ColourPicker = () => {
         setActiveIndex(finalIndex);
         setSelectedColor(COLORS[finalIndex]);
         setIsPicking(false);
-        if (settings.soundsEnabled) audioEngine.playAlarm(true);
+        audioEngine.playAlarm(settings.soundTheme);
       }
     };
 

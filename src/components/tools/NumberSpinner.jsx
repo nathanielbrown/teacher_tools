@@ -24,10 +24,10 @@ export const NumberSpinner = () => {
     const selectedNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
     // Play spinning sound
-    if (settings.soundsEnabled) {
+    if (settings.soundTheme !== 'none') {
       let ticks = 0;
       const interval = setInterval(() => {
-        audioEngine.playTick(true);
+        audioEngine.playTick(settings.soundTheme);
         ticks++;
         if (ticks > 15) clearInterval(interval);
       }, 100);
@@ -50,7 +50,7 @@ export const NumberSpinner = () => {
     setTimeout(() => {
       setResult(selectedNumber);
       setIsSpinning(false);
-      if (settings.soundsEnabled) audioEngine.playAlarm(true);
+      audioEngine.playAlarm(settings.soundTheme);
     }, 3000);
   };
 

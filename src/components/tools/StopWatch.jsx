@@ -17,7 +17,7 @@ export const StopWatch = () => {
           const newTime = prev + 10;
           // Play tick sound every second
           if (Math.floor(newTime / 1000) > lastTickRef.current) {
-            audioEngine.playTick(settings.soundsEnabled);
+            audioEngine.playTick(settings.soundTheme);
             lastTickRef.current = Math.floor(newTime / 1000);
           }
           return newTime;
@@ -25,7 +25,7 @@ export const StopWatch = () => {
       }, 10);
     }
     return () => clearInterval(intervalId);
-  }, [isRunning, settings.soundsEnabled]);
+  }, [isRunning, settings.soundTheme]);
 
   const toggle = () => {
     setIsRunning(!isRunning);

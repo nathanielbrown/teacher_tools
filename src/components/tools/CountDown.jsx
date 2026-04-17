@@ -14,6 +14,7 @@ export const CountDown = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [visualMode, setVisualMode] = useState('circle'); // circle, progress, sand, flip, rainbow
+  const [soundOverride, setSoundOverride] = useState('default');
 
   const { settings } = useSettings();
 
@@ -25,19 +26,16 @@ export const CountDown = () => {
           if (prev <= 1) {
             setIsRunning(false);
             setIsFinished(true);
-            audioEngine.playAlarm(settings.soundsEnabled);
+            const activeTheme = soundOverride === 'default' ? settings.soundTheme : soundOverride;
+            audioEngine.playAlarm(activeTheme);
             return 0;
-          }
-
-          if (prev <= 11) { // Tick for last 10 seconds
-             audioEngine.playTick(settings.soundsEnabled);
           }
           return prev - 1;
         });
       }, 1000);
     }
     return () => clearInterval(intervalId);
-  }, [isRunning, timeLeft, settings.soundsEnabled]);
+  }, [isRunning, timeLeft, settings.soundTheme, soundOverride]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -181,82 +179,125 @@ export const CountDown = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8">
-      <h2 className="text-3xl font-bold text-primary">Count Down</h2>
+    <div className="flex flex-col items-center space-y-8 w-full">
+      <h2 className="text-3xl font-bold text-primary mb-4">Count Down</h2>
 
-      {!isRunning && !isFinished && (
-        <div className="flex flex-col items-center space-y-4">
-          <div className="flex space-x-2 bg-white p-2 rounded-xl shadow-md border border-gray-200">
-            <button onClick={() => setVisualMode('circle')} className={`p-2 rounded ${visualMode === 'circle' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Circle Timer"><Circle size={20} /></button>
-            <button onClick={() => setVisualMode('progress')} className={`p-2 rounded ${visualMode === 'progress' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Progress Bar"><LayoutList size={20} /></button>
-            <button onClick={() => setVisualMode('sand')} className={`p-2 rounded ${visualMode === 'sand' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Sand Timer"><Hourglass size={20} /></button>
-            <button onClick={() => setVisualMode('flip')} className={`p-2 rounded ${visualMode === 'flip' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Flip Clock"><TimerIcon size={20} /></button>
-            <button onClick={() => setVisualMode('rainbow')} className={`p-2 rounded ${visualMode === 'rainbow' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Wait-Time Spinner"><Loader2 size={20} /></button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-6xl items-center justify-items-center">
+        {/* Empty left column for perfect center alignment */}
+        <div className="hidden lg:block"></div>
+
+        {/* Center Column: Timer & Controls */}
+        <div className="flex flex-col items-center space-y-8">
+          <div className={`
+            relative flex flex-col items-center justify-center transition-colors duration-500 overflow-hidden w-[350px] h-[350px] md:w-[400px] md:h-[400px]
+            ${visualMode === 'flip' ? 'bg-gray-900 rounded-xl border-4 border-gray-800' : `bg-white rounded-[3rem] shadow-2xl border-4 ${
+              isFinished ? 'border-red-500 bg-red-50 animate-pulse' :
+              isRunning && timeLeft <= 10 ? 'border-orange-500' : 'border-primary/10'
+            }`}
+          `}>
+            <span className={`
+              ${visualMode === 'flip' ? 'text-8xl font-mono font-bold tabular-nums tracking-tighter text-white bg-gray-800 p-4 rounded-lg shadow-inner' : `text-8xl font-mono font-bold tabular-nums tracking-tighter ${
+                isFinished ? 'text-red-600' :
+                isRunning && timeLeft <= 10 ? 'text-orange-500' : 'text-text'
+              }`}
+            `}>
+              {formatTime(timeLeft)}
+            </span>
+            {isFinished && <p className={`text-xl font-bold mt-4 ${visualMode === 'flip' ? 'text-red-400' : 'text-red-500'}`}>Time's Up!</p>}
+            {renderVisualization()}
           </div>
 
-          <div className="flex space-x-4 bg-white p-4 rounded-xl shadow-md border border-gray-200">
-            <div className="flex flex-col items-center">
-              <label className="text-sm text-gray-500 mb-1">Minutes</label>
-              <input
-                type="number"
-                min="0"
-                max="99"
-                value={initialMinutes}
-                onChange={(e) => setInitialMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-                className="w-20 text-center text-2xl p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div className="text-4xl font-bold self-end mb-2">:</div>
-            <div className="flex flex-col items-center">
-              <label className="text-sm text-gray-500 mb-1">Seconds</label>
-              <input
-                type="number"
-                min="0"
-                max="59"
-                value={initialSeconds}
-                onChange={(e) => setInitialSeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
-                className="w-20 text-center text-2xl p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-              />
-            </div>
+          <div className="flex space-x-6">
+            <button
+              onClick={toggle}
+              disabled={timeLeft === 0 && !isFinished}
+              className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+              }`}
+            >
+              {isRunning ? <Pause size={32} /> : <Play size={32} className={!isFinished ? "ml-2" : ""} />}
+            </button>
+            <button
+              onClick={reset}
+              className="w-20 h-20 rounded-full flex items-center justify-center bg-gray-200 text-gray-700 shadow-lg hover:bg-gray-300 transition-transform hover:scale-105 active:scale-95"
+            >
+              <RotateCcw size={32} />
+            </button>
           </div>
         </div>
-      )}
 
-      <div className={`
-        relative flex flex-col items-center justify-center transition-colors duration-500
-        ${visualMode === 'flip' ? 'bg-gray-900 p-8 rounded-xl border-4 border-gray-800' : `bg-white p-12 rounded-[3rem] shadow-2xl border-4 min-w-[300px] ${
-          isFinished ? 'border-red-500 bg-red-50 animate-pulse' :
-          isRunning && timeLeft <= 10 ? 'border-orange-500' : 'border-primary/10'
-        }`}
-      `}>
-        <span className={`
-          ${visualMode === 'flip' ? 'text-8xl font-mono font-bold tabular-nums tracking-tighter text-white bg-gray-800 p-4 rounded-lg shadow-inner' : `text-8xl font-mono font-bold tabular-nums tracking-tighter ${
-            isFinished ? 'text-red-600' :
-            isRunning && timeLeft <= 10 ? 'text-orange-500' : 'text-text'
-          }`}
-        `}>
-          {formatTime(timeLeft)}
-        </span>
-        {isFinished && <p className={`text-xl font-bold mt-4 ${visualMode === 'flip' ? 'text-red-400' : 'text-red-500'}`}>Time's Up!</p>}
-        {renderVisualization()}
-      </div>
+        {/* Right Column: Settings */}
+        <div className="flex flex-col items-center lg:items-start lg:justify-self-start">
+          {!isRunning && !isFinished && (
+            <div className="flex flex-col items-center lg:items-start space-y-4">
+              <div className="flex space-x-2 bg-white p-2 rounded-xl shadow-md border border-gray-200 flex-wrap justify-center max-w-[250px]">
+                <button onClick={() => setVisualMode('circle')} className={`p-2 rounded ${visualMode === 'circle' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Circle Timer"><Circle size={20} /></button>
+                <button onClick={() => setVisualMode('progress')} className={`p-2 rounded ${visualMode === 'progress' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Progress Bar"><LayoutList size={20} /></button>
+                <button onClick={() => setVisualMode('sand')} className={`p-2 rounded ${visualMode === 'sand' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Sand Timer"><Hourglass size={20} /></button>
+                <button onClick={() => setVisualMode('flip')} className={`p-2 rounded ${visualMode === 'flip' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Flip Clock"><TimerIcon size={20} /></button>
+                <button onClick={() => setVisualMode('rainbow')} className={`p-2 rounded ${visualMode === 'rainbow' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Wait-Time Spinner"><Loader2 size={20} /></button>
+              </div>
 
-      <div className="flex space-x-6">
-        <button
-          onClick={toggle}
-          disabled={timeLeft === 0 && !isFinished}
-          className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-            isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-          }`}
-        >
-          {isRunning ? <Pause size={32} /> : <Play size={32} className={!isFinished ? "ml-2" : ""} />}
-        </button>
-        <button
-          onClick={reset}
-          className="w-20 h-20 rounded-full flex items-center justify-center bg-gray-200 text-gray-700 shadow-lg hover:bg-gray-300 transition-transform hover:scale-105 active:scale-95"
-        >
-          <RotateCcw size={32} />
-        </button>
+              <div className="flex space-x-4 bg-white p-4 rounded-xl shadow-md border border-gray-200">
+                <div className="flex flex-col items-center">
+                  <label className="text-sm text-gray-500 mb-1">Minutes</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="99"
+                    value={initialMinutes}
+                    onChange={(e) => setInitialMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-20 text-center text-2xl p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="text-4xl font-bold self-end mb-2">:</div>
+                <div className="flex flex-col items-center">
+                  <label className="text-sm text-gray-500 mb-1">Seconds</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={initialSeconds}
+                    onChange={(e) => setInitialSeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                    className="w-20 text-center text-2xl p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex flex-col space-y-3 bg-white p-4 rounded-xl shadow-md border border-gray-200 w-full max-w-[320px]">
+                <label className="text-sm text-gray-500 font-medium text-center">Sound Effect</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'default', name: 'Default' },
+                    { id: 'none', name: 'None' },
+                    { id: 'classic', name: 'Classic' },
+                    { id: 'digital', name: 'Digital' },
+                    { id: 'soft', name: 'Soft' },
+                    { id: 'bubbly', name: 'Bubbly' },
+                    { id: 'chime', name: 'Chime' },
+                    { id: 'synth', name: 'Synth' },
+                    { id: 'beep', name: 'Beep' },
+                    { id: 'siren', name: 'Siren' },
+                  ].map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => {
+                        setSoundOverride(option.id);
+                      }}
+                      className={`p-2 text-sm rounded-lg border-2 font-medium transition-all ${
+                        soundOverride === option.id 
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-gray-100 hover:border-primary/30 text-gray-600 bg-gray-50 hover:bg-gray-100'
+                      }`}
+                    >
+                      {option.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

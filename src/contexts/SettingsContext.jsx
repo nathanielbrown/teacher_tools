@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const defaultSettings = {
   theme: 'early-years', // 'early-years', 'primary', 'secondary'
-  soundsEnabled: true,
+  soundTheme: 'classic', // 'none', 'classic', 'digital', 'soft', 'bubbly'
   classes: [{ id: 'class-1', name: 'Class 1', students: ['Alice', 'Bob', 'Charlie'] }]
 };
 
@@ -15,7 +15,16 @@ export const useSettings = () => {
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState(() => {
     const savedSettings = localStorage.getItem('teacherToolsSettings');
-    return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings);
+      // Migrate old soundsEnabled to soundTheme
+      if (parsed.soundsEnabled !== undefined && parsed.soundTheme === undefined) {
+        parsed.soundTheme = parsed.soundsEnabled ? 'classic' : 'none';
+        delete parsed.soundsEnabled;
+      }
+      return { ...defaultSettings, ...parsed };
+    }
+    return defaultSettings;
   });
 
   useEffect(() => {
@@ -24,7 +33,7 @@ export const SettingsProvider = ({ children }) => {
   }, [settings]);
 
   const updateTheme = (theme) => setSettings(prev => ({ ...prev, theme }));
-  const toggleSounds = () => setSettings(prev => ({ ...prev, soundsEnabled: !prev.soundsEnabled }));
+  const setSoundTheme = (soundTheme) => setSettings(prev => ({ ...prev, soundTheme }));
 
   const addClass = (newClass) => {
     setSettings(prev => ({
@@ -51,7 +60,7 @@ export const SettingsProvider = ({ children }) => {
     <SettingsContext.Provider value={{
       settings,
       updateTheme,
-      toggleSounds,
+      setSoundTheme,
       addClass,
       updateClass,
       deleteClass,

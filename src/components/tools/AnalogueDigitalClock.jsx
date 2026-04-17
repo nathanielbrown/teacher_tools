@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 
 export const AnalogueDigitalClock = () => {
   const [time, setTime] = useState(new Date());
-  const [digitalInput, setDigitalInput] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const svgRef = useRef(null);
   const isDragging = useRef(false);
@@ -14,18 +13,7 @@ export const AnalogueDigitalClock = () => {
     }
   }, [isEditing]);
 
-  const handleDigitalSubmit = (e) => {
-    e.preventDefault();
-    const [hours, minutes] = digitalInput.split(':').map(Number);
-    if (!isNaN(hours) && !isNaN(minutes) && hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
-      const newTime = new Date(time);
-      newTime.setHours(hours);
-      newTime.setMinutes(minutes);
-      newTime.setSeconds(0);
-      setTime(newTime);
-      setIsEditing(false);
-    }
-  };
+
 
   const getAngle = (e) => {
     if (!svgRef.current) return 0;
@@ -92,7 +80,6 @@ export const AnalogueDigitalClock = () => {
           <button
             onClick={() => {
               setIsEditing(true);
-              setDigitalInput(formatDigital(time, false));
             }}
             className={`px-4 py-2 rounded-lg font-bold transition-colors ${isEditing ? 'bg-primary text-white' : 'text-gray-500 hover:bg-gray-100'}`}
           >
@@ -191,18 +178,25 @@ export const AnalogueDigitalClock = () => {
       {/* Digital Input */}
       <div className="bg-white p-6 rounded-2xl shadow-lg border-2 border-primary/10">
         {isEditing ? (
-          <form onSubmit={handleDigitalSubmit} className="flex flex-col items-center space-y-4">
+          <div className="flex flex-col items-center space-y-4">
             <input
               type="time"
-              value={digitalInput || formatDigital(time, false)}
-              onChange={(e) => setDigitalInput(e.target.value)}
+              value={formatDigital(time, false)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val) {
+                  const [hours, minutes] = val.split(':').map(Number);
+                  const newTime = new Date(time);
+                  newTime.setHours(hours);
+                  newTime.setMinutes(minutes);
+                  newTime.setSeconds(0);
+                  setTime(newTime);
+                }
+              }}
               className="text-4xl font-bold text-center bg-gray-50 border-2 border-primary/50 rounded-lg p-2 focus:outline-none focus:border-primary"
               autoFocus
             />
-            <div className="flex space-x-4">
-              <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Set Time</button>
-            </div>
-          </form>
+          </div>
         ) : (
           <div className="text-5xl font-mono font-bold text-text transition-colors">
             {formatDigital(time, true)}

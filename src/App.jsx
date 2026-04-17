@@ -37,6 +37,9 @@ import { FractionTool } from './components/tools/FractionTool';
 import { MarbleCounting } from './components/tools/MarbleCounting';
 import { BinaryTool } from './components/tools/BinaryTool';
 import { FindTheWord } from './components/tools/FindTheWord';
+import { RevealWord } from './components/tools/RevealWord';
+import { TypingGame } from './components/tools/TypingGame';
+import { EmojiMatch } from './components/tools/EmojiMatch';
 
 function App() {
   const [currentTool, setCurrentTool] = useState('home');
@@ -84,6 +87,9 @@ function App() {
       case 'marblecounting': return <MarbleCounting />;
       case 'binarynumbers': return <BinaryTool />;
       case 'findtheword': return <FindTheWord />;
+      case 'revealword': return <RevealWord />;
+      case 'typinggame': return <TypingGame />;
+      case 'emojimatch': return <EmojiMatch />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">

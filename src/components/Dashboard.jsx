@@ -5,7 +5,7 @@ import { useSettings } from '../contexts/SettingsContext';
 
 import {
   Clock, Timer, Hourglass, AlertCircle, Dices, Coins, Loader,
-  Palette, Activity, BookOpen, UserCircle, Users, CalendarDays, Award, Star, Sparkles, Gamepad2, PenTool, Zap, Calculator, Banknote, Minus, X, Divide, PieChart, Circle, Cpu, Search
+  Palette, Activity, BookOpen, UserCircle, Users, CalendarDays, Award, Star, Sparkles, Gamepad2, PenTool, Zap, Calculator, Banknote, Minus, X, Divide, PieChart, Circle, Cpu, Search, Eye, Rocket, Brain
 } from 'lucide-react';
 
 const tools = [
@@ -37,11 +37,13 @@ const tools = [
   
   // Classroom Games
   { id: 'higherorlower', name: 'Higher or Lower', icon: Gamepad2, emoji: '⬆️', mainSection: 'Classroom Games', section: 'Games' },
+  { id: 'revealword', name: 'Reveal Word', icon: Eye, emoji: '🕵️', mainSection: 'Classroom Games', section: 'Games' },
   
   // Student Tools
   { id: 'spelling', name: 'Spelling Practice', icon: PenTool, emoji: '📝', mainSection: 'Student Tools', section: 'Literacy' },
   { id: 'lettertracing', name: 'Letter Tracing', icon: PenTool, emoji: '✏️', mainSection: 'Student Tools', section: 'Literacy' },
   { id: 'findtheword', name: 'Find the Word', icon: Search, emoji: '🔍', mainSection: 'Student Tools', section: 'Literacy' },
+  { id: 'typinggame', name: 'Typing Galaxy', icon: Rocket, emoji: '🚀', mainSection: 'Student Tools', section: 'Literacy' },
   { id: 'reactiontime', name: 'Reaction Time', icon: Zap, emoji: '⚡', mainSection: 'Student Tools', section: 'Science' },
   { id: 'timestable', name: 'Times Tables', icon: Calculator, emoji: '✖️', mainSection: 'Student Tools', section: 'Math' },
   { id: 'moneytool', name: 'Money Tool', icon: Banknote, emoji: '💵', mainSection: 'Student Tools', section: 'Math' },
@@ -52,6 +54,7 @@ const tools = [
   { id: 'marblecounting', name: 'Marble Counting', icon: Circle, emoji: '🔮', mainSection: 'Student Tools', section: 'Math' },
   { id: 'binarynumbers', name: 'Binary Numbers', icon: Cpu, emoji: '💻', mainSection: 'Student Tools', section: 'Math' },
   { id: 'simongame', name: 'Simon Says', icon: Gamepad2, emoji: '🧠', mainSection: 'Student Tools', section: 'Memory & Games' },
+  { id: 'emojimatch', name: 'Emoji Match', icon: Brain, emoji: '🧩', mainSection: 'Student Tools', section: 'Memory & Games' },
 ];
 
 const mainSections = [

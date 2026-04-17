@@ -59,6 +59,7 @@ const toolGroups = [
     title: 'Classroom Games',
     items: [
       { id: 'higherorlower', name: 'Higher or Lower' },
+      { id: 'revealword', name: 'Reveal Word' },
     ]
   },
   {
@@ -67,6 +68,7 @@ const toolGroups = [
       { id: 'spelling', name: 'Spelling Practice' },
       { id: 'lettertracing', name: 'Letter Tracing' },
       { id: 'findtheword', name: 'Find the Word' },
+      { id: 'typinggame', name: 'Typing Galaxy' },
     ]
   },
   {
@@ -86,6 +88,7 @@ const toolGroups = [
     title: 'Student Tools - Memory & Games',
     items: [
       { id: 'simongame', name: 'Simon Says' },
+      { id: 'emojimatch', name: 'Emoji Match' },
     ]
   },
   {

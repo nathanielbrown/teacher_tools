@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
 import { ChevronUp, ChevronDown, PieChart, Info, Plus, Minus } from 'lucide-react';
 
 export const FractionTool = () => {
   const [numerator, setNumerator] = useState(1);
   const [denominator, setDenominator] = useState(4);
+  const lineRef = useRef(null);
+  const pointerX = useMotionValue(0);
 
   const updateNumerator = (val) => {
     const next = Math.max(0, Math.min(denominator, numerator + val));
@@ -124,7 +126,7 @@ export const FractionTool = () => {
             <h3 className="text-gray-400 font-bold uppercase tracking-widest text-sm text-center">Number Line Model</h3>
             <div className="relative px-8">
               {/* The Line */}
-              <div className="h-1 bg-gray-200 rounded-full w-full relative">
+              <div ref={lineRef} className="h-1 bg-gray-200 rounded-full w-full relative">
                 {/* Tick Marks */}
                 {Array.from({ length: denominator + 1 }).map((_, i) => {
                   const left = `${(i / denominator) * 100}%`;
@@ -151,10 +153,10 @@ export const FractionTool = () => {
                   animate={{ width: `${(numerator / denominator) * 100}%` }}
                 />
 
-                {/* Draggable Handle (using click for now for simplicity, can add drag later if needed) */}
-                <div className="absolute inset-0 z-10 cursor-crosshair" 
+                {/* Clickable Overlay */}
+                <div className="absolute top-1/2 -translate-y-1/2 -inset-x-4 h-24 z-10 cursor-crosshair" 
                   onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
+                    const rect = lineRef.current.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const percent = x / rect.width;
                     const closestNum = Math.round(percent * denominator);
@@ -165,8 +167,28 @@ export const FractionTool = () => {
                 {/* The Pointer */}
                 <motion.div 
                   className="absolute -top-3 w-8 h-8 bg-primary rounded-full border-4 border-white shadow-lg cursor-grab active:cursor-grabbing z-20 flex items-center justify-center"
+                  drag="x"
+                  dragConstraints={lineRef}
+                  dragElastic={0}
+                  dragMomentum={false}
+                  style={{ x: pointerX }}
+                  onDrag={(e, info) => {
+                    const rect = lineRef.current.getBoundingClientRect();
+                    const x = info.point.x - rect.left;
+                    const percent = x / rect.width;
+                    const closestNum = Math.round(percent * denominator);
+                    const newVal = Math.max(0, Math.min(denominator, closestNum));
+                    if (newVal !== numerator) {
+                      setNumerator(newVal);
+                    }
+                    // Reset the drag transform so it stays locked to the snapped 'left' position
+                    pointerX.set(0);
+                  }}
+                  onDragEnd={() => {
+                    pointerX.set(0);
+                  }}
                   animate={{ left: `calc(${(numerator / denominator) * 100}% - 1rem)` }}
-                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                  transition={{ type: 'spring', damping: 30, stiffness: 500 }}
                 >
                   <div className="w-1 h-3 bg-white/50 rounded-full" />
                 </motion.div>

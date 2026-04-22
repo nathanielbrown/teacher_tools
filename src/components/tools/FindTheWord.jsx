@@ -416,7 +416,7 @@ export const FindTheWord = () => {
                 onTouchStart={handleStart}
                 onTouchMove={handleMove}
                 onTouchEnd={handleEnd}
-                className="relative w-full h-full bg-white rounded-[2rem] grid p-2 touch-none select-none"
+                className="relative w-full h-full bg-white rounded-[2rem] grid touch-none select-none"
                 style={{ 
                   gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`, 
                   gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)` 

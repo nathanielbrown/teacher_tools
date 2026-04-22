@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
@@ -13,8 +13,7 @@ import { NumberSpinner } from './components/tools/NumberSpinner';
 import { ColourPicker } from './components/tools/ColourPicker';
 import { Metronome } from './components/tools/Metronome';
 import { StoryStarters } from './components/tools/StoryStarters';
-import { CasinoSpinner } from './components/tools/CasinoSpinner';
-import { WheelSpinner } from './components/tools/WheelSpinner';
+import { NamePicker } from './components/tools/NamePicker';
 import { GroupMaker } from './components/tools/GroupMaker';
 import { EventCountdowns } from './components/tools/EventCountdowns';
 import { DailySchedule } from './components/tools/DailySchedule';
@@ -40,10 +39,48 @@ import { FindTheWord } from './components/tools/FindTheWord';
 import { RevealWord } from './components/tools/RevealWord';
 import { TypingGame } from './components/tools/TypingGame';
 import { EmojiMatch } from './components/tools/EmojiMatch';
+import { HundredsChart } from './components/tools/HundredsChart';
+import { MABBlocks } from './components/tools/MABBlocks';
+import { ColourHunt } from './components/tools/ColourHunt';
+import { WouldYouRather } from './components/tools/WouldYouRather';
+import { SimonSays } from './components/tools/SimonSays';
+import { SoundLevel } from './components/tools/SoundLevel';
+import { WordCloud } from './components/tools/WordCloud';
+import { SongMaker } from './components/tools/SongMaker';
+import { SandSimulation } from './components/tools/SandSimulation';
+import { Crossword } from './components/tools/Crossword';
+import { WordManager } from './components/tools/WordManager';
+import { Sudoku } from './components/tools/Sudoku';
+import { Puzzle } from './components/tools/Puzzle';
+import { ImageReveal } from './components/tools/ImageReveal';
+import { ChemicalFireworks } from './components/tools/ChemicalFireworks';
+import { ThermalConduction } from './components/tools/ThermalConduction';
+import { EcosystemSimulation } from './components/tools/EcosystemSimulation';
+import { StandingWaveSynthesis } from './components/tools/StandingWaveSynthesis';
+import { InkDiffusion } from './components/tools/InkDiffusion';
+import { MolecularModels } from './components/tools/MolecularModels';
+
+
+
+import { SpringScales } from './components/tools/SpringScales';
+import { QRCodeGenerator } from './components/tools/QRCodeGenerator';
+import { SeatingPlanGenerator } from './components/tools/SeatingPlanGenerator';
+import { StudentTimeline } from './components/tools/StudentTimeline';
+// import { MindMap } from './components/tools/MindMap';
+
+
 
 function App() {
-  const [currentTool, setCurrentTool] = useState('home');
-  const [activeTab, setActiveTab] = useState('Teacher Tools');
+  const [currentTool, setCurrentTool] = useState(() => localStorage.getItem('teacherToolsCurrentTool') || 'home');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('teacherToolsActiveTab') || 'Teacher Tools');
+
+  useEffect(() => {
+    localStorage.setItem('teacherToolsCurrentTool', currentTool);
+  }, [currentTool]);
+
+  useEffect(() => {
+    localStorage.setItem('teacherToolsActiveTab', activeTab);
+  }, [activeTab]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -63,8 +100,8 @@ function App() {
       case 'colourpicker': return <ColourPicker />;
       case 'metronome': return <Metronome />;
       case 'storystarters': return <StoryStarters />;
-      case 'casinospinner': return <CasinoSpinner />;
-      case 'wheelspinner': return <WheelSpinner />;
+      case 'casinospinner': return <NamePicker initialMode="spin" />;
+      case 'wheelspinner': return <NamePicker initialMode="wheel" />;
       case 'groupmaker': return <GroupMaker />;
       case 'eventcountdowns': return <EventCountdowns />;
       case 'dailyschedule': return <DailySchedule />;
@@ -83,6 +120,32 @@ function App() {
       case 'missingmultiplication': return <MissingMultiplication />;
       case 'missingdivision': return <MissingDivision />;
       case 'simongame': return <SimonGame />;
+      case 'simonsays': return <SimonSays />;
+      case 'soundlevel': return <SoundLevel />;
+      case 'wordcloud': return <WordCloud />;
+      case 'songmaker': return <SongMaker />;
+      case 'sandsim': return <SandSimulation />;
+      case 'crossword': return <Crossword />;
+      case 'wordmanager': return <WordManager />;
+      case 'sudoku': return <Sudoku />;
+      case 'puzzle': return <Puzzle />;
+      case 'imagereveal': return <ImageReveal />;
+      case 'chemicalfireworks': return <ChemicalFireworks />;
+      case 'thermalconduction': return <ThermalConduction />;
+      case 'ecosystem': return <EcosystemSimulation />;
+      case 'standingwave': return <StandingWaveSynthesis />;
+      case 'inkdiffusion': return <InkDiffusion />;
+      case 'molecularmodels': return <MolecularModels />;
+
+
+
+      case 'springscales': return <SpringScales />;
+      case 'qrcodegenerator': return <QRCodeGenerator />;
+      case 'seatingplan': return <SeatingPlanGenerator />;
+      case 'studenttimeline': return <StudentTimeline />;
+//       case 'mindmap': return <MindMap />;
+
+
       case 'fractiontool': return <FractionTool />;
       case 'marblecounting': return <MarbleCounting />;
       case 'binarynumbers': return <BinaryTool />;
@@ -90,6 +153,10 @@ function App() {
       case 'revealword': return <RevealWord />;
       case 'typinggame': return <TypingGame />;
       case 'emojimatch': return <EmojiMatch />;
+      case 'hundredschart': return <HundredsChart />;
+      case 'mabblocks': return <MABBlocks />;
+      case 'colourhunt': return <ColourHunt />;
+      case 'wouldyourather': return <WouldYouRather />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">
@@ -104,6 +171,14 @@ function App() {
         );
     }
   };
+
+
+
+
+
+
+
+
 
   return (
     <SettingsProvider>

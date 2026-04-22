@@ -2,66 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-
-import {
-  Clock, Timer, Hourglass, AlertCircle, Dices, Coins, Loader,
-  Palette, Activity, BookOpen, UserCircle, Users, CalendarDays, Award, Star, Sparkles, Gamepad2, PenTool, Zap, Calculator, Banknote, Minus, X, Divide, PieChart, Circle, Cpu, Search, Eye, Rocket, Brain
-} from 'lucide-react';
-
-const tools = [
-  // Teacher Tools - Time Management
-  { id: 'clock', name: 'Analogue & Digital Clock', icon: Clock, emoji: '🕒', mainSection: 'Teacher Tools', section: 'Time Management' },
-  { id: 'stopwatch', name: 'Stop Watch', icon: Timer, emoji: '⏱️', mainSection: 'Teacher Tools', section: 'Time Management' },
-  { id: 'countdown', name: 'Count Down', icon: Hourglass, emoji: '⏳', mainSection: 'Teacher Tools', section: 'Time Management' },
-  { id: 'examclock', name: 'Exam Clock', icon: AlertCircle, emoji: '📝', mainSection: 'Teacher Tools', section: 'Time Management' },
-  { id: 'eventcountdowns', name: 'Event Countdowns', icon: CalendarDays, emoji: '🗓️', mainSection: 'Teacher Tools', section: 'Time Management' },
-  // Teacher Tools - Classroom Management
-  { id: 'dailyschedule', name: 'Daily Schedule', icon: Clock, emoji: '📅', mainSection: 'Teacher Tools', section: 'Classroom Management' },
-  { id: 'groupmaker', name: 'Random Group Maker', icon: Users, emoji: '👥', mainSection: 'Teacher Tools', section: 'Classroom Management' },
-  { id: 'groupscoreboard', name: 'Group Score Board', icon: Award, emoji: '🏆', mainSection: 'Teacher Tools', section: 'Classroom Management' },
-  { id: 'marblejar', name: 'Marble Jar Reward', icon: Star, emoji: '⭐', mainSection: 'Teacher Tools', section: 'Classroom Management' },
-  { id: 'emotionpicker', name: 'Emotion Picker', icon: UserCircle, emoji: '😊', mainSection: 'Teacher Tools', section: 'Classroom Management' },
-  // Teacher Tools - Mathematics
-  { id: 'fractiontool', name: 'Fraction Visualizer', icon: PieChart, emoji: '🍕', mainSection: 'Teacher Tools', section: 'Mathematics' },
-  // Teacher Tools - Randomizers
-  { id: 'diceroller', name: 'Dice Roller', icon: Dices, emoji: '🎲', mainSection: 'Teacher Tools', section: 'Randomizers' },
-  { id: 'flipcoin', name: 'Flip a Coin', icon: Coins, emoji: '🪙', mainSection: 'Teacher Tools', section: 'Randomizers' },
-  { id: 'numberspinner', name: 'Number Spinner', icon: Loader, emoji: '🎡', mainSection: 'Teacher Tools', section: 'Randomizers' },
-  { id: 'casinospinner', name: 'Name Picker (Casino)', icon: UserCircle, emoji: '🎰', mainSection: 'Teacher Tools', section: 'Randomizers' },
-  { id: 'wheelspinner', name: 'Name Picker (Wheel)', icon: Loader, emoji: '🎡', mainSection: 'Teacher Tools', section: 'Randomizers' },
-  { id: 'groupnamegenerator', name: 'Group Name Generator', icon: Sparkles, emoji: '✨', mainSection: 'Teacher Tools', section: 'Randomizers' },
-  // Teacher Tools - Other
-  { id: 'colourpicker', name: 'Colour Picker', icon: Palette, emoji: '🎨', mainSection: 'Teacher Tools', section: 'Other' },
-  { id: 'metronome', name: 'Metronome', icon: Activity, emoji: '🎵', mainSection: 'Teacher Tools', section: 'Other' },
-  { id: 'storystarters', name: 'Story Starters', icon: BookOpen, emoji: '📖', mainSection: 'Teacher Tools', section: 'Other' },
-  
-  // Classroom Games
-  { id: 'higherorlower', name: 'Higher or Lower', icon: Gamepad2, emoji: '⬆️', mainSection: 'Classroom Games', section: 'Games' },
-  { id: 'revealword', name: 'Reveal Word', icon: Eye, emoji: '🕵️', mainSection: 'Classroom Games', section: 'Games' },
-  
-  // Student Tools
-  { id: 'spelling', name: 'Spelling Practice', icon: PenTool, emoji: '📝', mainSection: 'Student Tools', section: 'Literacy' },
-  { id: 'lettertracing', name: 'Letter Tracing', icon: PenTool, emoji: '✏️', mainSection: 'Student Tools', section: 'Literacy' },
-  { id: 'findtheword', name: 'Find the Word', icon: Search, emoji: '🔍', mainSection: 'Student Tools', section: 'Literacy' },
-  { id: 'typinggame', name: 'Typing Galaxy', icon: Rocket, emoji: '🚀', mainSection: 'Student Tools', section: 'Literacy' },
-  { id: 'reactiontime', name: 'Reaction Time', icon: Zap, emoji: '⚡', mainSection: 'Student Tools', section: 'Science' },
-  { id: 'timestable', name: 'Times Tables', icon: Calculator, emoji: '✖️', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'moneytool', name: 'Money Tool', icon: Banknote, emoji: '💵', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'missingaddition', name: 'Missing Addition', icon: Calculator, emoji: '➕', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'missingsubtraction', name: 'Missing Subtraction', icon: Minus, emoji: '➖', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'missingmultiplication', name: 'Missing Multiplier', icon: X, emoji: '✖️', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'missingdivision', name: 'Missing Division', icon: Divide, emoji: '➗', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'marblecounting', name: 'Marble Counting', icon: Circle, emoji: '🔮', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'binarynumbers', name: 'Binary Numbers', icon: Cpu, emoji: '💻', mainSection: 'Student Tools', section: 'Math' },
-  { id: 'simongame', name: 'Simon Says', icon: Gamepad2, emoji: '🧠', mainSection: 'Student Tools', section: 'Memory & Games' },
-  { id: 'emojimatch', name: 'Emoji Match', icon: Brain, emoji: '🧩', mainSection: 'Student Tools', section: 'Memory & Games' },
-];
-
-const mainSections = [
-  { title: 'Teacher Tools', subSections: ['Time Management', 'Classroom Management', 'Randomizers', 'Other'] },
-  { title: 'Classroom Games', subSections: ['Games'] },
-  { title: 'Student Tools', subSections: ['Literacy', 'Math', 'Memory & Games', 'Science'] }
-];
+import { tools, mainSections } from '../data/tools';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -86,31 +27,48 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
   if (!activeMainSection) return null;
 
   const getThemeColors = () => {
-    if (activeTab === 'Teacher Tools') return { text: 'text-primary', border: 'border-primary/20', bg: 'bg-primary/10', hoverBorder: 'hover:border-primary', groupHoverBg: 'group-hover:bg-primary/20' };
-    if (activeTab === 'Classroom Games') return { text: 'text-secondary', border: 'border-secondary/20', bg: 'bg-secondary/10', hoverBorder: 'hover:border-secondary', groupHoverBg: 'group-hover:bg-secondary/20' };
-    return { text: 'text-accent', border: 'border-accent/20', bg: 'bg-accent/10', hoverBorder: 'hover:border-accent', groupHoverBg: 'group-hover:bg-accent/20' };
+    if (activeTab === 'Teacher Tools') return { text: 'text-primary', border: 'border-primary/20', bg: 'bg-primary/5', accent: 'primary', iconBg: 'bg-primary/10' };
+    if (activeTab === 'Classroom Games') return { text: 'text-secondary', border: 'border-secondary/20', bg: 'bg-secondary/5', accent: 'secondary', iconBg: 'bg-secondary/10' };
+    return { text: 'text-accent', border: 'border-accent/20', bg: 'bg-accent/5', accent: 'accent', iconBg: 'bg-accent/10' };
   };
 
   const colors = getThemeColors();
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-12">
-      <h1 className={`text-5xl font-extrabold text-center mb-12 drop-shadow-sm ${colors.text}`}>
-        {isEarlyYears ? '🌟 Welcome! 🌟' : 'Dashboard'}
-      </h1>
+    <div className="space-y-12 pb-12 font-['Outfit']">
+      <div className="flex flex-col items-center text-center space-y-4">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`text-6xl font-black tracking-tight ${colors.text} drop-shadow-sm`}
+        >
+          {isEarlyYears ? '🌟 Welcome! 🌟' : activeTab}
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-slate-500 font-medium text-lg"
+        >
+          {activeTab === 'Teacher Tools' ? 'Manage your classroom with ease' : 
+           activeTab === 'Classroom Games' ? 'Engage your students with fun games' : 
+           'Empower student learning through interactive tools'}
+        </motion.p>
+      </div>
 
-      <div className={`bg-white/60 backdrop-blur-sm p-8 rounded-[3rem] shadow-xl border ${colors.border} space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500`}>
-        <h2 className={`text-4xl font-black border-b-4 pb-4 ${colors.text} ${colors.border}`}>{activeMainSection.title}</h2>
-        
-        <div className="space-y-12">
+      <div className={`glass-card p-10 rounded-[3rem] space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700`}>
+        <div className="space-y-16">
           {activeMainSection.subSections.map(subSection => {
             const sectionTools = tools.filter(t => t.mainSection === activeMainSection.title && t.section === subSection);
             if (sectionTools.length === 0) return null;
 
             return (
-              <div key={subSection} className="space-y-6">
+              <div key={subSection} className="space-y-8">
                 {(activeMainSection.title === 'Teacher Tools' || activeMainSection.title === 'Student Tools') && (
-                  <h3 className="text-2xl font-bold text-text/80 pl-2">{subSection}</h3>
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-2xl font-black text-slate-800 tracking-tight">{subSection}</h3>
+                    <div className={`flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent`} />
+                  </div>
                 )}
                 <motion.div
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
@@ -124,18 +82,32 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
                       <motion.button
                         key={tool.id}
                         variants={itemVariants}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => onNavigate(tool.id)}
-                        className={`bg-white p-6 rounded-2xl shadow-md flex flex-col items-center justify-center text-center gap-4 hover:shadow-xl transition-shadow border-2 border-transparent ${colors.hoverBorder} group h-full`}
+                        className={`group relative bg-white/50 hover:bg-white p-6 rounded-[2rem] shadow-sm hover:shadow-2xl hover:shadow-${colors.accent}/10 transition-all duration-300 border-2 border-transparent hover:border-${colors.accent}/20 flex flex-col items-center text-center gap-5 h-full`}
                       >
-                        <div className={`p-4 rounded-full transition-colors ${colors.bg} ${colors.groupHoverBg}`}>
-                          <Icon size={48} className={colors.text} />
+                        <div 
+                          className={`p-5 rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                          style={{ backgroundColor: isEarlyYears ? `${tool.color}15` : undefined }}
+                        >
+                          <Icon 
+                            size={40} 
+                            className={isEarlyYears ? '' : colors.text} 
+                            style={{ color: isEarlyYears ? tool.color : undefined }}
+                          />
                         </div>
-                        <span className="text-xl font-semibold text-text">
-                          {isEarlyYears && <span className="mr-2">{tool.emoji}</span>}
-                          {tool.name}
-                        </span>
+                        <div className="space-y-1">
+                          <span className="text-lg font-bold text-slate-800 block leading-tight">
+                            {tool.name}
+                          </span>
+                        </div>
+                        
+                        {/* Decorative background element */}
+                        <div 
+                          className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 transition-transform duration-500 group-hover:scale-150`} 
+                          style={{ backgroundColor: isEarlyYears ? `${tool.color}08` : undefined }}
+                        />
                       </motion.button>
                     )
                   })}
@@ -147,4 +119,4 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
       </div>
     </div>
   );
-};
+};

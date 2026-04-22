@@ -64,7 +64,7 @@ export const AnalogueDigitalClock = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8">
+    <div className="flex flex-col items-center justify-center space-y-8 select-none">
       <div className="flex flex-col items-center gap-4">
         <h2 className="text-3xl font-bold text-primary">Interactive Clock</h2>
         <div className="flex items-center gap-4 bg-white p-2 rounded-xl shadow-sm border-2 border-gray-100">

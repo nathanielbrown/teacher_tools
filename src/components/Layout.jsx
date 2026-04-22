@@ -1,108 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Settings, X, Home, ChevronDown } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { SettingsModal } from './SettingsModal';
 
+import { 
+  Plus, ChevronRight, Menu, 
+  Settings, X, Home, ChevronDown, ChevronLeft, EyeOff, LayoutGrid, Info
+} from 'lucide-react';
+import { AboutModal } from './AboutModal';
+
+import { tools } from '../data/tools';
+import logo from '../assets/ClassRex_logo.png';
+
+const dynamicGroups = tools.reduce((acc, tool) => {
+  let group = acc.find(g => g.title === tool.section && g.mainSection === tool.mainSection);
+  if (!group) {
+    group = { title: tool.section, mainSection: tool.mainSection, items: [] };
+    acc.push(group);
+  }
+  group.items.push(tool);
+  return acc;
+}, []);
+
 const toolGroups = [
+  ...dynamicGroups.filter(g => g.title === 'Word Management'),
   {
     title: '',
+    mainSection: 'All',
     items: [
       { id: 'home', name: 'Dashboard', icon: Home },
     ]
   },
-  {
-    title: 'Time Management',
-    items: [
-      { id: 'clock', name: 'Analogue & Digital Clock' },
-      { id: 'stopwatch', name: 'Stop Watch' },
-      { id: 'countdown', name: 'Count Down' },
-      { id: 'examclock', name: 'Exam Clock' },
-      { id: 'eventcountdowns', name: 'Event Countdowns' },
-    ]
-  },
-  {
-    title: 'Classroom Management',
-    items: [
-      { id: 'dailyschedule', name: 'Daily Schedule' },
-      { id: 'groupmaker', name: 'Random Group Maker' },
-      { id: 'groupscoreboard', name: 'Group Scoreboard' },
-      { id: 'marblejar', name: 'Marble Jar Reward' },
-      { id: 'emotionpicker', name: 'Emotion Picker' },
-    ]
-  },
-  {
-    title: 'Randomizers',
-    items: [
-      { id: 'diceroller', name: 'Dice Roller' },
-      { id: 'flipcoin', name: 'Flip a Coin' },
-      { id: 'numberspinner', name: 'Number Spinner' },
-      { id: 'casinospinner', name: 'Name Picker (Casino)' },
-      { id: 'wheelspinner', name: 'Name Picker (Wheel)' },
-      { id: 'groupnamegenerator', name: 'Random Group Name Generator' },
-    ]
-  },
-  {
-    title: 'Mathematics',
-    items: [
-      { id: 'fractiontool', name: 'Fraction Visualizer' },
-    ]
-  },
-  {
-    title: 'Literacy',
-    items: [
-      { id: 'colourpicker', name: 'Colour Picker' },
-      { id: 'metronome', name: 'Metronome' },
-      { id: 'storystarters', name: 'Story Starters' },
-    ]
-  },
-  {
-    title: 'Classroom Games',
-    items: [
-      { id: 'higherorlower', name: 'Higher or Lower' },
-      { id: 'revealword', name: 'Reveal Word' },
-    ]
-  },
-  {
-    title: 'Student Tools - Literacy',
-    items: [
-      { id: 'spelling', name: 'Spelling Practice' },
-      { id: 'lettertracing', name: 'Letter Tracing' },
-      { id: 'findtheword', name: 'Find the Word' },
-      { id: 'typinggame', name: 'Typing Galaxy' },
-    ]
-  },
-  {
-    title: 'Student Tools - Math',
-    items: [
-      { id: 'timestable', name: 'Times Tables' },
-      { id: 'moneytool', name: 'Money Tool' },
-      { id: 'missingaddition', name: 'Missing Addition' },
-      { id: 'missingsubtraction', name: 'Missing Subtraction' },
-      { id: 'missingmultiplication', name: 'Missing Multiplier' },
-      { id: 'missingdivision', name: 'Missing Division' },
-      { id: 'marblecounting', name: 'Marble Counting' },
-      { id: 'binarynumbers', name: 'Binary Numbers' },
-    ]
-  },
-  {
-    title: 'Student Tools - Memory & Games',
-    items: [
-      { id: 'simongame', name: 'Simon Says' },
-      { id: 'emojimatch', name: 'Emoji Match' },
-    ]
-  },
-  {
-    title: 'Student Tools - Science',
-    items: [
-      { id: 'reactiontime', name: 'Reaction Time' },
-    ]
-  }
+  ...dynamicGroups.filter(g => g.title !== 'Word Management')
 ];
 
 export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTool }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState('mini'); // 'mini', 'full', 'hidden'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({});
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({ 'Word Management': true });
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -114,66 +49,90 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
     }
   }, [currentTool]);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  
   const toggleSection = (title) => {
     setExpandedSections(prev => ({ ...prev, [title]: !prev[title] }));
   };
 
-
   const filteredGroups = toolGroups.filter(group => {
-    if (activeTab === 'Teacher Tools') {
-      return !group.title.includes('Student Tools') && group.title !== 'Classroom Games';
-    }
-    return group.title.startsWith(activeTab) || group.title === '';
+    if (group.mainSection === 'All') return true;
+    return group.mainSection === activeTab;
   });
 
+  const getThemeColorClass = () => {
+    if (activeTab === 'Teacher Tools') return 'primary';
+    if (activeTab === 'Classroom Games') return 'secondary';
+    return 'accent';
+  };
+
+  const themeColor = getThemeColorClass();
+
   return (
-    <div className="flex h-screen overflow-hidden bg-transparent">
+    <div className="flex h-screen overflow-hidden bg-transparent font-['Outfit']">
       {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/90 backdrop-blur-sm shadow-xl transform transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:relative lg:translate-x-0 flex flex-col`}
+      <aside
+        className={`fixed inset-y-4 left-4 z-50 glass-card rounded-[2rem] transition-all duration-500 ease-in-out flex flex-col ${
+          sidebarMode === 'hidden' ? '-translate-x-[120%]' : 'translate-x-0'
+        } ${sidebarMode === 'mini' ? 'w-20' : 'w-72'}`}
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold text-primary">{activeTab}</h2>
-          <button onClick={toggleSidebar} className="lg:hidden p-2 rounded-md hover:bg-gray-100 text-text">
-            <X size={24} />
+        <div className={`flex items-center p-6 ${sidebarMode === 'mini' ? 'justify-center' : 'justify-between'}`}>
+          {sidebarMode !== 'mini' && (
+            <div className="flex items-center gap-2">
+              <img src={logo} alt="ClassRex" className="h-10 w-auto object-contain" />
+            </div>
+          )}
+          <button 
+            onClick={() => setSidebarMode(sidebarMode === 'mini' ? 'full' : 'mini')} 
+            className={`p-2 rounded-xl hover:bg-gray-100/50 text-${themeColor} transition-all active:scale-95`}
+          >
+            {sidebarMode === 'mini' ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+
+        <nav className={`flex-1 overflow-y-auto custom-scrollbar py-2 ${sidebarMode === 'mini' ? 'px-2' : 'px-4'} space-y-6`}>
           {filteredGroups.map((group, idx) => {
             const isExpanded = group.title === '' || expandedSections[group.title];
             
             return (
               <div key={idx} className="space-y-1">
-                {group.title && (
+                {group.title && sidebarMode !== 'mini' && (
                   <button 
                     onClick={() => toggleSection(group.title)}
-                    className="w-full flex items-center justify-between text-xs font-bold text-primary/70 uppercase tracking-wider px-4 mb-2 hover:text-primary transition-colors cursor-pointer"
+                    className={`w-full flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 py-2 hover:text-${themeColor} transition-colors`}
                   >
                     <span>{group.title}</span>
                     <ChevronDown size={14} className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </button>
                 )}
-                <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                
+                <div className={`space-y-1 transition-all duration-300 ${isExpanded || sidebarMode === 'mini' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden pointer-events-none'}`}>
                   {group.items.map((tool) => {
                     const isActive = tool.id === currentTool;
                     return (
                       <button
                         key={tool.id}
-                        onClick={() => {
-                          onNavigate(tool.id);
-                          if (window.innerWidth < 1024) setIsSidebarOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center space-x-3 ${
-                          isActive ? 'bg-primary/20 text-primary font-bold' : 'hover:bg-primary/10 text-text'
+                        onClick={() => onNavigate(tool.id)}
+                        title={sidebarMode === 'mini' ? tool.name : ''}
+                        className={`w-full group relative flex items-center transition-all ${
+                          sidebarMode === 'mini' ? 'justify-center p-3' : 'px-4 py-3 space-x-4'
+                        } rounded-2xl ${
+                          isActive 
+                            ? `bg-${themeColor} text-white shadow-lg shadow-${themeColor}/20 scale-[1.02]` 
+                            : `hover:bg-white/50 text-slate-500 ${settings.theme === 'early-years' ? '' : `hover:text-${themeColor}`}`
                         }`}
                       >
-                        {tool.icon && <tool.icon size={20} />}
-                        <span>{tool.name}</span>
-                        {settings.theme === 'early-years' && tool.id === 'home' && <span>🏫</span>}
+                        {tool.icon ? (
+                          <tool.icon 
+                            size={20} 
+                            style={{ color: (settings.theme === 'early-years' && !isActive) ? tool.color : undefined }}
+                            className={settings.theme === 'early-years' && !isActive ? 'opacity-100' : ''}
+                          />
+                        ) : (
+                          <LayoutGrid size={20} />
+                        )}
+                        {sidebarMode !== 'mini' && <span className="text-sm font-bold truncate">{tool.name}</span>}
+                        {isActive && sidebarMode === 'mini' && (
+                          <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-white rounded-l-full shadow-sm" />
+                        )}
                       </button>
                     );
                   })}
@@ -182,37 +141,75 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
             );
           })}
         </nav>
-      </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-white/10 flex justify-center">
+          <button 
+            onClick={() => setSidebarMode('hidden')}
+            className="p-3 text-slate-300 hover:text-rose-500 transition-colors rounded-xl hover:bg-rose-50/50"
+            title="Hide Sidebar"
+          >
+            <EyeOff size={20} />
+          </button>
+        </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
+      <div className={`flex-1 flex flex-col overflow-hidden relative transition-all duration-500 ${
+        sidebarMode === 'mini' ? 'lg:pl-28' : sidebarMode === 'full' ? 'lg:pl-80' : 'lg:pl-0'
+      }`}>
+        {/* Floating Sidebar Toggle - Only when hidden */}
+        {sidebarMode === 'hidden' && (
+          <button
+            onClick={() => setSidebarMode('mini')}
+            className={`fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-white/80 backdrop-blur-md shadow-2xl border border-white/20 p-4 rounded-r-3xl text-${themeColor} hover:bg-${themeColor} hover:text-white transition-all group active:scale-95`}
+          >
+            <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        )}
+
         {/* Top Bar */}
-        <header className="bg-white/90 backdrop-blur-sm shadow-sm flex flex-col z-10">
-          <div className="h-16 flex items-center justify-between px-4">
-            <div className="flex items-center space-x-4">
-              <button onClick={toggleSidebar} className="lg:hidden p-2 rounded-md hover:bg-gray-100 text-text">
+        <header className="pt-4 px-4 md:px-8 z-10">
+          <div className="max-w-7xl mx-auto h-20 flex items-center justify-between px-6 glass-card rounded-[2rem]">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setSidebarMode(sidebarMode === 'hidden' ? 'full' : 'hidden')} 
+                className="lg:hidden p-2 rounded-xl hover:bg-gray-100 text-slate-600"
+              >
                 <Menu size={24} />
               </button>
-              <h1 className="text-xl font-bold text-text lg:hidden">App</h1>
+              <img src={logo} alt="ClassRex" className="h-8 w-auto object-contain lg:hidden" />
+              
+              {/* Privacy Badges - Visible on Desktop Top Left */}
+              <div className="hidden xl:flex items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-green-500/10 text-green-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider border border-green-500/10 shadow-sm whitespace-nowrap">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  100% LOCAL STORAGE
+                </div>
+                <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider border border-blue-500/10 shadow-sm whitespace-nowrap">
+                  NO COOKIES
+                </div>
+                <div className="flex items-center gap-1.5 bg-purple-500/10 text-purple-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider border border-purple-500/10 shadow-sm whitespace-nowrap">
+                  NO CLOUD ACCESS
+                </div>
+              </div>
             </div>
             
-            {/* Desktop Tabs */}
-            <div className="hidden lg:flex flex-1 items-end justify-center h-full pt-4 space-x-2">
+            {/* Desktop Navigation Tabs */}
+            <div className="hidden lg:flex items-center p-1.5 bg-gray-100/50 rounded-2xl gap-1">
+              <img src={logo} alt="ClassRex" className="h-10 w-auto object-contain mr-4 ml-2" />
               {['Teacher Tools', 'Classroom Games', 'Student Tools'].map(tab => {
-                const getTabColor = (t) => {
-                  if (t === 'Teacher Tools') return 'text-primary border-primary';
-                  if (t === 'Classroom Games') return 'text-secondary border-secondary';
-                  return 'text-accent border-accent';
-                };
-
+                const isTabActive = activeTab === tab;
+                const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
+                
                 return (
                   <button
                     key={tab}
                     onClick={() => onTabChange(tab)}
-                    className={`px-8 py-3 rounded-t-2xl font-bold text-sm transition-all border-t-4 border-x-2 border-b-0 ${
-                      activeTab === tab
-                        ? `bg-white ${getTabColor(tab)} shadow-sm z-10 scale-105 transform origin-bottom`
-                        : 'bg-gray-50/80 text-gray-400 border-transparent hover:bg-gray-100'
+                    className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+                      isTabActive
+                        ? `bg-white text-${tabColorClass} shadow-md scale-[1.02]`
+                        : 'text-slate-400 hover:text-slate-600 hover:bg-white/30'
                     }`}
                   >
                     {tab}
@@ -221,31 +218,39 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
               })}
             </div>
 
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 rounded-full hover:bg-gray-100 text-text transition-colors"
-              title="Settings"
-            >
-              <Settings size={24} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsAboutOpen(true)}
+                className="p-3 rounded-2xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90"
+                title="About ClassRex"
+              >
+                <Info size={24} />
+              </button>
+
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-3 rounded-2xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90 hover:rotate-45"
+                title="Settings"
+              >
+                <Settings size={24} />
+              </button>
+            </div>
           </div>
 
-          {/* Mobile Tabs */}
-          <div className="flex lg:hidden overflow-x-auto px-2 pt-2 border-t no-scrollbar">
+          {/* Mobile Navigation Tabs */}
+          <div className="lg:hidden mt-4 flex items-center p-1 bg-gray-100/50 rounded-2xl overflow-x-auto no-scrollbar">
             {['Teacher Tools', 'Classroom Games', 'Student Tools'].map(tab => {
-                const getTabColor = (t) => {
-                  if (t === 'Teacher Tools') return 'text-primary border-primary';
-                  if (t === 'Classroom Games') return 'text-secondary border-secondary';
-                  return 'text-accent border-accent';
-                };
+                const isTabActive = activeTab === tab;
+                const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
+                
                 return (
                   <button
                     key={tab}
                     onClick={() => onTabChange(tab)}
-                    className={`px-4 py-3 whitespace-nowrap font-bold text-sm transition-colors border-b-4 ${
-                      activeTab === tab
-                        ? getTabColor(tab)
-                        : 'text-gray-400 border-transparent hover:bg-gray-50'
+                    className={`flex-1 px-4 py-2.5 whitespace-nowrap font-bold text-xs rounded-xl transition-all ${
+                      isTabActive
+                        ? `bg-white text-${tabColorClass} shadow-sm`
+                        : 'text-slate-400 hover:text-slate-600'
                     }`}
                   >
                     {tab}
@@ -256,19 +261,22 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          {children}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto h-full">
+            {children}
+          </div>
         </main>
       </div>
 
-      {/* Settings Modal */}
+      {/* Modals */}
       {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
+      {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
 
-      {/* Overlay for mobile sidebar */}
-      {isSidebarOpen && (
+      {/* Mobile Sidebar Overlay */}
+      {sidebarMode !== 'hidden' && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarMode('hidden')}
         />
       )}
     </div>

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Calculator, Info } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
 export const TimesTable = () => {
   const [selectedRows, setSelectedRows] = useState([2, 3, 4, 5, 10]);
@@ -127,8 +128,24 @@ export const TimesTable = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 h-full flex flex-col px-4 lg:px-0">
-      <h2 className="text-3xl font-bold text-primary">Times Tables Practice</h2>
+    <div className="w-full mx-auto space-y-8 h-full flex flex-col px-4 pt-2 pb-8">
+      <ToolHeader
+        title="Times Tables"
+        icon={Calculator}
+        description="Master Multiplication with Spaced Repetition"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Adaptive Learning</strong>
+              The grid tracks your progress. Questions you miss appear more often (Orange), while ones you've mastered (Dark Green) appear less frequently.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Customization</strong>
+              Select or deselect row numbers on the right to focus your practice on specific tables.
+            </p>
+          </>
+        }
+      />
 
       <div className="flex flex-col xl:flex-row gap-8 flex-1 min-h-[600px]">
         {/* Flashcard Area */}

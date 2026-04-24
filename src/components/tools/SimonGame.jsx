@@ -4,6 +4,7 @@ import { Trophy, Play, RotateCcw, ArrowLeft, Gamepad2, Volume2 } from 'lucide-re
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const COLORS = [
   { id: 0, color: 'green', bg: 'bg-green-500', glow: 'shadow-[0_0_40px_rgba(34,197,94,0.6)]', activeBg: 'bg-green-300', freq: 415.30 },
@@ -84,27 +85,37 @@ export const SimonGame = () => {
 
   if (gameState === 'menu') {
     return (
-      <div className="max-w-4xl mx-auto h-full flex flex-col items-center justify-center p-4">
+      <div className="w-full mx-auto h-full flex flex-col px-4 pt-2 pb-8 gap-8">
+        <ToolHeader
+          title="Simon Says"
+          icon={Gamepad2}
+          description="Rhythmic Memory Challenge"
+          infoContent={
+            <>
+              <p>
+                <strong className="text-white block mb-1">How to Play</strong>
+                Watch the pattern of lights and sounds, then repeat them exactly. The sequence gets longer with every successful round!
+              </p>
+              <p>
+                <strong className="text-white block mb-1">Scoring</strong>
+                Your highest score is saved locally. Challenge yourself to beat your previous record!
+              </p>
+            </>
+          }
+        />
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-8 bg-white/90 backdrop-blur-md p-12 rounded-[4rem] shadow-2xl border border-white/20 w-full max-w-lg"
+          className="text-center space-y-8 bg-white/90 backdrop-blur-md p-12 rounded-[4rem] shadow-2xl border border-white/20 w-full max-w-lg mx-auto"
         >
           <div className="bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <Gamepad2 size={48} className="text-primary" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-5xl font-black text-gray-800 tracking-tight">Simon Says</h1>
-            <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">Memory Challenge</p>
+            <h2 className="text-4xl font-black text-gray-800 tracking-tight">Memory Challenge</h2>
+            <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">High Score: {highScore}</p>
           </div>
           
-          <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex justify-center gap-12">
-            <div className="text-center">
-              <div className="text-gray-400 text-xs font-black uppercase mb-1">High Score</div>
-              <div className="text-3xl font-black text-gray-800">{highScore}</div>
-            </div>
-          </div>
-
           <button
             onClick={startGame}
             className="w-full py-6 bg-primary text-white text-2xl font-black rounded-3xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-3 active:scale-95"
@@ -117,24 +128,40 @@ export const SimonGame = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto h-full flex flex-col items-center justify-center p-4 gap-12">
-      <div className="flex justify-between items-center w-full max-w-lg px-4">
-        <button 
-          onClick={() => setGameState('menu')}
-          className="p-4 hover:bg-white rounded-3xl transition-all text-gray-400 shadow-sm border border-transparent hover:border-gray-100"
-        >
-          <ArrowLeft size={24} />
-        </button>
-        
-        <div className="bg-white px-8 py-3 rounded-3xl shadow-xl border border-gray-100 text-center">
-          <div className="text-gray-400 text-[10px] font-black uppercase tracking-tighter">Level</div>
-          <div className="text-3xl font-black text-primary tabular-nums">
-            {gameState === 'gameover' ? sequence.length - 1 : sequence.length}
+    <div className="w-full mx-auto h-full flex flex-col px-4 pt-2 pb-8 gap-8 items-center">
+      <ToolHeader
+        title="Simon Says"
+        icon={Gamepad2}
+        description="Rhythmic Memory Challenge"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Watch the pattern of lights and sounds, then repeat them exactly. The sequence gets longer with every successful round!
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Scoring</strong>
+              Your highest score is saved locally. Challenge yourself to beat your previous record!
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setGameState('menu')}
+            className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:text-red-500 transition-all shadow-sm"
+            title="Return to Menu"
+          >
+            <RotateCcw size={20} />
+          </button>
+          <div className="bg-white px-4 py-1.5 rounded-xl shadow-sm border border-gray-100 text-center">
+            <div className="text-gray-400 text-[10px] font-black uppercase tracking-tighter">Level</div>
+            <div className="text-lg font-black text-primary tabular-nums leading-none">
+              {gameState === 'gameover' ? sequence.length - 1 : sequence.length}
+            </div>
           </div>
         </div>
-
-        <div className="w-14" />
-      </div>
+      </ToolHeader>
 
       <div className="relative">
         {/* Game Over Overlay */}

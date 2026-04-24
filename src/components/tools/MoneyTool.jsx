@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCcw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { RefreshCcw, CheckCircle2, AlertCircle, Banknote, Info } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
 const CURRENCIES = {
   AUD: {
@@ -109,17 +110,29 @@ export const MoneyTool = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 h-full flex flex-col px-4">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <h2 className="text-3xl font-bold text-primary flex items-center gap-3">
-          <RefreshCcw size={32} />
-          Money Tool
-        </h2>
-        <div className="flex gap-4">
+    <div className="w-full mx-auto space-y-8 h-full flex flex-col px-4 pt-2 pb-8">
+      <ToolHeader
+        title="Money Tool"
+        icon={Banknote}
+        description="Learn to Count and Manage Currency"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Currency Selection</strong>
+              Switch between Australian Dollars, Canadian Dollars, and UK Pounds using the dropdown menu.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Making Change</strong>
+              Click the notes and coins in the "Bank" to add them to the table. Try to match the target amount exactly!
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-4">
           <select 
             value={selectedCurrency}
             onChange={(e) => setSelectedCurrency(e.target.value)}
-            className="px-4 py-2 border-2 border-gray-200 rounded-xl font-bold text-gray-700 bg-white hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors cursor-pointer"
+            className="px-4 py-2 border-2 border-gray-200 rounded-xl font-bold text-gray-700 bg-white hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors cursor-pointer text-sm"
           >
             <option value="AUD">🇦🇺 Australian ($)</option>
             <option value="CAD">🇨🇦 Canadian ($)</option>
@@ -127,12 +140,13 @@ export const MoneyTool = () => {
           </select>
           <button
             onClick={generateTarget}
-            className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors font-bold shadow-sm border border-gray-100"
+            className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors font-bold shadow-sm border border-gray-100 text-sm"
+            title="Generate New Target Amount"
           >
-            <RefreshCcw size={20} /> New Amount
+            <RefreshCcw size={18} /> New Amount
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex flex-col lg:flex-row gap-8">
         

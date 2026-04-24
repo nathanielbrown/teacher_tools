@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
+const demoStudents = Array.from({ length: 28 }, (_, i) => `Student ${i + 1}`);
+
 const defaultSettings = {
   theme: 'early-years', // 'early-years', 'primary', 'secondary'
   soundTheme: 'classic', // 'none', 'classic', 'digital', 'soft', 'bubbly'
-  classes: [{ id: 'class-1', name: 'Class 1', students: ['Alice', 'Bob', 'Charlie'] }]
+  classes: [{ id: 'class-demo', name: 'Demo', students: demoStudents }]
 };
 
 const SettingsContext = createContext();
@@ -22,6 +24,12 @@ export const SettingsProvider = ({ children }) => {
         parsed.soundTheme = parsed.soundsEnabled ? 'classic' : 'none';
         delete parsed.soundsEnabled;
       }
+      
+      // Ensure there's always at least one class
+      if (!parsed.classes || parsed.classes.length === 0) {
+        parsed.classes = [{ id: 'class-demo', name: 'Demo', students: demoStudents }];
+      }
+      
       return { ...defaultSettings, ...parsed };
     }
     return defaultSettings;
@@ -50,10 +58,16 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deleteClass = (classId) => {
-    setSettings(prev => ({
-      ...prev,
-      classes: prev.classes.filter(c => c.id !== classId)
-    }));
+    setSettings(prev => {
+      const newClasses = prev.classes.filter(c => c.id !== classId);
+      if (newClasses.length === 0) {
+        newClasses.push({ id: 'class-demo', name: 'Demo', students: demoStudents });
+      }
+      return {
+        ...prev,
+        classes: newClasses
+      };
+    });
   };
 
   return (

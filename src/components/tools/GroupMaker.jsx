@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 import { Users, Settings, Shuffle } from 'lucide-react';
 import { audioEngine } from '../../utils/audio';
 
@@ -53,20 +54,45 @@ export const GroupMaker = () => {
 
   if (!students.length) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-8">
-        <h2 className="text-3xl font-bold text-primary flex items-center gap-2"><Users /> Group Maker</h2>
-        <div className="p-8 bg-yellow-50 text-yellow-800 rounded-xl border border-yellow-200">
-          Please add a class with students in Settings first!
+      <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+        <ToolHeader
+          title="Group Maker"
+          icon={Users}
+          description="Randomized student grouping engine"
+          infoContent={
+            <p>Select a class and choose how you want to group your students. The tool will handle the shuffle for you!</p>
+          }
+        />
+        <div className="p-12 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center gap-4">
+          <div className="p-4 bg-amber-50 text-amber-600 rounded-full">
+            <Settings size={40} />
+          </div>
+          <h3 className="text-xl font-bold text-slate-800">No Students Found</h3>
+          <p className="text-slate-500 max-w-md">Please add a class with students in the Settings menu before using the Group Maker.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold text-primary flex items-center gap-2">
-        <Users /> Random Group Maker
-      </h2>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Group Maker"
+        icon={Users}
+        description="Randomized student grouping engine"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Group Modes</strong>
+              Choose between a fixed number of groups or a specific number of students per group.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Shuffling</strong>
+              The tool uses a randomized algorithm to ensure fair and unpredictable groupings every time.
+            </p>
+          </>
+        }
+      />
 
       <div className="w-full bg-white p-6 rounded-2xl shadow-sm border space-y-6">
         <div className="flex flex-col sm:flex-row gap-6 justify-between items-center">

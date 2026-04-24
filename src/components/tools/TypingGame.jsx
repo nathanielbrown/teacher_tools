@@ -4,6 +4,7 @@ import { Play, RotateCcw, BookOpen, ChevronRight, Plus, Trash2, Pencil, Zap, Tar
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const SPAWN_INTERVAL = 3000; 
 const BASE_ENEMY_SPEED = 0.2; 
@@ -268,7 +269,34 @@ export const TypingGame = () => {
   const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
 
   return (
-    <div className="max-w-6xl mx-auto h-[calc(100vh-12rem)] flex flex-col space-y-4">
+    <div className="w-full mx-auto h-[calc(100vh-12rem)] flex flex-col space-y-4 px-4 pt-2 pb-8">
+      <ToolHeader
+        title="Galactic Typing"
+        icon={Rocket}
+        description="Space-Themed Speed & Accuracy Drill"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Mission Objective</strong>
+              Protect your sector by typing the words appearing on incoming ships. Accuracy and speed are your best defenses!
+            </p>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Select a word list and start the game. Type the letters of the words to fire plasma shots. Don't let the ships reach the bottom of the screen!
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setStatus('setup')}
+            className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:text-red-500 transition-all shadow-sm"
+            title="Return to Hangar"
+          >
+            <RotateCcw size={20} />
+          </button>
+        </div>
+      </ToolHeader>
       {status === 'setup' && (
         <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">
            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 w-full max-w-2xl space-y-8">

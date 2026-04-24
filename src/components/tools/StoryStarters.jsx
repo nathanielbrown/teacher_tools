@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 const storyPrompts = {
   1: [
@@ -66,29 +66,32 @@ export const StoryStarters = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold text-primary flex items-center gap-2">
-        <Sparkles className="text-accent" /> Random Story Starters
-      </h2>
-
-      <div className="w-full bg-white p-6 rounded-2xl shadow-sm border flex flex-col items-center space-y-4">
-        <label className="text-lg font-medium text-gray-700">Select Year Level</label>
-        <div className="flex flex-wrap justify-center gap-2">
+    <div className="w-full max-w-6xl mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Story Starters"
+        icon={Sparkles}
+        description="Creative Prompts for Narrative Writing"
+        infoContent={
+          <p>Overcome writer's block with aged-tailored creative prompts. Select a year level to get sentences that match the literacy expectations for that age group.</p>
+        }
+      >
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
           {[1, 2, 3, 4, 5, 6].map(year => (
             <button
               key={year}
               onClick={() => { setYearLevel(year); setPrompt(null); }}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-lg transition-all font-black text-[10px] ${
                 yearLevel === year
-                  ? 'bg-primary text-white shadow-md scale-105'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              Year {year}
+              Y{year}
             </button>
           ))}
         </div>
-      </div>
+      </ToolHeader>
+
 
       <div className="w-full min-h-[200px] flex flex-col items-center justify-center">
         <AnimatePresence mode="wait">
@@ -122,7 +125,7 @@ export const StoryStarters = () => {
       <button
         onClick={generatePrompt}
         disabled={isGenerating}
-        className="px-10 py-4 bg-accent text-white text-xl font-bold rounded-2xl shadow-lg hover:bg-accent/90 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
+        className="self-center px-10 py-4 bg-accent text-white text-xl font-bold rounded-2xl shadow-lg hover:bg-accent/90 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
       >
         {isGenerating ? <Sparkles className="animate-spin" /> : <Sparkles />}
         {isGenerating ? 'Generating...' : 'Generate New Story'}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Mic, MicOff, Settings2, AlertTriangle, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 export const SoundLevel = () => {
   const [volume, setVolume] = useState(0);
@@ -156,22 +157,27 @@ export const SoundLevel = () => {
   const status = getStatus();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 h-full flex flex-col gap-8">
-      {/* Header */}
-      <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
-              <Volume2 size={32} />
-            </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Sound Level</h2>
-          </div>
-          <p className="text-slate-400 font-medium pl-1">Monitor classroom noise levels visually.</p>
-        </div>
-
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Sound Level"
+        icon={Volume2}
+        description="Monitor Classroom Noise Levels Visually"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How it Works</strong>
+              Start monitoring to see the real-time volume. The green ring shows current noise, and the grey ring shows a 2-second rolling average.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Set Limits</strong>
+              Drag the purple marker on the gauge to set your "Danger" threshold. The app will pulse red if students exceed this limit.
+            </p>
+          </>
+        }
+      >
         <button
           onClick={isMonitoring ? stopMonitoring : startMonitoring}
-          className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black transition-all shadow-lg active:scale-95 ${
+          className={`flex items-center gap-3 px-8 py-3 rounded-2xl font-black transition-all shadow-lg active:scale-95 ${
             isMonitoring 
               ? 'bg-red-50 text-red-600 hover:bg-red-100' 
               : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200'
@@ -180,7 +186,7 @@ export const SoundLevel = () => {
           {isMonitoring ? <MicOff size={24} /> : <Mic size={24} />}
           {isMonitoring ? 'STOP MONITORING' : 'START MONITORING'}
         </button>
-      </div>
+      </ToolHeader>
 
       {permissionError ? (
         <div className="flex-1 bg-white rounded-[3rem] border-4 border-dashed border-red-200 flex flex-col items-center justify-center p-12 text-center gap-6">

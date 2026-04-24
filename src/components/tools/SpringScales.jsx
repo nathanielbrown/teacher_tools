@@ -5,6 +5,7 @@ import {
   Beaker, Anchor, Droplets, FlaskConical, Scale, Maximize2,
   ChevronRight, ShieldCheck, AlertCircle, TrendingUp, Weight
 } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 // Constants
 const LAB_WIDTH = 800;
@@ -109,41 +110,47 @@ export const SpringScales = () => {
   }, [totalMass, selectedScale, velocity, isBroken]);
 
   return (
-    <div className="max-w-[1400px] mx-auto min-h-0 h-full flex flex-col gap-4 px-6 py-6 select-none overflow-y-auto lg:overflow-hidden">
-      {/* Header */}
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-600">
-            <ArrowDownUp size={40} />
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Spring Scales</h2>
-            <p className="text-slate-400 font-medium italic">Measure force and explore Hooke's Law.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
+    <div className="w-full mx-auto min-h-0 h-full flex flex-col gap-4 px-6 pt-2 pb-8 select-none overflow-y-auto lg:overflow-hidden">
+      <ToolHeader
+        title="Spring Scales"
+        icon={ArrowDownUp}
+        description="Measure Force and Explore Hooke's Law"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Hooke's Law</strong>
+              The extension of a spring is directly proportional to the force applied to it, provided its elastic limit is not exceeded (F = kx).
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Safety First</strong>
+              Be careful! If you apply too much mass (force) to a scale, the spring will exceed its elastic limit and break.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-3">
           <button
             onClick={() => !isBroken && setShowForces(!showForces)}
             disabled={isBroken}
-            className={`px-6 py-3 rounded-2xl transition-all shadow-lg active:scale-95 flex items-center gap-3 font-black text-sm uppercase tracking-wider ${
-              isBroken ? 'bg-slate-100 text-slate-300' :
-              showForces ? 'bg-indigo-600 text-white shadow-indigo-100' : 'bg-slate-100 text-slate-500'
+            className={`px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-wider flex items-center gap-2 ${
+              isBroken ? 'bg-slate-50 text-slate-200' :
+              showForces ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
             }`}
           >
-            {showForces ? <Maximize2 size={20} /> : <Settings2 size={20} />}
+            {showForces ? <Maximize2 size={14} /> : <Settings2 size={14} />}
             {showForces ? 'Hide Forces' : 'Show Forces'}
           </button>
           <button
             onClick={resetLab}
-            className={`p-4 rounded-2xl transition-all active:scale-95 ${
-              isBroken ? 'bg-red-600 text-white shadow-xl shadow-red-200 animate-pulse' : 'bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600'
+            className={`p-2.5 rounded-xl transition-all active:scale-95 border ${
+              isBroken ? 'bg-red-600 text-white border-red-700 animate-pulse' : 'bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 border-slate-100'
             }`}
+            title="Reset Simulation"
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={20} />
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0">
         {/* Main Lab View */}

@@ -4,6 +4,7 @@ import { Play, Pause, ChevronRight, RotateCcw, BookOpen, SkipForward, Eye, Spark
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 export const RevealWord = () => {
   const { settings } = useSettings();
@@ -131,13 +132,24 @@ export const RevealWord = () => {
   }, [isAutoRevealing, revealOneLetter, revealSpeed]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 p-4">
-      <div className="text-center space-y-2">
-        <h2 className="text-4xl font-black text-slate-800 tracking-tight flex items-center justify-center gap-3">
-          <Sparkles className="text-secondary" /> Reveal Word
-        </h2>
-        <p className="text-slate-500 font-medium italic">Can you guess the word before it's fully revealed?</p>
-      </div>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Reveal Word"
+        icon={Sparkles}
+        description="Interactive Mystery Word Reveal Game"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Guess the Word</strong>
+              Hide a secret word and reveal it letter by letter. Can students guess it before the last letter appears?
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Manage Lists</strong>
+              Create custom word lists for spelling practice, vocabulary lessons, or themed games. Your lists are saved locally in this browser.
+            </p>
+          </>
+        }
+      />
 
       {status === 'setup' && (
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in zoom-in duration-300">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, Play, CheckCircle2, XCircle, RotateCcw, Plus, Trash2, BookOpen, ChevronRight, Pencil } from 'lucide-react';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 export const Spelling = () => {
   const { settings } = useSettings();
@@ -144,11 +145,33 @@ export const Spelling = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 p-4">
-      <div className="text-center space-y-2">
-        <h2 className="text-4xl font-black text-slate-800">Spelling Practice</h2>
-        <p className="text-slate-500 font-medium italic">Master your words through listening and typing</p>
-      </div>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Spelling Practice"
+        icon={BookOpen}
+        description="Master Your Words through Listening and Typing"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Listen and Spell</strong>
+              Click the speaker icon to hear the word, then type the correct spelling. If you get it wrong, the word will be added back to the queue for extra practice.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Custom Lists</strong>
+              Use your own spelling lists or create new ones for each week. Your progress is saved as you go!
+            </p>
+          </>
+        }
+      >
+        {status !== 'setup' && (
+          <button
+            onClick={() => setStatus('setup')}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all active:scale-95 shadow-sm"
+          >
+            <RotateCcw size={14} /> QUIT TEST
+          </button>
+        )}
+      </ToolHeader>
 
       {status === 'setup' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in zoom-in duration-300">

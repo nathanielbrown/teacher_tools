@@ -4,6 +4,7 @@ import { HelpCircle, ChevronRight, History, Trophy, ThumbsDown, Users, Sparkles,
 import { WYR_QUESTIONS } from '../../data/wouldYouRather';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const YEAR_LEVELS = [
   { id: '1-3', label: 'Years 1 - 3', color: 'from-pink-400 to-rose-500', emoji: '🧸' },
@@ -57,29 +58,33 @@ export const WouldYouRather = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 h-full flex flex-col gap-8">
-      {/* Header */}
-      <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start gap-3">
-            <div className="p-3 bg-purple-50 rounded-2xl text-purple-600">
-              <HelpCircle size={32} />
-            </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Would You Rather?</h2>
-          </div>
-          <p className="text-slate-400 font-medium pl-1">The ultimate classroom icebreaker and debate game.</p>
-        </div>
-
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Would You Rather?"
+        icon={HelpCircle}
+        description="The Ultimate Classroom Icebreaker and Debate Game"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Debate and Decide</strong>
+              Present two challenging options to the class. Students must pick one and justify their choice!
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Tailored Content</strong>
+              Select the appropriate year level to ensure questions are age-appropriate and engaging for your students.
+            </p>
+          </>
+        }
+      >
         {view === 'game' && (
           <button
             onClick={resetGame}
-            className="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black hover:bg-slate-200 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all active:scale-95 shadow-sm"
           >
-            <RotateCcw size={20} />
-            CHANGE LEVEL
+            <RotateCcw size={14} /> CHANGE LEVEL
           </button>
         )}
-      </div>
+      </ToolHeader>
 
       <AnimatePresence mode="wait">
         {view === 'selection' ? (

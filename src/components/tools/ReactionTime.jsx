@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Zap, Clock, RotateCcw, AlertTriangle, Play } from 'lucide-react';
 import { LineChart } from 'chartist';
+import { ToolHeader } from '../ToolHeader';
 import 'chartist/dist/index.css';
 
 export const ReactionTime = () => {
@@ -115,8 +116,33 @@ export const ReactionTime = () => {
   const btnConfig = getButtonConfig();
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 h-full flex flex-col p-4">
-      <h2 className="text-4xl font-black text-slate-800 tracking-tight italic">Reaction Time</h2>
+    <div className="w-full mx-auto space-y-8 h-full flex flex-col px-4 pt-2 pb-6">
+      <ToolHeader
+        title="Reaction Time"
+        icon={Zap}
+        description="Scientific Response Speed Testing"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How it Works</strong>
+              Click the button to start, then wait for it to turn green. Click as fast as you can when you see the "NOW!" signal.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Analytics</strong>
+              Track your average, best, and worst times. The line chart visualizes your consistency across multiple attempts.
+            </p>
+          </>
+        }
+      >
+        <button 
+          onClick={() => setHistory([])}
+          className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 disabled:opacity-50"
+          disabled={history.length === 0}
+          title="Reset All History"
+        >
+          <RotateCcw size={20} />
+        </button>
+      </ToolHeader>
       
       <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-[600px]">
         <div className="flex-1 flex flex-col">

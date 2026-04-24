@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, RefreshCw } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { ToolHeader } from '../ToolHeader';
 
 const ADJECTIVES = [
   'Brave', 'Clever', 'Mighty', 'Swift', 'Happy', 'Bright', 'Golden', 'Silver',
@@ -39,24 +39,30 @@ export const RandomGroupNameGenerator = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 max-w-4xl mx-auto pb-12">
-      <h2 className="text-3xl font-bold text-primary flex items-center gap-2">
-        <Sparkles /> Random Group Name Generator
-      </h2>
-
-      <div className="w-full bg-white p-8 rounded-3xl shadow-xl border-2 border-gray-100 flex flex-col items-center gap-8">
-        <p className="text-gray-500 text-center text-lg">
-          Need names for your groups? Click generate to get 5 random, school-appropriate group names!
-        </p>
-
+    <div className="w-full max-w-6xl mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Group Name Generator"
+        icon={Sparkles}
+        description="Creative and Inspiring Identity for Student Teams"
+        infoContent={
+          <p>Generate five fun, school-appropriate group names at the click of a button. Perfect for project teams, house groups, or classroom competitive play.</p>
+        }
+      >
         <button
           onClick={generateGroups}
           disabled={isGenerating}
-          className="px-8 py-4 bg-primary text-white text-xl font-bold rounded-2xl shadow-lg hover:bg-primary/90 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-3"
+          className="flex items-center gap-2 px-6 py-2 bg-slate-900 text-white rounded-xl font-black text-sm uppercase tracking-wider hover:bg-black transition-all active:scale-95 shadow-md disabled:opacity-50"
         >
-          <RefreshCw className={isGenerating ? "animate-spin" : ""} size={24} />
-          {isGenerating ? "Generating..." : "Generate 5 Group Names"}
+          {isGenerating ? <RefreshCw className="animate-spin" size={18} /> : <Sparkles size={18} />}
+          GENERATE
         </button>
+      </ToolHeader>
+
+      <div className="w-full bg-white p-8 rounded-3xl shadow-xl border-2 border-gray-100 flex flex-col items-center gap-6">
+        <label className="text-sm text-gray-500 font-bold uppercase tracking-wider text-center border-b pb-2 mb-1 block w-full">Generated Groups</label>
+        <p className="text-gray-500 text-center text-lg">
+          Need names for your groups? Click generate to get 5 random, school-appropriate group names!
+        </p>
 
         <div className="w-full flex flex-col gap-4 min-h-[400px]">
           <AnimatePresence>

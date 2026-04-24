@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeCanvas } from 'qrcode.react';
-import { Download, Share2, Type, Link as LinkIcon, Palette, Maximize, RefreshCcw, Trash2 } from 'lucide-react';
+import { Download, Share2, Type, Link as LinkIcon, Palette, Maximize, RefreshCcw, Trash2, QrCode } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
 export const QRCodeGenerator = () => {
   const [text, setText] = useState('https://google.com');
@@ -39,7 +40,31 @@ export const QRCodeGenerator = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8">
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="QR Code Generator"
+        icon={QrCode}
+        description="Instant Resource Sharing for Tablets & Phones"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Quick Sharing</strong>
+              Enter a URL or text to generate a QR code. Students can scan it with their tablets or phones to instantly access resources.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Custom Design</strong>
+              Adjust colours, size, and error correction levels to create the perfect QR code for your classroom handouts or displays.
+            </p>
+          </>
+        }
+      >
+        <button 
+          onClick={clearText}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all active:scale-95 shadow-sm"
+        >
+          <Trash2 size={14} /> CLEAR CONTENT
+        </button>
+      </ToolHeader>
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Controls Section */}
@@ -56,13 +81,6 @@ export const QRCodeGenerator = () => {
                 placeholder="Enter URL or text here..."
                 className="w-full h-32 p-4 rounded-2xl border-2 border-primary/20 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none text-lg"
               />
-              <button 
-                onClick={clearText}
-                className="absolute bottom-4 right-4 p-2 text-gray-400 hover:text-red-500 transition-colors"
-                title="Clear content"
-              >
-                <Trash2 size={20} />
-              </button>
             </div>
           </div>
 

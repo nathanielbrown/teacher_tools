@@ -6,6 +6,7 @@ import {
   Circle, Triangle, Star, Pentagon, Diamond
 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const SCALES = {
   Major: [0, 2, 4, 5, 7, 9, 11],
@@ -67,6 +68,8 @@ export const SongMaker = () => {
   const [activeStep, setActiveStep] = useState(-1);
   const audioCtxRef = useRef(null);
   const timerRef = useRef(null);
+  const containerRef = useRef(null);
+  const [zoomScale, setZoomScale] = useState(1);
 
   // Derived values
   const cols = config.bars * config.beatsPerBar * config.splits;
@@ -288,56 +291,88 @@ export const SongMaker = () => {
     return () => clearInterval(timerRef.current);
   }, [isPlaying, tempo, grid, cols, config.splits, notes]);
 
-  return (
-    <div className="max-w-[1400px] mx-auto px-4 py-8 h-full flex flex-col gap-6 overflow-hidden">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shadow-inner">
-            <Music size={32} />
-          </div>
-          <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Song Maker</h2>
-            <p className="text-slate-400 font-medium text-sm italic">Paint melodies and rhythms on the timeline.</p>
-          </div>
-        </div>
+  // Handle auto-zoom when playing
+  useEffect(() => {
+    if (isPlaying && containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth - 16; // Subtract padding
+      const containerHeight = containerRef.current.clientHeight - 16;
+      
+      const contentWidth = cols * 45 + 64; 
+      const contentHeight = rows * 32; 
+      
+      const scaleX = containerWidth / contentWidth;
+      const scaleY = containerHeight / contentHeight;
+      
+      // We want to fit both, so take the minimum scale
+      const scale = Math.min(scaleX, scaleY, 1);
+      setZoomScale(scale);
+    } else {
+      setZoomScale(1);
+    }
+  }, [isPlaying, cols, rows]);
 
+  return (
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6 overflow-hidden">
+      <ToolHeader
+        title="Song Maker"
+        icon={Music}
+        description="Interactive Music Composition"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Creating Music</strong>
+              Click on the grid to place notes. Different shapes represent different instruments. The top section is for melodies, while the bottom section is for percussion.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Controls</strong>
+              Use the Play button to hear your creation. You can adjust the tempo, scale, and grid size in the settings panel.
+            </p>
+          </>
+        }
+      >
         <div className="flex items-center gap-3">
           <button
             onClick={() => { initAudio(); setIsPlaying(!isPlaying); }}
-            className={`p-4 rounded-2xl transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
-              isPlaying ? 'bg-red-500 text-white' : 'bg-green-500 text-white shadow-green-100'
+            className={`px-4 py-2 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 font-black text-sm ${
+              isPlaying ? 'bg-amber-50 text-amber-600' : 'bg-emerald-600 text-white shadow-emerald-100'
             }`}
           >
-            {isPlaying ? <Square size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
-            <span className="font-black text-xs uppercase tracking-widest">{isPlaying ? 'Stop' : 'Play'}</span>
+            {isPlaying ? <Square size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
+            {isPlaying ? 'STOP' : 'PLAY'}
           </button>
-          
-          <div className="h-12 w-[2px] bg-slate-100 mx-2" />
           
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className={`p-4 rounded-2xl transition-all shadow-lg active:scale-95 ${
-              isSettingsOpen ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 shadow-md'
+            className={`p-3 rounded-xl transition-all shadow-sm active:scale-95 border ${
+              isSettingsOpen ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-slate-50 text-slate-400 hover:bg-slate-100 border-slate-100'
             }`}
+            title="Timeline Settings"
           >
-            <Settings2 size={24} />
+            <Settings2 size={20} />
           </button>
 
           <button
             onClick={clearGrid}
-            className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 shadow-md"
+            className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-100"
+            title="Clear All Notes"
           >
-            <Trash2 size={24} />
+            <Trash2 size={20} />
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch min-h-0 overflow-hidden">
         {/* Main Canvas */}
-        <div className="lg:col-span-9 bg-white rounded-[3rem] border-8 border-white shadow-2xl overflow-hidden relative flex flex-col min-h-0">
+        <div ref={containerRef} className="lg:col-span-9 bg-white rounded-[3rem] border-8 border-white shadow-2xl overflow-hidden relative flex flex-col min-h-0">
           <div className="flex-1 overflow-auto custom-scrollbar relative">
-            <div className="flex min-w-max min-h-full">
+            <motion.div 
+              animate={{ 
+                scale: zoomScale,
+                transformOrigin: 'top left'
+              }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="flex min-w-max min-h-full"
+            >
               {/* Note Labels Sidebar */}
               <div className="w-16 shrink-0 sticky left-0 z-20 bg-slate-50 border-r-2 border-slate-100 flex flex-col shadow-xl">
               {notes.map((midi, i) => (
@@ -411,7 +446,7 @@ export const SongMaker = () => {
                 </div>
               ))}
             </div>
-          </div>
+            </motion.div>
           </div>
         </div>
 

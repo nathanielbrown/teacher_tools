@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useSettings } from '../contexts/SettingsContext';
 import { SettingsModal } from './SettingsModal';
 
@@ -10,6 +11,33 @@ import { AboutModal } from './AboutModal';
 
 import { tools } from '../data/tools';
 import logo from '../assets/ClassRex_logo.png';
+
+const NoCookieIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block drop-shadow-sm">
+    <circle cx="12" cy="12" r="7" stroke="#b45309" fill="#fde68a" strokeWidth="2" />
+    <circle cx="10.5" cy="10.5" r="1" fill="#78350f" />
+    <circle cx="14" cy="12.5" r="1" fill="#78350f" />
+    <circle cx="12" cy="14.5" r="1" fill="#78350f" />
+    <circle cx="13" cy="9.5" r="0.75" fill="#78350f" />
+    <circle cx="9.5" cy="13" r="0.75" fill="#78350f" />
+    <circle cx="12" cy="12" r="11" stroke="#ef4444" strokeWidth="2.5" />
+    <line x1="4.5" y1="4.5" x2="19.5" y2="19.5" stroke="#ef4444" strokeWidth="2.5" />
+  </svg>
+);
+
+const NoCloudIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block drop-shadow-sm">
+    <g transform="matrix(0.65 0 0 0.65 4.2 4.2)">
+      <path d="M17.5 19c2.5 0 4.5-2 4.5-4.5 0-2.4-1.9-4.3-4.3-4.5C16.9 6.7 13.7 4 10 4 6.7 4 4 6.7 4 10c-2.2.3-4 2.2-4 4.5C0 17 2 19 4.5 19h13z" stroke="#0284c7" fill="#e0f2fe" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+    <circle cx="12" cy="12" r="11" stroke="#ef4444" strokeWidth="2.5" />
+    <line x1="4.5" y1="4.5" x2="19.5" y2="19.5" stroke="#ef4444" strokeWidth="2.5" />
+  </svg>
+);
+
+const Tooltip = ({ text, children }) => {
+  return children;
+};
 
 const dynamicGroups = tools.reduce((acc, tool) => {
   let group = acc.find(g => g.title === tool.section && g.mainSection === tool.mainSection);
@@ -27,7 +55,7 @@ const toolGroups = [
     title: '',
     mainSection: 'All',
     items: [
-      { id: 'home', name: 'Dashboard', icon: Home },
+      { id: 'home', name: 'Dashboard', icon: Home, emoji: '🏠' },
     ]
   },
   ...dynamicGroups.filter(g => g.title !== 'Word Management')
@@ -37,20 +65,22 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
   const [sidebarMode, setSidebarMode] = useState('mini'); // 'mini', 'full', 'hidden'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({ 'Word Management': true });
+  const [expandedSections, setExpandedSections] = useState({});
   const { settings } = useSettings();
 
   useEffect(() => {
     if (currentTool && currentTool !== 'home') {
       const activeGroup = toolGroups.find(g => g.items.some(i => i.id === currentTool));
       if (activeGroup && activeGroup.title) {
-        setExpandedSections(prev => ({ ...prev, [activeGroup.title]: true }));
+        setExpandedSections({ [activeGroup.title]: true });
       }
+    } else {
+      setExpandedSections({});
     }
   }, [currentTool]);
 
   const toggleSection = (title) => {
-    setExpandedSections(prev => ({ ...prev, [title]: !prev[title] }));
+    setExpandedSections(prev => prev[title] ? {} : { [title]: true });
   };
 
   const filteredGroups = toolGroups.filter(group => {
@@ -75,16 +105,21 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
         } ${sidebarMode === 'mini' ? 'w-20' : 'w-72'}`}
       >
         <div className={`flex items-center p-6 ${sidebarMode === 'mini' ? 'justify-center' : 'justify-between'}`}>
-          {sidebarMode !== 'mini' && (
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="ClassRex" className="h-10 w-auto object-contain" />
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="ClassRex" className="h-8 w-auto object-contain" />
+            {sidebarMode !== 'mini' && (
+              <span className="text-xl font-black text-slate-800 tracking-tighter">ClassRex</span>
+            )}
+          </div>
           <button 
             onClick={() => setSidebarMode(sidebarMode === 'mini' ? 'full' : 'mini')} 
             className={`p-2 rounded-xl hover:bg-gray-100/50 text-${themeColor} transition-all active:scale-95`}
           >
-            {sidebarMode === 'mini' ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+            {settings.theme === 'early-years' ? (
+              sidebarMode === 'mini' ? <span className="text-xl">👉</span> : <span className="text-xl">👈</span>
+            ) : (
+              sidebarMode === 'mini' ? <ChevronRight size={24} /> : <ChevronLeft size={24} />
+            )}
           </button>
         </div>
 
@@ -104,7 +139,7 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
                   </button>
                 )}
                 
-                <div className={`space-y-1 transition-all duration-300 ${isExpanded || sidebarMode === 'mini' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden pointer-events-none'}`}>
+                <div className={`space-y-1 transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden pointer-events-none'}`}>
                   {group.items.map((tool) => {
                     const isActive = tool.id === currentTool;
                     return (
@@ -120,7 +155,9 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
                             : `hover:bg-white/50 text-slate-500 ${settings.theme === 'early-years' ? '' : `hover:text-${themeColor}`}`
                         }`}
                       >
-                        {tool.icon ? (
+                        {settings.theme === 'early-years' && tool.emoji ? (
+                          <span className="text-xl leading-none">{tool.emoji}</span>
+                        ) : tool.icon ? (
                           <tool.icon 
                             size={20} 
                             style={{ color: (settings.theme === 'early-years' && !isActive) ? tool.color : undefined }}
@@ -149,7 +186,7 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
             className="p-3 text-slate-300 hover:text-rose-500 transition-colors rounded-xl hover:bg-rose-50/50"
             title="Hide Sidebar"
           >
-            <EyeOff size={20} />
+            {settings.theme === 'early-years' ? <span className="text-xl">🙈</span> : <EyeOff size={20} />}
           </button>
         </div>
       </aside>
@@ -176,28 +213,29 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
                 onClick={() => setSidebarMode(sidebarMode === 'hidden' ? 'full' : 'hidden')} 
                 className="lg:hidden p-2 rounded-xl hover:bg-gray-100 text-slate-600"
               >
-                <Menu size={24} />
+                {settings.theme === 'early-years' ? <span className="text-2xl">🍔</span> : <Menu size={24} />}
               </button>
               <img src={logo} alt="ClassRex" className="h-8 w-auto object-contain lg:hidden" />
               
               {/* Privacy Badges - Visible on Desktop Top Left */}
-              <div className="hidden xl:flex items-center gap-2">
-                <div className="flex items-center gap-1.5 bg-green-500/10 text-green-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider border border-green-500/10 shadow-sm whitespace-nowrap">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                  100% LOCAL STORAGE
+              <div className="hidden lg:flex items-center gap-2">
+                <div className="flex items-center gap-2 mr-2">
+                  <img src={logo} alt="ClassRex" className="h-10 w-auto object-contain" />
+                  <span className="text-xl font-black text-slate-800 tracking-tighter">ClassRex</span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider border border-blue-500/10 shadow-sm whitespace-nowrap">
-                  NO COOKIES
-                </div>
-                <div className="flex items-center gap-1.5 bg-purple-500/10 text-purple-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider border border-purple-500/10 shadow-sm whitespace-nowrap">
-                  NO CLOUD ACCESS
+                <div className="flex items-center">
+                  <div className="flex items-center justify-center p-0.5">
+                    <NoCookieIcon />
+                  </div>
+                  <div className="flex items-center justify-center p-0.5">
+                    <NoCloudIcon />
+                  </div>
                 </div>
               </div>
             </div>
             
             {/* Desktop Navigation Tabs */}
-            <div className="hidden lg:flex items-center p-1.5 bg-gray-100/50 rounded-2xl gap-1">
-              <img src={logo} alt="ClassRex" className="h-10 w-auto object-contain mr-4 ml-2" />
+            <div className="hidden lg:flex items-center p-1 bg-slate-100 rounded-[1.25rem] gap-1 border border-slate-200">
               {['Teacher Tools', 'Classroom Games', 'Student Tools'].map(tab => {
                 const isTabActive = activeTab === tab;
                 const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
@@ -206,10 +244,10 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
                   <button
                     key={tab}
                     onClick={() => onTabChange(tab)}
-                    className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+                    className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-300 border-2 ${
                       isTabActive
-                        ? `bg-white text-${tabColorClass} shadow-md scale-[1.02]`
-                        : 'text-slate-400 hover:text-slate-600 hover:bg-white/30'
+                        ? `bg-${tabColorClass} border-${tabColorClass} text-white shadow-lg shadow-${tabColorClass}/20 scale-105`
+                        : `bg-transparent border-slate-200 text-${tabColorClass} hover:border-${tabColorClass} hover:bg-${tabColorClass}/5`
                     }`}
                   >
                     {tab}
@@ -218,21 +256,21 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
               })}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <button
                 onClick={() => setIsAboutOpen(true)}
-                className="p-3 rounded-2xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90"
+                className="p-2 rounded-xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90"
                 title="About ClassRex"
               >
-                <Info size={24} />
+                {settings.theme === 'early-years' ? <span className="text-xl">ℹ️</span> : <Info size={20} />}
               </button>
 
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="p-3 rounded-2xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90 hover:rotate-45"
+                className="p-2 rounded-xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90 hover:rotate-45"
                 title="Settings"
               >
-                <Settings size={24} />
+                {settings.theme === 'early-years' ? <span className="text-xl">⚙️</span> : <Settings size={20} />}
               </button>
             </div>
           </div>
@@ -247,10 +285,10 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
                   <button
                     key={tab}
                     onClick={() => onTabChange(tab)}
-                    className={`flex-1 px-4 py-2.5 whitespace-nowrap font-bold text-xs rounded-xl transition-all ${
+                    className={`flex-1 px-4 py-2.5 whitespace-nowrap font-black text-[10px] uppercase tracking-wider rounded-xl transition-all border-2 ${
                       isTabActive
-                        ? `bg-white text-${tabColorClass} shadow-sm`
-                        : 'text-slate-400 hover:text-slate-600'
+                        ? `bg-${tabColorClass} border-${tabColorClass} text-white shadow-sm`
+                        : `bg-transparent border-slate-100 text-${tabColorClass}`
                     }`}
                   >
                     {tab}
@@ -262,7 +300,7 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
 
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-          <div className="max-w-7xl mx-auto h-full">
+          <div className="w-full h-full">
             {children}
           </div>
         </main>

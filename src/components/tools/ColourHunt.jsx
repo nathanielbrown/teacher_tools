@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Palette, Timer, RotateCcw, Play, Square, AlertCircle, Volume2, Clock } from 'lucide-react';
+import { Palette, Timer, RotateCcw, Play, Square, AlertCircle, Volume2, Clock, Crosshair } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
 const COLORS = [
   { name: 'Red', hex: '#ef4444', textHex: '#ffffff' },
@@ -81,20 +82,25 @@ export const ColourHunt = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-pink-50 rounded-2xl text-pink-600">
-              <Palette size={32} />
-            </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Colour Hunt</h2>
-          </div>
-          <p className="text-slate-400 font-medium pl-1">Find something in the room that matches the colour!</p>
-        </div>
-
-        <div className="flex items-center gap-3 bg-slate-100 p-2 rounded-2xl">
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Colour Hunt"
+        icon={Crosshair}
+        description="Active Classroom Scavenger Hunt"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Get Moving</strong>
+              Start the hunt to reveal a random colour. Students have to find an object in the room that matches before the timer ends.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Warning Period</strong>
+              When the timer reaches 10 seconds, a siren will sound and the screen will pulse red to build excitement.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-2xl">
           {[30, 60, 120].map(s => (
             <button
               key={s}
@@ -105,7 +111,7 @@ export const ColourHunt = () => {
               disabled={isActive}
               className={`px-4 py-2 rounded-xl text-sm font-black transition-all ${
                 duration === s 
-                  ? 'bg-white text-slate-800 shadow-sm' 
+                  ? 'bg-white text-indigo-600 shadow-sm' 
                   : 'text-slate-400 hover:text-slate-600 disabled:opacity-50'
               }`}
             >
@@ -113,7 +119,7 @@ export const ColourHunt = () => {
             </button>
           ))}
         </div>
-      </div>
+      </ToolHeader>
 
       {/* Main Game Area */}
       <div className="flex-1 flex flex-col gap-8 relative min-h-[400px]">

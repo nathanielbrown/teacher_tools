@@ -5,6 +5,7 @@ import {
   TrendingUp, Activity, Settings2, Info, ChevronRight,
   ShieldCheck, AlertCircle
 } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 // Constants
 const WIDTH = 800;
@@ -40,6 +41,7 @@ export const EcosystemSimulation = () => {
         y: Math.random() * HEIGHT,
         energy: 100,
         age: 0,
+        foodEaten: 0,
         id: Math.random()
       });
     }
@@ -51,6 +53,7 @@ export const EcosystemSimulation = () => {
         y: Math.random() * HEIGHT,
         energy: 150,
         age: 0,
+        foodEaten: 0,
         id: Math.random()
       });
     }
@@ -127,11 +130,11 @@ export const EcosystemSimulation = () => {
         const dx = (nearestGrass.x - r.x);
         const dy = (nearestGrass.y - r.y);
         const angle = Math.atan2(dy, dx);
-        r.x += Math.cos(angle) * 5 * speed;
-        r.y += Math.sin(angle) * 5 * speed;
+        r.x += Math.cos(angle) * 6 * speed; // move faster
+        r.y += Math.sin(angle) * 6 * speed;
       } else {
-        r.x += (Math.random() - 0.5) * 6 * speed;
-        r.y += (Math.random() - 0.5) * 6 * speed;
+        r.x += (Math.random() - 0.5) * 7 * speed;
+        r.y += (Math.random() - 0.5) * 7 * speed;
       }
       r.x = (r.x + WIDTH) % WIDTH;
       r.y = (r.y + HEIGHT) % HEIGHT;
@@ -147,18 +150,24 @@ export const EcosystemSimulation = () => {
       if (grassIndex !== -1) {
         sim.grass.splice(grassIndex, 1);
         r.energy += 35; // Gained energy from eating
+        r.foodEaten = (r.foodEaten || 0) + 1;
       }
 
-      // Reproduction (ONLY after eating enough - energy > 140)
-      if (r.energy > 140 && sim.rabbits.length < 150) {
-        r.energy -= 80;
-        sim.rabbits.push({ 
-          x: r.x + (Math.random() - 0.5) * 10,
-          y: r.y + (Math.random() - 0.5) * 10,
-          id: Math.random(), 
-          energy: 60, 
-          age: 0 
-        });
+      // Reproduction (ONLY enough food)
+      if (r.foodEaten >= 4 && sim.rabbits.length < 250) {
+        r.foodEaten -= 4;
+        r.energy -= 20;
+        // spawn 2 offspring to breed faster
+        for (let i = 0; i < 2; i++) {
+          sim.rabbits.push({ 
+            x: r.x + (Math.random() - 0.5) * 10,
+            y: r.y + (Math.random() - 0.5) * 10,
+            id: Math.random(), 
+            energy: 80, 
+            age: 0,
+            foodEaten: 0
+          });
+        }
       }
 
       return r.energy > 0 && r.age < 100;
@@ -181,11 +190,11 @@ export const EcosystemSimulation = () => {
         const dx = (target.x - w.x);
         const dy = (target.y - w.y);
         const angle = Math.atan2(dy, dx);
-        w.x += Math.cos(angle) * 4 * speed;
-        w.y += Math.sin(angle) * 4 * speed;
+        w.x += Math.cos(angle) * 2.5 * speed; // move slower
+        w.y += Math.sin(angle) * 2.5 * speed;
       } else {
-        w.x += (Math.random() - 0.5) * 4 * speed;
-        w.y += (Math.random() - 0.5) * 4 * speed;
+        w.x += (Math.random() - 0.5) * 3 * speed;
+        w.y += (Math.random() - 0.5) * 3 * speed;
       }
       w.x = (w.x + WIDTH) % WIDTH;
       w.y = (w.y + HEIGHT) % HEIGHT;
@@ -201,17 +210,20 @@ export const EcosystemSimulation = () => {
       if (rabbitIndex !== -1) {
         sim.rabbits.splice(rabbitIndex, 1);
         w.energy += 90; // Gained energy from hunting
+        w.foodEaten = (w.foodEaten || 0) + 1;
       }
 
-      // Reproduction (ONLY after eating enough - energy > 350)
-      if (w.energy > 350 && sim.wolves.length < 40) {
-        w.energy -= 220;
+      // Reproduction (ONLY enough food)
+      if (w.foodEaten >= 4 && sim.wolves.length < 40) {
+        w.foodEaten -= 4;
+        w.energy -= 40;
         sim.wolves.push({ 
           x: w.x + (Math.random() - 0.5) * 10,
           y: w.y + (Math.random() - 0.5) * 10,
           id: Math.random(), 
           energy: 160, 
-          age: 0 
+          age: 0,
+          foodEaten: 0
         });
       }
 
@@ -291,7 +303,7 @@ export const EcosystemSimulation = () => {
       
       const totalPoints = history.length;
       history.forEach((s, i) => {
-        const x = (i / Math.max(1, totalPoints - 1)) * w; 
+        const x = 30 + (i / Math.max(1, totalPoints - 1)) * (w - 30); 
         const y = h - (s[key] / maxVal) * h;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
@@ -300,25 +312,79 @@ export const EcosystemSimulation = () => {
 
       // Add a subtle gradient fill under the line
       ctx.lineTo(w, h);
-      ctx.lineTo(0, h);
+      ctx.lineTo(30, h);
       ctx.fillStyle = color + '15'; 
       ctx.fill();
     };
 
-    // Draw grid lines
+    // Draw grid lines and labels
     ctx.strokeStyle = '#f1f5f9';
     ctx.lineWidth = 1;
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
     for (let i = 0; i <= 4; i++) {
       const y = (i / 4) * h;
       ctx.beginPath();
-      ctx.moveTo(0, y);
+      ctx.moveTo(30, y);
       ctx.lineTo(w, y);
       ctx.stroke();
+      
+      const val = Math.round(maxVal - (i / 4) * maxVal);
+      ctx.fillText(val, 25, y === 0 ? y + 10 : y + 3);
     }
 
     drawLine('grass', '#4ade80');
     drawLine('rabbits', '#94a3b8');
     drawLine('wolves', '#ef4444');
+  };
+
+  const handleCanvasClick = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = WIDTH / rect.width;
+    const scaleY = HEIGHT / rect.height;
+    
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    const sim = simulationRef.current;
+    
+    // Check if clicked on a wolf
+    const clickedWolf = sim.wolves.find(w => Math.sqrt(Math.pow(w.x - x, 2) + Math.pow(w.y - y, 2)) < 30);
+    if (clickedWolf) {
+      sim.wolves.push({
+        x: x + (Math.random() - 0.5) * 20,
+        y: y + (Math.random() - 0.5) * 20,
+        energy: 150,
+        age: 0,
+        foodEaten: 0,
+        id: Math.random()
+      });
+      return;
+    }
+    
+    // Check if clicked on a rabbit
+    const clickedRabbit = sim.rabbits.find(r => Math.sqrt(Math.pow(r.x - x, 2) + Math.pow(r.y - y, 2)) < 30);
+    if (clickedRabbit) {
+      sim.rabbits.push({
+        x: x + (Math.random() - 0.5) * 20,
+        y: y + (Math.random() - 0.5) * 20,
+        energy: 100,
+        age: 0,
+        foodEaten: 0,
+        id: Math.random()
+      });
+      return;
+    }
+
+    // Otherwise random
+    if (Math.random() > 0.5) {
+      sim.rabbits.push({ x, y, energy: 100, age: 0, foodEaten: 0, id: Math.random() });
+    } else {
+      sim.wolves.push({ x, y, energy: 150, age: 0, foodEaten: 0, id: Math.random() });
+    }
   };
 
   useEffect(() => {
@@ -331,26 +397,31 @@ export const EcosystemSimulation = () => {
   }, [isPlaying, speed]);
 
   return (
-    <div className="max-w-[1400px] mx-auto min-h-0 h-full flex flex-col gap-4 px-6 py-6 select-none overflow-y-auto lg:overflow-hidden">
-      {/* Header */}
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-emerald-50 rounded-2xl text-emerald-600">
-            <Activity size={40} />
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Ecosystem Simulation</h2>
-            <p className="text-slate-400 font-medium italic">Balance the web of life.</p>
-          </div>
-        </div>
-
+    <div className="max-w-[1400px] mx-auto min-h-0 h-full flex flex-col gap-4 px-6 pt-2 pb-6 select-none overflow-y-auto lg:overflow-hidden">
+      <ToolHeader
+        title="Ecosystem Simulation"
+        icon={Activity}
+        description="Scientific Predator-Prey Model"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">The Food Web</strong>
+              Watch how energy flows from Grass (Producer) to Rabbits (Primary Consumer) and then to Wolves (Secondary Consumer).
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Dynamic Balance</strong>
+              If one species overpopulates, it impacts the entire system. Observe the oscillating cycles in the population graph below.
+            </p>
+          </>
+        }
+      >
         <div className="flex items-center gap-4">
           <div className="bg-slate-50 p-1.5 rounded-2xl border border-slate-100 flex items-center gap-1">
              {[1, 2, 5].map(s => (
                <button 
                  key={s} 
                  onClick={() => setSpeed(s)}
-                 className={`px-4 py-2 rounded-xl font-black text-xs transition-all ${speed === s ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-400'}`}
+                 className={`px-3 py-1.5 rounded-xl font-black text-[10px] transition-all ${speed === s ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-400'}`}
                >
                  {s}x
                </button>
@@ -358,21 +429,22 @@ export const EcosystemSimulation = () => {
           </div>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`p-4 rounded-2xl transition-all shadow-lg active:scale-95 flex items-center gap-3 font-black ${
+            className={`px-4 py-2 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 font-black text-sm ${
               isPlaying ? 'bg-amber-50 text-amber-600' : 'bg-emerald-600 text-white shadow-emerald-100'
             }`}
           >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
             {isPlaying ? 'PAUSE' : 'START'}
           </button>
           <button
             onClick={init}
-            className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
+            className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
+            title="Reset Simulation"
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={20} />
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0">
         {/* Main Simulation View */}
@@ -383,7 +455,8 @@ export const EcosystemSimulation = () => {
               ref={canvasRef} 
               width={WIDTH} 
               height={HEIGHT} 
-              className="absolute inset-0 w-full h-full object-contain z-10" 
+              className="absolute inset-0 w-full h-full object-contain z-10 cursor-pointer" 
+              onClick={handleCanvasClick}
             />
             
             {/* Real-time Overlay Labels */}

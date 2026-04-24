@@ -1,8 +1,8 @@
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Minus } from 'lucide-react';
+import { Play, Pause, Plus, Minus, Activity } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 
 export const Metronome = () => {
@@ -37,7 +37,8 @@ export const Metronome = () => {
     currentBeatRef.current = (currentBeatRef.current + 1) % 4;
   };
 
-  const playClick = (time, isFirstBeat) => {
+  const playClick = (time, beatNumber) => {
+    const isFirstBeat = beatNumber === 0;
     if (!settings.soundTheme) return;
 
     const osc = audioCtxRef.current.createOscillator();
@@ -60,13 +61,13 @@ export const Metronome = () => {
 
     // Visual update
     setTimeout(() => {
-      setBeat(currentBeatRef.current);
+      setBeat(beatNumber);
     }, (time - audioCtxRef.current.currentTime) * 1000);
   };
 
   const scheduler = () => {
     while (nextNoteTimeRef.current < audioCtxRef.current.currentTime + scheduleAheadTime) {
-      playClick(nextNoteTimeRef.current, currentBeatRef.current === 0);
+      playClick(nextNoteTimeRef.current, currentBeatRef.current);
       nextNote();
     }
     timerIDRef.current = setTimeout(scheduler, lookahead);
@@ -93,10 +94,27 @@ export const Metronome = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-12">
-      <h2 className="text-3xl font-bold text-primary">Metronome</h2>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Metronome"
+        icon={Activity}
+        description="Precision Rhythmic Pulse for Music & Performance"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Set the Pace</strong>
+              Adjust the Beats Per Minute (BPM) using the slider or the increment buttons.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Visual Cues</strong>
+              The visual indicators at the top pulse in time with the beat, with a red light marking the downbeat.
+            </p>
+          </>
+        }
+      />
 
-      {/* Visual Indicator */}
+      <div className="flex flex-col items-center gap-8 w-full">
+        {/* Visual Indicator */}
       <div className="flex gap-4">
         {[0, 1, 2, 3].map((b) => (
           <motion.div
@@ -155,6 +173,7 @@ export const Metronome = () => {
           {isPlaying ? <Pause size={40} /> : <Play size={40} className="ml-2" />}
         </button>
 
+      </div>
       </div>
     </div>
   );

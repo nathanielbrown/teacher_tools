@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Activity, Dog, Laugh, Ghost, Play, RotateCcw, ChevronRight, Settings2, Clock, Volume2 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 import { audioEngine } from '../../utils/audio';
 
 const MODES = [
@@ -96,19 +97,24 @@ export const SimonSays = () => {
   }, [gameState, isAuto, activeMode, autoSpeed]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 h-full flex flex-col gap-8">
-      {/* Header */}
-      <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
-              <User size={32} />
-            </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Simon Says</h2>
-          </div>
-          <p className="text-slate-400 font-medium pl-1">A high-energy movement and attention game.</p>
-        </div>
-
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-4">
+      <ToolHeader
+        title="Simon Says"
+        icon={User}
+        description="A high-energy movement and attention game"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Follow Simon's instructions ONLY if they say "Simon says...". If they don't, stay perfectly still!
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Auto Mode</strong>
+              Enable Auto Mode to let the tool generate commands automatically at your chosen speed.
+            </p>
+          </>
+        }
+      >
         {gameState === 'playing' && (
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 p-1 bg-slate-50 rounded-2xl border border-slate-100">
@@ -144,7 +150,7 @@ export const SimonSays = () => {
             </button>
           </div>
         )}
-      </div>
+      </ToolHeader>
 
       <AnimatePresence mode="wait">
         {gameState === 'menu' ? (

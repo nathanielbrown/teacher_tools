@@ -4,6 +4,7 @@ import { Cpu, Trophy, RotateCcw, ArrowLeft, Gamepad2, Info, CheckCircle2, Zap, S
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const BITS = [128, 64, 32, 16, 8, 4, 2, 1];
 
@@ -134,42 +135,47 @@ export const BinaryTool = () => {
   }, [decimalValue, inputValue, targetValue, gameState, showSuccess, timeLeft, challengeType, score]);
 
   return (
-    <div className="max-w-6xl mx-auto h-full flex flex-col p-4 space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center bg-white/50 backdrop-blur-sm p-4 rounded-[2rem] border border-white/50">
-        <div className="flex items-center gap-4">
-          <div className="bg-cyan-500 p-3 rounded-2xl text-white shadow-lg shadow-cyan-200">
-            <Cpu size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-gray-800 leading-none">Binary Explorer</h1>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Computer Science Tool</p>
-          </div>
-        </div>
-
+    <div className="w-full mx-auto h-full flex flex-col p-4 pt-2 pb-8 space-y-8">
+      <ToolHeader
+        title="Binary Explorer"
+        icon={Cpu}
+        description="Computer Science Tool"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Free Play</strong>
+              Toggle the bits to see the corresponding decimal and hexadecimal values.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Challenge Mode</strong>
+              Race against the clock to convert between binary and decimal. Unlock more bits as your score increases!
+            </p>
+          </>
+        }
+      >
         <div className="flex gap-4 items-center">
           {gameState === 'challenge' && (
             <div className="hidden md:flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
               <Star size={16} className="text-indigo-600 fill-indigo-600" />
-              <span className="font-black text-indigo-600">LEVEL {currentLevel}</span>
+              <span className="font-black text-indigo-600 text-xs">LEVEL {currentLevel}</span>
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
               onClick={() => { setGameState('freeplay'); setTargetValue(null); }}
-              className={`px-6 py-2 rounded-xl font-bold transition-all ${gameState === 'freeplay' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-200' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+              className={`px-4 py-1.5 rounded-lg transition-all font-black text-[10px] uppercase tracking-wider ${gameState === 'freeplay' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
             >
               Free Play
             </button>
             <button
               onClick={startChallenge}
-              className={`px-6 py-2 rounded-xl font-bold transition-all ${gameState === 'challenge' || gameState === 'gameover' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+              className={`px-4 py-1.5 rounded-lg transition-all font-black text-[10px] uppercase tracking-wider ${gameState === 'challenge' || gameState === 'gameover' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
             >
-              Start Challenge
+              Challenge
             </button>
           </div>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Board */}

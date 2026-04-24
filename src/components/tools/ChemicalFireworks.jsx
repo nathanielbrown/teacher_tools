@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Beaker, Sparkles, Trash2 } from 'lucide-react';
+import { Beaker, Sparkles, Trash2, Info } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 const CHEMICALS = [
   { id: 'NaNO3', name: 'Sodium Nitrate', formula: 'NaNO₃', color: '#FFFF00', secondary: '#FFFACD', description: 'Produces an intense yellow flame.' },
@@ -195,36 +196,40 @@ export const ChemicalFireworks = () => {
       return char;
     });
   };
-
   return (
-    <div ref={containerRef} className="relative w-full h-[calc(100vh-14rem)] bg-[#0a0a19] rounded-[3rem] overflow-hidden flex flex-col shadow-2xl border border-white/5">
-      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
-      
-      {/* Header Area */}
-      <div className="z-10 p-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-xl gap-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
-              <Beaker size={24} />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-white tracking-tight leading-none">Chemical Fireworks</h1>
-              <p className="text-white/40 text-[10px] font-medium uppercase tracking-widest mt-1">Scientific Flame Test Simulation</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-             <div className="hidden md:block h-8 w-[2px] bg-white/10" />
-             <div className="flex items-center gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
-                {['slow', 'normal', 'fast'].map(s => (
-                  <button key={s} onClick={() => setSpeed(s)} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${speed === s ? 'bg-white text-indigo-900 shadow-lg' : 'text-white/40 hover:text-white/60'}`}>
-                    {s}
-                  </button>
-                ))}
-             </div>
-          </div>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6">
+      <ToolHeader
+        title="Chemical Fireworks"
+        icon={Beaker}
+        description="Scientific Flame Test Simulation"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How it Works</strong>
+              Different chemical elements produce unique colors when heated. This simulation mimics the "Flame Test" used in chemistry.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Interaction</strong>
+              Click a chemical compound to launch a firework. Toggle them to enable "Auto-Launch" mode.
+            </p>
+          </>
+        }
+      >
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {['slow', 'normal', 'fast'].map(s => (
+            <button 
+              key={s} 
+              onClick={() => setSpeed(s)} 
+              className={`px-4 py-1.5 rounded-lg transition-all font-black text-[10px] uppercase tracking-wider ${speed === s ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              {s}
+            </button>
+          ))}
         </div>
-      </div>
+      </ToolHeader>
+
+      <div ref={containerRef} className="relative w-full flex-1 bg-[#0a0a19] rounded-[3rem] overflow-hidden flex flex-col shadow-2xl border border-white/5">
+        <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
       <div className="flex-1 flex items-center justify-center pointer-events-none opacity-5">
         <Sparkles size={200} className="text-white animate-pulse" strokeWidth={0.1} />
@@ -308,6 +313,7 @@ export const ChemicalFireworks = () => {
           </div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 };

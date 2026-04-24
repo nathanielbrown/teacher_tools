@@ -3,6 +3,7 @@ import { ArrowUp, ArrowDown, Check, RotateCcw, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
 export const HigherOrLower = () => {
   const [difficulty, setDifficulty] = useState(100);
@@ -66,8 +67,24 @@ export const HigherOrLower = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      <h2 className="text-3xl font-bold text-primary text-center">Higher or Lower</h2>
+    <div className="w-full max-w-6xl mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Higher or Lower"
+        icon={Trophy}
+        description="A Classic Number Guessing Challenge"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Select a difficulty level, then try to guess the secret number. The app will tell you if the target is higher or lower than your guess.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Difficulty</strong>
+              Choose between 1-10 (easy), 1-100 (medium), or 1-1000 (hard) to test your estimation and logical reasoning skills.
+            </p>
+          </>
+        }
+      />
 
       {status === 'setup' && (
         <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 max-w-xl mx-auto text-center space-y-6 animate-in fade-in zoom-in duration-300">

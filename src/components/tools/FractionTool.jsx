@@ -1,12 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
-import { ChevronUp, ChevronDown, PieChart, Info, Plus, Minus } from 'lucide-react';
+import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
+import { ChevronUp, ChevronDown, PieChart, Info, Plus, Minus, Settings, X } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 export const FractionTool = () => {
   const [numerator, setNumerator] = useState(1);
   const [denominator, setDenominator] = useState(4);
+  const [showConfig, setShowConfig] = useState(false);
+  const [activeColor, setActiveColor] = useState(null);
   const lineRef = useRef(null);
   const pointerX = useMotionValue(0);
+
+  const COLORS = [
+    { name: 'Theme Default', value: null },
+    { name: 'Red', value: '#ef4444' },
+    { name: 'Orange', value: '#f97316' },
+    { name: 'Yellow', value: '#eab308' },
+    { name: 'Green', value: '#22c55e' },
+    { name: 'Cyan', value: '#06b6d4' },
+    { name: 'Blue', value: '#3b82f6' },
+    { name: 'Purple', value: '#a855f7' },
+    { name: 'Pink', value: '#ec4899' },
+  ];
 
   const updateNumerator = (val) => {
     const next = Math.max(0, Math.min(denominator, numerator + val));
@@ -41,13 +56,62 @@ export const FractionTool = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-8 h-full flex flex-col">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold text-primary flex items-center gap-3">
-          <PieChart size={32} />
-          Fraction Visualizer
-        </h2>
-      </div>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6" style={activeColor ? { '--color-primary': activeColor } : {}}>
+      <ToolHeader
+        title="Fraction Visualizer"
+        icon={PieChart}
+        description="Interactive Part-Whole Relationship Model"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Circle & Number Line</strong>
+              Explore fractions using both area models (Circle) and linear models (Number Line) simultaneously.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Interaction</strong>
+              Click directly on the circle segments or the number line to quickly jump to a value. Use the arrows to fine-tune the numerator and denominator.
+            </p>
+          </>
+        }
+      >
+        <div className="relative z-50">
+          <button
+            onClick={() => setShowConfig(!showConfig)}
+            className={`p-3 rounded-2xl transition-all ${showConfig ? 'bg-primary text-white shadow-md' : 'bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/10'}`}
+          >
+            {showConfig ? <X size={24} /> : <Settings size={24} />}
+          </button>
+          
+          <AnimatePresence>
+            {showConfig && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute top-full right-0 mt-4 p-6 bg-white rounded-[2rem] shadow-2xl border border-gray-100 w-[280px]"
+              >
+                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4 border-b pb-2">Select Colour</h3>
+                <div className="grid grid-cols-4 gap-3">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c.name}
+                      onClick={() => {
+                        setActiveColor(c.value);
+                        setShowConfig(false);
+                      }}
+                      className={`w-12 h-12 rounded-full border-4 flex items-center justify-center transition-transform hover:scale-110 ${activeColor === c.value ? 'border-gray-800 scale-110 shadow-md' : 'border-transparent'}`}
+                      style={{ backgroundColor: c.value || '#f1f5f9' }}
+                      title={c.name}
+                    >
+                      {c.value === null && <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Auto</span>}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </ToolHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
         
@@ -204,13 +268,6 @@ export const FractionTool = () => {
         </div>
       </div>
       
-      {/* Tip Box */}
-      <div className="bg-blue-50 p-4 rounded-3xl border border-blue-100 flex items-start gap-4 text-blue-800">
-        <Info className="shrink-0 mt-1" />
-        <p className="text-sm font-medium">
-          <strong>Teacher Tip:</strong> Click directly on the circle segments or the number line to quickly jump to a specific numerator value. Use the arrows on the left to fine-tune both numerator and denominator.
-        </p>
-      </div>
     </div>
   );
 };

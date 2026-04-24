@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Image as ImageIcon, Upload, Play, RotateCcw, 
-  ChevronLeft, ChevronRight, Eye, Zap, Settings2,
+  ChevronLeft, ChevronRight, Eye, Zap, Settings, X,
   Maximize2, Grid, Layers, Sparkles
 } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 const REVEAL_EFFECTS = [
   { id: 'blur', label: 'Soft Blur', icon: Sparkles },
@@ -125,59 +126,63 @@ export const ImageReveal = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 h-full flex flex-col gap-6">
-      {/* Header & Mode Selector */}
-      <div className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-600">
-            <Eye size={32} />
-          </div>
-          <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Image Reveal</h2>
-            <p className="text-slate-400 text-sm font-medium italic">Mystery images for classroom engagement.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-            <button
-              onClick={() => { setMode('reveal'); resetReveal(); }}
-              className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 ${
-                mode === 'reveal' ? 'bg-white text-indigo-600 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <Zap size={16} />
-              REVEAL
-            </button>
-            <button
-              onClick={() => { setMode('lightsOut'); resetReveal(); }}
-              className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 ${
-                mode === 'lightsOut' ? 'bg-white text-indigo-600 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <Maximize2 size={16} />
-              LIGHTS OUT
-            </button>
-          </div>
-          
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-4">
+      <ToolHeader
+        title="Image Reveal"
+        icon={Eye}
+        description="Mystery images for engagement"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Reveal Mode</strong>
+              Gradually uncover the mystery image using Soft Blur, Mosaic Grid, or Pixelate effects.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Lights Out</strong>
+              Turn the screen black and use your mouse as a flashlight to reveal small parts of the image.
+            </p>
+            <div className="pt-4 border-t border-white/10 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Upload multiple images to create a mystery playlist!
+            </div>
+          </>
+        }
+      >
+        <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
           <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={`p-3 rounded-2xl transition-all ${
-              showSettings ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+            onClick={() => { setMode('reveal'); resetReveal(); }}
+            className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 ${
+              mode === 'reveal' ? 'bg-white text-indigo-600 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            <Settings2 size={24} />
+            <Zap size={16} />
+            REVEAL
+          </button>
+          <button
+            onClick={() => { setMode('lightsOut'); resetReveal(); }}
+            className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 ${
+              mode === 'lightsOut' ? 'bg-white text-indigo-600 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <Maximize2 size={16} />
+            LIGHTS OUT
           </button>
         </div>
-      </div>
+        
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          className={`p-3 rounded-2xl transition-all ${showSettings ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
+        >
+          {showSettings ? <X size={24} /> : <Settings size={24} />}
+        </button>
+      </ToolHeader>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0 transition-all duration-500">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 transition-all duration-500">
         {/* Main Display */}
-        <div className={`flex flex-col gap-6 transition-all duration-500 ${showSettings ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
+        <div className={`flex flex-col gap-4 transition-all duration-500 ${showSettings ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
           <div 
             ref={containerRef}
             onMouseMove={handleMouseMove}
-            className="flex-1 bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden relative group cursor-crosshair border-8 border-white"
+            className="flex-1 bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden relative group cursor-crosshair border-4 border-white"
           >
             {images.length > 0 ? (
               <>
@@ -322,9 +327,9 @@ export const ImageReveal = () => {
             >
               {/* Effect Selector */}
               {mode === 'reveal' && (
-                <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                    <Settings2 className="text-indigo-600" />
+                <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100">
+                  <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-3">
+                    <Settings className="text-indigo-600" />
                     Reveal Effect
                   </h3>
                   <div className="grid grid-cols-1 gap-3">
@@ -346,8 +351,8 @@ export const ImageReveal = () => {
               )}
 
               {/* Playlist / Uploaded Images */}
-              <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex-1 flex flex-col min-h-0">
-                <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-3">
+              <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 flex-1 flex flex-col min-h-0">
+                <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-3">
                   <Upload className="text-indigo-600" />
                   Playlist
                 </h3>

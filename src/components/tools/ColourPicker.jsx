@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { Palette, RefreshCw, Copy, Check } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 import { audioEngine } from '../../utils/audio';
 
 const HTML_COLORS = [
@@ -107,37 +108,56 @@ const HTML_COLORS = [
   { name: 'Orange', rgb: 'rgb(255, 165, 0)' }
 ];
 
-// Shuffle colors once on load, take exactly 100
-const COLORS = HTML_COLORS.sort(() => Math.random() - 0.5).slice(0, 100);
+const getRandomColors = (count) => {
+  const shuffled = [...HTML_COLORS].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+const rgbToHex = (rgb) => {
+  const match = rgb.match(/\d+/g);
+  if (!match) return '#000000';
+  const [r, g, b] = match.map(Number);
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+};
 
 export const ColourPicker = () => {
+  const [gridColors, setGridColors] = useState(() => getRandomColors(30));
   const [selectedColor, setSelectedColor] = useState(null);
   const [isPicking, setIsPicking] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [copied, setCopied] = useState(null);
+  const [hasPicked, setHasPicked] = useState(false);
   const { settings } = useSettings();
 
   const pickColor = () => {
     if (isPicking) return;
+    
+    // Generate new colors if it's not the first time
+    if (hasPicked) {
+      setGridColors(getRandomColors(30));
+    }
+    setHasPicked(true);
+    
     setIsPicking(true);
     setSelectedColor(null);
+    setCopied(null);
 
-    let speed = 50;
-    let index = 0;
     let iterations = 0;
+    const maxIterations = 25;
 
     const animate = () => {
-      setActiveIndex(Math.floor(Math.random() * 100));
+      const idx = Math.floor(Math.random() * gridColors.length);
+      setActiveIndex(idx);
       audioEngine.playTick(settings.soundTheme);
 
       iterations++;
-      if (iterations < 20) {
-        setTimeout(animate, speed);
-      } else if (iterations < 30) {
-        setTimeout(animate, speed * 2);
+      if (iterations < maxIterations) {
+        setTimeout(animate, 50 + (iterations * 5));
       } else {
-        const finalIndex = Math.floor(Math.random() * 100);
-        setActiveIndex(finalIndex);
-        setSelectedColor(COLORS[finalIndex]);
+        const finalIdx = Math.floor(Math.random() * gridColors.length);
+        const finalColor = gridColors[finalIdx];
+        setSelectedColor(finalColor);
+        setActiveIndex(finalIdx);
         setIsPicking(false);
         audioEngine.playAlarm(settings.soundTheme);
       }
@@ -146,59 +166,109 @@ export const ColourPicker = () => {
     animate();
   };
 
+  const copyToClipboard = (text, type) => {
+    navigator.clipboard.writeText(text);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold text-primary">Colour Picker</h2>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-4 relative overflow-x-hidden">
+      <ToolHeader
+        title="Colour Picker"
+        icon={Palette}
+        description="Random HTML Colour Selection"
+        infoContent={
+          <p>Instantly select a random colour from a collection of standard HTML colours. Great for picking team colours, UI design inspiration, or classroom games.</p>
+        }
+      />
 
-      <div className="grid grid-cols-10 gap-1 sm:gap-2 p-4 bg-white rounded-2xl shadow-lg w-full">
-        {COLORS.map((color, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              scale: activeIndex === i ? 1.2 : 1,
-              zIndex: activeIndex === i ? 10 : 1,
-              opacity: (isPicking && activeIndex !== i) ? 0.5 : 1
-            }}
-            className={`w-full aspect-square rounded-md shadow-sm transition-colors duration-100 ${
-              activeIndex === i ? 'ring-4 ring-text ring-offset-2' : ''
-            }`}
-            style={{ backgroundColor: color.rgb }}
-            title={color.name}
-          />
-        ))}
-      </div>
-
-      <div className="flex flex-col md:flex-row items-center gap-8 min-h-[120px]">
-        <button
-          onClick={pickColor}
-          disabled={isPicking}
-          className="px-12 py-4 bg-primary text-white text-2xl font-bold rounded-2xl shadow-lg hover:bg-primary/90 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 whitespace-nowrap"
-        >
-          {isPicking ? 'Picking...' : 'Pick a Colour!'}
-        </button>
-
-        <AnimatePresence>
-          {selectedColor && !isPicking && (
+      {/* Main Content Area - justify-start to prevent jumping */}
+      <div className="flex-1 flex flex-col items-center justify-center py-4 gap-6">
+        {/* Interactive Grid */}
+        <div className="grid grid-cols-5 md:grid-cols-10 gap-3 p-4 bg-white rounded-[2rem] shadow-xl border border-slate-100 w-full max-w-3xl">
+          {gridColors.map((color, i) => (
             <motion.div
+              key={`${color.name}-${i}`}
               initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex flex-col sm:flex-row items-center gap-4 bg-white p-4 rounded-xl shadow-md border"
-            >
-              <div
-                className="w-16 h-16 rounded-full shadow-inner border border-gray-200"
-                style={{ backgroundColor: selectedColor.rgb }}
-              />
-              <div className="flex flex-col">
-                <span className="text-2xl font-mono text-gray-700 tracking-widest font-bold">
-                  {selectedColor.name}
-                </span>
-                <span className="text-sm text-gray-500 font-mono">
-                  {selectedColor.rgb}
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              animate={{ 
+                scale: activeIndex === i ? 1.4 : 1,
+                opacity: (isPicking && activeIndex !== i) ? 0.3 : 1,
+                zIndex: activeIndex === i ? 10 : 1
+              }}
+              whileHover={{ scale: isPicking ? 1 : 1.1 }}
+              className={`w-full aspect-square rounded-xl shadow-sm transition-all duration-200 cursor-pointer ${
+                activeIndex === i ? 'ring-4 ring-primary ring-offset-4 shadow-xl' : ''
+              }`}
+              style={{ backgroundColor: color.rgb }}
+              title={color.name}
+              onClick={() => { if(!isPicking) { setSelectedColor(color); setActiveIndex(i); } }}
+            />
+          ))}
+        </div>
+
+        {/* Action Button & Info */}
+        <div className="flex flex-col items-center gap-6 w-full max-w-3xl">
+          <button
+            onClick={pickColor}
+            disabled={isPicking}
+            className="flex items-center gap-4 px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-lg uppercase tracking-[0.2em] hover:bg-black transition-all active:scale-95 shadow-2xl disabled:opacity-50 group border-4 border-white"
+          >
+            <RefreshCw className={`w-6 h-6 ${isPicking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+            {isPicking ? 'Picking...' : 'Pick Colour'}
+          </button>
+
+          {/* Reserved space for cards to prevent layout shift */}
+          <div className="min-h-[120px] w-full">
+            <AnimatePresence mode="wait">
+              {selectedColor && !isPicking && (
+                <motion.div
+                  key={selectedColor.name}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full"
+                >
+                  {/* Name Card */}
+                  <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-1">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Colour Name</span>
+                    <span className="text-2xl font-black text-slate-800 text-center uppercase tracking-tighter break-words w-full">
+                      {selectedColor.name}
+                    </span>
+                  </div>
+
+                  {/* HEX Card */}
+                  <button
+                    onClick={() => copyToClipboard(rgbToHex(selectedColor.rgb), 'hex')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-1 hover:border-primary/30 transition-all relative group"
+                  >
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">HEX Code</span>
+                    <span className="text-2xl font-mono font-black text-slate-700">
+                      {rgbToHex(selectedColor.rgb)}
+                    </span>
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {copied === 'hex' ? <Check className="text-green-500 w-4 h-4" /> : <Copy className="text-slate-300 w-4 h-4" />}
+                    </div>
+                  </button>
+
+                  {/* RGB Card */}
+                  <button
+                    onClick={() => copyToClipboard(selectedColor.rgb, 'rgb')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-1 hover:border-primary/30 transition-all relative group"
+                  >
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RGB Values</span>
+                    <span className="text-sm font-mono font-black text-slate-600 text-center break-all">
+                      {selectedColor.rgb}
+                    </span>
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {copied === 'rgb' ? <Check className="text-green-500 w-4 h-4" /> : <Copy className="text-slate-300 w-4 h-4" />}
+                    </div>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );

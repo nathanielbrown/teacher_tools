@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dices, Trash2, RotateCcw, Plus, Calculator, ChevronRight, Hash } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 
@@ -130,23 +131,23 @@ const DieSVG = ({ sides, value, color, isRolling, size = 64, delay = 0 }) => {
       case 10: // D10 - Symmetric Pentagonal Trapezohedron
         return (
           <g filter="url(#diceShadow)">
-            <polygon points="50,5 68,45 50,75 32,45" fill="url(#d10-3)" /> {/* Center Kite */}
-            <polygon points="50,5 32,45 10,35" fill="url(#d10-1)" /> {/* Top Left Tri */}
-            <polygon points="50,5 90,35 68,45" fill="url(#d10-2)" /> {/* Top Right Tri */}
-            <polygon points="10,35 32,45 50,75 50,95" fill="url(#d10-4)" /> {/* Bot Left Quad */}
-            <polygon points="90,35 68,45 50,75 50,95" fill="url(#d10-1)" /> {/* Bot Right Quad */}
+            <polygon points="50,5 80,45 50,80 20,45" fill="url(#d10-3)" /> {/* Center Kite */}
+            <polygon points="50,5 20,45 5,35" fill="url(#d10-1)" /> {/* Top Left Tri */}
+            <polygon points="50,5 95,35 80,45" fill="url(#d10-2)" /> {/* Top Right Tri */}
+            <polygon points="5,35 20,45 50,80 50,95" fill="url(#d10-4)" /> {/* Bot Left Quad */}
+            <polygon points="95,35 80,45 50,80 50,95" fill="url(#d10-1)" /> {/* Bot Right Quad */}
             
             {/* Shading */}
-            <polygon points="50,5 32,45 10,35" fill="rgba(255,255,255,0.2)" />
-            <polygon points="50,5 68,45 50,75 32,45" fill="rgba(255,255,255,0.1)" />
-            <polygon points="10,35 32,45 50,75 50,95" fill="rgba(0,0,0,0.3)" />
-            <polygon points="90,35 68,45 50,75 50,95" fill="rgba(0,0,0,0.5)" />
+            <polygon points="50,5 20,45 5,35" fill="rgba(255,255,255,0.2)" />
+            <polygon points="50,5 80,45 50,80 20,45" fill="rgba(255,255,255,0.1)" />
+            <polygon points="5,35 20,45 50,80 50,95" fill="rgba(0,0,0,0.3)" />
+            <polygon points="95,35 80,45 50,80 50,95" fill="rgba(0,0,0,0.5)" />
             
             {/* Edges */}
-            <line x1="50" y1="5" x2="32" y2="45" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-            <line x1="50" y1="5" x2="68" y2="45" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-            <line x1="32" y1="45" x2="50" y2="75" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-            <line x1="68" y1="45" x2="50" y2="75" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+            <line x1="50" y1="5" x2="20" y2="45" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <line x1="50" y1="5" x2="80" y2="45" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <line x1="20" y1="45" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+            <line x1="80" y1="45" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
           </g>
         );
       case 12: // D12 - Black
@@ -278,20 +279,26 @@ export const DiceRoller = () => {
   const total = useMemo(() => pool.reduce((acc, die) => acc + die.value, 0), [pool]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 space-y-12 select-none h-full flex flex-col">
-      <div className="flex-1 bg-white rounded-[3.5rem] shadow-2xl border-4 border-white overflow-hidden relative flex flex-col min-h-[600px]">
-        <div className="p-8 border-b border-slate-50 flex justify-between items-center">
-           <div className="flex items-center gap-4">
-              <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
-                <Dices size={24} />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Roll dice</h2>
-           </div>
-           <div className="flex flex-col items-end">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Result</span>
-              <span className="text-5xl font-black text-slate-900 tabular-nums">{total}</span>
-           </div>
-        </div>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6">
+      <ToolHeader
+        title="Dice Roller"
+        icon={Dices}
+        description="Multi-sided 3D Dice Laboratory"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Add Dice</strong>
+              Click any of the dice buttons at the bottom to add them to your rolling pool. You can add up to 24 dice!
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Remove & Reset</strong>
+              Click an individual die to remove it, or use the reset button to clear the entire pool.
+            </p>
+          </>
+        }
+      />
+
+      <div className="flex-1 bg-white rounded-[2.5rem] shadow-2xl border-4 border-white overflow-hidden relative flex flex-col min-h-[500px]">
 
         <div className="flex-1 p-12 flex flex-wrap content-center justify-center gap-14 overflow-y-auto no-scrollbar bg-slate-50/30">
           <AnimatePresence mode="popLayout">
@@ -324,8 +331,29 @@ export const DiceRoller = () => {
           </AnimatePresence>
         </div>
 
-        <div className="p-10 bg-white border-t border-slate-100 flex flex-col items-center gap-10">
-           <div className="flex flex-wrap justify-center gap-5">
+        <div className="p-8 bg-white border-t border-slate-100 flex flex-wrap items-center justify-center gap-10">
+           {/* Roll & Reset Controls */}
+           <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+             <button
+               onClick={rollPool}
+               disabled={pool.length === 0 || isRolling}
+               className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-wider hover:bg-black transition-all active:scale-95 shadow-md disabled:opacity-50"
+             >
+               ROLL
+             </button>
+             <button
+               onClick={clearPool}
+               disabled={pool.length === 0}
+               className="px-4 text-slate-400 rounded-xl hover:text-red-600 transition-all active:scale-95 disabled:opacity-30"
+               title="Clear Pool"
+             >
+               <RotateCcw size={20} />
+             </button>
+           </div>
+           
+           <div className="w-px h-12 bg-slate-200 hidden md:block"></div>
+
+           <div className="flex flex-wrap justify-center gap-4">
              {DICE_TYPES.map(type => (
                <button
                  key={type.sides}
@@ -335,47 +363,36 @@ export const DiceRoller = () => {
                  <DieSVG sides={type.sides} value={type.sides} isRolling={false} size={48} />
                </button>
              ))}
-             <button
-               onClick={clearPool}
-               className="w-16 h-16 bg-slate-900 text-white rounded-2xl shadow-xl hover:bg-rose-500 transition-all flex items-center justify-center"
-               title="Clear All"
-             >
-               <RotateCcw size={24} />
-             </button>
            </div>
-
-           <button
-             onClick={rollPool}
-             disabled={pool.length === 0 || isRolling}
-             className={`
-               px-24 py-6 rounded-3xl font-black text-2xl tracking-widest transition-all active:scale-95 shadow-2xl
-               ${pool.length === 0 || isRolling 
-                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
-                 : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200'}
-             `}
-           >
-             {isRolling ? 'ROLLING...' : 'ROLL'}
-           </button>
         </div>
       </div>
 
-      {rollHistory.length > 0 && (
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-50 flex items-center gap-8 overflow-x-auto no-scrollbar">
+      <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-50 flex items-center justify-between gap-8 overflow-x-auto no-scrollbar">
+         <div className="flex items-center gap-8 flex-1">
            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 border-r pr-8">Roll History</span>
            <div className="flex gap-4">
-              {rollHistory.map((h, i) => (
-                <motion.div 
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  key={i} 
-                  className="px-6 py-3 bg-slate-50 rounded-2xl font-black text-indigo-600 border border-slate-100 shadow-sm"
-                >
-                  {h.total}
-                </motion.div>
-              ))}
+              {rollHistory.length === 0 ? (
+                <span className="text-sm font-bold text-slate-300">No rolls yet</span>
+              ) : (
+                rollHistory.map((h, i) => (
+                  <motion.div 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    key={i} 
+                    className="px-6 py-3 bg-slate-50 rounded-2xl font-black text-indigo-600 border border-slate-100 shadow-sm"
+                  >
+                    {h.total}
+                  </motion.div>
+                ))
+              )}
            </div>
-        </div>
-      )}
+         </div>
+         
+         <div className="flex flex-col items-end shrink-0 pl-8 border-l border-slate-100">
+           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Result</span>
+           <span className="text-4xl font-black text-slate-900 tabular-nums">{total}</span>
+         </div>
+      </div>
     </div>
   );
 };

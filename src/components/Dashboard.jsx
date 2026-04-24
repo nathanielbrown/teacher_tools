@@ -35,12 +35,12 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
   const colors = getThemeColors();
 
   return (
-    <div className="space-y-12 pb-12 font-['Outfit']">
-      <div className="flex flex-col items-center text-center space-y-4">
+    <div className="space-y-6 pb-6 font-['Outfit']">
+      <div className="flex flex-col items-center text-center space-y-2">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`text-6xl font-black tracking-tight ${colors.text} drop-shadow-sm`}
+          className={`text-4xl font-black tracking-tight ${colors.text} drop-shadow-sm`}
         >
           {isEarlyYears ? '🌟 Welcome! 🌟' : activeTab}
         </motion.h1>
@@ -56,14 +56,14 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
         </motion.p>
       </div>
 
-      <div className={`glass-card p-10 rounded-[3rem] space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700`}>
-        <div className="space-y-16">
+      <div className={`glass-card p-6 md:p-10 rounded-[3rem] space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700`}>
+        <div className="space-y-8">
           {activeMainSection.subSections.map(subSection => {
             const sectionTools = tools.filter(t => t.mainSection === activeMainSection.title && t.section === subSection);
             if (sectionTools.length === 0) return null;
 
             return (
-              <div key={subSection} className="space-y-8">
+              <div key={subSection} className="space-y-4">
                 {(activeMainSection.title === 'Teacher Tools' || activeMainSection.title === 'Student Tools') && (
                   <div className="flex items-center gap-4">
                     <h3 className="text-2xl font-black text-slate-800 tracking-tight">{subSection}</h3>
@@ -71,7 +71,7 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
                   </div>
                 )}
                 <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
                   variants={containerVariants}
                   initial="hidden"
                   animate="show"
@@ -85,29 +85,26 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
                         whileHover={{ scale: 1.05, y: -5 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => onNavigate(tool.id)}
-                        className={`group relative bg-white/50 hover:bg-white p-6 rounded-[2rem] shadow-sm hover:shadow-2xl hover:shadow-${colors.accent}/10 transition-all duration-300 border-2 border-transparent hover:border-${colors.accent}/20 flex flex-col items-center text-center gap-5 h-full`}
+                        className={`group relative bg-white/50 hover:bg-white p-4 rounded-[1.5rem] shadow-sm hover:shadow-2xl hover:shadow-${colors.accent}/10 transition-all duration-300 border-2 border-transparent hover:border-${colors.accent}/20 flex flex-col items-center text-center gap-3 h-full`}
                       >
                         <div 
-                          className={`p-5 rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                          className={`p-3 rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}
                           style={{ backgroundColor: isEarlyYears ? `${tool.color}15` : undefined }}
                         >
-                          <Icon 
-                            size={40} 
-                            className={isEarlyYears ? '' : colors.text} 
-                            style={{ color: isEarlyYears ? tool.color : undefined }}
-                          />
+                          {isEarlyYears ? (
+                            <span className="text-3xl filter drop-shadow-sm leading-none">{tool.emoji}</span>
+                          ) : (
+                            <Icon 
+                              size={28} 
+                              className={colors.text} 
+                            />
+                          )}
                         </div>
                         <div className="space-y-1">
-                          <span className="text-lg font-bold text-slate-800 block leading-tight">
+                          <span className="text-sm font-bold text-slate-800 block leading-tight">
                             {tool.name}
                           </span>
                         </div>
-                        
-                        {/* Decorative background element */}
-                        <div 
-                          className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 transition-transform duration-500 group-hover:scale-150`} 
-                          style={{ backgroundColor: isEarlyYears ? `${tool.color}08` : undefined }}
-                        />
                       </motion.button>
                     )
                   })}

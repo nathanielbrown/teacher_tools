@@ -4,6 +4,7 @@ import { Trophy, Play, RotateCcw, ArrowLeft, Gamepad2, Circle, CheckCircle2, XCi
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const MARBLE_TYPES = [
   { name: 'Red', colorClass: 'bg-red-500 shadow-[inset_-4px_-4px_8px_rgba(0,0,0,0.2),0_0_15px_rgba(239,68,68,0.4)]', textClass: 'text-red-600' },
@@ -180,7 +181,24 @@ export const MarbleCounting = () => {
 
   if (gameState === 'menu') {
     return (
-      <div className="max-w-4xl mx-auto h-full flex flex-col items-center justify-center p-4">
+      <div className="w-full mx-auto h-full flex flex-col px-4 pt-2 pb-8 gap-8">
+        <ToolHeader
+          title="Marble Counting"
+          icon={Circle}
+          description="Visual Tracking & Numeracy Game"
+          infoContent={
+            <>
+              <p>
+                <strong className="text-white block mb-1">How to Play</strong>
+                Count the specific color of marbles as they bounce around the screen. Select the correct number from the options at the bottom.
+              </p>
+              <p>
+                <strong className="text-white block mb-1">Game Modes</strong>
+                Choose from three difficulty ranges: 1-5, 5-10, or 1-20 marbles per color.
+              </p>
+            </>
+          }
+        />
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -189,7 +207,7 @@ export const MarbleCounting = () => {
           <div className="bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <Circle size={48} className="text-primary fill-primary" />
           </div>
-          <h1 className="text-5xl font-black text-gray-800 tracking-tight">Marble Counting</h1>
+          <h2 className="text-4xl font-black text-gray-800 tracking-tight">Select Difficulty</h2>
           <p className="text-xl text-gray-500 font-medium max-w-md mx-auto">
             Count the specific colour of marbles as they bounce around!
           </p>
@@ -212,7 +230,7 @@ export const MarbleCounting = () => {
 
   if (gameState === 'result') {
     return (
-      <div className="max-w-4xl mx-auto h-full flex flex-col items-center justify-center p-4">
+      <div className="w-full mx-auto h-full flex flex-col items-center justify-center p-4">
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -239,17 +257,38 @@ export const MarbleCounting = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto h-full flex flex-col p-4 space-y-6">
-      <div className="flex justify-between items-center px-4">
-        <button onClick={() => setGameState('menu')} className="p-3 hover:bg-gray-100 rounded-2xl transition-colors text-gray-400">
-          <ArrowLeft size={24} />
-        </button>
-        <div className="flex items-center gap-4 bg-white px-6 py-2 rounded-2xl shadow-sm border border-gray-100">
-          <div className="text-gray-400 font-bold text-sm uppercase tracking-widest">Progress</div>
-          <div className="text-xl font-black text-primary">{currentIndex + 1} / 10</div>
+    <div className="w-full mx-auto h-full flex flex-col px-4 pt-2 pb-8 space-y-6">
+      <ToolHeader
+        title="Marble Counting"
+        icon={Circle}
+        description="Visual Tracking & Numeracy Game"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Count the specific color of marbles as they bounce around the screen. Select the correct number from the options at the bottom.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Game Modes</strong>
+              Choose from three difficulty ranges: 1-5, 5-10, or 1-20 marbles per color.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setGameState('menu')} 
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400"
+            title="Return to Menu"
+          >
+            <RotateCcw size={20} />
+          </button>
+          <div className="flex items-center gap-4 bg-white px-4 py-1.5 rounded-xl shadow-sm border border-gray-100">
+            <div className="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Progress</div>
+            <div className="text-lg font-black text-primary">{currentIndex + 1} / 10</div>
+          </div>
         </div>
-        <div className="w-12" />
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 relative bg-white rounded-[3rem] shadow-xl border-4 border-gray-100 overflow-hidden" ref={containerRef}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,1)_0%,_rgba(243,244,246,1)_100%)] opacity-50" />

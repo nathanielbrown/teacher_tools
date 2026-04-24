@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Grid3X3, RotateCcw, Trophy, Brain, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, BookOpen, Sparkles } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 // Sudoku Logic Utilities
 const isValid = (grid, row, col, num) => {
@@ -245,20 +246,25 @@ export const Sudoku = () => {
   }, [selected, status, grid]);
 
   return (
-    <div className="max-w-6xl mx-auto h-full flex flex-col gap-8 px-4 lg:px-0 py-8">
-      {/* Header */}
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-600">
-            <Grid3X3 size={40} />
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Sudoku</h2>
-            <p className="text-slate-400 font-medium tracking-wide italic">Sharpen your mind with classic logic.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+    <div className="w-full mx-auto h-full flex flex-col gap-8 px-4 lg:px-0 pt-2 pb-8">
+      <ToolHeader
+        title="Sudoku"
+        icon={Grid3X3}
+        description="Classic Logic Puzzle"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">The Goal</strong>
+              Fill the 9×9 grid so that each row, column, and 3×3 box contains all digits from 1 to 9.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Controls</strong>
+              Click cells to increment values or use your keyboard (1-9). Conflicting numbers are highlighted in red on lower difficulties.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-100">
           {['Easy', 'Medium', 'Hard'].map((level) => (
             <button
               key={level}
@@ -266,17 +272,17 @@ export const Sudoku = () => {
                 setDifficulty(level);
                 initGame(level);
               }}
-              className={`px-6 py-2.5 rounded-xl font-black transition-all ${
+              className={`px-4 py-1.5 rounded-lg font-black transition-all text-[10px] ${
                 difficulty === level 
-                  ? 'bg-white text-indigo-600 shadow-md scale-105' 
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
+                  ? 'bg-white text-indigo-600 shadow-sm' 
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               {level}
             </button>
           ))}
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0">
         {/* Main Game Area */}

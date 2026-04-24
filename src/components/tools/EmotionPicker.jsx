@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { UserCircle } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 const EMOTIONS = [
   { emoji: '😀', label: 'Happy' },
@@ -29,10 +30,19 @@ export const EmotionPicker = () => {
   const [selectedEmotion, setSelectedEmotion] = useState(null);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 max-w-4xl mx-auto pb-12">
-      <h2 className="text-3xl font-bold text-primary">How are you feeling?</h2>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Emotion Picker"
+        icon={UserCircle}
+        description="Check-in and Emotional Intelligence"
+        infoContent={
+          <p>A simple way for students to express their current emotional state. Select an emoji to see a larger check-in message.</p>
+        }
+      />
 
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 gap-4 sm:gap-6 bg-white p-6 sm:p-8 rounded-3xl shadow-xl w-full border-2 border-gray-100">
+      <div className="flex flex-col w-full bg-white p-6 sm:p-8 rounded-3xl shadow-xl border-2 border-gray-100">
+        <label className="text-sm text-gray-500 font-bold uppercase tracking-wider text-center border-b pb-2 mb-6 block w-full">Select Emotion</label>
+        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 gap-4 sm:gap-6">
         {EMOTIONS.map((emotion, index) => (
           <button
             key={index}
@@ -47,6 +57,7 @@ export const EmotionPicker = () => {
             </span>
           </button>
         ))}
+        </div>
       </div>
 
       <div className="min-h-[160px] flex items-center justify-center w-full">

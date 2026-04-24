@@ -5,6 +5,7 @@ import {
   Settings2, Info, ChevronRight, TrendingUp, FlaskConical,
   Wind, Zap, Waves, Palette
 } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 // Constants
 const BEAKER_WIDTH = 300;
@@ -209,42 +210,49 @@ export const InkDiffusion = () => {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto min-h-0 h-full flex flex-col gap-4 px-6 py-6 select-none overflow-y-auto lg:overflow-hidden">
-      {/* Header */}
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
+    <div className="max-w-[1400px] mx-auto min-h-0 h-full flex flex-col gap-4 px-6 pt-2 pb-8 select-none overflow-y-auto lg:overflow-hidden">
+      <ToolHeader
+        title="Ink Diffusion"
+        icon={Droplets}
+        description="Explore Kinetic Energy and Particle Motion"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Temperature and Speed</strong>
+              Compare how ink spreads in hot vs cold water. Heat is the kinetic energy of particles—hotter water has faster-moving molecules.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Observation</strong>
+              Click anywhere in the water to add an ink drop. Notice how the ink spreads faster and more randomly in the higher-temperature beaker.
+            </p>
+          </>
+        }
+      >
         <div className="flex items-center gap-4">
-          <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-600">
-            <Droplets size={40} />
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Ink Diffusion</h2>
-            <p className="text-slate-400 font-medium italic">Explore kinetic energy through simultaneous multi-color drops.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="bg-indigo-50 px-6 py-3 rounded-2xl border border-indigo-100 flex items-center gap-3">
-            <Droplets size={20} className="text-indigo-600 animate-bounce" />
+          <div className="bg-indigo-50 px-6 py-2 rounded-2xl border border-indigo-100 flex items-center gap-3">
+            <Droplets size={18} className="text-indigo-600 animate-bounce" />
             <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Click water to add drops</span>
           </div>
           
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`p-4 rounded-2xl transition-all active:scale-95 shadow-md ${
+            className={`p-2 rounded-2xl transition-all active:scale-95 shadow-md ${
               isPlaying ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-emerald-500 text-white shadow-emerald-200 hover:bg-emerald-600'
             }`}
+            title={isPlaying ? "Pause Simulation" : "Resume Simulation"}
           >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
 
           <button
             onClick={resetLab}
-            className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 shadow-md"
+            className="p-2 bg-slate-50 text-slate-400 rounded-2xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 shadow-md"
+            title="Clear Beakers"
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={20} />
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0">
         {/* Lab Area */}

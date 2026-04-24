@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Trash2, RotateCcw, Shuffle, Save, Layout as LayoutIcon, 
-  UserPlus, UserMinus, Monitor, Square, Circle, Grid3X3, Plus, X
+  UserPlus, UserMinus, Monitor, Square, Circle, Grid3X3, Plus, X,
+  DoorOpen, AppWindow, TreePine, Presentation, Settings
 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 import { audioEngine } from '../../utils/audio';
 
 const FURNITURE_TYPES = [
@@ -13,51 +15,115 @@ const FURNITURE_TYPES = [
   { id: 'table-quad', name: 'Quad Table', icon: Square, seats: 4, w: 140, h: 100, type: 'rect' },
   { id: 'table-round', name: 'Round Table', icon: Circle, seats: 4, w: 100, h: 100, type: 'circle' },
   { id: 'teacher-desk', name: 'Teacher Desk', icon: Monitor, seats: 0, w: 160, h: 80, type: 'teacher' },
+  { id: 'door', name: 'Door', icon: DoorOpen, seats: 0, w: 100, h: 20, type: 'door' },
+  { id: 'window', name: 'Window', icon: AppWindow, seats: 0, w: 120, h: 20, type: 'window' },
+  { id: 'plant', name: 'Plant', icon: TreePine, seats: 0, w: 60, h: 60, type: 'plant' },
+  { id: 'smart-board', name: 'Smart Board', icon: Presentation, seats: 0, w: 200, h: 20, type: 'smart-board' },
 ];
 
-const PRESETS = {
-  traditional: {
-    name: 'Traditional Rows',
-    items: [
-      { id: 't1', typeId: 'teacher-desk', x: 300, y: 50, assignments: {} },
-      { id: 'd1', typeId: 'desk-single', x: 100, y: 200, assignments: {} },
-      { id: 'd2', typeId: 'desk-single', x: 250, y: 200, assignments: {} },
-      { id: 'd3', typeId: 'desk-single', x: 400, y: 200, assignments: {} },
-      { id: 'd4', typeId: 'desk-single', x: 550, y: 200, assignments: {} },
-      { id: 'd5', typeId: 'desk-single', x: 100, y: 320, assignments: {} },
-      { id: 'd6', typeId: 'desk-single', x: 250, y: 320, assignments: {} },
-      { id: 'd7', typeId: 'desk-single', x: 400, y: 320, assignments: {} },
-      { id: 'd8', typeId: 'desk-single', x: 550, y: 320, assignments: {} },
-      { id: 'd9', typeId: 'desk-single', x: 100, y: 440, assignments: {} },
-      { id: 'd10', typeId: 'desk-single', x: 250, y: 440, assignments: {} },
-      { id: 'd11', typeId: 'desk-single', x: 400, y: 440, assignments: {} },
-      { id: 'd12', typeId: 'desk-single', x: 550, y: 440, assignments: {} },
-    ]
-  },
-  clusters: {
-    name: 'Group Clusters',
-    items: [
-      { id: 't1', typeId: 'teacher-desk', x: 300, y: 50, assignments: {} },
-      { id: 'c1', typeId: 'table-quad', x: 100, y: 200, assignments: {} },
-      { id: 'c2', typeId: 'table-quad', x: 450, y: 200, assignments: {} },
-      { id: 'c3', typeId: 'table-quad', x: 100, y: 400, assignments: {} },
-      { id: 'c4', typeId: 'table-quad', x: 450, y: 400, assignments: {} },
-    ]
-  },
-  ushape: {
-    name: 'U-Shape',
-    items: [
-      { id: 't1', typeId: 'teacher-desk', x: 300, y: 50, assignments: {} },
-      { id: 'u1', typeId: 'table-double', x: 100, y: 150, assignments: {}, rotation: 90 },
-      { id: 'u2', typeId: 'table-double', x: 100, y: 300, assignments: {}, rotation: 90 },
-      { id: 'u3', typeId: 'table-double', x: 100, y: 450, assignments: {}, rotation: 90 },
-      { id: 'u4', typeId: 'table-double', x: 250, y: 500, assignments: {} },
-      { id: 'u5', typeId: 'table-double', x: 400, y: 500, assignments: {} },
-      { id: 'u6', typeId: 'table-double', x: 550, y: 150, assignments: {}, rotation: 270 },
-      { id: 'u7', typeId: 'table-double', x: 550, y: 300, assignments: {}, rotation: 270 },
-      { id: 'u8', typeId: 'table-double', x: 550, y: 450, assignments: {}, rotation: 270 },
-    ]
+const generatePresets = (studentCount) => {
+  const traditionalItems = [
+    { id: 'door1', typeId: 'door', x: -30, y: 250, rotation: 90, assignments: {} },
+    { id: 't1', typeId: 'teacher-desk', x: 300, y: 50, assignments: {} }
+  ];
+  const cols = Math.ceil(Math.sqrt(studentCount));
+  const rows = Math.ceil(studentCount / cols);
+  let count = 0;
+  for(let r=0; r<rows; r++) {
+    for(let c=0; c<cols; c++) {
+      if(count >= studentCount) break;
+      traditionalItems.push({
+        id: `d${count}`,
+        typeId: 'desk-single',
+        x: 100 + c * 100,
+        y: 200 + r * 80,
+        assignments: {}
+      });
+      count++;
+    }
   }
+
+  const numClusters = Math.ceil(studentCount / 4);
+  const clusterCols = Math.ceil(Math.sqrt(numClusters));
+  const clusterRows = Math.ceil(numClusters / clusterCols);
+  const clusterItems = [
+    { id: 'door1', typeId: 'door', x: -30, y: 250, rotation: 90, assignments: {} },
+    { id: 't1', typeId: 'teacher-desk', x: 300, y: 50, assignments: {} }
+  ];
+  count = 0;
+  for(let r=0; r<clusterRows; r++) {
+    for(let c=0; c<clusterCols; c++) {
+      if(count >= numClusters) break;
+      clusterItems.push({
+        id: `c${count}`,
+        typeId: 'table-quad',
+        x: 100 + c * 200,
+        y: 200 + r * 150,
+        assignments: {}
+      });
+      count++;
+    }
+  }
+
+  const numDouble = Math.ceil(studentCount / 2);
+  let bottomCount = Math.min(8, numDouble); // Allow more on bottom to prevent too long sides
+  let sideCount = numDouble - bottomCount;
+  let leftCount = Math.ceil(sideCount / 2);
+  let rightCount = Math.floor(sideCount / 2);
+  
+  const uShapeItems = [
+    { id: 'door1', typeId: 'door', x: -30, y: 250, rotation: 90, assignments: {} },
+    { id: 't1', typeId: 'teacher-desk', x: 350, y: 50, assignments: {} }
+  ];
+  
+  const xOffset = 60;
+  const rightX = 660; // Forced right edge
+  const yOffset = 150;
+  const stepY = 145;
+
+  for(let i=0; i<leftCount; i++) {
+    uShapeItems.push({
+      id: `u-l${i}`,
+      typeId: 'table-double',
+      x: xOffset,
+      y: yOffset + i * stepY,
+      assignments: {},
+      rotation: 90
+    });
+  }
+
+  const bottomY = yOffset + Math.max(0, leftCount - 1) * stepY + 120;
+  const bottomStartX = xOffset + 100;
+  const bottomEndX = rightX - 100;
+  const stepX = bottomCount > 1 ? (bottomEndX - bottomStartX) / (bottomCount - 1) : 0;
+  
+  for(let i=0; i<bottomCount; i++) {
+    uShapeItems.push({
+      id: `u-b${i}`,
+      typeId: 'table-double',
+      x: bottomStartX + i * stepX,
+      y: bottomY,
+      assignments: {},
+      rotation: 0
+    });
+  }
+
+  for(let i=0; i<rightCount; i++) {
+    uShapeItems.push({
+      id: `u-r${i}`,
+      typeId: 'table-double',
+      x: rightX,
+      y: yOffset + i * stepY,
+      assignments: {},
+      rotation: 270
+    });
+  }
+
+  return {
+    traditional: { name: 'Rows', items: traditionalItems },
+    clusters: { name: 'Groups', items: clusterItems },
+    ushape: { name: 'U-Shape', items: uShapeItems }
+  };
 };
 
 export const SeatingPlanGenerator = () => {
@@ -66,8 +132,10 @@ export const SeatingPlanGenerator = () => {
   const [planItems, setPlanItems] = useState([]);
   const [draggedItem, setDraggedItem] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [showPresets, setShowPresets] = useState(false);
+  const [layoutStudentCount, setLayoutStudentCount] = useState(28);
+  const [showConfig, setShowConfig] = useState(true);
   const constraintsRef = useRef(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
 
   const selectedClass = settings.classes.find(c => c.id === selectedClassId);
   const students = selectedClass ? selectedClass.students : [];
@@ -79,7 +147,7 @@ export const SeatingPlanGenerator = () => {
     if (savedPlans[selectedClassId]) {
       setPlanItems(savedPlans[selectedClassId]);
     } else {
-      setPlanItems(PRESETS.traditional.items);
+      setPlanItems(generatePresets(layoutStudentCount).traditional.items);
     }
   }, [selectedClassId]);
 
@@ -95,8 +163,8 @@ export const SeatingPlanGenerator = () => {
     const newItem = {
       id: `item-${Date.now()}`,
       typeId,
-      x: 100,
-      y: 100,
+      x: 350,
+      y: 250,
       assignments: {},
       rotation: 0
     };
@@ -201,11 +269,11 @@ export const SeatingPlanGenerator = () => {
   };
 
   const loadPreset = (presetKey) => {
-    const preset = PRESETS[presetKey];
+    const presets = generatePresets(layoutStudentCount);
+    const preset = presets[presetKey];
     if (preset) {
       setPlanItems(preset.items);
       savePlan(preset.items);
-      setShowPresets(false);
       audioEngine.playTick(settings.soundTheme);
     }
   };
@@ -221,124 +289,144 @@ export const SeatingPlanGenerator = () => {
   const assignedSet = getAssignedStudents();
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-180px)] flex flex-col gap-6 p-4">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
-            <LayoutIcon size={32} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-none">Seating Plan</h2>
-            <p className="text-slate-400 font-medium text-sm mt-1">Design your classroom and assign students.</p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
+    <div className="w-full mx-auto h-full flex flex-col gap-6 px-4 pt-2 pb-8 select-none overflow-hidden">
+      <ToolHeader
+        title="Seating Plan"
+        icon={Users}
+        description="Dynamic Classroom Layout Architect"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Architecting the Room</strong>
+              Drag and drop desks and tables to match your physical classroom layout. You can rotate items and add different table shapes.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Smart Seating</strong>
+              Select a class list to populate the seats. Use the shuffle tool to randomly assign students to desks, or drag students manually to specific spots.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-3">
           <select
             value={selectedClassId}
             onChange={(e) => setSelectedClassId(e.target.value)}
-            className="p-3 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 outline-none font-bold text-slate-600"
+            className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl font-black text-xs text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm"
           >
             {settings.classes.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
 
-          <button
-            onClick={() => setShowPresets(!showPresets)}
-            className="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all"
-          >
-            <Grid3X3 size={18} /> PRESETS
-          </button>
-
-          <button
-            onClick={randomiseSeating}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
-          >
-            <Shuffle size={18} /> RANDOMISE
-          </button>
-
-          <button
-            onClick={clearAssignments}
-            className="p-3 text-slate-400 hover:text-red-500 transition-colors"
-            title="Clear all assignments"
-          >
-            <RotateCcw size={20} />
-          </button>
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-100">
+            <button
+              onClick={randomiseSeating}
+              className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-slate-400 hover:text-blue-600 transition-all"
+              title="Shuffle Students"
+            >
+              <Shuffle size={20} />
+            </button>
+            <button
+              onClick={clearAssignments}
+              className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-slate-400 hover:text-red-500 transition-all"
+              title="Clear All Seats"
+            >
+              <RotateCcw size={20} />
+            </button>
+            <button
+              onClick={() => setShowConfig(!showConfig)}
+              className={`p-2 rounded-lg transition-all ${showConfig ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm'}`}
+              title="Toggle Config"
+            >
+              {showConfig ? <X size={20} /> : <Settings size={20} />}
+            </button>
+          </div>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 flex gap-6 min-h-0 relative">
-        {/* Presets Popover */}
         <AnimatePresence>
-          {showPresets && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute top-0 right-0 z-50 bg-white p-6 rounded-3xl shadow-2xl border-2 border-slate-100 w-64"
+          {showConfig && (
+            <motion.div 
+              initial={{ opacity: 0, x: -20, width: 0 }}
+              animate={{ opacity: 1, x: 0, width: 256 }}
+              exit={{ opacity: 0, x: -20, width: 0 }}
+              className="w-64 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar overflow-x-hidden"
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">Presets</h3>
-                <button onClick={() => setShowPresets(false)}><X size={18} /></button>
+              {/* Layouts Section */}
+              <div className="bg-white p-4 rounded-3xl border-2 border-slate-100 shadow-sm flex flex-col gap-3">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Layouts</h3>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between text-sm font-bold text-slate-600">
+                    <span>Students:</span>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="100" 
+                      value={layoutStudentCount}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val)) setLayoutStudentCount(val);
+                      }}
+                      className="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-center focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {Object.entries(generatePresets(layoutStudentCount)).map(([key, preset]) => (
+                      <button
+                        key={key}
+                        onClick={() => loadPreset(key)}
+                        className="w-full p-2 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl text-center font-bold transition-all text-[11px] truncate"
+                        title={preset.name}
+                      >
+                        {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                {Object.entries(PRESETS).map(([key, preset]) => (
-                  <button
-                    key={key}
-                    onClick={() => loadPreset(key)}
-                    className="w-full p-3 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl text-left font-bold transition-all"
-                  >
-                    {preset.name}
-                  </button>
-                ))}
+
+              <div className="bg-white p-4 rounded-3xl border-2 border-slate-100 shadow-sm flex flex-col gap-3">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Furniture</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {FURNITURE_TYPES.map(type => {
+                    const Icon = type.icon;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => addItem(type.id)}
+                        className="flex flex-col items-center gap-1.5 p-2 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all group"
+                      >
+                        <Icon size={24} className="text-slate-400 group-hover:text-indigo-500" />
+                        <span className="text-[10px] font-black uppercase text-center">{type.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-3xl border-2 border-slate-100 shadow-sm flex flex-col gap-3 flex-1 min-h-0">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2 flex justify-between items-center">
+                  Students
+                  <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px]">{assignedSet.size}/{students.length}</span>
+                </h3>
+                <div className="flex-1 overflow-y-auto space-y-1">
+                  {students.map(student => (
+                    <div 
+                      key={student}
+                      className={`p-1.5 px-3 rounded-xl text-sm font-bold flex items-center justify-between ${
+                        assignedSet.has(student) ? 'bg-indigo-50 text-indigo-400' : 'bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      {student}
+                      {assignedSet.has(student) && <Users size={12} />}
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Toolbar Sidebar */}
-        <div className="w-64 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
-          <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-sm flex flex-col gap-4">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Furniture</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {FURNITURE_TYPES.map(type => {
-                const Icon = type.icon;
-                return (
-                  <button
-                    key={type.id}
-                    onClick={() => addItem(type.id)}
-                    className="flex flex-col items-center gap-2 p-3 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all group"
-                  >
-                    <Icon size={24} className="text-slate-400 group-hover:text-indigo-500" />
-                    <span className="text-[10px] font-black uppercase text-center">{type.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-sm flex flex-col gap-4 flex-1 min-h-0">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2 flex justify-between items-center">
-              Students
-              <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px]">{assignedSet.size}/{students.length}</span>
-            </h3>
-            <div className="flex-1 overflow-y-auto space-y-1">
-              {students.map(student => (
-                <div 
-                  key={student}
-                  className={`p-2 rounded-xl text-sm font-bold flex items-center justify-between ${
-                    assignedSet.has(student) ? 'bg-indigo-50 text-indigo-400' : 'bg-slate-50 text-slate-600'
-                  }`}
-                >
-                  {student}
-                  {assignedSet.has(student) && <Users size={12} />}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Canvas Area */}
         <div 
@@ -359,10 +447,12 @@ export const SeatingPlanGenerator = () => {
                 <motion.div
                   key={item.id}
                   drag
-                  dragConstraints={constraintsRef}
+                  dragMomentum={false}
+                  onPointerDown={(e) => {
+                    dragOffsetRef.current = { itemX: item.x, itemY: item.y };
+                  }}
                   onDragEnd={(e, info) => {
-                    const rect = constraintsRef.current.getBoundingClientRect();
-                    updateItemPos(item.id, info.point.x - rect.left - type.w/2, info.point.y - rect.top - type.h/2);
+                    updateItemPos(item.id, dragOffsetRef.current.itemX + info.offset.x, dragOffsetRef.current.itemY + info.offset.y);
                   }}
                   initial={{ x: item.x, y: item.y }}
                   animate={{ 
@@ -387,6 +477,22 @@ export const SeatingPlanGenerator = () => {
                       <Monitor size={24} />
                       <span className="text-[10px] font-black uppercase">TEACHER</span>
                     </div>
+                  ) : type.type === 'door' ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-amber-100 border-2 border-amber-800/20 text-amber-900 rounded-[4px]">
+                      <span className="text-[10px] font-black tracking-widest uppercase">DOOR</span>
+                    </div>
+                  ) : type.type === 'window' ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-sky-100 border-2 border-sky-400/30 text-sky-700 rounded-[4px]">
+                      <span className="text-[10px] font-black tracking-widest uppercase">WINDOW</span>
+                    </div>
+                  ) : type.type === 'plant' ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-full">
+                      <TreePine size={28} />
+                    </div>
+                  ) : type.type === 'smart-board' ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-slate-800 border-4 border-slate-400 text-white rounded-lg shadow-inner">
+                      <span className="text-[10px] font-black tracking-widest uppercase">SMART BOARD</span>
+                    </div>
                   ) : (
                     <div className={`grid gap-1 w-full h-full ${type.seats === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                       {[...Array(type.seats)].map((_, i) => {
@@ -399,7 +505,7 @@ export const SeatingPlanGenerator = () => {
                               setSelectedItem({ ...item, activeSeat: i });
                             }}
                             title={assigned || 'Empty seat'}
-                            className={`flex items-center justify-center text-[10px] font-black p-1 text-center transition-all overflow-hidden ${
+                            className={`flex items-center justify-center text-[9px] font-bold p-0.5 leading-tight text-center transition-all overflow-hidden ${
                               type.type === 'circle' ? 'rounded-full' : 'rounded-lg'
                             } ${
                               assigned 
@@ -408,7 +514,7 @@ export const SeatingPlanGenerator = () => {
                             }`}
                           >
                             <span className="truncate w-full px-1">
-                              {assigned ? assigned.substring(0, 8) : <Plus size={12} />}
+                              {assigned ? assigned.substring(0, 10) : <Plus size={12} />}
                             </span>
                           </div>
                         );

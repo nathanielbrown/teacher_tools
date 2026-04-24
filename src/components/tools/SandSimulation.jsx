@@ -5,6 +5,7 @@ import {
   Play, Pause, Settings2, Sparkles, MousePointer2, Hammer, Zap
 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const GRID_SIZE = 120;
 const CELL_SIZE = 5;
@@ -168,36 +169,43 @@ export const SandSimulation = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 h-full flex flex-col gap-6">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6">
+      <ToolHeader
+        title="Sand Simulation"
+        icon={Sparkles}
+        description="Particle Physics & Interactions"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Materials</strong>
+              Different materials have unique behaviors. Sand falls, water flows, walls are static, and fire spreads through flammable objects.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Interactions</strong>
+              Fire burns Wood and Oil. Water puts out Fire. Experiment with placing different materials together to see how they react!
+            </p>
+          </>
+        }
+      >
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-amber-50 rounded-2xl text-amber-600">
-            <Sparkles size={32} />
-          </div>
-          <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Sand Simulation</h2>
-            <p className="text-slate-400 font-medium text-sm">Explore physics with different materials!</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className={`p-4 rounded-2xl transition-all shadow-lg active:scale-95 ${
-              isPaused ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600'
+            className={`px-4 py-2 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 font-black text-sm ${
+              isPaused ? 'bg-emerald-600 text-white shadow-emerald-100' : 'bg-slate-100 text-slate-600'
             }`}
           >
-            {isPaused ? <Play size={24} fill="currentColor" /> : <Pause size={24} fill="currentColor" />}
+            {isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
+            {isPaused ? 'START' : 'PAUSE'}
           </button>
           <button
             onClick={clearCanvas}
-            className="p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-all active:scale-95"
+            className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
+            title="Clear Simulation"
           >
-            <Trash2 size={24} />
+            <Trash2 size={20} />
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch min-h-0">
         {/* Simulation Canvas */}

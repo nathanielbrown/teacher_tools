@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Thermometer, Zap, RotateCcw, Info, Hand, Play, Maximize2, TrendingUp } from 'lucide-react';
 import { LineChart } from 'chartist';
 import 'chartist/dist/index.css';
+import { ToolHeader } from '../ToolHeader';
 
 const PARTICLE_SPACING = 20;
 
@@ -306,37 +307,43 @@ export const ThermalConduction = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full flex flex-col gap-6 px-4 py-8 select-none">
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-orange-50 rounded-2xl text-orange-600">
-            <Thermometer size={40} />
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight italic">Thermal Conduction</h2>
-            <p className="text-slate-400 font-medium italic">Watch heat flow through vibrating particles.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="bg-slate-50 px-6 py-3 rounded-2xl border border-slate-100 flex items-center gap-6">
+    <div className="w-full mx-auto h-full flex flex-col gap-6 px-4 pt-2 pb-8 select-none">
+      <ToolHeader
+        title="Thermal Conduction"
+        icon={Thermometer}
+        description="Visualize Heat Transfer through Particle Vibration"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Vibrating Particles</strong>
+              In solids, particles are locked in a grid but vibrate in place. Hotter particles vibrate faster (higher kinetic energy).
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Conduction in Action</strong>
+              Drag the blocks so they touch. Watch as the fast-vibrating particles in the hot block bump into the slow ones in the cold block, transferring energy until they reach thermal equilibrium.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 items-center gap-6 px-4">
              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Hot</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Hot</span>
              </div>
              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Cold</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cold</span>
              </div>
           </div>
           <button
             onClick={reset}
-            className="p-4 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors shadow-lg shadow-red-100 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-black transition-all active:scale-95 shadow-md"
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={14} /> RESET
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0">
         <div 

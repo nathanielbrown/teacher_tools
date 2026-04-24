@@ -1,7 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Circle, LayoutList, Hourglass, Timer as TimerIcon, Loader2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Circle, LayoutList, Hourglass, Timer as TimerIcon, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
@@ -179,14 +180,27 @@ export const CountDown = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-8 w-full">
-      <h2 className="text-3xl font-bold text-primary mb-4">Count Down</h2>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Count Down"
+        icon={TimerIcon}
+        description="Visual Time Management for Lessons"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Visual Modes</strong>
+              Choose between Circle, Progress Bar, Sand Timer, Flip Clock, or Rainbow Spinner to match your classroom vibe.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Custom Sounds</strong>
+              Select from a variety of alarm sounds to signal when the time is up.
+            </p>
+          </>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-6xl items-center justify-items-center">
-        {/* Empty left column for perfect center alignment */}
-        <div className="hidden lg:block"></div>
-
-        {/* Center Column: Timer & Controls */}
+      <div className="flex flex-col items-center gap-12 w-full max-w-6xl mx-auto">
+        {/* Timer & Controls */}
         <div className="flex flex-col items-center space-y-8">
           <div className={`
             relative flex flex-col items-center justify-center transition-colors duration-500 overflow-hidden w-[350px] h-[350px] md:w-[400px] md:h-[400px]
@@ -195,14 +209,77 @@ export const CountDown = () => {
               isRunning && timeLeft <= 10 ? 'border-orange-500' : 'border-primary/10'
             }`}
           `}>
-            <span className={`
-              ${visualMode === 'flip' ? 'text-8xl font-mono font-bold tabular-nums tracking-tighter text-white bg-gray-800 p-4 rounded-lg shadow-inner' : `text-8xl font-mono font-bold tabular-nums tracking-tighter ${
-                isFinished ? 'text-red-600' :
-                isRunning && timeLeft <= 10 ? 'text-orange-500' : 'text-text'
-              }`}
-            `}>
-              {formatTime(timeLeft)}
-            </span>
+            <div className="flex items-center space-x-2">
+              {/* Minutes Column */}
+              <div className="relative flex flex-col items-center">
+                <button 
+                  onClick={() => setInitialMinutes(m => Math.min(99, m + 1))}
+                  className={`absolute -top-12 p-1 hover:bg-white/10 rounded-full transition-all duration-300 ${
+                    isRunning || isFinished ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  } ${visualMode === 'flip' ? 'text-white/40 hover:text-white' : 'text-slate-300 hover:text-primary'}`}
+                >
+                  <ChevronUp size={48} />
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  readOnly={isRunning || isFinished}
+                  value={isRunning || isFinished 
+                    ? Math.floor(timeLeft / 60).toString().padStart(2, '0') 
+                    : initialMinutes.toString().padStart(2, '0')
+                  }
+                  onChange={(e) => setInitialMinutes(Math.max(0, Math.min(99, parseInt(e.target.value.replace(/\D/g, '')) || 0)))}
+                  className={`w-[110px] text-center bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-7xl md:text-8xl font-mono font-bold tabular-nums tracking-tighter ${
+                    visualMode === 'flip' ? 'text-white' : (isFinished ? 'text-red-600' : (isRunning && timeLeft <= 10 ? 'text-orange-500' : 'text-text'))
+                  }`}
+                />
+                <button 
+                  onClick={() => setInitialMinutes(m => Math.max(0, m - 1))}
+                  className={`absolute -bottom-12 p-1 hover:bg-white/10 rounded-full transition-all duration-300 ${
+                    isRunning || isFinished ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  } ${visualMode === 'flip' ? 'text-white/40 hover:text-white' : 'text-slate-300 hover:text-primary'}`}
+                >
+                  <ChevronDown size={48} />
+                </button>
+              </div>
+              
+              <span className={`text-7xl md:text-8xl font-mono font-bold ${
+                visualMode === 'flip' ? 'text-white' : (isFinished ? 'text-red-600' : (isRunning && timeLeft <= 10 ? 'text-orange-500' : 'text-text'))
+              }`}>:</span>
+              
+              {/* Seconds Column */}
+              <div className="relative flex flex-col items-center">
+                <button 
+                  onClick={() => setInitialSeconds(s => (s + 1) % 60)}
+                  className={`absolute -top-12 p-1 hover:bg-white/10 rounded-full transition-all duration-300 ${
+                    isRunning || isFinished ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  } ${visualMode === 'flip' ? 'text-white/40 hover:text-white' : 'text-slate-300 hover:text-primary'}`}
+                >
+                  <ChevronUp size={48} />
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  readOnly={isRunning || isFinished}
+                  value={isRunning || isFinished 
+                    ? (timeLeft % 60).toString().padStart(2, '0') 
+                    : initialSeconds.toString().padStart(2, '0')
+                  }
+                  onChange={(e) => setInitialSeconds(Math.max(0, Math.min(59, parseInt(e.target.value.replace(/\D/g, '')) || 0)))}
+                  className={`w-[110px] text-center bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-7xl md:text-8xl font-mono font-bold tabular-nums tracking-tighter ${
+                    visualMode === 'flip' ? 'text-white' : (isFinished ? 'text-red-600' : (isRunning && timeLeft <= 10 ? 'text-orange-500' : 'text-text'))
+                  }`}
+                />
+                <button 
+                  onClick={() => setInitialSeconds(s => (s - 1 + 60) % 60)}
+                  className={`absolute -bottom-12 p-1 hover:bg-white/10 rounded-full transition-all duration-300 ${
+                    isRunning || isFinished ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  } ${visualMode === 'flip' ? 'text-white/40 hover:text-white' : 'text-slate-300 hover:text-primary'}`}
+                >
+                  <ChevronDown size={48} />
+                </button>
+              </div>
+            </div>
             {isFinished && <p className={`text-xl font-bold mt-4 ${visualMode === 'flip' ? 'text-red-400' : 'text-red-500'}`}>Time's Up!</p>}
             {renderVisualization()}
           </div>
@@ -226,77 +303,58 @@ export const CountDown = () => {
           </div>
         </div>
 
-        {/* Right Column: Settings */}
-        <div className="flex flex-col items-center lg:items-start lg:justify-self-start">
-          {!isRunning && !isFinished && (
-            <div className="flex flex-col items-center lg:items-start space-y-4">
-              <div className="flex space-x-2 bg-white p-2 rounded-xl shadow-md border border-gray-200 flex-wrap justify-center max-w-[250px]">
-                <button onClick={() => setVisualMode('circle')} className={`p-2 rounded ${visualMode === 'circle' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Circle Timer"><Circle size={20} /></button>
-                <button onClick={() => setVisualMode('progress')} className={`p-2 rounded ${visualMode === 'progress' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Progress Bar"><LayoutList size={20} /></button>
-                <button onClick={() => setVisualMode('sand')} className={`p-2 rounded ${visualMode === 'sand' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Sand Timer"><Hourglass size={20} /></button>
-                <button onClick={() => setVisualMode('flip')} className={`p-2 rounded ${visualMode === 'flip' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Flip Clock"><TimerIcon size={20} /></button>
-                <button onClick={() => setVisualMode('rainbow')} className={`p-2 rounded ${visualMode === 'rainbow' ? 'bg-primary/20 text-primary' : 'hover:bg-gray-100'}`} title="Wait-Time Spinner"><Loader2 size={20} /></button>
-              </div>
-
-              <div className="flex space-x-4 bg-white p-4 rounded-xl shadow-md border border-gray-200">
-                <div className="flex flex-col items-center">
-                  <label className="text-sm text-gray-500 mb-1">Minutes</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="99"
-                    value={initialMinutes}
-                    onChange={(e) => setInitialMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-20 text-center text-2xl p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div className="text-4xl font-bold self-end mb-2">:</div>
-                <div className="flex flex-col items-center">
-                  <label className="text-sm text-gray-500 mb-1">Seconds</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={initialSeconds}
-                    onChange={(e) => setInitialSeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
-                    className="w-20 text-center text-2xl p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex flex-col space-y-3 bg-white p-4 rounded-xl shadow-md border border-gray-200 w-full max-w-[320px]">
-                <label className="text-sm text-gray-500 font-medium text-center">Sound Effect</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'default', name: 'Default' },
-                    { id: 'none', name: 'None' },
-                    { id: 'classic', name: 'Classic' },
-                    { id: 'digital', name: 'Digital' },
-                    { id: 'soft', name: 'Soft' },
-                    { id: 'bubbly', name: 'Bubbly' },
-                    { id: 'chime', name: 'Chime' },
-                    { id: 'synth', name: 'Synth' },
-                    { id: 'beep', name: 'Beep' },
-                    { id: 'siren', name: 'Siren' },
-                  ].map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => {
-                        setSoundOverride(option.id);
-                      }}
-                      className={`p-2 text-sm rounded-lg border-2 font-medium transition-all ${
-                        soundOverride === option.id 
-                          ? 'border-primary bg-primary/10 text-primary' 
-                          : 'border-gray-100 hover:border-primary/30 text-gray-600 bg-gray-50 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.name}
-                    </button>
-                  ))}
-                </div>
+        {/* Configuration */}
+        <div className={`transition-all duration-500 w-full flex justify-center ${
+          isRunning || isFinished ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100'
+        }`}>
+          <div className="flex flex-col md:flex-row gap-6 w-full max-w-4xl justify-center">
+            
+            <div className="flex flex-col space-y-3 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 w-full max-w-[350px]">
+              <label className="text-sm text-gray-500 font-bold uppercase tracking-wider text-center border-b pb-2 mb-1">Visual Mode</label>
+              <div className="grid grid-cols-5 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+                <button onClick={() => setVisualMode('circle')} className={`p-3 rounded-lg transition-all flex justify-center ${visualMode === 'circle' ? 'bg-white text-primary shadow-md' : 'text-slate-400 hover:text-slate-600'}`} title="Circle Timer"><Circle size={20} /></button>
+                <button onClick={() => setVisualMode('progress')} className={`p-3 rounded-lg transition-all flex justify-center ${visualMode === 'progress' ? 'bg-white text-primary shadow-md' : 'text-slate-400 hover:text-slate-600'}`} title="Progress Bar"><LayoutList size={20} /></button>
+                <button onClick={() => setVisualMode('sand')} className={`p-3 rounded-lg transition-all flex justify-center ${visualMode === 'sand' ? 'bg-white text-primary shadow-md' : 'text-slate-400 hover:text-slate-600'}`} title="Sand Timer"><Hourglass size={20} /></button>
+                <button onClick={() => setVisualMode('flip')} className={`p-3 rounded-lg transition-all flex justify-center ${visualMode === 'flip' ? 'bg-white text-primary shadow-md' : 'text-slate-400 hover:text-slate-600'}`} title="Flip Clock"><TimerIcon size={20} /></button>
+                <button onClick={() => setVisualMode('rainbow')} className={`p-3 rounded-lg transition-all flex justify-center ${visualMode === 'rainbow' ? 'bg-white text-primary shadow-md' : 'text-slate-400 hover:text-slate-600'}`} title="Wait-Time Spinner"><Loader2 size={20} /></button>
               </div>
             </div>
-          )}
+            
+            <div className="flex flex-col space-y-3 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 w-full max-w-[450px]">
+              <label className="text-sm text-gray-500 font-bold uppercase tracking-wider text-center border-b pb-2 mb-1">Sound Effect</label>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {[
+                  { id: 'default', name: 'Default' },
+                  { id: 'none', name: 'None' },
+                  { id: 'classic', name: 'Clsc' },
+                  { id: 'digital', name: 'Digi' },
+                  { id: 'soft', name: 'Soft' },
+                  { id: 'bubbly', name: 'Bubl' },
+                  { id: 'chime', name: 'Chim' },
+                  { id: 'synth', name: 'Synt' },
+                  { id: 'beep', name: 'Beep' },
+                  { id: 'siren', name: 'Sire' },
+                ].map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => {
+                      setSoundOverride(option.id);
+                      if (option.id !== 'none') {
+                        audioEngine.playAlarm(option.id === 'default' ? settings.soundTheme : option.id);
+                      }
+                    }}
+                    className={`p-2 text-[11px] rounded-lg border-2 font-black uppercase tracking-tighter transition-all ${
+                      soundOverride === option.id 
+                        ? (option.id === 'default' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-primary bg-primary/10 text-primary')
+                        : (option.id === 'default' ? 'border-amber-100 hover:border-amber-300 text-amber-600 bg-amber-50/50' : 'border-gray-100 hover:border-primary/30 text-gray-600 bg-gray-50 hover:bg-gray-100')
+                    }`}
+                  >
+                    {option.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

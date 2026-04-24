@@ -4,6 +4,7 @@ import { Trophy, RotateCcw, Play, Star, Zap, Brain, ChevronRight } from 'lucide-
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 
 const EMOJIS = [
   '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', 
@@ -84,13 +85,34 @@ export const EmojiMatch = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 p-4 h-full flex flex-col">
-      <div className="text-center space-y-2">
-        <h2 className="text-4xl font-black text-slate-800 tracking-tight flex items-center justify-center gap-3">
-          <Brain className="text-primary" /> Emoji Match
-        </h2>
-        <p className="text-slate-500 font-medium italic">Train your memory and find all the pairs!</p>
-      </div>
+    <div className="w-full mx-auto space-y-8 px-4 pt-2 pb-8 h-full flex flex-col">
+      <ToolHeader
+        title="Emoji Match"
+        icon={Brain}
+        description="Memory Training Game"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Click cards to flip them. Find two cards with the same emoji to clear them from the board.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Difficulty Levels</strong>
+              Easy (2x4), Medium (4x4), and Hard (6x6) modes are available to test different memory capacities.
+            </p>
+          </>
+        }
+      >
+        {status !== 'setup' && (
+          <button
+            onClick={() => setStatus('setup')}
+            className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:text-red-500 transition-all"
+            title="Return to Menu"
+          >
+            <RotateCcw size={20} />
+          </button>
+        )}
+      </ToolHeader>
 
       {status === 'setup' && (
         <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">

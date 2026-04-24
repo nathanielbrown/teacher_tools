@@ -6,8 +6,11 @@ import {
 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
-const GRID_SIZE = 15;
+const INITIAL_GRID_SIZE = 40; // Larger internal size for generation room
+const MAX_CELL_SIZE = 48;
+const MIN_CELL_SIZE = 24;
 
 export const Crossword = () => {
   const [status, setStatus] = useState('setup'); // setup, playing, finished
@@ -15,9 +18,12 @@ export const Crossword = () => {
   const [selectedList, setSelectedList] = useState(null);
   const [grid, setGrid] = useState([]);
   const [clues, setClues] = useState([]);
-  const [userGrid, setUserGrid] = useState({}); // { 'x-y': char }
-  const [focusedCell, setFocusedCell] = useState(null);
+  const [gridSize, setGridSize] = useState({ rows: 0, cols: 0 });
   const [direction, setDirection] = useState('across'); // across, down
+  const containerRef = useRef(null);
+  const [cellSize, setCellSize] = useState(40);
+  const [userGrid, setUserGrid] = useState({});
+  const [focusedCell, setFocusedCell] = useState(null);
   
   const { settings } = useSettings();
 
@@ -29,91 +35,215 @@ export const Crossword = () => {
   }, []);
 
   const generateCrossword = useCallback((words) => {
-    // Basic greedy crossword algorithm
     const cleanWords = words.map(w => w.toUpperCase().trim()).filter(w => w.length > 1);
-    cleanWords.sort((a, b) => b.length - a.length);
+    if (cleanWords.length === 0) return;
 
-    let tempGrid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-    let placedWords = [];
-
-    const canPlace = (word, x, y, isAcross) => {
+    const canPlace = (word, x, y, isAcross, currentGrid) => {
       if (isAcross) {
-        if (x + word.length > GRID_SIZE) return false;
-        // Check surrounding cells for illegal collisions
+        if (x < 0 || x + word.length > INITIAL_GRID_SIZE || y < 0 || y >= INITIAL_GRID_SIZE) return false;
         for (let i = 0; i < word.length; i++) {
-          const cell = tempGrid[y][x + i];
+          const cell = currentGrid[y][x + i];
           if (cell !== null && cell !== word[i]) return false;
-          
-          // Check top/bottom for neighbors if we're not intersecting
           if (cell === null) {
-            if (y > 0 && tempGrid[y - 1][x + i]) return false;
-            if (y < GRID_SIZE - 1 && tempGrid[y + 1][x + i]) return false;
+            // Check neighbors (excluding existing same-word connections)
+            if (y > 0 && currentGrid[y - 1][x + i]) return false;
+            if (y < INITIAL_GRID_SIZE - 1 && currentGrid[y + 1][x + i]) return false;
           }
         }
-        // Check edges
-        if (x > 0 && tempGrid[y][x - 1]) return false;
-        if (x + word.length < GRID_SIZE && tempGrid[y][x + word.length]) return false;
+        // Check end caps
+        if (x > 0 && currentGrid[y][x - 1]) return false;
+        if (x + word.length < INITIAL_GRID_SIZE && currentGrid[y][x + word.length]) return false;
       } else {
-        if (y + word.length > GRID_SIZE) return false;
+        if (y < 0 || y + word.length > INITIAL_GRID_SIZE || x < 0 || x >= INITIAL_GRID_SIZE) return false;
         for (let i = 0; i < word.length; i++) {
-          const cell = tempGrid[y + i][x];
+          const cell = currentGrid[y + i][x];
           if (cell !== null && cell !== word[i]) return false;
-
           if (cell === null) {
-            if (x > 0 && tempGrid[y + i][x - 1]) return false;
-            if (x < GRID_SIZE - 1 && tempGrid[y + i][x + 1]) return false;
+            if (x > 0 && currentGrid[y + i][x - 1]) return false;
+            if (x < INITIAL_GRID_SIZE - 1 && currentGrid[y + i][x + 1]) return false;
           }
         }
-        if (y > 0 && tempGrid[y - 1][x]) return false;
-        if (y + word.length < GRID_SIZE && tempGrid[y + word.length][x]) return false;
+        if (y > 0 && currentGrid[y - 1][x]) return false;
+        if (y + word.length < INITIAL_GRID_SIZE && currentGrid[y + word.length][x]) return false;
       }
       return true;
     };
 
-    const placeWord = (word, x, y, isAcross, clueNum) => {
-      for (let i = 0; i < word.length; i++) {
-        if (isAcross) tempGrid[y][x + i] = word[i];
-        else tempGrid[y + i][x] = word[i];
-      }
-      placedWords.push({ word, x, y, isAcross, num: clueNum });
-    };
+    const attemptGeneration = () => {
+      let tempGrid = Array(INITIAL_GRID_SIZE).fill(null).map(() => Array(INITIAL_GRID_SIZE).fill(null));
+      let placedWords = [];
+      let remainingWords = [...cleanWords].sort((a, b) => b.length - a.length);
 
-    // Place first word
-    const startX = Math.floor((GRID_SIZE - cleanWords[0].length) / 2);
-    const startY = Math.floor(GRID_SIZE / 2);
-    placeWord(cleanWords[0], startX, startY, true, 1);
+      const placeWordInternal = (word, x, y, isAcross) => {
+        let num;
+        const existing = placedWords.find(p => p.x === x && p.y === y);
+        if (existing) {
+          num = existing.num;
+        } else {
+          const maxNum = placedWords.length === 0 ? 0 : Math.max(...placedWords.map(p => p.num));
+          num = maxNum + 1;
+        }
 
-    // Try to place others
-    let clueCounter = 2;
-    for (let i = 1; i < cleanWords.length; i++) {
-      const word = cleanWords[i];
-      let placed = false;
+        for (let i = 0; i < word.length; i++) {
+          if (isAcross) tempGrid[y][x + i] = word[i];
+          else tempGrid[y + i][x] = word[i];
+        }
+        placedWords.push({ word, x, y, isAcross, num });
+      };
 
-      // Find intersections
-      for (let pIdx = 0; pIdx < placedWords.length && !placed; pIdx++) {
-        const p = placedWords[pIdx];
-        for (let j = 0; j < p.word.length && !placed; j++) {
-          for (let k = 0; k < word.length && !placed; k++) {
-            if (p.word[j] === word[k]) {
-              const nx = p.isAcross ? p.x + j : p.x - k;
-              const ny = p.isAcross ? p.y - k : p.y + j;
-              const nIsAcross = !p.isAcross;
+      // Place first word in middle
+      const first = remainingWords.shift();
+      placeWordInternal(first, Math.floor((INITIAL_GRID_SIZE - first.length) / 2), Math.floor(INITIAL_GRID_SIZE / 2), true);
 
-              if (canPlace(word, nx, ny, nIsAcross)) {
-                placeWord(word, nx, ny, nIsAcross, clueCounter++);
-                placed = true;
+      let iterations = 0;
+      while (remainingWords.length > 0 && iterations < 1000) {
+        iterations++;
+        let placedAny = false;
+
+        // Try connections with random order to vary results
+        const currentRemaining = [...remainingWords];
+        for (let i = 0; i < currentRemaining.length; i++) {
+          const word = currentRemaining[i];
+          const shuffledPlaced = [...placedWords].sort(() => Math.random() - 0.5);
+
+          for (const p of shuffledPlaced) {
+            for (let j = 0; j < p.word.length; j++) {
+              for (let k = 0; k < word.length; k++) {
+                if (p.word[j] === word[k]) {
+                  const nx = p.isAcross ? p.x + j : p.x - k;
+                  const ny = p.isAcross ? p.y - k : p.y + j;
+                  const nIsAcross = !p.isAcross;
+
+                  if (canPlace(word, nx, ny, nIsAcross, tempGrid)) {
+                    placeWordInternal(word, nx, ny, nIsAcross);
+                    remainingWords = remainingWords.filter(w => w !== word);
+                    placedAny = true;
+                    break;
+                  }
+                }
+              }
+              if (placedAny) break;
+            }
+            if (placedAny) break;
+          }
+          if (placedAny) break;
+        }
+
+        // If no connection possible, place an island CLOSER to the center of mass
+        if (!placedAny && remainingWords.length > 0) {
+          const word = remainingWords[0];
+          let islandPlaced = false;
+
+          // Try placing it near the center of existing words
+          const centerX = Math.floor(placedWords.reduce((acc, p) => acc + p.x, 0) / placedWords.length);
+          const centerY = Math.floor(placedWords.reduce((acc, p) => acc + p.y, 0) / placedWords.length);
+
+          for (let radius = 2; radius < 15 && !islandPlaced; radius++) {
+            for (let attempt = 0; attempt < 20; attempt++) {
+              const rx = centerX + Math.floor((Math.random() - 0.5) * radius * 2);
+              const ry = centerY + Math.floor((Math.random() - 0.5) * radius * 2);
+              const rIsAcross = Math.random() > 0.5;
+
+              if (canPlace(word, rx, ry, rIsAcross, tempGrid)) {
+                placeWordInternal(word, rx, ry, rIsAcross);
+                remainingWords.shift();
+                islandPlaced = true;
+                placedAny = true;
+                break;
               }
             }
           }
+
+          if (!islandPlaced) remainingWords.shift(); // Skip if impossible
         }
+      }
+
+      // Calculate bounding box
+      let minX = INITIAL_GRID_SIZE, maxX = 0, minY = INITIAL_GRID_SIZE, maxY = 0;
+      let hasPlaced = false;
+      for (let y = 0; y < INITIAL_GRID_SIZE; y++) {
+        for (let x = 0; x < INITIAL_GRID_SIZE; x++) {
+          if (tempGrid[y][x]) {
+            minX = Math.min(minX, x);
+            maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y);
+            maxY = Math.max(maxY, y);
+            hasPlaced = true;
+          }
+        }
+      }
+
+      if (!hasPlaced) return null;
+
+      // Padding
+      minX = Math.max(0, minX - 1);
+      minY = Math.max(0, minY - 1);
+      maxX = Math.min(INITIAL_GRID_SIZE - 1, maxX + 1);
+      maxY = Math.min(INITIAL_GRID_SIZE - 1, maxY + 1);
+
+      const rows = maxY - minY + 1;
+      const cols = maxX - minX + 1;
+      const trimmedGrid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+      
+      for (let y = minY; y <= maxY; y++) {
+        for (let x = minX; x <= maxX; x++) {
+          trimmedGrid[y - minY][x - minX] = tempGrid[y][x];
+        }
+      }
+
+      const trimmedClues = placedWords.map(clue => ({
+        ...clue,
+        x: clue.x - minX,
+        y: clue.y - minY
+      }));
+
+      return { grid: trimmedGrid, clues: trimmedClues, rows, cols, area: rows * cols };
+    };
+
+    // Run multiple times and pick the most compact one
+    let best = null;
+    for (let i = 0; i < 5; i++) {
+      const result = attemptGeneration();
+      if (!best || (result && result.area < best.area)) {
+        best = result;
       }
     }
 
-    setGrid(tempGrid);
-    setClues(placedWords);
-    setUserGrid({});
-    setStatus('playing');
+    if (best) {
+      setGrid(best.grid);
+      setClues(best.clues);
+      setGridSize({ rows: best.rows, cols: best.cols });
+      setUserGrid({});
+      setStatus('playing');
+    }
   }, []);
+
+  // Dynamic cell sizing
+  useEffect(() => {
+    if (status !== 'playing' || !containerRef.current) return;
+
+    const updateSize = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      
+      const { width, height } = container.getBoundingClientRect();
+      const padding = 48; // Account for container padding
+      const availableW = width - padding;
+      const availableH = height - padding;
+
+      const sizeW = availableW / gridSize.cols;
+      const sizeH = availableH / gridSize.rows;
+      
+      let newSize = Math.min(sizeW, sizeH);
+      newSize = Math.max(MIN_CELL_SIZE, Math.min(MAX_CELL_SIZE, newSize));
+      
+      setCellSize(newSize);
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [status, gridSize, lists]);
 
   const startGame = (list) => {
     setSelectedList(list);
@@ -131,7 +261,7 @@ export const Crossword = () => {
       // Move focus
       const nextX = direction === 'across' ? x + 1 : x;
       const nextY = direction === 'down' ? y + 1 : y;
-      if (nextX < GRID_SIZE && nextY < GRID_SIZE && grid[nextY][nextX]) {
+      if (nextY < gridSize.rows && nextX < gridSize.cols && grid[nextY][nextX]) {
         setFocusedCell({ x: nextX, y: nextY });
       }
     }
@@ -143,7 +273,7 @@ export const Crossword = () => {
     window.speechSynthesis.speak(utterance);
   };
 
-  const checkWin = () => {
+  const checkWin = useCallback(() => {
     const isComplete = clues.every(clue => {
       for (let i = 0; i < clue.word.length; i++) {
         const cx = clue.isAcross ? clue.x + i : clue.x;
@@ -157,35 +287,41 @@ export const Crossword = () => {
       setStatus('finished');
       audioEngine.playTick(settings.soundTheme);
     }
-  };
+  }, [clues, userGrid, settings.soundTheme, audioEngine]);
 
   useEffect(() => {
     if (status === 'playing') checkWin();
-  }, [userGrid]);
+  }, [checkWin, status]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 h-full flex flex-col gap-6">
-      {/* Header */}
-      <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
-              <Grid3X3 size={32} />
-            </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Crossword</h2>
-          </div>
-          <p className="text-slate-400 font-medium pl-1">Solve puzzles using your spelling lists!</p>
-        </div>
-
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6">
+      <ToolHeader
+        title="Crossword"
+        icon={Grid3X3}
+        description="Solve Puzzles with Spelling Lists"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Getting Started</strong>
+              Select a spelling list from your saved collections to generate a custom crossword puzzle.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">How to Play</strong>
+              Click a white cell to focus. Use the "Audio Clues" sidebar to hear the words. Change typing direction using the "Across/Down" buttons.
+            </p>
+          </>
+        }
+      >
         {status !== 'setup' && (
           <button
             onClick={() => setStatus('setup')}
-            className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-red-500 transition-all"
+            className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:text-red-500 transition-all"
+            title="Return to Menu"
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={20} />
           </button>
         )}
-      </div>
+      </ToolHeader>
 
       <AnimatePresence mode="wait">
         {status === 'setup' ? (
@@ -232,16 +368,23 @@ export const Crossword = () => {
             className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
           >
             {/* Grid Area */}
-            <div className="lg:col-span-8 bg-white p-6 rounded-[3rem] border-2 border-slate-100 shadow-xl overflow-auto flex justify-center">
+            <div 
+              ref={containerRef}
+              className="lg:col-span-8 bg-white p-4 md:p-8 rounded-[3rem] border-2 border-slate-100 shadow-xl overflow-hidden flex items-center justify-center min-h-[400px] lg:min-h-0 h-full"
+            >
               <div 
-                className="grid gap-[2px] bg-slate-200 p-[2px] rounded-lg"
-                style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
+                className="grid gap-[1px] bg-slate-200 p-[1px] rounded-lg shadow-inner"
+                style={{ 
+                  gridTemplateColumns: `repeat(${gridSize.cols}, ${cellSize}px)`,
+                  gridTemplateRows: `repeat(${gridSize.rows}, ${cellSize}px)`
+                }}
               >
                 {grid.map((row, y) => (
                   row.map((cell, x) => (
                     <div 
                       key={`${x}-${y}`} 
-                      className={`relative w-8 h-8 md:w-10 md:h-10 ${cell ? 'bg-white' : 'bg-slate-900'}`}
+                      className={`relative ${cell ? 'bg-white' : 'bg-slate-900'}`}
+                      style={{ width: cellSize, height: cellSize }}
                       onClick={() => cell && setFocusedCell({ x, y })}
                     >
                       {cell && (
@@ -252,9 +395,10 @@ export const Crossword = () => {
                             value={userGrid[`${x}-${y}`] || ""}
                             onChange={(e) => handleCellInput(x, y, e.target.value)}
                             onFocus={() => setFocusedCell({ x, y })}
-                            className={`w-full h-full text-center font-black text-xl outline-none transition-colors
+                            className={`w-full h-full text-center font-black outline-none transition-colors
                               ${focusedCell?.x === x && focusedCell?.y === y ? 'bg-indigo-50' : 'bg-transparent'}
                             `}
+                            style={{ fontSize: cellSize * 0.5 }}
                           />
                           {/* Clue Number */}
                           {clues.find(c => c.x === x && c.y === y) && (

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { RefreshCw, CheckCircle, ChevronLeft, ChevronRight, PenTool } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { ToolHeader } from '../ToolHeader';
 
 export const LetterTracing = () => {
   const charSets = {
@@ -37,7 +38,7 @@ export const LetterTracing = () => {
 
   const CANVAS_SIZE = 400;
   const FONT_SIZE = 300;
-  const BRUSH_SIZE = 24;
+  const BRUSH_SIZE = 16;
 
   const getCoordinates = (e) => {
     const canvas = drawCanvasRef.current;
@@ -66,23 +67,23 @@ export const LetterTracing = () => {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    ctx.font = `bold ${FONT_SIZE}px "Comic Sans MS", "Chalkboard SE", sans-serif`;
+    ctx.font = `100 ${FONT_SIZE}px "Segoe UI Light", "Helvetica Neue Light", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     // Draw the gray template for the user to trace
     ctx.fillStyle = '#f3f4f6'; // gray-100
     ctx.strokeStyle = '#e5e7eb'; // gray-200
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 4;
     
     // Draw text centered
     ctx.strokeText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
     ctx.fillText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
     
     // Add dashed outline to make it look like tracing paper
-    ctx.setLineDash([10, 10]);
+    ctx.setLineDash([8, 8]);
     ctx.strokeStyle = '#d1d5db'; // gray-300
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2;
     ctx.strokeText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
     ctx.setLineDash([]);
   };
@@ -175,50 +176,64 @@ export const LetterTracing = () => {
     const hiddenCanvas = hiddenCanvasRef.current;
     const ctx = hiddenCanvas.getContext('2d', { willReadFrequently: true });
 
-    // 1. Get Template Pixels (Safe Zone)
+    // 1. Get Exact Template for Coverage
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    ctx.font = `bold ${FONT_SIZE}px "Comic Sans MS", "Chalkboard SE", sans-serif`;
+    ctx.font = `100 ${FONT_SIZE}px "Segoe UI Light", "Helvetica Neue Light", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#000000';
-    // Add a stroke to give them some wiggle room for staying inside
-    ctx.lineWidth = 12; // Reduced from 20 to make it stricter
+    ctx.fillText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
+    const exactTemplateData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
+
+    // 2. Get Safe Zone for Stay Inside
+    ctx.lineWidth = 40; // Safe zone for wobbly writing
     ctx.strokeStyle = '#000000';
     ctx.strokeText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
-    ctx.fillText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
-    
-    const templateData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
+    const safeZoneData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
 
-    // 2. Get User Stroke Pixels (Standard width)
+    // 3. Get Danger Zone (Too Far Outside)
+    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.lineWidth = 120; // Anything beyond 60px from the letter is the danger zone
+    ctx.strokeText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
+    ctx.fillText(currentLetter, CANVAS_SIZE / 2, CANVAS_SIZE / 2 + 20);
+    const dangerZoneData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
+
+    // 4. Get User Stroke Pixels (Standard width)
     renderPathToContext(ctx, userPath.current, BRUSH_SIZE);
     const userStandardData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
 
-    // 3. Get User Stroke Pixels (Dilated width for coverage)
-    // A huge brush simulates "did they draw anywhere near this part of the letter"
-    renderPathToContext(ctx, userPath.current, 60); // Reduced from 80 to require more exact coverage
+    // 5. Get User Stroke Pixels (Dilated width for coverage)
+    renderPathToContext(ctx, userPath.current, 60); 
     const userDilatedData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
 
     let userPixelsTotal = 0;
-    let userPixelsInside = 0;
+    let userPixelsInsideSafe = 0;
+    let userPixelsWayOutside = 0;
     
     let templatePixelsTotal = 0;
     let templatePixelsCovered = 0;
 
-    for (let i = 0; i < templateData.length; i += 4) {
-      const isTemplate = templateData[i + 3] > 128;
-      const isUserStandard = userStandardData[i + 3] > 128;
-      const isUserDilated = userDilatedData[i + 3] > 128;
+    for (let i = 0; i < exactTemplateData.length; i += 4) {
+      const isExactTemplate = exactTemplateData[i + 3] > 64;
+      const isSafeZone = safeZoneData[i + 3] > 64;
+      const isDangerZone = dangerZoneData[i + 3] > 64;
+      
+      const isUserStandard = userStandardData[i + 3] > 64;
+      const isUserDilated = userDilatedData[i + 3] > 64;
 
       // Stay Inside Logic
       if (isUserStandard) {
         userPixelsTotal++;
-        if (isTemplate) {
-          userPixelsInside++;
+        if (isSafeZone) {
+          userPixelsInsideSafe++;
+        }
+        if (!isDangerZone) {
+          userPixelsWayOutside++;
         }
       }
 
       // Coverage Logic
-      if (isTemplate) {
+      if (isExactTemplate) {
         templatePixelsTotal++;
         if (isUserDilated) {
           templatePixelsCovered++;
@@ -226,10 +241,19 @@ export const LetterTracing = () => {
       }
     }
 
-    const stayInsideScore = userPixelsTotal === 0 ? 0 : userPixelsInside / userPixelsTotal;
+    const stayInsideScore = userPixelsTotal === 0 ? 0 : userPixelsInsideSafe / userPixelsTotal;
     const coverageScore = templatePixelsTotal === 0 ? 0 : templatePixelsCovered / templatePixelsTotal;
     
-    const finalAccuracy = Math.max(0, Math.round(((stayInsideScore * 0.7) + (coverageScore * 0.3)) * 100));
+    // Base score using geometric mean
+    let baseAccuracy = Math.sqrt(stayInsideScore * coverageScore) * 100;
+    
+    // Take marks away for going too far outside
+    if (userPixelsWayOutside > 0) {
+      const wayOutsideRatio = userPixelsWayOutside / userPixelsTotal;
+      baseAccuracy -= (wayOutsideRatio * 200); // 10% of pixels way outside drops score by 20%
+    }
+
+    const finalAccuracy = Math.max(0, Math.round(baseAccuracy));
 
     let msg = '';
     if (finalAccuracy > 90) msg = "Perfect!";
@@ -270,14 +294,25 @@ export const LetterTracing = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 h-full flex flex-col px-4">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <h2 className="text-3xl font-bold text-primary flex items-center gap-3">
-          <PenTool size={32} />
-          Letter Tracing
-        </h2>
-        
-        <div className="flex items-center gap-2 flex-wrap">
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Letter Tracing"
+        icon={PenTool}
+        description="Develop Handwriting Skills through Interactive Guidance"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Trace and Learn</strong>
+              Follow the dashed lines to trace uppercase letters, lowercase letters, and numbers. Click "Check Score" to see how accurately you stayed within the lines.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Track Progress</strong>
+              The mastery grid at the bottom shows your best score for each character, helping you identify which ones need more practice.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-2">
           <div className="flex bg-white p-1 rounded-xl border border-gray-200 shadow-sm sm:mr-4">
             <button 
               onClick={() => changeCharSet('upper')}
@@ -299,17 +334,17 @@ export const LetterTracing = () => {
             </button>
           </div>
 
-          <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-            <button onClick={prevLetter} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <ChevronLeft size={24} className="text-gray-600" />
+          <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
+            <button onClick={prevLetter} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+              <ChevronLeft size={20} className="text-gray-600" />
             </button>
-            <div className="text-3xl font-black w-16 text-center text-text">{currentLetter}</div>
-            <button onClick={nextLetter} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <ChevronRight size={24} className="text-gray-600" />
+            <div className="text-xl font-black w-10 text-center text-text">{currentLetter}</div>
+            <button onClick={nextLetter} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+              <ChevronRight size={20} className="text-gray-600" />
             </button>
           </div>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 bg-white rounded-[3rem] shadow-xl border border-gray-100 p-8 flex flex-col lg:flex-row gap-12 items-center justify-center">
         

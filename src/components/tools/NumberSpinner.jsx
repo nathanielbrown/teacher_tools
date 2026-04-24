@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Palette, Download, History, BarChart3, Hash } from 'lucide-react';
+import { Settings, Palette, Download, History, BarChart3, Hash, Loader } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
+import { ToolHeader } from '../ToolHeader';
 import { audioEngine } from '../../utils/audio';
 
 export const NumberSpinner = () => {
@@ -12,7 +13,14 @@ export const NumberSpinner = () => {
   const [rotation, setRotation] = useState(0);
   const [history, setHistory] = useState([]); // { value, time }
   const [spinnerTheme, setSpinnerTheme] = useState('vibrant');
+  const [targetNumber, setTargetNumber] = useState(null);
   const { settings } = useSettings();
+  
+  const resetStats = () => {
+    setHistory([]);
+    setResult(null);
+    setRotation(0);
+  };
 
   const themes = {
     vibrant: {
@@ -37,37 +45,32 @@ export const NumberSpinner = () => {
     }
 
     setIsSpinning(true);
-    const selectedNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+    setResult(null);
+
+    const winningIndex = Math.floor(Math.random() * numbers.length);
+    const winningNumber = numbers[winningIndex];
+
+    const segments = numbers.length;
+    const degreesPerSegment = 360 / segments;
+    const extraFullSpins = Math.floor(5 + Math.random() * 3) * 360;
+    const segmentCenter = (winningIndex + 0.5) * degreesPerSegment;
+    const randomOffset = (Math.random() - 0.5) * (degreesPerSegment * 0.7);
+    
+    const resetRotation = 360 - (rotation % 360);
+    const targetFromZero = 360 - segmentCenter;
+    
+    const nextRotation = rotation + extraFullSpins + resetRotation + targetFromZero - randomOffset;
+    setRotation(nextRotation);
+    setTargetNumber(winningNumber);
 
     if (settings.soundTheme !== 'none') {
       let ticks = 0;
-      const interval = setInterval(() => {
+      const tickInterval = setInterval(() => {
         audioEngine.playTick(settings.soundTheme);
         ticks++;
-        if (ticks > 20) clearInterval(interval);
-      }, 120);
+        if (ticks > 25) clearInterval(tickInterval);
+      }, 150);
     }
-
-    const numSegments = max - min + 1;
-    const degreesPerSegment = 360 / numSegments;
-    const selectedIndex = selectedNumber - min;
-    const segmentCenterAngle = (selectedIndex * degreesPerSegment) + (degreesPerSegment / 2);
-    const jitter = (Math.random() - 0.5) * (degreesPerSegment * 0.7);
-    const targetRotation = 360 - segmentCenterAngle + jitter;
-    const spins = 5 * 360;
-    const currentRotMod = rotation % 360;
-    let rotationDiff = targetRotation - currentRotMod;
-    if (rotationDiff < 0) rotationDiff += 360;
-
-    const newRotation = rotation + spins + rotationDiff;
-    setRotation(newRotation);
-
-    setTimeout(() => {
-      setResult(selectedNumber);
-      setHistory(prev => [...prev, { value: selectedNumber, time: new Date().toISOString() }]);
-      setIsSpinning(false);
-      audioEngine.playAlarm(settings.soundTheme);
-    }, 3000);
   };
 
   const downloadCSV = () => {
@@ -97,17 +100,24 @@ export const NumberSpinner = () => {
   const mostCommon = Object.entries(frequencies).sort((a, b) => b[1] - a[1])[0];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 space-y-8">
-      {/* Tool Header */}
-      <div className="flex items-center gap-4 bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100">
-         <div className="p-4 bg-primary/10 rounded-2xl text-primary">
-            <Hash size={32} />
-         </div>
-         <div>
-            <h2 className="text-3xl font-black text-slate-800">Number Spinner</h2>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Probability Tool</p>
-         </div>
-      </div>
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Number Spinner"
+        icon={Loader}
+        description="Interactive Probability and Random Selection Wheel"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Custom Range</strong>
+              Set your minimum and maximum values in the settings panel. The wheel will automatically divide into equal segments.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Analytics</strong>
+              Track every spin in the history panel and download a CSV report for probability analysis lessons.
+            </p>
+          </>
+        }
+      />
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
@@ -121,8 +131,17 @@ export const NumberSpinner = () => {
             {/* Wheel */}
             <motion.div
               animate={{ rotate: rotation }}
-              transition={{ duration: 3, ease: [0.1, 0.7, 0.1, 1] }}
-              className={`w-full h-full rounded-full border-[12px] ${currentTheme.border} shadow-[0_20px_60px_rgba(0,0,0,0.2)] relative overflow-hidden ${currentTheme.wheelBg}`}
+              transition={isSpinning ? { duration: 4, ease: [0.15, 0.85, 0.15, 1] } : { duration: 0.5 }}
+              onAnimationComplete={() => {
+                if (isSpinning && targetNumber !== null) {
+                  setResult(targetNumber);
+                  setHistory(prev => [...prev, { value: targetNumber, time: new Date().toISOString() }]);
+                  setIsSpinning(false);
+                  audioEngine.playAlarm(settings.soundTheme);
+                }
+              }}
+              className={`w-full h-full rounded-full border-[12px] ${currentTheme.border} shadow-[0_20px_60px_rgba(0,0,0,0.2)] relative overflow-hidden ${currentTheme.wheelBg} cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.99]`}
+              onClick={spin}
               style={{
                 background: numSegments > 0 ? `conic-gradient(${
                   numbers.map((_, i) =>
@@ -168,14 +187,6 @@ export const NumberSpinner = () => {
                 <div className="h-24" /> // Spacer
               )}
             </AnimatePresence>
-
-            <button
-              onClick={spin}
-              disabled={isSpinning}
-              className="px-20 py-6 bg-gradient-to-br from-primary to-blue-700 text-white text-3xl font-black rounded-[2.5rem] shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest"
-            >
-              {isSpinning ? 'SPINNING...' : 'SPIN WHEEL'}
-            </button>
           </div>
         </div>
 
@@ -195,7 +206,10 @@ export const NumberSpinner = () => {
                    <input
                      type="number"
                      value={min}
-                     onChange={e => setMin(Number(e.target.value))}
+                     onChange={e => {
+                        setMin(Number(e.target.value));
+                        resetStats();
+                     }}
                      className="w-full p-4 bg-slate-50 border-2 border-slate-50 rounded-2xl text-xl font-black text-slate-700 focus:border-primary outline-none transition-all"
                      disabled={isSpinning}
                    />
@@ -205,7 +219,10 @@ export const NumberSpinner = () => {
                    <input
                      type="number"
                      value={max}
-                     onChange={e => setMax(Number(e.target.value))}
+                     onChange={e => {
+                        setMax(Number(e.target.value));
+                        resetStats();
+                     }}
                      className="w-full p-4 bg-slate-50 border-2 border-slate-50 rounded-2xl text-xl font-black text-slate-700 focus:border-primary outline-none transition-all"
                      disabled={isSpinning}
                    />
@@ -231,53 +248,56 @@ export const NumberSpinner = () => {
                 </button>
              </div>
 
-             {totalSpins === 0 ? (
-                <div className="py-12 text-center text-slate-300 text-xs font-black uppercase italic tracking-widest">No data collected</div>
-             ) : (
-                <div className="space-y-6">
-                   <div className="flex justify-around py-4 bg-slate-50 rounded-3xl">
-                      <div className="text-center">
-                         <p className="text-[9px] font-black text-slate-400 uppercase">Total</p>
-                         <p className="text-2xl font-black text-slate-700">{totalSpins}</p>
-                      </div>
-                      <div className="text-center">
-                         <p className="text-[9px] font-black text-slate-400 uppercase">Common</p>
-                         <p className="text-2xl font-black text-primary">{mostCommon[0]}</p>
-                      </div>
-                   </div>
+             <div className="space-y-8">
+                {/* Bar Chart */}
+                <div className="flex items-end justify-between h-32 gap-1 px-1 mt-4 border-b border-slate-100 relative">
+                   {numbers.map((num, i) => {
+                     const freq = frequencies[num] || 0;
+                     const maxFreq = Math.max(...Object.values(frequencies), 1);
+                     const height = (freq / maxFreq) * 100;
+                     return (
+                       <div key={num} className="flex-1 flex flex-col items-center relative h-full justify-end">
+                         <motion.div 
+                           initial={{ height: 0 }}
+                           animate={{ height: `${height}%` }}
+                           className="w-full bg-primary transition-colors rounded-t-sm min-h-[2px] relative"
+                         >
+                            {freq > 0 && (
+                               <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] font-black text-primary transition-opacity">
+                                  {freq}
+                               </span>
+                            )}
+                         </motion.div>
+                         <span className="absolute -bottom-5 text-[8px] font-black text-slate-400 transition-colors">
+                            {num}
+                         </span>
+                       </div>
+                     );
+                   })}
+                </div>
 
-                   <div className="flex flex-col items-center">
-                      <div 
-                        className="w-32 h-32 rounded-full border-4 border-white shadow-xl transition-all duration-700"
-                        style={{
-                          background: `conic-gradient(${
-                            Object.entries(frequencies).map(([val, freq], i, arr) => {
-                              let prevSum = 0;
-                              for(let j=0; j<i; j++) prevSum += (arr[j][1] / totalSpins) * 100;
-                              const currentPct = (freq / totalSpins) * 100;
-                              return `${currentTheme.colors[i % currentTheme.colors.length]} ${prevSum}% ${prevSum + currentPct}%`;
-                            }).join(', ')
-                          })`
-                        }}
-                      />
+                <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+                   <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase px-2">
+                      <span>Value History</span>
+                      <span className="opacity-50">{history.length} spins</span>
                    </div>
-
-                   <div className="max-h-48 overflow-y-auto pr-2 custom-scrollbar space-y-2">
-                      <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase px-2 mb-2">
-                         <span>Value</span>
-                         <span>History</span>
-                      </div>
-                      <div className="flex flex-col-reverse gap-2">
-                         {history.map((h, i) => (
-                           <div key={i} className="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                              <span className="text-[9px] font-black text-slate-300">#{i + 1}</span>
-                              <span className="text-lg font-black text-slate-700">{h.value}</span>
+                   <div className="grid grid-cols-5 gap-2 px-1">
+                      {history.slice().reverse().map((h, i) => (
+                        <motion.div 
+                          key={history.length - 1 - i}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="aspect-square flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 group relative cursor-help"
+                        >
+                           <span className="text-sm font-black text-slate-700">{h.value}</span>
+                           <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[8px] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-sm">
+                              {history.length - i}
                            </div>
-                         ))}
-                      </div>
+                        </motion.div>
+                      ))}
                    </div>
                 </div>
-             )}
+             </div>
           </div>
 
         </div>

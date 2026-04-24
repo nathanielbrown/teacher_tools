@@ -5,6 +5,7 @@ import {
   Waves, Zap, Sliders, Maximize2, ChevronRight,
   ShieldCheck, AlertCircle, TrendingUp, HelpCircle
 } from 'lucide-react';
+import { ToolHeader } from '../ToolHeader';
 
 // Constants
 const CANVAS_WIDTH = 1200;
@@ -156,36 +157,65 @@ export const StandingWaveSynthesis = () => {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto min-h-0 h-full flex flex-col gap-4 px-6 py-6 select-none overflow-y-auto lg:overflow-hidden">
-      {/* Header */}
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-blue-50 rounded-2xl text-blue-600">
-            <Activity size={40} />
+    <div className="w-full mx-auto min-h-0 h-full flex flex-col gap-4 px-6 pt-2 pb-8 select-none overflow-y-auto lg:overflow-hidden">
+      <ToolHeader
+        title="Standing Wave Synthesis"
+        icon={Activity}
+        description="Formation of Standing Waves by Superposition"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Superposition</strong>
+              Standing waves occur when two waves of the same frequency move in opposite directions and overlap.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Nodes and Antinodes</strong>
+              Watch for points that don't move (Nodes) and points with maximum motion (Antinodes). These are caused by constructive and destructive interference.
+            </p>
+          </>
+        }
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className={`p-2 rounded-lg transition-all active:scale-95 ${
+                isPlaying ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-emerald-600'
+              }`}
+              title={isPlaying ? "Pause Simulation" : "Resume Simulation"}
+            >
+              {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+            <button
+              onClick={resetExperiment}
+              className="p-2 text-slate-400 rounded-lg hover:text-red-600 transition-all active:scale-95"
+              title="Reset Simulation"
+            >
+              <RotateCcw size={18} />
+            </button>
           </div>
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Standing Wave Synthesis</h2>
-            <p className="text-slate-400 font-medium italic">Formation of standing waves by superposition.</p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className={`p-4 rounded-2xl transition-all shadow-lg active:scale-95 ${
-              isPlaying ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'
-            }`}
-          >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-          </button>
-          <button
-            onClick={resetExperiment}
-            className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
-          >
-            <RotateCcw size={24} />
-          </button>
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            {[
+              { id: 'components', icon: Waves, active: showComponents, set: setShowComponents, label: 'Waves' },
+              { id: 'trace', icon: Activity, active: showTrace, set: setShowTrace, label: 'Envelope' },
+              { id: 'slowmo', icon: Zap, active: slowMotion, set: setSlowMotion, label: 'Slow Mo' },
+            ].map((toggle) => (
+              <button
+                key={toggle.id}
+                onClick={() => toggle.set(!toggle.active)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all font-black text-[10px] uppercase tracking-wider ${
+                  toggle.active ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                }`}
+                title={toggle.label}
+              >
+                <toggle.icon size={14} />
+                <span className="hidden md:inline">{toggle.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0">
         {/* Main Simulation View */}
@@ -290,32 +320,6 @@ export const StandingWaveSynthesis = () => {
             </div>
           </div>
 
-          {/* Visualization Toggles */}
-          <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
-            <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-3">
-              <Maximize2 className="text-blue-600" />
-              Visualization
-            </h3>
-            
-            <div className="grid grid-cols-1 gap-3">
-              {[
-                { id: 'components', label: 'Show Component Waves', active: showComponents, set: setShowComponents, icon: Waves },
-                { id: 'trace', label: 'Show Wave Envelope', active: showTrace, set: setShowTrace, icon: Activity },
-                { id: 'slowmo', label: 'Slow Motion', active: slowMotion, set: setSlowMotion, icon: Zap },
-              ].map((toggle) => (
-                <button
-                  key={toggle.id}
-                  onClick={() => toggle.set(!toggle.active)}
-                  className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${
-                    toggle.active ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-50 bg-slate-50/50 text-slate-400 hover:border-slate-200'
-                  }`}
-                >
-                  <toggle.icon size={20} />
-                  <span className="text-sm font-bold">{toggle.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Education Panel */}
           <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-xl border border-slate-800 flex-1 flex flex-col gap-6 overflow-hidden relative group">

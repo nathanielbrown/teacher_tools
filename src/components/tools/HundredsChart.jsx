@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, RotateCcw, Highlighter, Eraser, Grid3X3, Hash, MousePointer2, Zap, Gauge } from 'lucide-react';
 import React, { useState, useEffect, useMemo } from 'react';
+import { ToolHeader } from '../ToolHeader';
 
 const ChartCell = ({ num, isHidden, highlightColor, animDelay, onClick, isPatternAnimating }) => {
   // Reveal hidden number if it's highlighted
@@ -118,19 +119,24 @@ export const HundredsChart = () => {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border-2 border-slate-200 shadow-sm">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-2xl">
-              <Grid3X3 className="text-primary" size={32} />
-            </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Hundreds Chart</h2>
-          </div>
-          <p className="text-slate-400 font-medium pl-1">Interactive base-10 exploration and pattern finding.</p>
-        </div>
-
+    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+      <ToolHeader
+        title="Hundreds Chart"
+        icon={Grid3X3}
+        description="Interactive base-10 exploration and pattern finding"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Modes</strong>
+              Use "Hide Mode" to conceal numbers for guessing games. Use colors to highlight multiples or skip-counting patterns.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Patterns</strong>
+              Quickly highlight multiples of 2, 3, 5, or 10 with the pattern cascade buttons.
+            </p>
+          </>
+        }
+      >
         <div className="flex flex-wrap gap-3">
           <div className="flex bg-slate-100 p-1.5 rounded-2xl border-2 border-slate-200">
             <button onClick={hideAll} className="px-5 py-2 text-sm font-black text-slate-600 hover:text-primary transition-colors">Hide All</button>
@@ -139,13 +145,13 @@ export const HundredsChart = () => {
           </div>
           <button
             onClick={clearAll}
-            className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all active:scale-95 border-2 border-red-100"
+            className="p-3 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all active:scale-95 border-2 border-red-100"
+            title="Reset Chart"
           >
-            <RotateCcw size={20} />
-            Reset
+            <RotateCcw size={24} />
           </button>
         </div>
-      </div>
+      </ToolHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-1 space-y-6">

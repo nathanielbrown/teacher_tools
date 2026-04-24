@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Layers, Columns, Square, Hand, LayoutGrid, RotateCcw } from 'lucide-react';
 import React, { useState, useRef, useMemo } from 'react';
+import { ToolHeader } from '../ToolHeader';
 
 const UnitBlock = ({ color }) => (
   <div 
@@ -39,6 +40,13 @@ const TYPES = [
 export const MABBlocks = () => {
   const [blocks, setBlocks] = useState([]);
   const workspaceRef = useRef(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
+
+  const BLOCK_SIZES = {
+    hundreds: { w: 162, h: 162 }, // 160 + 2px padding
+    tens: { w: 18, h: 162 },
+    ones: { w: 16, h: 16 },
+  };
 
   const counts = useMemo(() => {
     return {
@@ -81,23 +89,46 @@ export const MABBlocks = () => {
     ) {
       setBlocks(prev => prev.filter(b => b.id !== id));
     } else {
-      // Update position
-      const x = info.point.x - rect.left;
-      const y = info.point.y - rect.top;
-      setBlocks(prev => prev.map(b => b.id === id ? { ...b, x, y } : b));
+      setBlocks(prev => prev.map(b => 
+        b.id === id ? { 
+          ...b, 
+          x: (info.point.x - rect.left) - dragOffset.current.x, 
+          y: (info.point.y - rect.top) - dragOffset.current.y 
+        } : b
+      ));
+    }
+  };
+
+  const handleSidebarDragEnd = (type, info) => {
+    if (!workspaceRef.current) return;
+    const rect = workspaceRef.current.getBoundingClientRect();
+    
+    if (
+      info.point.x >= rect.left &&
+      info.point.x <= rect.right &&
+      info.point.y >= rect.top &&
+      info.point.y <= rect.bottom
+    ) {
+      // Calculate position accounting for the exact grab offset
+      const x = (info.point.x - rect.left) - dragOffset.current.x;
+      const y = (info.point.y - rect.top) - dragOffset.current.y;
+      
+      const newBlock = {
+        id: `block-${Date.now()}-${Math.random()}`,
+        type,
+        x,
+        y
+      };
+      
+      setBlocks(prev => [...prev, newBlock]);
     }
   };
 
   const sortBlocks = () => {
     if (!workspaceRef.current) return;
     const rect = workspaceRef.current.getBoundingClientRect();
-    const padding = 60;
+    const padding = 40;
     const colWidth = (rect.width - padding * 2) / 3;
-
-    let sortedBlocks = [...blocks].sort((a, b) => {
-      const order = { hundreds: 0, tens: 1, ones: 2 };
-      return order[a.type] - order[b.type];
-    });
 
     const typeCounts = { hundreds: 0, tens: 0, ones: 0 };
 
@@ -107,14 +138,17 @@ export const MABBlocks = () => {
       
       let x, y;
       if (type === 'hundreds') {
-        x = padding + 50 + (idx % 2) * 110;
-        y = padding + Math.floor(idx / 2) * 110;
+        const cols = Math.max(1, Math.floor(colWidth / 175));
+        x = padding + (idx % cols) * 175;
+        y = padding + Math.floor(idx / cols) * 175;
       } else if (type === 'tens') {
-        x = padding + colWidth + 50 + (idx % 5) * 40;
-        y = padding + Math.floor(idx / 5) * 80;
+        const cols = Math.max(1, Math.floor(colWidth / 35));
+        x = padding + colWidth + (idx % cols) * 35;
+        y = padding + Math.floor(idx / cols) * 175;
       } else {
-        x = padding + colWidth * 2 + 20 + (idx % 10) * 40;
-        y = padding + Math.floor(idx / 10) * 40;
+        const cols = Math.max(1, Math.floor(colWidth / 25));
+        x = padding + colWidth * 2 + (idx % cols) * 25;
+        y = padding + Math.floor(idx / cols) * 25;
       }
 
       return { ...block, x, y };
@@ -123,48 +157,100 @@ export const MABBlocks = () => {
 
   const clear = () => setBlocks([]);
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-4 h-[calc(100vh-160px)] flex flex-col gap-3 select-none">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[2rem] border-2 border-slate-100 shadow-sm">
-        <div className="space-y-0.5">
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            MAB Blocks Lab
-            <span className="text-[10px] bg-indigo-50 text-indigo-500 px-3 py-0.5 rounded-full uppercase tracking-widest font-bold">Interactive</span>
-          </h2>
-          <p className="text-slate-400 font-medium text-xs">Click a block from the bank to add it. Drag blocks to move them. Drag off to remove.</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="bg-slate-50 px-6 py-2 rounded-[1.5rem] border-2 border-slate-100 flex flex-col items-center">
-            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total Value</span>
-            <span className="text-2xl font-black text-indigo-600 tabular-nums">
-              {totalValue.toLocaleString()}
-            </span>
-          </div>
-          
-          <div className="flex flex-col gap-1">
-            <button
-              onClick={sortBlocks}
-              className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-lg font-black text-[10px] hover:bg-indigo-700 shadow-lg shadow-indigo-100 uppercase"
-            >
-              <LayoutGrid size={12} /> Sort
-            </button>
-            <button
-              onClick={clear}
-              className="flex items-center gap-2 px-4 py-1.5 bg-red-50 text-red-500 rounded-lg font-black text-[10px] hover:bg-red-100 uppercase"
-            >
-              <RotateCcw size={12} /> Reset
-            </button>
-          </div>
+  const renderDraggableType = (type) => (
+    <div 
+      key={type.key} 
+      className="flex flex-col items-center gap-2 group overflow-visible"
+    >
+      <div className="relative flex items-center justify-center shrink-0">
+        <motion.div
+          drag
+          dragSnapToOrigin
+          dragMomentum={false}
+          onPointerDown={(e) => {
+            const target = e.currentTarget || (e.target && e.target.closest('div'));
+            if (!target) return;
+            const rect = target.getBoundingClientRect();
+            dragOffset.current = {
+              x: e.clientX - rect.left,
+              y: e.clientY - rect.top
+            };
+          }}
+          onDragEnd={(e, info) => handleSidebarDragEnd(type.key, info)}
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileDrag={{ scale: 1.05, zIndex: 1000, cursor: 'grabbing' }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="cursor-grab active:cursor-grabbing relative z-10"
+        >
+          <type.component color={type.color} />
+        </motion.div>
+        {/* Shadow/Placeholder */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none -z-0">
+          <type.component color={type.color} />
         </div>
       </div>
+      <div className="flex flex-col text-center mt-2">
+        <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">{type.label}</p>
+        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-tight">{type.key === 'hundreds' ? '100 Units' : type.key === 'tens' ? '10 Units' : '1 Unit'}</p>
+      </div>
+    </div>
+  );
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch min-h-0">
-        {/* Workspace */}
-        <div 
-          ref={workspaceRef}
-          className="lg:col-span-9 bg-white rounded-[2.5rem] border-4 border-white shadow-xl relative overflow-hidden bg-slate-50"
-        >
+  return (
+    <div className="w-full mx-auto h-[calc(100vh-140px)] flex flex-col gap-8 px-4 pt-2 pb-8 select-none overflow-hidden">
+      <ToolHeader
+        title="MAB Blocks Lab"
+        icon={Layers}
+        description="Interactive Base-10 Place Value Simulation"
+        infoContent={
+          <>
+            <p>
+              <strong className="text-white block mb-1">Add Blocks</strong>
+              Drag the blocks from the sidebar and drop them onto the workspace to add Hundreds, Tens, or Ones.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Workspace</strong>
+              Drag blocks to position them. Drag a block off the workspace to remove it. Use "Sort" to automatically organize your blocks into columns.
+            </p>
+          </>
+        }
+      />
+
+      <div className="flex-1 flex flex-row gap-6 min-h-0">
+        {/* Block Bank Sidebar */}
+        <div className="bg-white rounded-[2.5rem] border-2 border-slate-50 shadow-xl p-4 flex flex-col items-center gap-4 z-20 overflow-visible relative w-56 shrink-0">
+          <div className="flex flex-col items-center gap-4 border-b border-slate-100 pb-4 w-full">
+            <div className="flex flex-col text-center">
+              <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Block Bank</span>
+              <span className="text-[9px] text-indigo-500 font-bold">Drag to add</span>
+            </div>
+            <button 
+              onClick={clear}
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl transition-colors group/reset flex items-center gap-2 w-full justify-center"
+              title="Reset Workspace"
+            >
+              <RotateCcw size={16} className="group-active/reset:rotate-[-45deg] transition-transform" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Reset</span>
+            </button>
+          </div>
+          
+          <div className="flex-1 flex flex-col items-center justify-start gap-4 overflow-visible w-full pt-2">
+            <div className="w-full flex justify-center">
+              {renderDraggableType(TYPES.find(t => t.key === 'hundreds'))}
+            </div>
+            <div className="flex flex-row items-end justify-center gap-8 w-full mt-2">
+              {renderDraggableType(TYPES.find(t => t.key === 'tens'))}
+              {renderDraggableType(TYPES.find(t => t.key === 'ones'))}
+            </div>
+          </div>
+        </div>
+
+        {/* Workspace - Takes remaining width */}
+        <div className="flex-1 min-h-0 relative z-10">
+          <div 
+            ref={workspaceRef}
+            className="h-full bg-white rounded-[2.5rem] border-4 border-white shadow-xl relative overflow-hidden bg-slate-50"
+          >
           {/* Architectural Grid */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
             style={{ 
@@ -190,6 +276,15 @@ export const MABBlocks = () => {
                   drag
                   dragMomentum={false}
                   dragElastic={0}
+                  onPointerDown={(e) => {
+                    const target = e.currentTarget || (e.target && e.target.closest('div'));
+                    if (!target) return;
+                    const rect = target.getBoundingClientRect();
+                    dragOffset.current = {
+                      x: e.clientX - rect.left,
+                      y: e.clientY - rect.top
+                    };
+                  }}
                   onDragEnd={(e, info) => handleWorkspaceDragEnd(block.id, info)}
                   initial={{ opacity: 0, scale: 0.5, x: block.x, y: block.y }}
                   animate={{ 
@@ -210,7 +305,6 @@ export const MABBlocks = () => {
                     position: 'absolute',
                     left: 0,
                     top: 0,
-                    transform: 'translate(-50%, -50%)',
                     cursor: 'grab'
                   }}
                   className="active:cursor-grabbing"
@@ -227,78 +321,46 @@ export const MABBlocks = () => {
               <p className="font-black uppercase tracking-[0.4em] text-xl text-center">Workspace Ready</p>
             </div>
           )}
-        </div>
-
-        {/* Bank Sidebar */}
-        <div className="lg:col-span-3 flex flex-col gap-4">
-          <div className="bg-white rounded-[2rem] border-2 border-slate-50 shadow-xl p-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
-            <div className="flex items-center gap-2 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">
-              <RotateCcw size={12} />
-              Block Bank
-            </div>
-            
-            <div className="flex flex-col gap-8 items-center py-2">
-              {TYPES.map(type => (
-                <button 
-                  key={type.key} 
-                  onClick={() => addBlock(type.key)}
-                  className="flex flex-col items-center gap-2 w-full group outline-none"
-                >
-                  <div className="relative">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                      className="cursor-pointer"
-                    >
-                      <type.component color={type.color} />
-                    </motion.div>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[9px] font-black text-slate-700 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">{type.label}</p>
-                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">({type.key === 'hundreds' ? 100 : type.key === 'tens' ? 10 : 1})</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-auto p-3 bg-indigo-50 text-indigo-600 rounded-xl text-[9px] font-bold space-y-0.5">
-              <p className="uppercase tracking-widest text-[7px] opacity-60 font-black">Pro Tip</p>
-              <p>Click blocks to add them instantly!</p>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Expanded Form Footer */}
-      <div className="p-4 bg-white rounded-[2rem] border-2 border-slate-50 shadow-xl overflow-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500 opacity-20" />
-        <div className="flex flex-wrap items-center justify-center gap-4 text-lg font-black text-slate-800 tabular-nums">
-          <div className="flex flex-col items-center group">
-            <span className="text-[7px] text-blue-500 uppercase font-black tracking-widest mb-1">Hundreds</span>
-            <div className="bg-blue-50 px-5 py-2 rounded-lg border border-blue-100 min-w-[100px] text-center text-blue-600 shadow-sm">
-              {counts.hundreds * 100}
+      {/* Compact Form Footer */}
+      <div className="px-6 py-4 bg-white rounded-2xl border-2 border-slate-100 shadow-lg flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-8">
+          <button
+            onClick={sortBlocks}
+            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-black text-[11px] hover:bg-indigo-700 shadow-lg shadow-indigo-100 uppercase transition-all active:scale-95"
+          >
+            <LayoutGrid size={16} /> Sort Blocks
+          </button>
+
+          <div className="h-8 w-px bg-slate-100 mx-2" />
+
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Hundreds</span>
+              <span className="text-xl font-black text-blue-600 tabular-nums">{counts.hundreds * 100}</span>
+            </div>
+            <div className="w-px h-4 bg-slate-100" />
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tens</span>
+              <span className="text-xl font-black text-green-600 tabular-nums">{counts.tens * 10}</span>
+            </div>
+            <div className="w-px h-4 bg-slate-100" />
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-yellow-500" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Ones</span>
+              <span className="text-xl font-black text-yellow-600 tabular-nums">{counts.ones}</span>
             </div>
           </div>
-          <span className="text-slate-200 text-3xl font-light">+</span>
-          <div className="flex flex-col items-center group">
-            <span className="text-[7px] text-green-500 uppercase font-black tracking-widest mb-1">Tens</span>
-            <div className="bg-green-50 px-5 py-2 rounded-lg border border-green-100 min-w-[100px] text-center text-green-600 shadow-sm">
-              {counts.tens * 10}
-            </div>
-          </div>
-          <span className="text-slate-200 text-3xl font-light">+</span>
-          <div className="flex flex-col items-center group">
-            <span className="text-[7px] text-yellow-500 uppercase font-black tracking-widest mb-1">Ones</span>
-            <div className="bg-yellow-50 px-5 py-2 rounded-lg border border-yellow-100 min-w-[100px] text-center text-yellow-600 shadow-sm">
-              {counts.ones}
-            </div>
-          </div>
-          <span className="text-indigo-300 text-3xl mx-2">=</span>
-          <div className="flex flex-col items-center">
-             <span className="text-[7px] text-indigo-400 uppercase font-black tracking-widest mb-1">Total Value</span>
-             <span className="text-5xl text-indigo-600 drop-shadow-md font-black leading-none">{totalValue.toLocaleString()}</span>
-          </div>
+        </div>
+
+        <div className="flex items-center gap-4 bg-indigo-50 px-8 py-3 rounded-2xl border border-indigo-100 shadow-inner">
+          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Total Value</span>
+          <span className="text-4xl font-black text-indigo-600 tabular-nums leading-none">{totalValue.toLocaleString()}</span>
         </div>
       </div>
     </div>

@@ -60,7 +60,7 @@ export const WouldYouRather = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
       <ToolHeader
-        title="Would You Rather?"
+        title="Would You Rather"
         icon={HelpCircle}
         description="The Ultimate Classroom Icebreaker and Debate Game"
         infoContent={

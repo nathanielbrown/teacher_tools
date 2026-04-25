@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Square, Droplet, Flame, Grid, Eraser, Trash2, 
-  Play, Pause, Settings2, Sparkles, MousePointer2, Hammer, Zap
+  Play, Pause, Settings2, Sparkles, MousePointer2, Hammer, Zap,
+  Thermometer, FlaskConical, Sprout, Wind, Infinity, Snowflake
 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ToolHeader } from '../ToolHeader';
@@ -13,20 +14,32 @@ const CELL_SIZE = 5;
 const MATERIALS = [
   { id: 0, label: 'Eraser', icon: Eraser, color: '#f8fafc', behavior: 'empty' },
   { id: 1, label: 'Wall', icon: Square, color: '#475569', behavior: 'static' },
-  { id: 2, label: 'Sand', icon: Grid, color: '#eab308', behavior: 'falling' },
+  { id: 2, label: 'Dirt', icon: Grid, color: '#451a03', behavior: 'falling' },
   { id: 3, label: 'Water', icon: Droplet, color: '#3b82f6', behavior: 'liquid' },
   { id: 4, label: 'Wood', icon: Hammer, color: '#78350f', behavior: 'flammable' },
   { id: 5, label: 'Fire', icon: Flame, color: '#ef4444', behavior: 'gas' },
   { id: 6, label: 'Oil', icon: Zap, color: '#1e293b', behavior: 'flammable-liquid' },
+  { id: 7, label: 'Lava', icon: Thermometer, color: '#f97316', behavior: 'hot-liquid' },
+  { id: 8, label: 'Acid', icon: FlaskConical, color: '#a3e635', behavior: 'corrosive' },
+  { id: 9, label: 'Plant', icon: Sprout, color: '#22c55e', behavior: 'living' },
+  { id: 10, label: 'Ice', icon: Snowflake, color: '#bae6fd', behavior: 'melting' },
+  { id: 11, label: 'Steam', icon: Wind, color: '#e2e8f0', behavior: 'rising' },
+  { id: 12, label: 'Generator', icon: Infinity, color: '#a855f7', behavior: 'generator' },
 ];
 
 export const SandSimulation = () => {
   const [selectedMaterial, setSelectedMaterial] = useState(2);
   const [brushSize, setBrushSize] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
+  const [isGeneratorMode, setIsGeneratorMode] = useState(false);
   const canvasRef = useRef(null);
   const gridRef = useRef(new Uint8Array(GRID_SIZE * GRID_SIZE));
+  const nextGridRef = useRef(new Uint8Array(GRID_SIZE * GRID_SIZE));
+  const sourceGridRef = useRef(new Uint8Array(GRID_SIZE * GRID_SIZE));
+  const drawQueueRef = useRef([]);
   const requestRef = useRef();
+  const containerRef = useRef(null);
+  const [containerHeight, setContainerHeight] = useState(600);
   
   const { settings } = useSettings();
 
@@ -36,17 +49,42 @@ export const SandSimulation = () => {
     if (isPaused) return;
 
     const currentGrid = gridRef.current;
-    const nextGrid = new Uint8Array(currentGrid);
+    const nextGrid = nextGridRef.current;
+    
+    // Apply queued drawing actions first
+    while (drawQueueRef.current.length > 0) {
+      const { x, y, material, isGenerator } = drawQueueRef.current.shift();
+      const idx = getIdx(x, y);
+      const oldMat = currentGrid[idx];
+      
+      if (material === 0) { // Eraser
+        currentGrid[idx] = 0;
+        sourceGridRef.current[idx] = 0;
+      } else if (isGenerator) { 
+        currentGrid[idx] = 12; // ID 12 is Generator
+        sourceGridRef.current[idx] = material;
+      } else if (oldMat === 12) { // Painting over Generator
+        sourceGridRef.current[idx] = material;
+      } else {
+        currentGrid[idx] = material;
+      }
+    }
 
-    // Iterate backwards so falling materials don't teleport to the bottom in one frame
+    nextGrid.set(currentGrid);
+
+    // Alternate horizontal scan direction to stabilize liquids
+    const scanDir = (Math.floor(Date.now() / 16) % 2 === 0);
+
     for (let y = GRID_SIZE - 1; y >= 0; y--) {
-      for (let x = 0; x < GRID_SIZE; x++) {
+      for (let x_base = 0; x_base < GRID_SIZE; x_base++) {
+        const x = scanDir ? x_base : (GRID_SIZE - 1 - x_base);
         const i = getIdx(x, y);
         const cell = currentGrid[i];
 
         if (cell === 0) continue;
 
         const material = MATERIALS[cell];
+        if (material.behavior === 'static') continue;
 
         if (material.behavior === 'falling') {
           // Down
@@ -65,53 +103,148 @@ export const SandSimulation = () => {
             nextGrid[getIdx(x + 1, y + 1)] = cell;
           }
         } 
-        else if (material.behavior === 'liquid' || material.behavior === 'flammable-liquid') {
-          // Down
+        else if (material.behavior === 'liquid' || material.behavior === 'flammable-liquid' || material.behavior === 'hot-liquid' || material.behavior === 'corrosive') {
+          // Check for interactions
+          const neighbors = [
+            { nx: x, ny: y + 1 }, { nx: x - 1, ny: y + 1 }, { nx: x + 1, ny: y + 1 },
+            { nx: x - 1, ny: y }, { nx: x + 1, ny: y }
+          ];
+
+          let interacted = false;
+          for (const { nx, ny } of neighbors) {
+            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+              const target = nextGrid[getIdx(nx, ny)];
+              if (cell === 7 && target === 3) { // Lava + Water
+                nextGrid[getIdx(nx, ny)] = 1; nextGrid[i] = 0; interacted = true; break;
+              }
+              if (cell === 3 && target === 7) { // Water + Lava
+                nextGrid[getIdx(nx, ny)] = 1; nextGrid[i] = 0; interacted = true; break;
+              }
+              if (cell === 7 && (target === 4 || target === 6 || target === 9)) { // Lava ignites flammable
+                nextGrid[getIdx(nx, ny)] = 5; interacted = true; break;
+              }
+              if (cell === 8 && target !== 0 && target !== 1 && target !== 8) { // Acid
+                nextGrid[getIdx(nx, ny)] = 0;
+                if (Math.random() > 0.5) nextGrid[i] = 0;
+                interacted = true; break;
+              }
+            }
+          }
+          if (interacted) continue;
+
+          // Liquid Movement
           if (y < GRID_SIZE - 1 && nextGrid[getIdx(x, y + 1)] === 0) {
             nextGrid[i] = 0;
             nextGrid[getIdx(x, y + 1)] = cell;
-          } 
-          // Down-Left
-          else if (y < GRID_SIZE - 1 && x > 0 && nextGrid[getIdx(x - 1, y + 1)] === 0) {
-            nextGrid[i] = 0;
-            nextGrid[getIdx(x - 1, y + 1)] = cell;
-          }
-          // Down-Right
-          else if (y < GRID_SIZE - 1 && x < GRID_SIZE - 1 && nextGrid[getIdx(x + 1, y + 1)] === 0) {
-            nextGrid[i] = 0;
-            nextGrid[getIdx(x + 1, y + 1)] = cell;
-          }
-          // Horizontal (flow)
-          else {
+          } else {
             const dir = Math.random() > 0.5 ? 1 : -1;
-            if (x + dir >= 0 && x + dir < GRID_SIZE && nextGrid[getIdx(x + dir, y)] === 0) {
-              nextGrid[i] = 0;
-              nextGrid[getIdx(x + dir, y)] = cell;
+            const sides = [dir, -dir];
+            for (const s of sides) {
+              if (x + s >= 0 && x + s < GRID_SIZE && nextGrid[getIdx(x + s, y)] === 0) {
+                nextGrid[i] = 0;
+                nextGrid[getIdx(x + s, y)] = cell;
+                break;
+              }
             }
           }
         }
-        else if (material.behavior === 'gas') { // Fire
-          // Rise or spread
+        else if (material.behavior === 'gas' || material.behavior === 'rising') {
           const nx = x + Math.floor(Math.random() * 3) - 1;
-          const ny = y + Math.floor(Math.random() * 3) - 2;
+          const ny = y + (material.behavior === 'rising' ? -1 : (Math.floor(Math.random() * 3) - 2));
 
           if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
             const target = currentGrid[getIdx(nx, ny)];
             if (target === 0) {
               nextGrid[i] = 0;
               nextGrid[getIdx(nx, ny)] = cell;
-            } else if (target === 4 || target === 6) { // Wood or Oil
-              nextGrid[getIdx(nx, ny)] = 5; // Set on fire
+            } else if (material.behavior === 'rising' && (MATERIALS[target]?.behavior.includes('liquid') || MATERIALS[target]?.behavior === 'corrosive')) {
+              // Steam rises through liquids (Swap)
+              nextGrid[i] = target;
+              nextGrid[getIdx(nx, ny)] = cell;
+            } else if (cell === 5 && target === 3) {
+              nextGrid[i] = 11;
+            } else if (cell === 5 && target === 10) {
+              nextGrid[getIdx(nx, ny)] = 3;
             }
           }
           
-          // Randomly die out
-          if (Math.random() > 0.9) nextGrid[i] = 0;
+          // Fire spreads in all directions
+          if (cell === 5) {
+            const directions = [
+              { dx: 0, dy: 1 }, { dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: -1, dy: 0 }
+            ];
+            for (const { dx, dy } of directions) {
+              const tx = x + dx; const ty = y + dy;
+              if (tx >= 0 && tx < GRID_SIZE && ty >= 0 && ty < GRID_SIZE) {
+                const target = currentGrid[getIdx(tx, ty)];
+                if ((target === 4 || target === 6 || target === 9) && Math.random() > 0.4) {
+                  nextGrid[getIdx(tx, ty)] = 5;
+                }
+              }
+            }
+          }
+          const dieChance = material.behavior === 'rising' ? 0.05 : 0.1;
+          if (Math.random() > (1 - dieChance)) nextGrid[i] = 0;
+        }
+        else if (material.behavior === 'living') {
+          const growChance = 0.95; // Base high chance for random check, then modified below
+          if (Math.random() > growChance) {
+            const nx = x + Math.floor(Math.random() * 3) - 1;
+            const ny = y + Math.floor(Math.random() * 3) - 1;
+            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+              const target = currentGrid[getIdx(nx, ny)];
+              if (target === 3 || target === 0 || target === 2) {
+                let soilQuality = 0; // 0 = nothing, 1 = dirt, 2 = water
+                for (let ay = -1; ay <= 1; ay++) {
+                  for (let ax = -1; ax <= 1; ax++) {
+                    const tx = x + ax; const ty = y + ay;
+                    if (tx >= 0 && tx < GRID_SIZE && ty >= 0 && ty < GRID_SIZE) {
+                      const n = currentGrid[getIdx(tx, ty)];
+                      if (n === 3) soilQuality = Math.max(soilQuality, 2);
+                      if (n === 2) soilQuality = Math.max(soilQuality, 1);
+                    }
+                  }
+                }
+                
+                // Grow logic:
+                // If in water, grow very fast.
+                // If in dirt, grow slow.
+                const speedMod = soilQuality === 2 ? 0.4 : (soilQuality === 1 ? 0.05 : 0);
+                if (Math.random() < speedMod) {
+                   nextGrid[getIdx(nx, ny)] = 9;
+                }
+              }
+            }
+          }
+        }
+        else if (material.behavior === 'generator') {
+          const targetType = sourceGridRef.current[i];
+          if (targetType !== 0) {
+            const dx = Math.floor(Math.random() * 3) - 1;
+            const dy = Math.floor(Math.random() * 3) - 1;
+            const nx = x + dx; const ny = y + dy;
+            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE && nextGrid[getIdx(nx, ny)] === 0) {
+              if (dx !== 0 || dy !== 0) nextGrid[getIdx(nx, ny)] = targetType;
+            }
+          }
+        }
+        else if (material.behavior === 'melting') {
+          let nearHeat = false;
+          for (let ay = -1; ay <= 1; ay++) {
+            for (let ax = -1; ax <= 1; ax++) {
+              const tx = x + ax; const ty = y + ay;
+              if (tx >= 0 && tx < GRID_SIZE && ty >= 0 && ty < GRID_SIZE) {
+                const t = currentGrid[getIdx(tx, ty)];
+                if (t === 5 || t === 7) nearHeat = true;
+              }
+            }
+          }
+          if (nearHeat && Math.random() > 0.9) nextGrid[i] = 3;
         }
       }
     }
 
-    gridRef.current = nextGrid;
+    currentGrid.set(nextGrid);
     draw();
     requestRef.current = requestAnimationFrame(update);
   };
@@ -136,6 +269,23 @@ export const SandSimulation = () => {
   };
 
   useEffect(() => {
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        if (entry.target === containerRef.current) {
+          // Subtract some padding/header space if needed, but flex should handle it
+          setContainerHeight(entry.contentRect.height);
+        }
+      }
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     requestRef.current = requestAnimationFrame(update);
     return () => cancelAnimationFrame(requestRef.current);
   }, [isPaused]);
@@ -155,12 +305,32 @@ export const SandSimulation = () => {
         const ny = mouseY + dy;
         if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
           if (Math.sqrt(dx * dx + dy * dy) <= brushSize) {
-            gridRef.current[getIdx(nx, ny)] = selectedMaterial;
+            drawQueueRef.current.push({ x: nx, y: ny, material: selectedMaterial, isGenerator: isGeneratorMode });
           }
         }
       }
     }
-    if (isPaused) draw();
+    if (isPaused) {
+       // Apply immediately if paused so the user sees results
+       while (drawQueueRef.current.length > 0) {
+        const { x, y, material, isGenerator } = drawQueueRef.current.shift();
+        const idx = getIdx(x, y);
+        const oldMat = gridRef.current[idx];
+        
+        if (material === 0) {
+          gridRef.current[idx] = 0;
+          sourceGridRef.current[idx] = 0;
+        } else if (isGenerator) {
+          gridRef.current[idx] = 12;
+          sourceGridRef.current[idx] = material;
+        } else if (oldMat === 12) {
+          sourceGridRef.current[idx] = material;
+        } else {
+          gridRef.current[idx] = material;
+        }
+      }
+      draw();
+    }
   };
 
   const clearCanvas = () => {
@@ -169,7 +339,7 @@ export const SandSimulation = () => {
   };
 
   return (
-    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-6">
+    <div className="w-full mx-auto px-4 pt-2 pb-2 h-full flex flex-col gap-4 overflow-hidden">
       <ToolHeader
         title="Sand Simulation"
         icon={Sparkles}
@@ -178,11 +348,15 @@ export const SandSimulation = () => {
           <>
             <p>
               <strong className="text-white block mb-1">Materials</strong>
-              Different materials have unique behaviors. Sand falls, water flows, walls are static, and fire spreads through flammable objects.
+              From falling Sand to flowing Lava and growing Plants. Each material has physical properties like weight, flammability, and state.
+            </p>
+            <p>
+              <strong className="text-white block mb-1">Generators (Source)</strong>
+              Use the Source tool to create infinite emitters. Tip: Paint over a Source with another material to change what it generates!
             </p>
             <p>
               <strong className="text-white block mb-1">Interactions</strong>
-              Fire burns Wood and Oil. Water puts out Fire. Experiment with placing different materials together to see how they react!
+              Lava + Water = Rock. Acid dissolves almost anything. Plants grow when near water. Fire melts Ice. Experiment!
             </p>
           </>
         }
@@ -209,14 +383,14 @@ export const SandSimulation = () => {
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch min-h-0">
         {/* Simulation Canvas */}
-        <div className="lg:col-span-9 bg-slate-900 rounded-[3rem] border-8 border-slate-800 shadow-2xl overflow-hidden relative cursor-crosshair group">
+        <div ref={containerRef} className="lg:col-span-9 bg-slate-900 rounded-[3rem] border-8 border-slate-800 shadow-2xl overflow-hidden relative cursor-crosshair group flex items-center justify-center min-h-0">
           <canvas
             ref={canvasRef}
             width={GRID_SIZE * CELL_SIZE}
             height={GRID_SIZE * CELL_SIZE}
             onPointerDown={handlePointer}
             onPointerMove={handlePointer}
-            className="w-full h-full object-contain"
+            className="w-full h-full"
           />
           
           {/* Overlay hints */}
@@ -233,22 +407,38 @@ export const SandSimulation = () => {
               Material Palette
             </div>
             
-            <div className="grid grid-cols-1 gap-2">
-              {MATERIALS.map(mat => (
-                <button
-                  key={mat.id}
-                  onClick={() => setSelectedMaterial(mat.id)}
-                  className={`
-                    w-full px-4 py-4 rounded-2xl text-sm font-black transition-all flex items-center gap-4
-                    ${selectedMaterial === mat.id ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}
-                  `}
-                >
-                  <div className={`p-2 rounded-lg ${selectedMaterial === mat.id ? 'bg-white/20' : 'bg-white shadow-sm'}`}>
-                    <mat.icon size={18} style={{ color: selectedMaterial === mat.id ? 'white' : mat.color }} />
-                  </div>
-                  {mat.label}
-                </button>
-              ))}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => setIsGeneratorMode(!isGeneratorMode)}
+                className={`
+                  w-full px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-3 border-2
+                  ${isGeneratorMode 
+                    ? 'bg-purple-600 text-white border-purple-400 shadow-lg shadow-purple-200 ring-4 ring-purple-500/20' 
+                    : 'bg-white text-slate-400 border-slate-100 hover:border-purple-200 hover:text-purple-500'}
+                `}
+              >
+                <Infinity size={18} className={isGeneratorMode ? 'animate-pulse' : ''} />
+                {isGeneratorMode ? 'GENERATOR MODE: ON' : 'GENERATOR MODE: OFF'}
+              </button>
+
+              <div className="grid grid-cols-3 gap-2">
+                {MATERIALS.filter(m => m.id !== 12).map(mat => (
+                  <button
+                    key={mat.id}
+                    onClick={() => setSelectedMaterial(mat.id)}
+                    className={`
+                      p-2 rounded-2xl transition-all flex flex-col items-center gap-1
+                      ${selectedMaterial === mat.id ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}
+                    `}
+                    title={mat.label}
+                  >
+                    <div className={`p-2 rounded-lg ${selectedMaterial === mat.id ? 'bg-white/20' : 'bg-white shadow-sm'}`}>
+                      <mat.icon size={16} style={{ color: selectedMaterial === mat.id ? 'white' : mat.color }} />
+                    </div>
+                    <span className="text-[10px] font-black truncate w-full text-center">{mat.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="pt-6 border-t border-slate-50 space-y-4">
@@ -266,9 +456,9 @@ export const SandSimulation = () => {
               />
             </div>
 
-            <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-[10px] font-bold space-y-1">
-              <p className="uppercase tracking-widest text-[8px] opacity-60">Interaction Hint</p>
-              <p>Fire burns Wood and Oil! Water puts out Fire.</p>
+            <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-[10px] font-bold space-y-1 shrink-0">
+              <p className="uppercase tracking-widest text-[8px] opacity-60">Master Alchemist</p>
+              <p>Lava ignites Wood! Plants grow fast in Water, slow in Dirt! Generators emit whatever you paint them with!</p>
             </div>
           </div>
         </div>

@@ -24,6 +24,10 @@
     --color-text: #2f3542;
   }
 
+  [data-theme="early-years"] body {
+    background-color: transparent;
+  }
+
   /* Primary Theme - Nature */
   [data-theme="primary"] {
     --color-primary: #10b981; 
@@ -77,6 +81,24 @@ body {
 
 [data-theme="primary"] body {
   background-color: transparent; /* Rely on nature bg */
+}
+
+/* Early Years background elements */
+.theme-early-years-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background-image: url('./assets/classroom_bg.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1; /* Faded and not distracting */
+}
+
+[data-theme="early-years"] .theme-early-years-bg {
+  display: block;
 }
 
 .nature-sun {

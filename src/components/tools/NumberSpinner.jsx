@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Palette, Download, History, BarChart3, Hash, Loader } from 'lucide-react';
+import { Settings, Download, BarChart3, Loader } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ToolHeader } from '../ToolHeader';
 import { audioEngine } from '../../utils/audio';
+import { downloadCSV } from '../../utils/export';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { ToolAnalytics } from '../ToolAnalytics';
 
 export const NumberSpinner = () => {
   const [min, setMin] = useState(1);
@@ -11,11 +14,11 @@ export const NumberSpinner = () => {
   const [result, setResult] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [history, setHistory] = useState([]); // { value, time }
-  const [spinnerTheme, setSpinnerTheme] = useState('vibrant');
+  const [history, setHistory] = useLocalStorage('number_spinner_history', []); // { value, time }
+  const [spinnerTheme] = useState('vibrant');
   const [targetNumber, setTargetNumber] = useState(null);
   const { settings } = useSettings();
-  
+
   const resetStats = () => {
     setHistory([]);
     setResult(null);
@@ -73,31 +76,45 @@ export const NumberSpinner = () => {
     }
   };
 
-  const downloadCSV = () => {
-    const csvHeader = 'Result,Timestamp';
-    const csvRows = history.map(h => `${h.value},${h.time}`);
-    const csvContent = [csvHeader, ...csvRows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'spinner_results.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleDownload = () => {
+    downloadCSV(history, 'spinner_results.csv');
   };
 
   const numSegments = max - min + 1;
   const numbers = Array.from({ length: numSegments }, (_, i) => min + i);
   const segmentAngle = 360 / numSegments;
 
-  const totalSpins = history.length;
   const frequencies = history.reduce((acc, curr) => {
     acc[curr.value] = (acc[curr.value] || 0) + 1;
     return acc;
   }, {});
-  const mostCommon = Object.entries(frequencies).sort((a, b) => b[1] - a[1])[0];
+
+  const chartData = React.useMemo(() => {
+    return {
+      labels: numbers.map(String),
+      series: numbers.map(num => frequencies[num] || 0)
+    };
+  }, [numbers, frequencies]);
+
+  const chartOptions = React.useMemo(() => {
+    return {
+      distributeSeries: true,
+      axisY: {
+        onlyInteger: true,
+        offset: 20
+      },
+      axisX: {
+        offset: 30
+      },
+      height: '160px',
+      chartPadding: {
+        top: 15,
+        right: 15,
+        bottom: 5,
+        left: 5
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
@@ -121,7 +138,7 @@ export const NumberSpinner = () => {
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
-        {/* Left Side: The Spinner (BIGGER) */}
+        {/* Left Side: The Spinner */}
         <div className="flex-1 flex flex-col items-center space-y-12 bg-white/40 p-8 rounded-[3rem] border border-white/60 backdrop-blur-sm">
           
           <div className="relative w-full max-w-[500px] aspect-square">
@@ -176,7 +193,7 @@ export const NumberSpinner = () => {
             <AnimatePresence mode="wait">
               {!isSpinning && result !== null ? (
                 <motion.div
-                  key={totalSpins}
+                  key={history.length}
                   initial={{ scale: 0, rotate: -20 }}
                   animate={{ scale: 1, rotate: 0 }}
                   className="text-8xl font-black text-primary drop-shadow-sm"
@@ -184,7 +201,7 @@ export const NumberSpinner = () => {
                   {result}
                 </motion.div>
               ) : (
-                <div className="h-24" /> // Spacer
+                <div className="h-24" />
               )}
             </AnimatePresence>
           </div>
@@ -228,80 +245,51 @@ export const NumberSpinner = () => {
                    />
                 </div>
              </div>
-
-
           </div>
 
-          {/* Stats Panel */}
-          <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
-             <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                   <BarChart3 className="text-primary" size={20} />
-                   <h3 className="font-black text-slate-700 uppercase tracking-wider text-sm">Analytics</h3>
-                </div>
-                <button 
-                  onClick={downloadCSV}
-                  disabled={totalSpins === 0}
-                  className="p-2 text-slate-400 hover:text-primary transition-colors disabled:opacity-20"
-                >
-                   <Download size={20} />
-                </button>
-             </div>
-
-             <div className="space-y-8">
-                {/* Bar Chart */}
-                <div className="flex items-end justify-between h-32 gap-1 px-1 mt-4 border-b border-slate-100 relative">
-                   {numbers.map((num, i) => {
-                     const freq = frequencies[num] || 0;
-                     const maxFreq = Math.max(...Object.values(frequencies), 1);
-                     const height = (freq / maxFreq) * 100;
-                     return (
-                       <div key={num} className="flex-1 flex flex-col items-center relative h-full justify-end">
-                         <motion.div 
-                           initial={{ height: 0 }}
-                           animate={{ height: `${height}%` }}
-                           className="w-full bg-primary transition-colors rounded-t-sm min-h-[2px] relative"
-                         >
-                            {freq > 0 && (
-                               <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] font-black text-primary transition-opacity">
-                                  {freq}
-                               </span>
-                            )}
-                         </motion.div>
-                         <span className="absolute -bottom-5 text-[8px] font-black text-slate-400 transition-colors">
-                            {num}
-                         </span>
-                       </div>
-                     );
-                   })}
-                </div>
-
-                <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-                   <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase px-2">
-                      <span>Value History</span>
-                      <span className="opacity-50">{history.length} spins</span>
-                   </div>
-                   <div className="grid grid-cols-5 gap-2 px-1">
-                      {history.slice().reverse().map((h, i) => (
-                        <motion.div 
-                          key={history.length - 1 - i}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="aspect-square flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 group relative cursor-help"
-                        >
-                           <span className="text-sm font-black text-slate-700">{h.value}</span>
-                           <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[8px] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-sm">
-                              {history.length - i}
-                           </div>
-                        </motion.div>
-                      ))}
-                   </div>
-                </div>
-             </div>
-          </div>
+          <ToolAnalytics
+            title="Analytics"
+            history={history}
+            onReset={resetStats}
+            onDownload={handleDownload}
+            chartData={numbers.length > 0 ? chartData : null}
+            chartOptions={chartOptions}
+            historyTitle="Value History"
+            historyItemLabel="spins"
+            historyContainerClass="grid grid-cols-5 gap-2 px-1"
+            renderHistoryItem={(h, i, totalLength) => (
+              <motion.div 
+                key={totalLength - 1 - i}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="aspect-square flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 group relative cursor-help"
+              >
+                 <span className="text-sm font-black text-slate-700">{h.value}</span>
+                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[8px] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-sm">
+                    {totalLength - i}
+                 </div>
+              </motion.div>
+            )}
+          />
 
         </div>
       </div>
+      
+      {/* Global CSS for Chartist colors to match our theme */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ct-bar {
+          stroke: #6366f1 !important;
+          stroke-width: 15px !important;
+        }
+        .ct-label {
+          color: #94a3b8 !important;
+          font-size: 8px !important;
+          font-weight: 900 !important;
+        }
+        .ct-grid {
+          stroke: #f1f5f9 !important;
+        }
+      `}} />
     </div>
   );
 };

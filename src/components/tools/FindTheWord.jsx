@@ -260,7 +260,7 @@ export const FindTheWord = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
       <ToolHeader
-        title="Word Search"
+        title="Find the Word"
         icon={Search}
         description="Customisable Classroom Vocabulary Challenge"
         infoContent={

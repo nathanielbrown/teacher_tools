@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { X, Plus, Trash2, Download, Upload } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { audioEngine } from '../utils/audio';
@@ -8,6 +8,24 @@ export const SettingsModal = ({ onClose }) => {
   const fileInputRef = useRef(null);
   const [newClassName, setNewClassName] = useState('');
   const [newClassStudents, setNewClassStudents] = useState('');
+  
+  const storageUsage = useMemo(() => {
+    let total = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          total += (localStorage.getItem(key).length + key.length) * 2;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to calculate storage usage', e);
+    }
+    return total;
+  }, [settings]);
+
+  const storageLimit = 5 * 1024 * 1024; // 5MB
+  const storagePercentage = Math.min((storageUsage / storageLimit) * 100, 100);
 
   const handleAddClass = () => {
     if (!newClassName.trim() || !newClassStudents.trim()) return;
@@ -130,6 +148,30 @@ export const SettingsModal = ({ onClose }) => {
               ))}
             </div>
           </section>
+  
+          {/* Year Level Selection */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-black text-slate-800 tracking-tight">Year Level Filter</h3>
+              <div className="flex-1 h-px bg-slate-100" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['All', 'Prep', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(year => (
+                <button
+                  key={year}
+                  onClick={() => setSettings(prev => ({ ...prev, selectedYear: year }))}
+                  className={`px-4 py-2 rounded-xl border-2 font-bold text-sm transition-all duration-300 ${
+                    settings.selectedYear === year
+                      ? 'border-primary bg-primary text-white shadow-md'
+                      : 'border-slate-100 bg-white text-slate-600 hover:border-primary/30 hover:bg-slate-50'
+                  }`}
+                >
+                  {year === 'Prep' ? 'Prep' : year === 'All' ? 'All' : `Yr ${year}`}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-slate-500 font-medium">Select a year level to only see relevant tools on the dashboard.</p>
+          </section>
 
           {/* Sound Settings */}
           <section className="space-y-4">
@@ -195,6 +237,22 @@ export const SettingsModal = ({ onClose }) => {
                 accept=".json,application/json"
                 className="hidden"
               />
+            </div>
+            
+            <div className="space-y-2 mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                <span className="uppercase tracking-wider">Local Storage Usage</span>
+                <span>{(storageUsage / 1024).toFixed(1)} KB / 5.0 MB</span>
+              </div>
+              <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                <div 
+                  className={`h-full transition-all duration-1000 ease-out rounded-full ${
+                    storagePercentage > 90 ? 'bg-rose-500' : storagePercentage > 70 ? 'bg-amber-500' : 'bg-emerald-500'
+                  }`}
+                  style={{ width: `${storagePercentage}%` }}
+                />
+              </div>
+              <p className="text-[9px] text-slate-400 font-medium">LocalStorage is used to save your settings, classes, and tool data directly in your browser.</p>
             </div>
           </section>
 

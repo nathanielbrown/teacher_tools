@@ -137,7 +137,7 @@ export const BinaryTool = () => {
   return (
     <div className="w-full mx-auto h-full flex flex-col p-4 pt-2 pb-8 space-y-8">
       <ToolHeader
-        title="Binary Explorer"
+        title="Binary Numbers"
         icon={Cpu}
         description="Computer Science Tool"
         infoContent={

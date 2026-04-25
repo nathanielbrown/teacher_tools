@@ -4,13 +4,16 @@ import { Coins, BarChart3, Download } from 'lucide-react';
 import { ToolHeader } from '../ToolHeader';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { downloadCSV } from '../../utils/export';
+import { ToolAnalytics } from '../ToolAnalytics';
 
 export const FlipCoin = () => {
   const [result, setResult] = useState('heads');
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipCount, setFlipCount] = useState(0);
   const [rotation, setRotation] = useState(0);
-  const [history, setHistory] = useState([]); // { result, time }
+  const [history, setHistory] = useLocalStorage('coin_flip_history', []); // { result, time }
   const { settings } = useSettings();
 
   const flip = () => {
@@ -42,24 +45,38 @@ export const FlipCoin = () => {
     }, 1500);
   };
 
-  const downloadCSV = () => {
-    const csvHeader = 'Result,Timestamp';
-    const csvRows = history.map(h => `${h.result},${h.time}`);
-    const csvContent = [csvHeader, ...csvRows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'coin_flips.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleDownload = () => {
+    downloadCSV(history, 'coin_flips.csv');
   };
+
 
   const totalFlips = history.length;
   const headsCount = history.filter(h => h.result === 'heads').length;
   const tailsCount = history.filter(h => h.result === 'tails').length;
+
+  const chartData = React.useMemo(() => {
+    return {
+      labels: ['Heads', 'Tails'],
+      series: [headsCount, tailsCount]
+    };
+  }, [headsCount, tailsCount]);
+
+  const chartOptions = React.useMemo(() => {
+    return {
+      distributeSeries: true,
+      axisY: {
+        onlyInteger: true,
+        offset: 20
+      },
+      height: '160px',
+      chartPadding: {
+        top: 15,
+        right: 15,
+        bottom: 5,
+        left: 5
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
@@ -84,13 +101,14 @@ export const FlipCoin = () => {
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Left Side: The Coin */}
-        <div className="flex-1 flex flex-col items-center space-y-12 bg-white/40 p-8 rounded-[3rem] border border-white/60 backdrop-blur-sm">
+        <div className="flex-1 flex flex-col items-center bg-white/40 p-8 rounded-[3rem] border border-white/60 backdrop-blur-sm">
           
-          <div
-            className="relative w-64 h-64 cursor-pointer"
-            style={{ perspective: '1000px' }}
-            onClick={flip}
-          >
+          <div className="h-[480px] flex items-end justify-center w-full mb-12">
+            <div
+              className="relative w-64 h-64 cursor-pointer"
+              style={{ perspective: '1000px' }}
+              onClick={flip}
+            >
             <motion.div
               animate={{
                 rotateX: rotation,
@@ -140,6 +158,7 @@ export const FlipCoin = () => {
                 </div>
               </div>
             </motion.div>
+            </div>
           </div>
 
           <div className="flex flex-col items-center space-y-6">
@@ -160,82 +179,46 @@ export const FlipCoin = () => {
           </div>
         </div>
 
-        {/* Right Side: Stats Dashboard */}
-        <div className="w-full lg:w-[380px] space-y-6">
-          <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
-             <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                   <BarChart3 className="text-primary" size={20} />
-                   <h3 className="font-black text-slate-700 uppercase tracking-wider text-sm">Analytics</h3>
-                </div>
-                <button 
-                  onClick={downloadCSV}
-                  disabled={totalFlips === 0}
-                  className="p-2 text-slate-400 hover:text-primary transition-colors disabled:opacity-20"
-                >
-                   <Download size={20} />
-                </button>
-             </div>
-
-             <div className="space-y-8">
-                {/* Bar Chart for Heads/Tails */}
-                <div className="flex items-end justify-between h-32 gap-1 px-1 mt-4 border-b border-slate-100 relative">
-                   {['heads', 'tails'].map((res) => {
-                     const freq = res === 'heads' ? headsCount : tailsCount;
-                     const maxFreq = Math.max(headsCount, tailsCount, 1);
-                     const height = (freq / maxFreq) * 100;
-                     return (
-                       <div key={res} className="flex-1 flex flex-col items-center relative h-full justify-end mx-4">
-                         <motion.div 
-                           initial={{ height: 0 }}
-                           animate={{ height: `${height}%` }}
-                           className={`w-full transition-colors rounded-t-sm min-h-[2px] relative ${res === 'heads' ? 'bg-[#ffd700]' : 'bg-[#4b5563]'}`}
-                         >
-                            {freq > 0 && (
-                               <span className={`absolute -top-4 left-1/2 -translate-x-1/2 text-[10px] font-black transition-opacity ${res === 'heads' ? 'text-yellow-600' : 'text-gray-600'}`}>
-                                  {freq}
-                               </span>
-                            )}
-                         </motion.div>
-                         <span className="absolute -bottom-5 text-[10px] font-black text-slate-400 transition-colors uppercase">
-                            {res}
-                         </span>
-                       </div>
-                     );
-                   })}
-                </div>
-
-                <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-                   <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase px-2">
-                      <span>Flip History</span>
-                      <span className="opacity-50">{history.length} flips</span>
-                   </div>
-                   <div className="grid grid-cols-5 gap-2 px-1">
-                      {history.slice().reverse().map((h, i) => (
-                        <motion.div 
-                          key={history.length - 1 - i}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className={`aspect-square flex items-center justify-center rounded-xl border group relative cursor-help ${
-                            h.result === 'heads' ? 'bg-yellow-50 border-yellow-100' : 'bg-gray-50 border-gray-100'
-                          }`}
-                        >
-                           <span className={`text-sm font-black ${h.result === 'heads' ? 'text-yellow-700' : 'text-gray-600'}`}>
-                             {h.result === 'heads' ? 'H' : 'T'}
-                           </span>
-                           <div className={`absolute -top-1 -right-1 w-4 h-4 text-[8px] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-sm ${
-                             h.result === 'heads' ? 'bg-yellow-500' : 'bg-gray-500'
-                           }`}>
-                              {history.length - i}
-                           </div>
-                        </motion.div>
-                      ))}
-                   </div>
-                </div>
-             </div>
-          </div>
-        </div>
+          <ToolAnalytics
+            title="Analytics"
+            history={history}
+            onReset={() => setHistory([])}
+            onDownload={handleDownload}
+            chartData={chartData}
+            chartOptions={chartOptions}
+            historyTitle="Flip History"
+            historyItemLabel="flips"
+            historyContainerClass="grid grid-cols-5 gap-2 px-1"
+            renderHistoryItem={(h, i, totalLength) => (
+              <motion.div 
+                key={totalLength - 1 - i}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className={`aspect-square flex items-center justify-center rounded-xl border group relative cursor-help ${
+                  h.result === 'heads' ? 'bg-yellow-50 border-yellow-100' : 'bg-gray-50 border-gray-100'
+                }`}
+              >
+                 <span className={`text-sm font-black ${h.result === 'heads' ? 'text-yellow-700' : 'text-gray-600'}`}>
+                   {h.result === 'heads' ? 'H' : 'T'}
+                 </span>
+                 <div className={`absolute -top-1 -right-1 w-4 h-4 text-[8px] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-sm ${
+                   h.result === 'heads' ? 'bg-yellow-500' : 'bg-gray-500'
+                 }`}>
+                    {totalLength - i}
+                 </div>
+              </motion.div>
+            )}
+          />
       </div>
+
+      {/* Global CSS for Chartist colors to match Heads/Tails */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ct-bar { stroke-width: 30px !important; }
+        .ct-series-a .ct-bar { stroke: #ffd700 !important; } /* Heads Gold */
+        .ct-series-b .ct-bar { stroke: #4b5563 !important; } /* Tails Slate */
+        .ct-label { color: #94a3b8 !important; font-size: 10px !important; font-weight: 900 !important; text-transform: uppercase; }
+        .ct-grid { stroke: #f1f5f9 !important; }
+      `}} />
     </div>
   );
 };

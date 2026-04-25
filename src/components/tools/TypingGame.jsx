@@ -271,7 +271,7 @@ export const TypingGame = () => {
   return (
     <div className="w-full mx-auto h-[calc(100vh-12rem)] flex flex-col space-y-4 px-4 pt-2 pb-8">
       <ToolHeader
-        title="Galactic Typing"
+        title="Typing Galaxy"
         icon={Rocket}
         description="Space-Themed Speed & Accuracy Drill"
         infoContent={

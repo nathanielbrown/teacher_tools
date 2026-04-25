@@ -294,7 +294,7 @@ export const LetterTracing = () => {
   };
 
   return (
-    <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
+    <div className="w-full mx-auto px-4 pt-2 pb-4 h-full flex flex-col gap-4">
       <ToolHeader
         title="Letter Tracing"
         icon={PenTool}
@@ -346,7 +346,7 @@ export const LetterTracing = () => {
         </div>
       </ToolHeader>
 
-      <div className="flex-1 bg-white rounded-[3rem] shadow-xl border border-gray-100 p-8 flex flex-col lg:flex-row gap-12 items-center justify-center">
+      <div className="flex-1 bg-white rounded-[3rem] shadow-xl border border-gray-100 p-6 flex flex-col lg:flex-row gap-8 items-center justify-center">
         
         {/* Canvas Area */}
         <div className="relative w-[400px] h-[400px] shrink-0 touch-none">
@@ -437,10 +437,10 @@ export const LetterTracing = () => {
       </div>
 
       {/* Mastery Grid Area */}
-      <div className="bg-white rounded-[3rem] shadow-xl border border-gray-100 p-8 w-full mt-8 flex flex-col items-center">
-        <h3 className="text-xl font-bold text-gray-400 uppercase tracking-wider mb-8 text-center">Mastery Progress</h3>
+      <div className="bg-white rounded-[3rem] shadow-xl border border-gray-100 p-6 w-full mt-4 flex flex-col items-center">
+        <h3 className="text-lg font-bold text-gray-400 uppercase tracking-wider mb-3 text-center">Mastery Progress</h3>
         
-        <div className="space-y-6 w-full overflow-x-auto pb-4">
+        <div className="space-y-2 w-full overflow-x-auto py-2">
           
           <div className="flex items-center min-w-max gap-4">
             <span className="font-bold text-gray-400 w-12 text-right">ABC</span>
@@ -451,12 +451,12 @@ export const LetterTracing = () => {
                   <button
                     key={char}
                     onClick={() => { setCharSet('upper'); setCurrentLetter(char); }}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-md sm:rounded-lg font-black text-xs sm:text-sm shadow-sm border overflow-hidden relative flex items-center justify-center hover:scale-105 transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-md sm:rounded-lg font-black text-xs sm:text-sm shadow-sm border relative flex items-center justify-center hover:scale-105 transition-all ${
                       currentLetter === char ? 'ring-2 sm:ring-4 ring-primary border-primary z-20' : 'border-gray-200'
                     }`}
                   >
                     <div 
-                      className="absolute inset-0 z-0 opacity-80" 
+                      className="absolute inset-0 z-0 opacity-80 rounded-md sm:rounded-lg" 
                       style={{ background: `linear-gradient(to top, #15803d ${charScore}%, #f9fafb ${charScore}%)` }} 
                     />
                     <span className={`relative z-10 ${charScore > 50 ? 'text-white' : 'text-gray-500'}`}>{char}</span>
@@ -475,12 +475,12 @@ export const LetterTracing = () => {
                   <button
                     key={char}
                     onClick={() => { setCharSet('lower'); setCurrentLetter(char); }}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-md sm:rounded-lg font-black text-xs sm:text-sm shadow-sm border overflow-hidden relative flex items-center justify-center hover:scale-105 transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-md sm:rounded-lg font-black text-xs sm:text-sm shadow-sm border relative flex items-center justify-center hover:scale-105 transition-all ${
                       currentLetter === char ? 'ring-2 sm:ring-4 ring-primary border-primary z-20' : 'border-gray-200'
                     }`}
                   >
                     <div 
-                      className="absolute inset-0 z-0 opacity-80" 
+                      className="absolute inset-0 z-0 opacity-80 rounded-md sm:rounded-lg" 
                       style={{ background: `linear-gradient(to top, #15803d ${charScore}%, #f9fafb ${charScore}%)` }} 
                     />
                     <span className={`relative z-10 ${charScore > 50 ? 'text-white' : 'text-gray-500'}`}>{char}</span>
@@ -499,12 +499,12 @@ export const LetterTracing = () => {
                   <button
                     key={char}
                     onClick={() => { setCharSet('numbers'); setCurrentLetter(char); }}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-md sm:rounded-lg font-black text-xs sm:text-sm shadow-sm border overflow-hidden relative flex items-center justify-center hover:scale-105 transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-md sm:rounded-lg font-black text-xs sm:text-sm shadow-sm border relative flex items-center justify-center hover:scale-105 transition-all ${
                       currentLetter === char ? 'ring-2 sm:ring-4 ring-primary border-primary z-20' : 'border-gray-200'
                     }`}
                   >
                     <div 
-                      className="absolute inset-0 z-0 opacity-80" 
+                      className="absolute inset-0 z-0 opacity-80 rounded-md sm:rounded-lg" 
                       style={{ background: `linear-gradient(to top, #15803d ${charScore}%, #f9fafb ${charScore}%)` }} 
                     />
                     <span className={`relative z-10 ${charScore > 50 ? 'text-white' : 'text-gray-500'}`}>{char}</span>

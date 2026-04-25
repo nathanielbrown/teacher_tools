@@ -3,16 +3,15 @@ import { Volume2, Play, CheckCircle2, XCircle, RotateCcw, Plus, Trash2, BookOpen
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ToolHeader } from '../ToolHeader';
+import { speak } from '../../utils/speech';
+import { shuffle } from '../../utils/random';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { DEFAULT_SPELLING_LISTS } from './Spelling/spellingData';
 
 export const Spelling = () => {
   const { settings } = useSettings();
   const [status, setStatus] = useState('setup'); // 'setup', 'playing', 'finished'
-  const [lists, setLists] = useState(() => {
-    const saved = localStorage.getItem('spelling_lists');
-    return saved ? JSON.parse(saved) : [
-      { id: '1', name: 'Example List', words: ['apple', 'banana', 'orange'] }
-    ];
-  });
+  const [lists, setLists] = useLocalStorage('spelling_lists', DEFAULT_SPELLING_LISTS);
   
   const [selectedListId, setSelectedListId] = useState(lists[0]?.id || '');
   const [isAddingList, setIsAddingList] = useState(false);
@@ -29,18 +28,6 @@ export const Spelling = () => {
   
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    localStorage.setItem('spelling_lists', JSON.stringify(lists));
-  }, [lists]);
-
-  const speak = (text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
 
   const saveList = () => {
     if (!newListTitle.trim() || !wordsInput.trim()) return;
@@ -84,7 +71,7 @@ export const Spelling = () => {
     const list = lists.find(l => l.id === selectedListId);
     if (!list || list.words.length === 0) return;
 
-    const shuffled = [...list.words].sort(() => Math.random() - 0.5);
+    const shuffled = shuffle(list.words);
     setQueue(shuffled);
     setCurrentWord(shuffled[0]);
     setTotalWords(shuffled.length);

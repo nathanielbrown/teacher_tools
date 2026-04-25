@@ -291,7 +291,7 @@ export const SeatingPlanGenerator = () => {
   return (
     <div className="w-full mx-auto h-full flex flex-col gap-6 px-4 pt-2 pb-8 select-none overflow-hidden">
       <ToolHeader
-        title="Seating Plan"
+        title="Seating Plan Generator"
         icon={Users}
         description="Dynamic Classroom Layout Architect"
         infoContent={
@@ -311,36 +311,40 @@ export const SeatingPlanGenerator = () => {
           <select
             value={selectedClassId}
             onChange={(e) => setSelectedClassId(e.target.value)}
-            className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl font-black text-xs text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm"
+            className="px-4 py-3 bg-slate-50 border-2 border-transparent hover:border-slate-100 rounded-2xl font-black text-xs text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm h-[52px]"
           >
             {settings.classes.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
 
-          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-100">
-            <button
-              onClick={randomiseSeating}
-              className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-slate-400 hover:text-blue-600 transition-all"
-              title="Shuffle Students"
-            >
-              <Shuffle size={20} />
-            </button>
-            <button
-              onClick={clearAssignments}
-              className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-slate-400 hover:text-red-500 transition-all"
-              title="Clear All Seats"
-            >
-              <RotateCcw size={20} />
-            </button>
-            <button
-              onClick={() => setShowConfig(!showConfig)}
-              className={`p-2 rounded-lg transition-all ${showConfig ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm'}`}
-              title="Toggle Config"
-            >
-              {showConfig ? <X size={20} /> : <Settings size={20} />}
-            </button>
-          </div>
+          <button
+            onClick={randomiseSeating}
+            className="p-3 bg-slate-50 text-slate-400 hover:text-blue-600 rounded-2xl hover:bg-blue-50 transition-all active:scale-95 border-2 border-transparent hover:border-blue-100 shadow-sm"
+            title="Shuffle Students"
+          >
+            <Shuffle size={24} />
+          </button>
+          
+          <button
+            onClick={clearAssignments}
+            className="p-3 bg-slate-50 text-slate-400 hover:text-red-500 rounded-2xl hover:bg-rose-50 transition-all active:scale-95 border-2 border-transparent hover:border-rose-100 shadow-sm"
+            title="Clear All Seats"
+          >
+            <RotateCcw size={24} />
+          </button>
+
+          <button
+            onClick={() => setShowConfig(!showConfig)}
+            className={`p-3 rounded-2xl transition-all active:scale-95 border-2 shadow-sm ${
+              showConfig 
+                ? 'bg-slate-800 text-white border-slate-900 shadow-md' 
+                : 'bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border-transparent hover:border-indigo-100'
+            }`}
+            title="Toggle Config"
+          >
+            {showConfig ? <X size={24} /> : <Settings size={24} />}
+          </button>
         </div>
       </ToolHeader>
 

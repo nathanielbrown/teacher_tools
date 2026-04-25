@@ -121,7 +121,7 @@ export const HundredsChart = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
       <ToolHeader
-        title="Hundreds Chart"
+        title="Interactive Hundreds Chart"
         icon={Grid3X3}
         description="Interactive base-10 exploration and pattern finding"
         infoContent={

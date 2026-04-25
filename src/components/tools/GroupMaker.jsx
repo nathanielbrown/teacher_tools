@@ -5,14 +5,17 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { ToolHeader } from '../ToolHeader';
 import { Users, Settings, Shuffle } from 'lucide-react';
 import { audioEngine } from '../../utils/audio';
+import { shuffle } from '../../utils/random';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export const GroupMaker = () => {
   const { settings } = useSettings();
-  const [selectedClassId, setSelectedClassId] = useState(settings.classes[0]?.id || '');
-  const [mode, setMode] = useState('numberOfGroups'); // 'numberOfGroups' or 'studentsPerGroup'
-  const [count, setCount] = useState(3);
+  const [selectedClassId, setSelectedClassId] = useLocalStorage('group_maker_class_id', settings.classes[0]?.id || '');
+  const [mode, setMode] = useLocalStorage('group_maker_mode', 'numberOfGroups'); // 'numberOfGroups' or 'studentsPerGroup'
+  const [count, setCount] = useLocalStorage('group_maker_count', 3);
   const [groups, setGroups] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+
 
   const selectedClass = settings.classes.find(c => c.id === selectedClassId);
   const students = selectedClass ? selectedClass.students : [];
@@ -28,7 +31,7 @@ export const GroupMaker = () => {
 
     setTimeout(() => {
       // Shuffle students array
-      const shuffled = [...students].sort(() => Math.random() - 0.5);
+      const shuffled = shuffle(students);
       const newGroups = [];
 
       if (mode === 'numberOfGroups') {
@@ -56,7 +59,7 @@ export const GroupMaker = () => {
     return (
       <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
         <ToolHeader
-          title="Group Maker"
+          title="Random Group Maker"
           icon={Users}
           description="Randomized student grouping engine"
           infoContent={
@@ -77,7 +80,7 @@ export const GroupMaker = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
       <ToolHeader
-        title="Group Maker"
+        title="Random Group Maker"
         icon={Users}
         description="Randomized student grouping engine"
         infoContent={

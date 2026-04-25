@@ -5,6 +5,7 @@ const demoStudents = Array.from({ length: 28 }, (_, i) => `Student ${i + 1}`);
 const defaultSettings = {
   theme: 'early-years', // 'early-years', 'primary', 'secondary'
   soundTheme: 'classic', // 'none', 'classic', 'digital', 'soft', 'bubbly'
+  selectedYear: 'All',
   classes: [{ id: 'class-demo', name: 'Demo', students: demoStudents }]
 };
 

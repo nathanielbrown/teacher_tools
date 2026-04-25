@@ -99,7 +99,7 @@ export const SimonSays = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-4">
       <ToolHeader
-        title="Simon Says"
+        title="Simon Says (Classroom)"
         icon={User}
         description="A high-energy movement and attention game"
         infoContent={

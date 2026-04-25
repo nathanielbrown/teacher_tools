@@ -103,7 +103,7 @@ export const MissingMultiplication = () => {
   return (
     <div className="w-full mx-auto h-full flex flex-col p-4 pt-2 pb-8 space-y-6">
       <ToolHeader
-        title="Missing Multiplication"
+        title="Missing Multiplier"
         icon={X}
         description="Find the Missing Factor or Product"
         infoContent={
@@ -229,7 +229,13 @@ export const MissingMultiplication = () => {
         <div className="flex-1 flex flex-col lg:flex-row gap-8 items-center justify-center">
           <div className="flex-1 w-full bg-white rounded-[3rem] shadow-xl border border-gray-100 p-12 flex flex-col items-center justify-center space-y-12 min-h-[400px]">
             <div className="flex items-center gap-6 md:gap-8 flex-wrap justify-center">
-              {equation.map((part, i) => (
+              {[
+                questions[currentIndex].blankIndex === 0 ? '?' : questions[currentIndex].a,
+                '×',
+                questions[currentIndex].blankIndex === 1 ? '?' : questions[currentIndex].b,
+                '=',
+                questions[currentIndex].blankIndex === 2 ? '?' : questions[currentIndex].c
+              ].map((part, i) => (
                 <React.Fragment key={i}>
                   {part === '?' ? (
                     <motion.div

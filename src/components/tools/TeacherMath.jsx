@@ -10,10 +10,23 @@ import {
   Calculator,
   MousePointer2,
   HelpCircle,
-  Info
+  Info,
+  Settings,
+  X
 } from 'lucide-react';
 import { ToolHeader } from '../ToolHeader';
-import * as math from 'mathjs';
+import { Parser } from 'expr-eval';
+
+const parser = new Parser();
+
+// Pre-processor to support classroom syntax like "2x" instead of "2*x"
+const prepareFormula = (f) => {
+  return f
+    .replace(/(\d)([a-z])/gi, '$1*$2') // 2x -> 2*x
+    .replace(/\)\(/g, ')*(')           // (x+1)(x+2) -> (x+1)*(x+2)
+    .replace(/([a-z])\(/gi, '$1*(')     // x(x+1) -> x*(x+1)
+    .replace(/\)([\d])/g, ')*$1');      // (x+1)2 -> (x+1)*2
+};
 
 const getRandomColor = () => `hsl(${Math.random() * 360}, 75%, 50%)`;
 
@@ -30,6 +43,8 @@ export const TeacherMath = () => {
     step: 1,
     showLabels: true
   });
+
+  const [showConfig, setShowConfig] = useState(false);
 
   const svgRef = useRef(null);
   const size = 800;
@@ -67,7 +82,9 @@ export const TeacherMath = () => {
         if (f.toLowerCase().startsWith('y=') || f.toLowerCase().startsWith('y =')) {
           f = f.substring(f.indexOf('=') + 1).trim();
         }
-        const compiled = math.compile(f);
+        
+        const prepared = prepareFormula(f);
+        const compiled = parser.parse(prepared);
         compiled.evaluate({ x: 0 }); 
         return { ...el, type: 'formula', formula: f, compiled, displayFormula: `y = ${f}` };
       } catch (err) {
@@ -172,7 +189,29 @@ export const TeacherMath = () => {
             <p><strong className="text-white block mb-1">New Elements</strong>Type in the bottom-most empty row to add a new formula or point. You can also click the grid to drop points.</p>
           </div>
         }
-      />
+      >
+        <button
+          onClick={() => {
+            setElements([{ id: Date.now(), raw: '', color: getRandomColor() }]);
+            audioEngine?.playTick?.(settings.soundTheme);
+          }}
+          className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95 border-2 border-transparent hover:border-rose-100 shadow-sm"
+          title="Reset All Elements"
+        >
+          <RotateCcw size={24} />
+        </button>
+        <button
+          onClick={() => setShowConfig(!showConfig)}
+          className={`p-3 rounded-2xl transition-all active:scale-95 border-2 shadow-sm ${
+            showConfig 
+              ? 'bg-slate-800 text-white border-slate-900 shadow-md' 
+              : 'bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border-transparent hover:border-indigo-100'
+          }`}
+          title="Configure Plane"
+        >
+          {showConfig ? <X size={24} /> : <Settings size={24} />}
+        </button>
+      </ToolHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
         {/* Left: Equation List */}
@@ -240,29 +279,68 @@ export const TeacherMath = () => {
               
               <div className="absolute top-full right-0 mt-3 w-64 bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-2xl border border-slate-100 opacity-0 scale-95 pointer-events-none group-hover/help:opacity-100 group-hover/help:scale-100 group-hover/help:pointer-events-auto transition-all duration-300 origin-top-right">
                 <div className="flex items-center gap-2 mb-4 border-b pb-2">
-                  <Info size={16} className="text-blue-500" />
-                  <h5 className="text-xs font-black text-slate-800 uppercase tracking-widest">Examples</h5>
+                  <span className="p-1 bg-blue-50 text-blue-500 rounded-lg"><Info size={14} /></span>
+                  <h5 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Examples</h5>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-left">Coordinates</p>
-                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-blue-600 text-left">(3, 4)</code>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Coordinates</p>
+                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-blue-600">(3, 4)</code>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-left">Linear</p>
-                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-emerald-600 text-left">y = 2x + 1</code>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Linear</p>
+                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-emerald-600">y = 2x + 1</code>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-left">Quadratic</p>
-                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-amber-600 text-left">y = x^2</code>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Quadratic</p>
+                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-amber-600">y = x^2</code>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-left">Trig</p>
-                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-purple-600 text-left">y = sin(x)</code>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Trig</p>
+                    <code className="block bg-slate-50 p-2 rounded-xl text-xs font-mono font-bold text-purple-600">y = sin(x)</code>
                   </div>
                 </div>
               </div>
             </div>
+
+            <AnimatePresence>
+              {showConfig && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                  className="absolute bottom-6 left-6 right-6 z-[30] flex flex-col md:flex-row items-center gap-6 bg-white/95 backdrop-blur-md px-8 py-6 rounded-[2.5rem] border border-slate-100 shadow-2xl"
+                >
+                  <div className="flex flex-col gap-2 flex-1 w-full">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Settings2 size={14} /> Grid Zoom</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs font-bold text-slate-400 w-4">5</span>
+                      <input type="range" min="5" max="50" step="5" value={gridConfig.range} onChange={(e) => setGridConfig({ ...gridConfig, range: parseInt(e.target.value) })} className="flex-1 accent-indigo-600 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer" />
+                      <span className="text-xs font-bold text-slate-400 w-4">50</span>
+                      <div className="bg-indigo-50 px-3 py-1 rounded-lg">
+                        <span className="text-xs font-black text-indigo-600">{gridConfig.range}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-px h-12 bg-slate-100 hidden md:block" />
+
+                  <div className="flex items-center justify-between gap-8 w-full md:w-auto">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Axis Labels</span>
+                      <p className="text-[9px] text-slate-300 font-bold">Toggle numbers on grid</p>
+                    </div>
+                    <button 
+                      onClick={() => setGridConfig({ ...gridConfig, showLabels: !gridConfig.showLabels })} 
+                      className={`w-14 h-7 rounded-full relative transition-all shadow-inner ${gridConfig.showLabels ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                    >
+                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all ${gridConfig.showLabels ? 'left-8' : 'left-1'}`} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <svg 
               ref={svgRef}
               viewBox={`0 0 ${size} ${size}`}
@@ -317,24 +395,9 @@ export const TeacherMath = () => {
                 return null;
               })}
             </svg>
-
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-slate-200 shadow-xl">
-               <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Settings2 size={14} /> Zoom</span>
-               <input type="range" min="5" max="50" step="5" value={gridConfig.range} onChange={(e) => setGridConfig({ ...gridConfig, range: parseInt(e.target.value) })} className="w-32 accent-slate-800" />
-            </div>
-
-            <div className="absolute bottom-6 right-6">
-              <div className="bg-slate-800/90 text-white px-4 py-3 rounded-2xl backdrop-blur shadow-xl flex items-center gap-4">
-                <span className="text-xs font-bold text-white/80">Labels</span>
-                <button onClick={() => setGridConfig({ ...gridConfig, showLabels: !gridConfig.showLabels })} className={`w-10 h-5 rounded-full relative transition-colors ${gridConfig.showLabels ? 'bg-blue-500' : 'bg-slate-600'}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${gridConfig.showLabels ? 'left-6' : 'left-1'}`} />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
-

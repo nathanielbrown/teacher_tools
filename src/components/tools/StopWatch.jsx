@@ -4,15 +4,15 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { ToolHeader } from '../ToolHeader';
 import { audioEngine } from '../../utils/audio';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { formatStopwatchTime } from '../../utils/format';
+import { downloadCSV } from '../../utils/export';
 
 export const StopWatch = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [laps, setLaps] = useState([]);
-  const [isMuted, setIsMuted] = useState(() => {
-    const saved = localStorage.getItem('teacherToolsStopwatchMuted');
-    return saved ? JSON.parse(saved) : false;
-  });
+  const [isMuted, setIsMuted] = useLocalStorage('teacherToolsStopwatchMuted', false);
   const { settings } = useSettings();
   const lastTickRef = useRef(0);
 
@@ -32,10 +32,6 @@ export const StopWatch = () => {
     }
     return () => clearInterval(intervalId);
   }, [isRunning, settings.soundTheme, isMuted]);
-
-  useEffect(() => {
-    localStorage.setItem('teacherToolsStopwatchMuted', JSON.stringify(isMuted));
-  }, [isMuted]);
 
   const toggle = () => {
     setIsRunning(!isRunning);
@@ -62,41 +58,22 @@ export const StopWatch = () => {
     setLaps([{ id: Date.now(), lap: lapTime, total: time }, ...laps]);
   };
 
-  const downloadCSV = () => {
+  const handleDownload = () => {
     if (laps.length === 0) return;
-    
-    const headers = ['Lap Number', 'Lap Time (ms)', 'Total Time (ms)', 'Formatted Lap', 'Formatted Total'];
-    const rows = laps.map((l, i) => [
-      laps.length - i,
-      l.lap,
-      l.total,
-      formatTime(l.lap),
-      formatTime(l.total)
-    ]);
-    
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `stopwatch_data_${new Date().toISOString().slice(0,10)}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCSV(laps.map((l, i) => ({
+      'Lap Number': laps.length - i,
+      'Lap Time (ms)': l.lap,
+      'Total Time (ms)': l.total,
+      'Formatted Lap': formatStopwatchTime(l.lap),
+      'Formatted Total': formatStopwatchTime(l.total)
+    })), `stopwatch_data_${new Date().toISOString().slice(0,10)}.csv`);
   };
 
-  const formatTime = (ms) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    const centiseconds = Math.floor((ms % 1000) / 10);
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8">
       <ToolHeader
-        title="Stopwatch"
+        title="Stop Watch"
         icon={Clock}
         description="Precision Timing Suite"
         infoContent={
@@ -128,7 +105,7 @@ export const StopWatch = () => {
       <div className="relative mx-auto">
         <div className="relative flex flex-col items-center justify-center transition-colors duration-500 overflow-hidden w-[350px] h-[180px] md:w-[450px] md:h-[220px] bg-white rounded-[2.5rem] shadow-xl border-4 border-indigo-500/10">
           <span className="text-6xl md:text-7xl font-mono font-black text-slate-800 tabular-nums tracking-tighter">
-            {formatTime(time)}
+            {formatStopwatchTime(time)}
           </span>
         </div>
       </div>
@@ -174,7 +151,7 @@ export const StopWatch = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={downloadCSV}
+              onClick={handleDownload}
               disabled={laps.length === 0}
               className="p-2 bg-white text-indigo-600 rounded-lg border border-indigo-100 hover:bg-indigo-50 transition-all disabled:opacity-30"
               title="Export CSV"
@@ -216,12 +193,12 @@ export const StopWatch = () => {
                     </span>
                     <div className="flex flex-col">
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Lap Time</span>
-                      <span className="text-sm font-black text-slate-800 tabular-nums leading-tight">+{formatTime(lap.lap)}</span>
+                      <span className="text-sm font-black text-slate-800 tabular-nums leading-tight">+{formatStopwatchTime(lap.lap)}</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Total</span>
-                    <span className="text-base font-black text-indigo-600 tabular-nums leading-tight">{formatTime(lap.total)}</span>
+                    <span className="text-base font-black text-indigo-600 tabular-nums leading-tight">{formatStopwatchTime(lap.total)}</span>
                   </div>
                 </motion.div>
               ))

@@ -2,6 +2,44 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Clock, ChevronUp, ChevronDown } from 'lucide-react';
 import { ToolHeader } from '../ToolHeader';
 
+const getNumberWords = (n) => {
+  const words = [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen",
+    "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine"
+  ];
+  return words[n];
+};
+
+const getTimeInWords = (date) => {
+  const hours = [
+    "twelve", "one", "two", "three", "four", "five", "six", 
+    "seven", "eight", "nine", "ten", "eleven"
+  ];
+  const h = date.getHours();
+  const m = date.getMinutes();
+  
+  const hourName = hours[h % 12];
+  const nextHourName = hours[(h + 1) % 12];
+
+  if (m === 0) return `${hourName} o'clock`;
+  if (m === 15) return `quarter past ${hourName}`;
+  if (m === 30) return `half past ${hourName}`;
+  if (m === 45) return `quarter to ${nextHourName}`;
+  
+  if (m < 30) {
+    if (m === 1) return `one minute past ${hourName}`;
+    if (m % 5 === 0) return `${getNumberWords(m)} past ${hourName}`;
+    return `${getNumberWords(m)} minutes past ${hourName}`;
+  } else {
+    const remaining = 60 - m;
+    if (remaining === 1) return `one minute to ${nextHourName}`;
+    if (remaining % 5 === 0) return `${getNumberWords(remaining)} to ${nextHourName}`;
+    return `${getNumberWords(remaining)} minutes to ${nextHourName}`;
+  }
+};
+
+
 export const AnalogueDigitalClock = () => {
   const [time, setTime] = useState(new Date());
   const [isEditing, setIsEditing] = useState(false);
@@ -90,7 +128,7 @@ export const AnalogueDigitalClock = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-8 select-none">
       <ToolHeader
-        title="Interactive Clock"
+        title="Analogue & Digital Clock"
         icon={Clock}
         description="Analogue and Digital Time Explorer"
         infoContent={
@@ -112,7 +150,7 @@ export const AnalogueDigitalClock = () => {
         <div className="hidden lg:block"></div>
 
         {/* Center Column: Clock Displays */}
-        <div className="flex flex-col items-center space-y-10">
+        <div className="flex flex-col items-center space-y-4">
           {/* Analogue Clock */}
           <div className="relative w-72 h-72 md:w-80 md:h-80 bg-white rounded-full shadow-2xl border-4 border-primary/20 flex items-center justify-center">
             <svg
@@ -216,9 +254,9 @@ export const AnalogueDigitalClock = () => {
             </button>
           </div>
 
-          {/* Digital Time with Floating Controls */}
-          <div className="flex flex-col items-center">
-            <div className="bg-slate-900 px-10 py-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-4 border-slate-800 relative group">
+          {/* Digital Time with Floating Controls & English Time Words */}
+          <div className="flex flex-col items-center w-fit">
+            <div className="bg-slate-900 px-10 py-8 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-4 border-slate-800 relative group w-full">
               {/* Glow effect */}
               <div className="absolute inset-0 bg-primary/5 rounded-[2.5rem] blur-xl group-hover:bg-primary/10 transition-colors" />
               
@@ -292,10 +330,17 @@ export const AnalogueDigitalClock = () => {
               </div>
             </div>
             
-            <p className="text-center text-[10px] text-slate-400 font-black tracking-[0.2em] uppercase mt-8 opacity-60">
+            <div className="mt-8 text-center px-6 py-4 bg-primary/5 rounded-2xl border border-primary/10 w-full shadow-sm">
+              <p className="text-xl md:text-2xl font-black text-primary capitalize leading-tight">
+                {getTimeInWords(time)}
+              </p>
+            </div>
+            
+            <p className="text-center text-[10px] text-slate-400 font-black tracking-[0.2em] uppercase mt-4 opacity-60">
               {isEditing ? "Manual adjustment active" : "Real-time sync active"}
             </p>
           </div>
+
         </div>
 
         {/* Right Column: Empty for centering alignment */}

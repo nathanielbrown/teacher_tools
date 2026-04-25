@@ -229,7 +229,7 @@ export const MarbleJar = () => {
   return (
     <div className="w-full mx-auto px-4 pt-2 pb-8 h-full flex flex-col gap-12 select-none overflow-x-hidden">
       <ToolHeader
-        title="Marble Jar"
+        title="Marble Jar Reward"
         icon={Trophy}
         description="Behavioral Reward Simulation"
         infoContent={

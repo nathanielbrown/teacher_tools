@@ -56,8 +56,11 @@ import { ThermalConduction } from './components/tools/ThermalConduction';
 import { EcosystemSimulation } from './components/tools/EcosystemSimulation';
 import { StandingWaveSynthesis } from './components/tools/StandingWaveSynthesis';
 import { InkDiffusion } from './components/tools/InkDiffusion';
+import { Boggle } from './components/tools/Boggle';
 import { GuessingGame } from './components/tools/GuessingGame';
 import { TeacherMath } from './components/tools/TeacherMath';
+import { BalanceEquations } from './components/tools/BalanceEquations';
+import { NumberLine } from './components/tools/NumberLine';
 
 
 
@@ -65,7 +68,9 @@ import { TeacherMath } from './components/tools/TeacherMath';
 import { SpringScales } from './components/tools/SpringScales';
 import { QRCodeGenerator } from './components/tools/QRCodeGenerator';
 import { SeatingPlanGenerator } from './components/tools/SeatingPlanGenerator';
+import { Tournaments } from './components/tools/Tournaments';
 // import { MindMap } from './components/tools/MindMap';
+
 
 
 
@@ -131,6 +136,7 @@ function App() {
       case 'ecosystem': return <EcosystemSimulation />;
       case 'standingwave': return <StandingWaveSynthesis />;
       case 'inkdiffusion': return <InkDiffusion />;
+      case 'boggle': return <Boggle />;
 
 
 
@@ -138,12 +144,14 @@ function App() {
       case 'springscales': return <SpringScales />;
       case 'qrcodegenerator': return <QRCodeGenerator />;
       case 'seatingplan': return <SeatingPlanGenerator />;
+      case 'tournaments': return <Tournaments />;
 //       case 'mindmap': return <MindMap />;
 
 
       case 'fractiontool': return <FractionTool />;
       case 'marblecounting': return <MarbleCounting />;
       case 'binarynumbers': return <BinaryTool />;
+      case 'numberline': return <NumberLine />;
       case 'cartesianplane': return <TeacherMath />;
       case 'findtheword': return <FindTheWord />;
       case 'revealword': return <RevealWord />;
@@ -154,6 +162,7 @@ function App() {
       case 'colourhunt': return <ColourHunt />;
       case 'wouldyourather': return <WouldYouRather />;
       case 'guessinggame': return <GuessingGame />;
+      case 'balanceequations': return <BalanceEquations />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">
@@ -184,6 +193,7 @@ function App() {
         <div className="nature-cloud cloud-1" />
         <div className="nature-cloud cloud-2" />
       </div>
+      <div className="theme-early-years-bg" />
       <Layout onNavigate={setCurrentTool} activeTab={activeTab} onTabChange={handleTabChange} currentTool={currentTool}>
         {renderTool()}
       </Layout>

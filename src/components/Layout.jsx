@@ -259,7 +259,7 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
             <div className="flex items-center">
               <button
                 onClick={() => setIsAboutOpen(true)}
-                className="p-2 rounded-xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90"
+                className="p-2 rounded-xl hover:bg-gray-100/80 text-slate-600 transition-all"
                 title="About ClassRex"
               >
                 {settings.theme === 'early-years' ? <span className="text-xl">ℹ️</span> : <Info size={20} />}
@@ -267,7 +267,7 @@ export const Layout = ({ children, onNavigate, activeTab, onTabChange, currentTo
 
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded-xl hover:bg-gray-100/80 text-slate-600 transition-all active:scale-90 hover:rotate-45"
+                className="p-2 rounded-xl hover:bg-gray-100/80 text-slate-600 transition-all"
                 title="Settings"
               >
                 {settings.theme === 'early-years' ? <span className="text-xl">⚙️</span> : <Settings size={20} />}

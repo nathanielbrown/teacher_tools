@@ -69,6 +69,23 @@ export const AboutModal = ({ onClose }) => {
             </p>
           </section>
 
+          <section className="p-4 rounded-3xl bg-amber-50 border border-amber-100 space-y-3">
+            <h3 className="text-sm font-black text-amber-800 flex items-center gap-2 uppercase tracking-wider">
+              🚀 Support the Project
+            </h3>
+            <p className="font-medium text-xs leading-relaxed text-amber-900/70">
+              ClassRex is free to use and ad-free. If you find these tools helpful and would like to support their development, please consider becoming a patron.
+            </p>
+            <a 
+              href="https://www.patreon.com/cw/ClassRex/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-xs font-black hover:bg-amber-600 transition-all active:scale-95 shadow-lg shadow-amber-500/20"
+            >
+              Support on Patreon
+            </a>
+          </section>
+
           <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400">
             <span>Version {import.meta.env.PACKAGE_VERSION || '1.0.0'}</span>
             <div className="flex items-center gap-1.5">

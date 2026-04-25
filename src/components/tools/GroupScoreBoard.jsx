@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Minus, Trash2, Edit2, Check, Award } from 'lucide-react';
+import { Plus, Minus, Trash2, Edit2, Check, Award, RotateCcw, Settings, X } from 'lucide-react';
 import { ToolHeader } from '../ToolHeader';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,7 @@ export const GroupScoreBoard = () => {
 
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
+  const [showConfig, setShowConfig] = useState(false);
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -62,6 +63,11 @@ export const GroupScoreBoard = () => {
     if (e.key === 'Enter') saveEdit(id);
   };
 
+  const resetAllScores = () => {
+    setGroups(groups.map(g => ({ ...g, score: 0 })));
+    audioEngine.playTick(settings.soundTheme);
+  };
+
   const getGridCols = () => {
     const count = groups.length;
     const items = count + 1; // groups + add button
@@ -105,18 +111,84 @@ export const GroupScoreBoard = () => {
           <>
             <p>
               <strong className="text-white block mb-1">Manage Groups</strong>
-              Click "Add Group" to create a new team. Hover over a group name to edit or delete it.
+              Click the config icon to add, rename, or remove teams.
             </p>
             <p>
               <strong className="text-white block mb-1">Scoring</strong>
-              Use the plus and minus buttons to adjust scores. Points are saved automatically for this session.
+              Use the plus and minus buttons to adjust scores. Points are saved automatically.
             </p>
           </>
         }
-      />
+      >
+        <button
+          onClick={resetAllScores}
+          className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95 border-2 border-transparent hover:border-rose-100 shadow-sm"
+          title="Reset All Scores"
+        >
+          <RotateCcw size={24} />
+        </button>
+        <button
+          onClick={() => setShowConfig(!showConfig)}
+          className={`p-3 rounded-2xl transition-all active:scale-95 border-2 shadow-sm ${
+            showConfig 
+              ? 'bg-slate-800 text-white border-slate-900 shadow-md' 
+              : 'bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border-transparent hover:border-indigo-100'
+          }`}
+          title="Configure Groups"
+        >
+          {showConfig ? <X size={24} /> : <Settings size={24} />}
+        </button>
+      </ToolHeader>
 
-      <div className="flex flex-col w-full max-w-7xl mx-auto items-center">
-        <div className="w-full">
+      <div className="flex flex-col lg:flex-row gap-8 w-full max-w-7xl mx-auto items-start justify-center relative">
+        <AnimatePresence>
+          {showConfig && (
+            <motion.div
+              initial={{ opacity: 0, x: -20, width: 0 }}
+              animate={{ opacity: 1, x: 0, width: 320 }}
+              exit={{ opacity: 0, x: -20, width: 0 }}
+              className="w-full lg:w-[320px] bg-white p-6 rounded-[2.5rem] border-2 border-slate-50 shadow-xl space-y-6 shrink-0 overflow-hidden"
+            >
+              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                <h3 className="font-black text-slate-800 flex items-center gap-2">
+                  <Settings size={18} className="text-indigo-500" />
+                  Configuration
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                <button
+                  onClick={addGroup}
+                  className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100"
+                >
+                  <Plus size={18} /> Add Group
+                </button>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Group List</label>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {groups.map(group => (
+                      <div key={group.id} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span className="flex-1 font-bold text-slate-700 truncate text-sm">{group.name}</span>
+                        <button onClick={() => startEditing(group)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-all">
+                          <Edit2 size={14} />
+                        </button>
+                        <button onClick={() => removeGroup(group.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white rounded-lg transition-all">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    {groups.length === 0 && (
+                      <p className="text-center py-8 text-xs font-bold text-slate-300 uppercase tracking-widest">No groups yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex-1 w-full">
           {groups.length === 0 ? (
             <div className="text-center p-12 bg-white rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 w-full max-w-lg mx-auto">
               <p className="text-xl font-bold uppercase tracking-widest opacity-50">No groups created</p>

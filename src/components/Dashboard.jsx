@@ -59,7 +59,13 @@ export const Dashboard = ({ onNavigate, activeTab }) => {
       <div className={`glass-card p-6 md:p-10 rounded-[3rem] space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700`}>
         <div className="space-y-8">
           {activeMainSection.subSections.map(subSection => {
-            const sectionTools = tools.filter(t => t.mainSection === activeMainSection.title && t.section === subSection);
+            const sectionTools = tools.filter(t => {
+              if (t.mainSection !== activeMainSection.title || t.section !== subSection) return false;
+              if (settings.selectedYear === 'All') return true;
+              
+              const yearNum = settings.selectedYear === 'Prep' ? 0 : parseInt(settings.selectedYear);
+              return yearNum >= t.yearRange[0] && yearNum <= t.yearRange[1];
+            });
             if (sectionTools.length === 0) return null;
 
             return (

@@ -134,6 +134,7 @@ export const NumberLine = () => {
     const start = parseFloat(range.start) || 0;
     const end = parseFloat(range.end) || 0;
     const totalRange = end - start;
+    if (totalRange <= 0) return padding + (width - 2 * padding) / 2;
     const progress = (val - start) / totalRange;
     return padding + progress * (width - 2 * padding);
   };
@@ -190,9 +191,13 @@ export const NumberLine = () => {
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '-' || val === '') {
-                          setRange({ ...range, start: val });
+                          setRange(prev => ({ ...prev, start: val }));
                         } else {
-                          setRange({ ...range, start: Number(val) });
+                          const numVal = Number(val);
+                          setRange(prev => ({
+                            start: numVal,
+                            end: Math.max(numVal, parseFloat(prev.end) || 0)
+                          }));
                         }
                       }}
                       className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-slate-700"
@@ -206,9 +211,13 @@ export const NumberLine = () => {
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '-' || val === '') {
-                          setRange({ ...range, end: val });
+                          setRange(prev => ({ ...prev, end: val }));
                         } else {
-                          setRange({ ...range, end: Number(val) });
+                          const numVal = Number(val);
+                          setRange(prev => ({
+                            start: Math.min(numVal, parseFloat(prev.start) || 0),
+                            end: numVal
+                          }));
                         }
                       }}
                       className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-slate-700"

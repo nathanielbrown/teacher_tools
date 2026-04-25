@@ -61,6 +61,10 @@ import { GuessingGame } from './components/tools/GuessingGame';
 import { TeacherMath } from './components/tools/TeacherMath';
 import { BalanceEquations } from './components/tools/BalanceEquations';
 import { NumberLine } from './components/tools/NumberLine';
+import { WordBuilder } from './components/tools/WordBuilder';
+import ClassRex from './components/tools/ClassRex';
+import PoolGame from './components/tools/PoolGame';
+import NewtonsCradle from './components/tools/NewtonsCradle';
 
 
 
@@ -137,6 +141,8 @@ function App() {
       case 'standingwave': return <StandingWaveSynthesis />;
       case 'inkdiffusion': return <InkDiffusion />;
       case 'boggle': return <Boggle />;
+      case 'wordbuilder': return <WordBuilder />;
+      case 'newtonscradle': return <NewtonsCradle />;
 
 
 
@@ -163,6 +169,8 @@ function App() {
       case 'wouldyourather': return <WouldYouRather />;
       case 'guessinggame': return <GuessingGame />;
       case 'balanceequations': return <BalanceEquations />;
+      case 'classrex': return <ClassRex />;
+      case 'poolgame': return <PoolGame />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">

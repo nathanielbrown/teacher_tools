@@ -2,7 +2,7 @@ import {
   Clock, Timer, Hourglass, AlertCircle, Dices, Coins, Loader,
   Palette, Activity, BookOpen, UserCircle, Users, CalendarDays, Award, Star, Sparkles, Gamepad2, PenTool, Zap, Calculator, Banknote, Minus, X, Divide, PieChart, Circle, Cpu, Search, Eye, Rocket, Brain, Grid3X3, Columns, Volume2, Music, HelpCircle, Cloud, User, Library, Image as ImageIcon, QrCode, History, GitBranch,
   Beaker, Thermometer, Leaf, ArrowDownUp, FlaskConical, Droplets, Share2, Settings2,
-  Calendar, BookA, TimerReset, Cuboid, Lightbulb, MessageCircle, TrendingUp, Trophy, Scale, MoveRight
+  Calendar, BookA, TimerReset, Cuboid, Lightbulb, MessageCircle, TrendingUp, Trophy, Scale, MoveRight, Target
 } from 'lucide-react';
 
 export const tools = [
@@ -57,6 +57,7 @@ export const tools = [
   { id: 'boggle', name: 'Boggle Challenge', icon: Sparkles, emoji: '🎲', mainSection: 'Student Tools', section: 'Literacy', color: '#6366f1', yearRange: [2, 12] },
   { id: 'lettertracing', name: 'Letter Tracing', icon: PenTool, emoji: '✏️', mainSection: 'Student Tools', section: 'Literacy', color: '#1e90ff', yearRange: [0, 2] },
   { id: 'findtheword', name: 'Find the Word', icon: Search, emoji: '🔍', mainSection: 'Student Tools', section: 'Literacy', color: '#ffa502', yearRange: [1, 6] },
+  { id: 'wordbuilder', name: 'Word Builder', icon: Sparkles, emoji: '🧩', mainSection: 'Student Tools', section: 'Literacy', color: '#6366f1', yearRange: [0, 4] },
   { id: 'crossword', name: 'Crossword', icon: Grid3X3, emoji: '🧩', mainSection: 'Student Tools', section: 'Literacy', color: '#a29bfe', yearRange: [2, 12] },
   { id: 'typinggame', name: 'Typing Galaxy', icon: Rocket, emoji: '🚀', mainSection: 'Student Tools', section: 'Literacy', color: '#ff6b81', yearRange: [2, 12] },
   
@@ -69,6 +70,8 @@ export const tools = [
   { id: 'inkdiffusion', name: 'Ink Diffusion', icon: Droplets, emoji: '💧', mainSection: 'Student Tools', section: 'Science', color: '#6366f1', yearRange: [3, 10] },
   { id: 'standingwave', name: 'Standing Wave Synthesis', icon: Activity, emoji: '🌊', mainSection: 'Student Tools', section: 'Science', color: '#3b82f6', yearRange: [7, 12] },
   { id: 'sandsim', name: 'Sand Simulation', icon: Sparkles, emoji: '🏜️', mainSection: 'Student Tools', section: 'Science', color: '#1e90ff', yearRange: [0, 12] },
+  { id: 'newtonscradle', name: "Newton's Cradle", icon: Zap, emoji: '⚛️', mainSection: 'Student Tools', section: 'Science', color: '#3b82f6', yearRange: [3, 12] },
+  { id: 'poolgame', name: 'Physics Pool', icon: Target, emoji: '🎱', mainSection: 'Student Tools', section: 'Science', color: '#27ae60', yearRange: [3, 12] },
   
   // Student Tools - Math
   { id: 'timestable', name: 'Times Tables', icon: Calculator, emoji: '✖️', mainSection: 'Student Tools', section: 'Math', color: '#ffa502', yearRange: [2, 6] },
@@ -86,6 +89,7 @@ export const tools = [
   { id: 'simongame', name: 'Simon Says', icon: Gamepad2, emoji: '🧠', mainSection: 'Student Tools', section: 'Memory & Games', color: '#ffa502', yearRange: [0, 12] },
   { id: 'emojimatch', name: 'Emoji Match', icon: Brain, emoji: '🧩', mainSection: 'Student Tools', section: 'Memory & Games', color: '#a29bfe', yearRange: [0, 8] },
   { id: 'sudoku', name: 'Sudoku', icon: Grid3X3, emoji: '🔢', mainSection: 'Student Tools', section: 'Memory & Games', color: '#ff6b81', yearRange: [2, 12] },
+  { id: 'classrex', name: 'ClassRex Runner', icon: Gamepad2, emoji: '🦖', mainSection: 'Student Tools', section: 'Memory & Games', color: '#2ed573', yearRange: [0, 12] },
   
   // Student Tools - Arts & Music
   { id: 'songmaker', name: 'Song Maker', icon: Music, emoji: '🎵', mainSection: 'Student Tools', section: 'Arts & Music', color: '#fa8231', yearRange: [0, 12] },

@@ -1,0 +1,46 @@
+﻿
+> teacher-tools@1008 lint
+> eslint .
+
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\shared\WordPanel.tsx
+  44:3  error  'onRenameList' is defined but never used. Allowed unused args must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Crossword.tsx
+   50:7   error  'grid' is never reassigned. Use 'const' instead                                                   prefer-const
+  199:52  error  'setHeaderActions' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\FindTheWord.tsx
+  115:52  error  'setHeaderActions' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  380:37  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\FindTheWord.tsx:380:37
+  378 |                     style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`, gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)` }}
+  379 |                  >
+> 380 |                     {foundPaths.map((path, i) => (
+      |                                     ^^^^^^^^^^^^^^
+> 381 |                       <div key={i} style={getLineStyles(path.start, path.end, true)} />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 382 |                     ))}
+      | ^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  383 |                     {selection && <div style={getLineStyles(selection.start, selection.end, false)} />}
+  384 |                     {grid.map((row, r) => row.map((letter, c) => (
+  385 |                       <div key={`${r}-${c}`} className={`flex items-center justify-center font-black text-4xl text-slate-900 z-10 pointer-events-none transition-all ${isDragging ? 'opacity-40' : ''}`}>  react-hooks/refs
+  383:47  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\FindTheWord.tsx:383:47
+  381 |                       <div key={i} style={getLineStyles(path.start, path.end, true)} />
+  382 |                     ))}
+> 383 |                     {selection && <div style={getLineStyles(selection.start, selection.end, false)} />}
+      |                                               ^^^^^^^^^^^^^ This function accesses a ref value
+  384 |                     {grid.map((row, r) => row.map((letter, c) => (
+  385 |                       <div key={`${r}-${c}`} className={`flex items-center justify-center font-black text-4xl text-slate-900 z-10 pointer-events-none transition-all ${isDragging ? 'opacity-40' : ''}`}>
+  386 |                         {letter}                                                                                                                                                                                                                                                                                                                react-hooks/refs
+
+Ô£û 6 problems (6 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

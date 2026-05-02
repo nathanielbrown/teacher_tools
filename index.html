@@ -6,10 +6,30 @@
     <link rel="apple-touch-icon" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f8fafc" />
-    <title>Teacher Tools</title>
+    <meta name="description" content="Free online interactive tools and games for teachers and students. Perfect for classroom management, math, literacy, science, and more." />
+    <meta property="og:title" content="Teacher Tools | ClassRex" />
+    <meta property="og:description" content="Free online interactive tools and games for teachers and students. Perfect for classroom management, math, literacy, science, and more." />
+    <meta property="og:url" content="https://beta.classrex.com/" />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href="https://beta.classrex.com/" />
+    <title>Teacher Tools | ClassRex</title>
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafgraph/spa-github-pages
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

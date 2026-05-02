@@ -1,0 +1,30 @@
+﻿
+> teacher-tools@1005 lint
+> eslint .
+
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Crossword.tsx
+  15:10  error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   @typescript-eslint/no-unused-vars
+  74:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
+  74:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\FindTheWord.tsx
+   20:10  error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   @typescript-eslint/no-unused-vars
+  115:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
+  115:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Spelling.tsx
+  53:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
+  53:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\TypingGame.tsx
+  20:10  error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   @typescript-eslint/no-unused-vars
+  64:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
+  64:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\WordManager.tsx
+   1:38  error  'useCallback' is defined but never used. Allowed unused vars must match /^[A-Z_]/u          @typescript-eslint/no-unused-vars
+  50:45  error  'setOnReset' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+Ô£û 13 problems (13 errors, 0 warnings)
+

@@ -1,0 +1,55 @@
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\AboutModal.tsx
+  8:9  error  'isEarlyYears' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\Dashboard.tsx
+  30:9  error  'isSecondary' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\GDPRConsent.tsx
+  8:11  error  'settings' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\SettingsModal.tsx
+  32:6  warning  React Hook useMemo has an unnecessary dependency: 'settings'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\ToolAnalytics.tsx
+  2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\shared\HistoryPanel.tsx
+  1:27  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Boggle.tsx
+  377:46  error  'i' is defined but never used. Allowed unused args must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\ClassRex.tsx
+  147:88  error  'height' is defined but never used. Allowed unused args must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Config.tsx
+  63:6  warning  React Hook useEffect has a missing dependency: 'configTabs'. Either include it or remove the dependency array   react-hooks/exhaustive-deps
+  92:6  warning  React Hook useMemo has an unnecessary dependency: 'settings'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Crossword.tsx
+  72:10  error  'selectedList' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\DailySchedule.tsx
+  82:9  warning  The 'currentSchedule' logical expression could make the dependencies of useEffect Hook (at line 176) change on every render. To fix this, wrap the initialization of 'currentSchedule' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\DiceRoller.tsx
+  1:38  error  'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\DiceRoller\DiceComponents.tsx
+  4:40  error  'color' is defined but never used. Allowed unused args must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\EcosystemSimulation.tsx
+  100:17  error  'setSpeed' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\ImageReveal.tsx
+  109:1  warning  Unused eslint-disable directive (no problems were reported from 'react-refresh/only-export-components')
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\LetterTracing.tsx
+  143:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\MoneyTool.tsx
+  110:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+✖ 18 problems (11 errors, 7 warnings)
+  0 errors and 3 warnings potentially fixable with the `--fix` option.

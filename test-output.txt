@@ -1,0 +1,81 @@
+﻿
+> teacher-tools@1005 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.5 [39m[90mC:/Users/natis/Documents/GitHub/teacher_tools[39m
+
+ [31mÔØ»[39m src/tests/ToolsSmokeTest.test.tsx [2m([22m[2m67 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1026[2mms[22m[39m
+     [32mÔ£ô[39m renders Analogue Digital Clock and passes interaction smoke test[32m 49[2mms[22m[39m
+     [32mÔ£ô[39m renders Stopwatch and passes interaction smoke test[32m 15[2mms[22m[39m
+     [32mÔ£ô[39m renders Countdown and passes interaction smoke test[32m 12[2mms[22m[39m
+     [32mÔ£ô[39m renders Exam Clock and passes interaction smoke test[32m 11[2mms[22m[39m
+     [32mÔ£ô[39m renders Daily Schedule and passes interaction smoke test[32m 44[2mms[22m[39m
+     [32mÔ£ô[39m renders Event Calendar and passes interaction smoke test[32m 9[2mms[22m[39m
+     [32mÔ£ô[39m renders Random Group Maker and passes interaction smoke test[32m 20[2mms[22m[39m
+     [32mÔ£ô[39m renders Group Score Board and passes interaction smoke test[32m 18[2mms[22m[39m
+     [32mÔ£ô[39m renders Marble Jar Reward and passes interaction smoke test[32m 10[2mms[22m[39m
+     [32mÔ£ô[39m renders Emotion Picker and passes interaction smoke test[32m 25[2mms[22m[39m
+     [32mÔ£ô[39m renders Sound Level and passes interaction smoke test[32m 10[2mms[22m[39m
+[31m     [31m├ù[31m renders Seating Plan Generator and passes interaction smoke test[39m[32m 5[2mms[22m[39m
+[31m     [31m├ù[31m renders Tournaments and passes interaction smoke test[39m[32m 3[2mms[22m[39m
+     [32mÔ£ô[39m renders Fraction Tool and passes interaction smoke test[32m 14[2mms[22m[39m
+     [32mÔ£ô[39m renders Hundreds Chart and passes interaction smoke test[32m 255[2mms[22m[39m
+     [32mÔ£ô[39m renders MAB Blocks and passes interaction smoke test[32m 41[2mms[22m[39m
+     [32mÔ£ô[39m renders Story Starters and passes interaction smoke test[32m 9[2mms[22m[39m
+     [32mÔ£ô[39m renders Number Line and passes interaction smoke test[32m 11[2mms[22m[39m
+     [32mÔ£ô[39m renders Abacus and passes interaction smoke test[32m 41[2mms[22m[39m
+     [32mÔ£ô[39m renders Fraction Wall and passes interaction smoke test[32m 8[2mms[22m[39m
+     [32mÔ£ô[39m renders Dice Roller and passes interaction smoke test[32m 6[2mms[22m[39m
+     [32mÔ£ô[39m renders Flip Coin and passes interaction smoke test[32m 16[2mms[22m[39m
+     [32mÔ£ô[39m renders Number Spinner and passes interaction smoke test[32m 12[2mms[22m[39m
+     [32mÔ£ô[39m renders Name Picker and passes interaction smoke test[32m 13[2mms[22m[39m
+     [32mÔ£ô[39m renders Group Name Generator and passes interaction smoke test[32m 3[2mms[22m[39m
+     [32mÔ£ô[39m renders Colour Picker and passes interaction smoke test[32m 14[2mms[22m[39m
+     [32mÔ£ô[39m renders Metronome and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders QR Code Generator and passes interaction smoke test[32m 13[2mms[22m[39m
+     [32mÔ£ô[39m renders Config and passes interaction smoke test[32m 8[2mms[22m[39m
+     [32mÔ£ô[39m renders Higher Or Lower and passes interaction smoke test[32m 7[2mms[22m[39m
+     [32mÔ£ô[39m renders Reveal Word and passes interaction smoke test[32m 7[2mms[22m[39m
+     [32mÔ£ô[39m renders Image Reveal and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Colour Hunt and passes interaction smoke test[32m 3[2mms[22m[39m
+     [32mÔ£ô[39m renders Would You Rather and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Simon Says (Classroom) and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Guessing Game and passes interaction smoke test[32m 5[2mms[22m[39m
+     [32mÔ£ô[39m renders Spelling and passes interaction smoke test[32m 5[2mms[22m[39m
+     [32mÔ£ô[39m renders Letter Tracing and passes interaction smoke test[32m 6[2mms[22m[39m
+     [32mÔ£ô[39m renders Find The Word and passes interaction smoke test[32m 7[2mms[22m[39m
+     [32mÔ£ô[39m renders Word Builder and passes interaction smoke test[32m 6[2mms[22m[39m
+     [32mÔ£ô[39m renders Crossword and passes interaction smoke test[32m 6[2mms[22m[39m
+     [32mÔ£ô[39m renders Typing Game and passes interaction smoke test[32m 6[2mms[22m[39m
+     [32mÔ£ô[39m renders Reaction Time and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Chemical Fireworks and passes interaction smoke test[32m 5[2mms[22m[39m
+     [32mÔ£ô[39m renders Thermal Conduction and passes interaction smoke test[32m 20[2mms[22m[39m
+     [32mÔ£ô[39m renders Ecosystem and passes interaction smoke test[32m 8[2mms[22m[39m
+     [32mÔ£ô[39m renders Spring Scales and passes interaction smoke test[32m 10[2mms[22m[39m
+     [32mÔ£ô[39m renders Ink Diffusion and passes interaction smoke test[32m 12[2mms[22m[39m
+     [32mÔ£ô[39m renders Standing Wave and passes interaction smoke test[32m 7[2mms[22m[39m
+     [32mÔ£ô[39m renders Sand Simulation and passes interaction smoke test[32m 7[2mms[22m[39m
+     [32mÔ£ô[39m renders Newton's Cradle and passes interaction smoke test[32m 3[2mms[22m[39m
+     [32mÔ£ô[39m renders Pool Game and passes interaction smoke test[32m 28[2mms[22m[39m
+     [32mÔ£ô[39m renders Times Table and passes interaction smoke test[32m 8[2mms[22m[39m
+     [32mÔ£ô[39m renders Money Tool and passes interaction smoke test[32m 10[2mms[22m[39m
+     [32mÔ£ô[39m renders Missing Addition and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Missing Subtraction and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Missing Multiplication and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Missing Division and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Marble Counting and passes interaction smoke test[32m 3[2mms[22m[39m
+     [32mÔ£ô[39m renders Binary Tool and passes interaction smoke test[32m 8[2mms[22m[39m
+     [32mÔ£ô[39m renders Balance Equations and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Cartesian Plane and passes interaction smoke test[32m 29[2mms[22m[39m
+     [32mÔ£ô[39m renders Simon Game and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Emoji Match and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Sudoku and passes interaction smoke test[32m 7[2mms[22m[39m
+     [32mÔ£ô[39m renders ClassRex and passes interaction smoke test[32m 4[2mms[22m[39m
+     [32mÔ£ô[39m renders Song Maker and passes interaction smoke test[32m 57[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m65 passed[39m[22m[90m (67)[39m
+[2m   Start at [22m 23:47:18
+[2m   Duration [22m 3.14s[2m (transform 1.04s, setup 75ms, import 1.42s, tests 1.03s, environment 507ms)[22m
+

@@ -95,8 +95,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
     ];
   }, [intl]);
 
-  const [sidebarMode, setSidebarMode] = useLocalStorage<'hidden' | 'mini' | 'full'>('layout_sidebar_mode', 
-    window.innerWidth < 1024 ? 'hidden' : 'mini'
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [sidebarMode, setSidebarMode] = useLocalStorage<'hidden' | 'full'>('layout_sidebar_mode', 
+    window.innerWidth < 1024 ? 'hidden' : 'full'
   );
 
   useEffect(() => {
@@ -104,7 +112,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
       if (window.innerWidth < 1024) {
         setSidebarMode(prev => (prev !== 'hidden' && window.innerWidth < 1024) ? 'hidden' : prev);
       } else {
-        setSidebarMode(prev => prev === 'hidden' ? 'mini' : prev);
+        setSidebarMode(prev => prev === 'hidden' ? 'full' : prev);
       }
     };
 
@@ -135,6 +143,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
       clearHeader();
     };
   }, [currentTool, clearHeader, toolGroups]);
+
+  const [isNavDropdownOpen, setIsNavDropdownOpen] = useState(false);
 
   const toggleSection = (title: string) => {
     setExpandedSections(prev => prev[title] ? {} : { [title]: true });
@@ -188,31 +198,36 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
       {/* Sidebar */}
       {!isFullscreen && (
         <aside
-          className={`fixed inset-y-4 left-4 z-50 glass-card rounded-[3rem] transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col shadow-2xl ${sidebarMode === 'hidden' ? '-translate-x-[120%]' : 'translate-x-0'
+          className={`fixed ${isMobile ? 'top-24 bottom-6' : 'inset-y-4'} left-4 z-50 glass-card rounded-[3rem] transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col shadow-2xl ${sidebarMode === 'hidden' ? '-translate-x-[120%]' : 'translate-x-0'
             } ${sidebarMode === 'mini' ? 'w-24' : 'w-80'}`}
         >
-          <div className={`flex ${sidebarMode === 'mini' ? 'flex-col gap-4 p-3 pt-6' : 'items-center p-6 justify-between'}`}>
+          <div className="flex items-center p-6 justify-between">
             <button
               onClick={() => onNavigate('home')}
-              className={`flex items-center transition-all active:scale-95 group ${sidebarMode === 'mini' ? 'flex-col gap-2' : 'gap-3'}`}
+              className="flex items-center transition-all active:scale-95 group gap-3"
               title="Go to Dashboard"
             >
               <motion.img
                 whileHover={{ rotate: 15, scale: 1.1 }}
                 src={logo}
                 alt="ClassRex"
-                className={`${sidebarMode === 'mini' ? 'h-10' : 'h-10'} w-auto object-contain drop-shadow-md`}
+                className="h-10 w-auto object-contain drop-shadow-md"
               />
-              <span className={`${sidebarMode === 'mini' ? 'text-[9px] text-slate-400 uppercase tracking-[0.2em] font-medium' : 'text-2xl font-medium text-slate-800 tracking-tighter'}`}>
+              <span className="text-2xl font-medium text-slate-800 tracking-tighter">
                 ClassRex
               </span>
             </button>
 
             <button
-              onClick={() => setSidebarMode(sidebarMode === 'mini' ? 'full' : 'mini')}
+              onClick={() => setSidebarMode('hidden')}
               className={`p-2.5 rounded-2xl hover:bg-slate-100/80 text-${themeColor} transition-all active:scale-90`}
+              title="Hide Sidebar"
             >
-              {sidebarMode === 'mini' ? <span className="text-2xl">👉</span> : <span className="text-2xl">👈</span>}
+              {settings.theme === 'early-years' ? (
+                <span className="text-2xl">👈</span>
+              ) : (
+                <ChevronLeft size={24} strokeWidth={3} />
+              )}
             </button>
           </div>
 
@@ -232,33 +247,25 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                     {group.title && (
                       <button
                         onClick={() => toggleSection(group.title)}
-                        className={`flex items-center transition-all group ${sidebarMode === 'mini'
-                            ? 'w-[calc(100%-12px)] mx-auto justify-center p-2.5 rounded-2xl'
-                            : 'w-full justify-between px-3 py-2 text-[11px] font-medium uppercase tracking-[0.25em]'
-                          } ${isExpanded
-                            ? sidebarMode === 'mini' ? 'bg-slate-100/80 text-' + themeColor : 'text-' + themeColor
-                            : 'text-slate-400 hover:text-' + themeColor + ' ' + (sidebarMode === 'mini' ? 'hover:bg-slate-50' : '')
+                        className={`flex items-center transition-all group w-full justify-between px-3 py-2 text-[11px] font-medium uppercase tracking-[0.25em] ${isExpanded
+                            ? 'text-' + themeColor
+                            : 'text-slate-400 hover:text-' + themeColor
                           }`}
-                        title={sidebarMode === 'mini' ? group.title : ''}
                       >
-                        <div className={`flex items-center ${sidebarMode === 'mini' ? 'justify-center w-10 h-10' : 'gap-2'}`}>
+                        <div className="flex items-center gap-2">
                           {settings.theme === 'early-years' ? (
-                            <span className={sidebarMode === 'mini' ? 'text-2xl leading-none' : 'text-sm'}>{group.emoji || '🛠️'}</span>
+                            <span className="text-sm">{group.emoji || '🛠️'}</span>
                           ) : (
-                            <group.icon size={sidebarMode === 'mini' ? 24 : 16} strokeWidth={2.5} />
+                            <group.icon size={16} strokeWidth={2.5} />
                           )}
-                          {sidebarMode !== 'mini' && (
-                            <span>
-                              {intl.formatMessage({
-                                id: sectionKeyMap[group.title] || 'section.unknown',
-                                defaultMessage: group.title
-                              })}
-                            </span>
-                          )}
+                          <span>
+                            {intl.formatMessage({
+                              id: sectionKeyMap[group.title] || 'section.unknown',
+                              defaultMessage: group.title
+                            })}
+                          </span>
                         </div>
-                        {sidebarMode !== 'mini' && (
-                          <ChevronDown size={14} className={`transform transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} />
-                        )}
+                        <ChevronDown size={14} className={`transform transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
                     )}
 
@@ -276,25 +283,21 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                               <button
                                 key={tool.id}
                                 onClick={() => onNavigate(tool.id)}
-                                title={sidebarMode === 'mini' ? tool.name : ''}
-                                className={`group relative flex items-center transition-all duration-300 ${sidebarMode === 'mini' ? 'w-[calc(100%-12px)] mx-auto justify-center p-2.5' : 'w-full px-4 py-2.5 space-x-3'
-                                  } rounded-2xl ${isActive
+                                className={`group relative flex items-center transition-all duration-300 w-full px-4 py-2.5 space-x-3 rounded-2xl ${isActive
                                     ? `bg-${themeColor} text-white shadow-xl shadow-${themeColor}/30 scale-[1.05] z-10`
                                     : `hover:bg-white/60 text-slate-500 ${settings.theme === 'early-years' ? '' : `hover:text-${themeColor}`}`
                                   }`}
                               >
-                                <div className={`flex items-center justify-center transform transition-transform duration-300 ${sidebarMode === 'mini' ? 'w-10 h-10' : 'w-6 h-6'} ${isActive ? '' : 'group-hover:scale-125 group-hover:rotate-6'}`}>
+                                <div className={`flex items-center justify-center transform transition-transform duration-300 w-6 h-6 ${isActive ? '' : 'group-hover:scale-125 group-hover:rotate-6'}`}>
                                   {settings.theme === 'early-years' ? (
                                     <span className="text-2xl leading-none">{tool.emoji || '🛠️'}</span>
                                   ) : (
-                                    <tool.icon size={sidebarMode === 'mini' ? 22 : 18} strokeWidth={isActive ? 3 : 2.5} />
+                                    <tool.icon size={18} strokeWidth={isActive ? 3 : 2.5} />
                                   )}
                                 </div>
-                                {sidebarMode !== 'mini' && (
-                                  <span className="text-sm font-medium truncate">
-                                    {intl.formatMessage({ id: `tool.${tool.id}.name`, defaultMessage: tool.name })}
-                                  </span>
-                                )}
+                                <span className="text-sm font-medium truncate">
+                                  {intl.formatMessage({ id: `tool.${tool.id}.name`, defaultMessage: tool.name })}
+                                </span>
                               </button>
                             );
                           })}
@@ -309,16 +312,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
 
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-slate-100 flex justify-center">
+            {/* Sidebar Footer - Only Dashboard link now */}
             <button
-              onClick={() => setSidebarMode('hidden')}
-              className="p-4 text-slate-300 hover:text-rose-500 transition-all rounded-2xl hover:bg-rose-50/80 active:scale-90"
-              title="Hide Sidebar"
+              onClick={() => onNavigate('home')}
+              className="p-4 text-slate-300 hover:text-indigo-500 transition-all rounded-2xl hover:bg-indigo-50/80 active:scale-90"
+              title="Go to Dashboard"
             >
-              {settings.theme === 'early-years' ? (
-                <span className="text-2xl">🙈</span>
-              ) : (
-                <ChevronLeft size={24} strokeWidth={3} />
-              )}
+              <Home size={24} strokeWidth={3} />
             </button>
           </div>
         </aside>
@@ -332,7 +332,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="fixed left-0 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3"
+            className="fixed left-0 bottom-10 z-40 flex flex-col gap-3"
           >
             {/* Dashboard Link */}
             <button
@@ -350,7 +350,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
 
             {/* Expand Toggle */}
             <button
-              onClick={() => setSidebarMode('mini')}
+              onClick={() => setSidebarMode('full')}
               className={`bg-white/90 backdrop-blur-xl shadow-2xl border border-white/40 p-5 rounded-r-[3rem] text-${themeColor} hover:bg-${themeColor} hover:text-white transition-all group active:scale-95 flex items-center justify-center`}
               title="Show Sidebar"
             >
@@ -361,16 +361,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
 
         {/* Top Bar */}
         {!isFullscreen && (
-          <header className="pt-2 md:pt-6 px-2 md:px-10 z-10">
+          <header className="pt-2 md:pt-6 px-2 md:px-10 z-[60]">
             <div className="max-w-7xl mx-auto h-16 md:h-24 flex items-center justify-between px-4 md:px-8 glass-card rounded-[3rem] shadow-2xl shadow-slate-200/50">
               <div className="flex items-center gap-6">
                 <button
-                  onClick={() => setSidebarMode(sidebarMode === 'hidden' ? 'full' : 'hidden')}
+                  onClick={() => setSidebarMode('full')}
                   className="lg:hidden p-3 rounded-2xl hover:bg-slate-100 text-slate-600 active:scale-90"
                 >
-                  <span className="text-2xl">🍔</span>
+                  <Menu size={28} strokeWidth={3} />
                 </button>
-                <img src={logo} alt="ClassRex" className="h-10 w-auto object-contain lg:hidden" />
+                <img src={logo} alt="ClassRex" className="h-8 w-auto object-contain lg:hidden" />
 
                 {/* Privacy Badges - Visible on Desktop Top Left */}
                 <div className="hidden lg:flex items-center gap-6">
@@ -404,9 +404,73 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                                 settings.language === 'vi' ? 'VN' :
                                   settings.language === 'ja' ? 'JP' : 'AU'
                         }
-                        className="w-[22px] h-[15px] shadow-sm rounded-sm"
+                        className="w-[20px] h-[14px] shadow-sm rounded-sm"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* Mobile Navigation Dropdown - Centered */}
+                <div className="lg:hidden absolute left-1/2 -translate-x-1/2">
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsNavDropdownOpen(!isNavDropdownOpen)}
+                      className={`flex items-center justify-between gap-1.5 px-4 py-2 w-48 rounded-xl bg-${themeColor} text-white font-black text-[10px] uppercase tracking-wider shadow-lg active:scale-95 transition-all whitespace-nowrap`}
+                    >
+                      <span className="truncate flex-1 text-center">
+                        {activeTab === 'Teacher Tools'
+                          ? intl.formatMessage({ id: 'nav.teacher_tools', defaultMessage: 'Teacher Tools' })
+                          : activeTab === 'Classroom Games'
+                            ? intl.formatMessage({ id: 'nav.classroom_games', defaultMessage: 'Classroom Games' })
+                            : intl.formatMessage({ id: 'nav.student_tools', defaultMessage: 'Student Tools' })}
+                      </span>
+                      <ChevronDown size={14} strokeWidth={3} className={`transform transition-transform duration-300 ${isNavDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {isNavDropdownOpen && (
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsNavDropdownOpen(false)}
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            className="absolute top-full mt-1.5 left-0 w-48 flex flex-col gap-1.5 z-50 pointer-events-auto"
+                          >
+                            {['Teacher Tools', 'Classroom Games', 'Student Tools']
+                              .filter(tab => tab.toLowerCase().trim() !== activeTab.toLowerCase().trim())
+                              .map(tab => {
+                                const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
+                                const tabLabel = tab === 'Teacher Tools'
+                                  ? intl.formatMessage({ id: 'nav.teacher_tools', defaultMessage: 'Teacher Tools' })
+                                  : tab === 'Classroom Games'
+                                    ? intl.formatMessage({ id: 'nav.classroom_games', defaultMessage: 'Classroom Games' })
+                                    : intl.formatMessage({ id: 'nav.student_tools', defaultMessage: 'Student Tools' });
+
+                                return (
+                                  <button
+                                    key={tab}
+                                    onClick={() => {
+                                      onTabChange(tab);
+                                      onNavigate('home');
+                                      setIsNavDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-4 py-2 text-center font-black text-[10px] uppercase tracking-wider transition-all rounded-xl shadow-lg bg-${tabColorClass} text-white italic active:scale-95`}
+                                  >
+                                    {tabLabel}
+                                  </button>
+                                );
+                              })}
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
@@ -471,32 +535,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               </div>
             </div>
 
-            {/* Mobile Navigation Tabs */}
-            <div className="lg:hidden mt-2 flex items-center p-1 bg-white/50 backdrop-blur-md rounded-xl overflow-x-auto no-scrollbar border border-white/50">
-              {['Teacher Tools', 'Classroom Games', 'Student Tools'].map(tab => {
-                const isTabActive = activeTab === tab && currentTool !== 'config';
-                const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
-
-                const tabLabel = tab === 'Teacher Tools'
-                  ? intl.formatMessage({ id: 'nav.teacher_tools', defaultMessage: 'Teacher Tools' })
-                  : tab === 'Classroom Games'
-                    ? intl.formatMessage({ id: 'nav.classroom_games', defaultMessage: 'Classroom Games' })
-                    : intl.formatMessage({ id: 'nav.student_tools', defaultMessage: 'Student Tools' });
-
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => onTabChange(tab)}
-                    className={`flex-1 px-6 py-3.5 whitespace-nowrap font-black text-[10px] uppercase tracking-wider rounded-xl transition-all border-2 ${isTabActive
-                        ? `bg-${tabColorClass} border-${tabColorClass} text-white shadow-lg`
-                        : `bg-transparent border-transparent text-slate-400`
-                      }`}
-                  >
-                    {tabLabel}
-                  </button>
-                )
-              })}
-            </div>
           </header>
         )}
 

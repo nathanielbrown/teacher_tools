@@ -126,7 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, activeTab }) =
                 </div>
 
                 <motion.div
-                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                  className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-6"
                   variants={containerVariants}
                   initial="hidden"
                   animate="show"
@@ -146,29 +146,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, activeTab }) =
                         }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => onNavigate(tool.id)}
-                        className={`group relative bg-white/40 hover:bg-white p-6 rounded-[2rem] border border-white transition-all duration-500 flex flex-col items-center text-center gap-4 h-full shadow-lg hover:shadow-2xl hover:shadow-${colors.accent}/10`}
+                        className={`group relative bg-white/40 hover:bg-white p-1.5 md:p-6 rounded-[1.2rem] md:rounded-[2rem] border border-white transition-all duration-500 flex flex-col items-center text-center gap-1.5 md:gap-4 h-full shadow-lg hover:shadow-2xl hover:shadow-${colors.accent}/10`}
                       >
                         {/* Hover Gradient Overlay */}
                         <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${colors.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                         
                         <div 
-                          className={`relative z-10 p-4 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-sm group-hover:shadow-lg flex items-center justify-center`}
+                          className={`relative z-10 p-2 md:p-4 rounded-xl md:rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-sm group-hover:shadow-lg flex items-center justify-center`}
                           style={{ 
                             backgroundColor: `${toolColor}15`,
                             color: toolColor
                           }}
                         >
-                            <div className="filter drop-shadow-sm leading-none flex items-center justify-center transform group-hover:scale-110 transition-transform w-12 h-12">
+                            <div className="filter drop-shadow-sm leading-none flex items-center justify-center transform group-hover:scale-110 transition-transform w-8 h-8 md:w-12 md:h-12">
                               {settings.theme === 'early-years' ? (
-                                <span className="text-4xl">{tool.emoji}</span>
+                                <span className="text-2xl md:text-4xl">{tool.emoji}</span>
                               ) : (
-                                <Icon size={40} strokeWidth={2.5} />
+                                <Icon size={24} md:size={40} strokeWidth={2.5} />
                               )}
                             </div>
                         </div>
 
                         <div className="relative z-10 space-y-1 italic">
-                          <span className="text-sm font-black text-slate-800 block leading-tight group-hover:text-black transition-colors">
+                          <span className="text-[9px] md:text-sm font-black text-slate-800 block leading-tight group-hover:text-black transition-colors truncate w-full">
                             <FormattedMessage id={`tool.${tool.id.toLowerCase()}.name`} defaultMessage={tool.name} />
                           </span>
                         </div>

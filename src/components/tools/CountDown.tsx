@@ -194,7 +194,7 @@ export const CountDown = () => {
 
       return (
         <div className="relative flex items-center justify-center bg-slate-50/50 p-12 rounded-full border-4 border-white  group-hover:scale-105 transition-transform">
-          <svg viewBox="0 0 160 160" className="transform -rotate-90 w-48 h-48 md:w-64 md:h-64">
+          <svg viewBox="0 0 160 160" className="transform -rotate-90 w-64 h-64">
             <circle cx="80" cy="80" r="60" stroke="#e2e8f0" strokeWidth="12" fill="transparent" opacity="0.3" />
             <motion.circle
               cx="80" cy="80" r="60"
@@ -248,7 +248,7 @@ export const CountDown = () => {
 
       return (
         <div className="relative flex items-center justify-center bg-slate-50/50 p-12 rounded-full border-4 border-white  group-hover:scale-105 transition-transform">
-          <svg viewBox="0 0 160 160" className="transform -rotate-90 w-48 h-48 md:w-64 md:h-64">
+          <svg viewBox="0 0 160 160" className="transform -rotate-90 w-64 h-64">
             <circle cx="80" cy="80" r={radius} stroke="#e2e8f0" strokeWidth="30" fill="transparent" opacity="0.3" />
             <motion.circle
               cx="80" cy="80" r={radius}
@@ -280,12 +280,13 @@ export const CountDown = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+            className="fixed inset-0 z-[100] p-4 bg-slate-100/60 backdrop-blur-xl lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none lg:w-[320px] lg:h-full flex flex-col gap-8 italic overflow-hidden shrink-0"
           >
             <SettingsPanel
               isOpen={isConfigOpen}
               onClose={() => setIsConfigOpen(false)}
               title={intl.formatMessage({ id: 'header.tooltip.config', defaultMessage: 'Configuration' })}
+              className="h-full"
               compact
             >
               <div className="space-y-8">
@@ -344,11 +345,11 @@ export const CountDown = () => {
         )}
       </AnimatePresence>
 
-      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={1200} baseHeight={800}>
-        <div className="flex flex-col items-center justify-center gap-12 w-full max-w-4xl italic relative z-10">
+      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={800} baseHeight={800} fluid={false}>
+        <div className="flex flex-col items-center justify-center gap-12 w-full italic relative z-10">
           <div className="flex flex-col items-center gap-12 w-full">
             {/* Numerical Interface - Stabilized */}
-            <div className="flex items-center gap-8 md:gap-16 shrink-0">
+            <div className="flex items-center gap-12 shrink-0">
               <div className="flex flex-col items-center">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setInitialMinutes(m => Math.min(99, m + 1)); audioEngine.playTick(settings.soundTheme); }}
@@ -356,7 +357,7 @@ export const CountDown = () => {
                 >
                   <ChevronUp size={64} strokeWidth={4} />
                 </button>
-                <div className="w-[180px] md:w-[240px] text-center text-8xl md:text-[12rem] font-black tabular-nums tracking-tighter leading-none text-slate-900 ">
+                <div className="w-[240px] text-center text-[12rem] font-black tabular-nums tracking-tighter leading-none text-slate-900 ">
                   {Math.floor(timeLeft / 60).toString().padStart(2, '0')}
                 </div>
                 <button 
@@ -367,7 +368,7 @@ export const CountDown = () => {
                 </button>
               </div>
 
-              <div className="text-7xl md:text-9xl font-black text-slate-200 leading-none pb-8 animate-pulse">:</div>
+              <div className="text-9xl font-black text-slate-200 leading-none pb-8 animate-pulse">:</div>
 
               <div className="flex flex-col items-center">
                 <button 
@@ -376,7 +377,7 @@ export const CountDown = () => {
                 >
                   <ChevronUp size={64} strokeWidth={4} />
                 </button>
-                <div className="w-[180px] md:w-[240px] text-center text-8xl md:text-[12rem] font-black tabular-nums tracking-tighter leading-none text-slate-900 ">
+                <div className="w-[240px] text-center text-[12rem] font-black tabular-nums tracking-tighter leading-none text-slate-900 ">
                   {(timeLeft % 60).toString().padStart(2, '0')}
                 </div>
                 <button 

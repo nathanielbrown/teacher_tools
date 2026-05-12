@@ -1,7 +1,7 @@
 {
   "name": "teacher-tools",
   "private": true,
-  "version": "1016",
+  "version": "1017",
   "type": "module",
   "homepage": "https://beta.classrex.com",
   "scripts": {

@@ -156,7 +156,7 @@ export const ExamClock = () => {
   };
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
+    <ToolPanel className="italic" baseWidth={900} baseHeight={800} fluid={false}>
       <AnimatePresence mode="wait">
         {phase === 'setup' ? (
           <motion.div 
@@ -164,16 +164,16 @@ export const ExamClock = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="w-full max-w-4xl space-y-12 relative z-10"
+            className="w-full max-w-4xl space-y-4 lg:space-y-8 relative z-10"
           >
             {/* Simple Header */}
-            <div className="text-center space-y-4 shrink-0 mb-8">
-              <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+            <div className="text-center space-y-2 shrink-0">
+              <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                 <FormattedMessage id="examclock.setup.title" defaultMessage="New Exam" />
               </h1>
             </div>
 
-            <div className="bg-slate-50/50 p-10 lg:p-16 rounded-[4rem] border-4 border-white  space-y-12">
+            <div className="bg-slate-50/50 p-6 lg:p-8 rounded-[3rem] border-4 border-white  space-y-6 lg:space-y-8">
               <div className="space-y-4">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] ml-2">
                   <FormattedMessage id="examclock.setup.name" defaultMessage="Exam Name" />
@@ -182,7 +182,7 @@ export const ExamClock = () => {
                   type="text" 
                   value={examName} 
                   onChange={(e) => setExamName(e.target.value)}
-                  className="w-full p-10 bg-white border-4 border-transparent focus:border-indigo-100 rounded-[2.5rem] font-black text-3xl lg:text-5xl text-slate-900 text-center outline-none transition-all  placeholder:text-slate-100 uppercase italic tracking-tighter"
+                  className="w-full p-4 bg-white border-4 border-transparent focus:border-indigo-100 rounded-[2rem] font-black text-2xl lg:text-4xl text-slate-900 text-center outline-none transition-all  placeholder:text-slate-100 uppercase italic tracking-tighter"
                   placeholder={intl.formatMessage({ id: 'examclock.setup.name', defaultMessage: 'Exam Name' })}
                 />
               </div>
@@ -201,25 +201,25 @@ export const ExamClock = () => {
                       type="number" 
                       value={item.val} 
                       onChange={(e) => item.set(Math.max(0, parseInt(e.target.value) || 0))}
-                      className={`w-full p-8 bg-white border-4 border-transparent focus:border-indigo-100 rounded-[2rem] font-black text-4xl lg:text-5xl ${item.color} text-center outline-none transition-all tabular-nums  italic leading-none`}
+                      className={`w-full p-4 bg-white border-4 border-transparent focus:border-indigo-100 rounded-[1.5rem] font-black text-2xl lg:text-3xl ${item.color} text-center outline-none transition-all tabular-nums  italic leading-none`}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-6 pt-8">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 lg:pt-6">
                 <button 
                   onClick={startReading}
-                  className="flex-1 h-24 bg-white border-4 border-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-[2.5rem] font-black text-xl uppercase tracking-widest transition-all  active:scale-95 flex items-center justify-center gap-4 group"
+                  className="flex-1 h-16 bg-white border-4 border-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-[2rem] font-black text-lg uppercase tracking-widest transition-all  active:scale-95 flex items-center justify-center gap-4 group"
                 >
-                  <History className="group-hover:rotate-180 transition-transform duration-500" />
+                  <History size={20} className="group-hover:rotate-180 transition-transform duration-500" />
                   <FormattedMessage id="examclock.setup.start_reading" defaultMessage="Start Reading" />
                 </button>
                 <button 
                   onClick={startExam}
-                  className="flex-1 h-24 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xl uppercase tracking-widest transition-all  active:scale-95 flex items-center justify-center gap-4 hover:bg-indigo-700"
+                  className="flex-1 h-16 bg-indigo-600 text-white rounded-[2rem] font-black text-lg uppercase tracking-widest transition-all  active:scale-95 flex items-center justify-center gap-4 hover:bg-indigo-700"
                 >
-                  <Play fill="currentColor" />
+                  <Play size={20} fill="currentColor" />
                   <FormattedMessage id="examclock.setup.skip_reading" defaultMessage="Skip to Exam" />
                 </button>
               </div>
@@ -231,7 +231,7 @@ export const ExamClock = () => {
             initial={{ opacity: 0, scale: 1.1, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-full max-w-6xl space-y-12 flex flex-col items-center relative z-10"
+            className="w-full max-w-6xl space-y-6 flex flex-col items-center relative z-10"
           >
             {/* Status Indicator */}
             <div className="flex flex-col items-center gap-6">
@@ -239,13 +239,13 @@ export const ExamClock = () => {
                 <div className={`w-3 h-3 rounded-full animate-pulse -[0_0_15px_currentColor] ${phase === 'reading' ? 'text-indigo-400' : (phase === 'paused' ? 'text-amber-400' : (timeLeft <= warningTime * 60 ? 'text-rose-400' : 'text-emerald-400'))}`} />
                 <span className="text-[12px] font-black text-white uppercase tracking-[0.4em] italic">{getPhaseLabel()}</span>
               </div>
-              <h2 className="text-4xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">{examName}</h2>
+              <h2 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tighter uppercase leading-none">{examName}</h2>
             </div>
 
             {/* Main Timer Display */}
-            <div className={`w-full bg-white rounded-[5rem] border-8  p-16 lg:p-24 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-700 ${phase === 'exam' && timeLeft <= warningTime * 60 ? 'border-rose-500 bg-rose-50/20' : 'border-indigo-600'}`}>
+            <div className={`w-full bg-white rounded-[4rem] border-8  p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-700 ${phase === 'exam' && timeLeft <= warningTime * 60 ? 'border-rose-500 bg-rose-50/20' : 'border-indigo-600'}`}>
                <div className="tool-grid-bg opacity-10 pointer-events-none" />
-               <div className={`text-[12rem] lg:text-[22rem] font-black tabular-nums tracking-tighter leading-none transition-all duration-700  ${phase === 'exam' && timeLeft <= warningTime * 60 ? 'text-rose-600 scale-105' : 'text-slate-900'}`}>
+               <div className={`text-[8rem] lg:text-[14rem] font-black tabular-nums tracking-tighter leading-none transition-all duration-700  ${phase === 'exam' && timeLeft <= warningTime * 60 ? 'text-rose-600 scale-105' : 'text-slate-900'}`}>
                   {formatTime(timeLeft)}
                </div>
             </div>

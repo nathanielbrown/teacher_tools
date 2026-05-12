@@ -42,7 +42,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <div className="bg-white/80 backdrop-blur-sm px-8 py-6 flex justify-between items-center shrink-0 border-b-4 border-white">
             <div className="flex items-center gap-2">
               <Settings2 size={16} className="text-indigo-400" />
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 leading-none">{title}</h3>
+              <h3 className="text-sm sm:text-xs font-black uppercase tracking-[0.2em] text-slate-900 leading-none">{title}</h3>
             </div>
             <button
               onClick={onClose}

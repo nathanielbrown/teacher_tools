@@ -99,6 +99,16 @@ export const CountDown = () => {
   const { settings } = useSettings();
   const { setHasConfig, setHelpContent, setOnReset, setOnConfigToggle, clearHeader, isConfigOpen, setIsConfigOpen } = useHeader();
   const intl = useIntl();
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [initialMinutes, setInitialMinutes] = useLocalStorage<number>('countdown_initial_minutes', 5);
   const [initialSeconds, setInitialSeconds] = useLocalStorage<number>('countdown_initial_seconds', 0);
@@ -291,7 +301,7 @@ export const CountDown = () => {
             >
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
                     <FormattedMessage id="countdown.settings.visual_mode" defaultMessage="Visual Mode" />
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -306,7 +316,7 @@ export const CountDown = () => {
                         }`}
                       >
                         <mode.icon size={24} />
-                        <span className="text-[9px] font-black uppercase tracking-widest">
+                        <span className="text-[10px] font-black uppercase tracking-widest">
                           <FormattedMessage id={`countdown.visual_mode.${mode.id}`} />
                         </span>
                       </button>
@@ -315,7 +325,7 @@ export const CountDown = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
                     <FormattedMessage id="countdown.settings.alarm_sound" defaultMessage="Alarm Sound" />
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -328,7 +338,7 @@ export const CountDown = () => {
                             audioEngine.playAlarm(soundId === 'default' ? settings.soundTheme : soundId);
                           }
                         }}
-                        className={`py-3 px-2 rounded-xl border-2 transition-all text-[8px] font-black uppercase italic tracking-widest truncate ${
+                        className={`py-3 px-2 rounded-xl border-2 transition-all text-[10px] font-black uppercase italic tracking-widest truncate ${
                           soundOverride === soundId 
                             ? 'bg-indigo-600 border-indigo-400 text-white ' 
                             : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'
@@ -345,7 +355,7 @@ export const CountDown = () => {
         )}
       </AnimatePresence>
 
-      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={800} baseHeight={800} fluid={false}>
+      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={isMobile ? 600 : 800} baseHeight={800} fluid={false}>
         <div className="flex flex-col items-center justify-center gap-12 w-full italic relative z-10">
           <div className="flex flex-col items-center gap-12 w-full">
             {/* Numerical Interface - Stabilized */}

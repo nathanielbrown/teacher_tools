@@ -65,7 +65,7 @@ export const ToolHeader = ({
         </motion.div>
 
         <div className="space-y-0.5 relative min-w-0">
-          <h2 className="text-base md:text-2xl font-black text-slate-800 tracking-tight leading-none truncate">
+          <h2 className="text-lg md:text-2xl font-black text-slate-800 tracking-tight leading-none truncate">
             {displayTitle}
           </h2>
         </div>

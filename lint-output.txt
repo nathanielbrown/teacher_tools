@@ -1,30 +1,846 @@
-﻿
-> teacher-tools@1005 lint
-> eslint .
-
-
-C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Crossword.tsx
-  15:10  error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   @typescript-eslint/no-unused-vars
-  74:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
-  74:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
-
-C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\FindTheWord.tsx
-   20:10  error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   @typescript-eslint/no-unused-vars
-  115:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
-  115:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
-
-C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Spelling.tsx
-  53:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
-  53:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
-
-C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\TypingGame.tsx
-  20:10  error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   @typescript-eslint/no-unused-vars
-  64:52  error  'isConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     @typescript-eslint/no-unused-vars
-  64:66  error  'setIsConfigOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
-
-C:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\WordManager.tsx
-   1:38  error  'useCallback' is defined but never used. Allowed unused vars must match /^[A-Z_]/u          @typescript-eslint/no-unused-vars
-  50:45  error  'setOnReset' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  @typescript-eslint/no-unused-vars
-
-Ô£û 13 problems (13 errors, 0 warnings)
-
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\BalanceEquations.tsx[24m[0m
+[0m  [2m160:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setYearLevel`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\BalanceEquations.tsx:160:33[0m
+[0m  158 |   const { settings } = useSettings();[0m
+[0m  159 |[0m
+[0m> 160 |   const startGame = useCallback((level: string) => {[0m
+[0m      |                                 ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 161 |     setYearLevel(level);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 162 |     const newQuestions = Array.from({ length: 10 }, () => generateQuestion(level));[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 169 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 170 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  171 |[0m
+[0m  172 |   const handleCheck = useCallback(() => {[0m
+[0m  173 |     if (userAnswer === '' || feedback) return;  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m170:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setYearLevel'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\BinaryNumbers.tsx[24m[0m
+[0m  [2m188:6[22m  [33mwarning[39m  React Hook useEffect has a missing dependency: 'setHighScore'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\ClassRex.tsx[24m[0m
+[0m  [2m225:6[22m  [33mwarning[39m  React Hook useCallback has a missing dependency: 'setHighScore'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\CountDown.tsx[24m[0m
+[0m  [2m122:29[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setTimeLeft`, but the source dependencies were [initialMinutes, initialSeconds, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\CountDown.tsx:122:29[0m
+[0m  120 |   const [soundOverride, setSoundOverride] = useLocalStorage<string>('countdown_sound_override', 'default');[0m
+[0m  121 |[0m
+[0m> 122 |   const reset = useCallback(() => {[0m
+[0m      |                             ^^^^^^^[0m
+[0m> 123 |     setIsRunning(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 124 |     setIsFinished(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 125 |     const newTotal = initialMinutes * 60 + initialSeconds;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     setTimeLeft(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |     setTotalTime(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 128 |     setVisualMode('circle');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 129 |     setSoundOverride('default');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 130 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |   }, [initialMinutes, initialSeconds, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  132 |[0m
+[0m  133 |   useEffect(() => {[0m
+[0m  134 |     setHasConfig(true);       [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m122:29[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setTotalTime`, but the source dependencies were [initialMinutes, initialSeconds, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\CountDown.tsx:122:29[0m
+[0m  120 |   const [soundOverride, setSoundOverride] = useLocalStorage<string>('countdown_sound_override', 'default');[0m
+[0m  121 |[0m
+[0m> 122 |   const reset = useCallback(() => {[0m
+[0m      |                             ^^^^^^^[0m
+[0m> 123 |     setIsRunning(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 124 |     setIsFinished(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 125 |     const newTotal = initialMinutes * 60 + initialSeconds;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     setTimeLeft(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |     setTotalTime(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 128 |     setVisualMode('circle');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 129 |     setSoundOverride('default');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 130 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |   }, [initialMinutes, initialSeconds, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  132 |[0m
+[0m  133 |   useEffect(() => {[0m
+[0m  134 |     setHasConfig(true);      [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m122:29[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setVisualMode`, but the source dependencies were [initialMinutes, initialSeconds, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\CountDown.tsx:122:29[0m
+[0m  120 |   const [soundOverride, setSoundOverride] = useLocalStorage<string>('countdown_sound_override', 'default');[0m
+[0m  121 |[0m
+[0m> 122 |   const reset = useCallback(() => {[0m
+[0m      |                             ^^^^^^^[0m
+[0m> 123 |     setIsRunning(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 124 |     setIsFinished(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 125 |     const newTotal = initialMinutes * 60 + initialSeconds;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     setTimeLeft(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |     setTotalTime(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 128 |     setVisualMode('circle');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 129 |     setSoundOverride('default');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 130 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |   }, [initialMinutes, initialSeconds, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  132 |[0m
+[0m  133 |   useEffect(() => {[0m
+[0m  134 |     setHasConfig(true);     [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m122:29[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setSoundOverride`, but the source dependencies were [initialMinutes, initialSeconds, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\CountDown.tsx:122:29[0m
+[0m  120 |   const [soundOverride, setSoundOverride] = useLocalStorage<string>('countdown_sound_override', 'default');[0m
+[0m  121 |[0m
+[0m> 122 |   const reset = useCallback(() => {[0m
+[0m      |                             ^^^^^^^[0m
+[0m> 123 |     setIsRunning(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 124 |     setIsFinished(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 125 |     const newTotal = initialMinutes * 60 + initialSeconds;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     setTimeLeft(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |     setTotalTime(newTotal);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 128 |     setVisualMode('circle');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 129 |     setSoundOverride('default');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 130 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |   }, [initialMinutes, initialSeconds, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  132 |[0m
+[0m  133 |   useEffect(() => {[0m
+[0m  134 |     setHasConfig(true);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m131:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setSoundOverride', 'setTimeLeft', 'setTotalTime', and 'setVisualMode'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m165:6[22m   [33mwarning[39m  React Hook useEffect has a missing dependency: 'setTimeLeft'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m176:6[22m   [33mwarning[39m  React Hook useEffect has missing dependencies: 'setTimeLeft' and 'setTotalTime'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\DailySchedule.tsx[24m[0m
+[0m  [2m154:37[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setAllSchedules`, but the source dependencies were [currentDay, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\DailySchedule.tsx:154:37[0m
+[0m  152 |   // Persistence handled by useLocalStorage[0m
+[0m  153 |[0m
+[0m> 154 |   const resetSchedule = useCallback(() => {[0m
+[0m      |                                     ^^^^^^^[0m
+[0m> 155 |     setAllSchedules(prev => ({[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 156 |       ...prev,[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 157 |       [currentDay]: defaultSchedules[currentDay][0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 158 |     }));[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 159 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 160 |   }, [currentDay, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  161 |[0m
+[0m  162 |   const clearDay = () => {[0m
+[0m  163 |     setAllSchedules(prev => ({  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m160:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setAllSchedules'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\DiceRoller.tsx[24m[0m
+[0m  [2m55:6[22m  [33mwarning[39m  React Hook useCallback has a missing dependency: 'setActiveDice'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\EventCalendar.tsx[24m[0m
+[0m  [2m113:38[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setEvents`, but the source dependencies were [events.length, settings.soundTheme, intl]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\EventCalendar.tsx:113:38[0m
+[0m  111 |   }, [view]);[0m
+[0m  112 |[0m
+[0m> 113 |   const clearAllEvents = useCallback(() => {[0m
+[0m      |                                      ^^^^^^^[0m
+[0m> 114 |     if (events.length === 0) return;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 115 |     if (window.confirm(intl.formatMessage({ id: 'eventcalendar.confirm_delete_all', defaultMessage: 'Are you sure you want to delete all events?' }))) {[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 116 |       setEvents([]);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 117 |       audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 118 |     }[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 119 |   }, [events.length, settings.soundTheme, intl]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  120 |[0m
+[0m  121 |   useEffect(() => {[0m
+[0m  122 |     setOnReset(() => clearAllEvents);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m119:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setEvents'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\GroupScoreBoard.tsx[24m[0m
+[0m   [2m83:32[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setGroups`, but the source dependencies were [groups, settings.soundTheme, intl]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\GroupScoreBoard.tsx:83:32[0m
+[0m  81 |   // Persistence handled by useLocalStorage[0m
+[0m  82 |[0m
+[0m> 83 |   const addGroup = useCallback(() => {[0m
+[0m     |                                ^^^^^^^[0m
+[0m> 84 |     const newGroup = {[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 85 |       id: Date.now().toString(),[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 86 |       name: intl.formatMessage({ id: 'groupscoreboard.group_name', defaultMessage: 'Group {n}' }, { n: groups.length + 1 }),[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 87 |       score: 0[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 88 |     };[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 89 |     setGroups([...groups, newGroup]);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 90 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 91 |   }, [groups, settings.soundTheme, intl]);[0m
+[0m     | ^^^^ Could not preserve existing manual memoization[0m
+[0m  92 |[0m
+[0m  93 |   const removeGroup = (id: string) => {[0m
+[0m  94 |     setGroups(groups.filter(g => g.id !== id));  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m   [2m91:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setGroups'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m125:38[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setGroups`, but the source dependencies were [groups, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\GroupScoreBoard.tsx:125:38[0m
+[0m  123 |   };[0m
+[0m  124 |[0m
+[0m> 125 |   const resetAllScores = useCallback(() => {[0m
+[0m      |                                      ^^^^^^^[0m
+[0m> 126 |     setGroups(groups.map(g => ({ ...g, score: 0 })));[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 128 |   }, [groups, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  129 |[0m
+[0m  130 |   useEffect(() => {[0m
+[0m  131 |     setOnReset(() => resetAllScores);                                                                                                                                                                                                                                                                                                                                                                               [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m128:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setGroups'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\LetterTracing.tsx[24m[0m
+[0m  [2m228:34[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setMastery`, but the source dependencies were [currentLetter, settings.soundTheme, intl]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\LetterTracing.tsx:228:34[0m
+[0m  226 |   };[0m
+[0m  227 |[0m
+[0m> 228 |   const checkScore = useCallback(() => {[0m
+[0m      |                                  ^^^^^^^[0m
+[0m> 229 |     if (userPath.current.length === 0) return;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 230 |[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 291 |     setMastery((prev: any) => ({ ...prev, [currentLetter]: Math.max(prev[currentLetter] || 0, finalAccuracy) }));[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 292 |   }, [currentLetter, settings.soundTheme, intl]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  293 |[0m
+[0m  294 |   const nextLetter = () => {[0m
+[0m  295 |     const set = CHAR_SETS[charSet];  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m292:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setMastery'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\MarbleJar.tsx[24m[0m
+[0m  [2m146:6[22m  [33mwarning[39m  React Hook useCallback has a missing dependency: 'setMarbleCount'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m165:6[22m  [33mwarning[39m  React Hook useCallback has a missing dependency: 'setMarbleCount'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m237:6[22m  [33mwarning[39m  React Hook useCallback has a missing dependency: 'setMarbleCount'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m388:6[22m  [33mwarning[39m  React Hook useEffect has a missing dependency: 'setMarbleCount'. Either include it or remove the dependency array    [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\NamePicker.tsx[24m[0m
+[0m  [2m327:6[22m  [33mwarning[39m  React Hook useEffect has a missing dependency: 'setIsClassPanelOpen'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\QRCodeGenerator.tsx[24m[0m
+[0m  [2m54:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setText`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\QRCodeGenerator.tsx:54:33[0m
+[0m  52 |   const qrRef = useRef<HTMLDivElement>(null);[0m
+[0m  53 |[0m
+[0m> 54 |   const resetTool = useCallback(() => {[0m
+[0m     |                                 ^^^^^^^[0m
+[0m> 55 |     setText('https://classrex.com');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 56 |     setFgColor('#0f172a');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 57 |     setBgColor('#ffffff');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 58 |     setIsConfigOpen(false);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 59 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 60 |   }, [settings.soundTheme]);[0m
+[0m     | ^^^^ Could not preserve existing manual memoization[0m
+[0m  61 |[0m
+[0m  62 |   useEffect(() => {[0m
+[0m  63 |     setHasConfig(true);     [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m54:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setFgColor`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\QRCodeGenerator.tsx:54:33[0m
+[0m  52 |   const qrRef = useRef<HTMLDivElement>(null);[0m
+[0m  53 |[0m
+[0m> 54 |   const resetTool = useCallback(() => {[0m
+[0m     |                                 ^^^^^^^[0m
+[0m> 55 |     setText('https://classrex.com');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 56 |     setFgColor('#0f172a');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 57 |     setBgColor('#ffffff');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 58 |     setIsConfigOpen(false);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 59 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 60 |   }, [settings.soundTheme]);[0m
+[0m     | ^^^^ Could not preserve existing manual memoization[0m
+[0m  61 |[0m
+[0m  62 |   useEffect(() => {[0m
+[0m  63 |     setHasConfig(true);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m54:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setBgColor`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\QRCodeGenerator.tsx:54:33[0m
+[0m  52 |   const qrRef = useRef<HTMLDivElement>(null);[0m
+[0m  53 |[0m
+[0m> 54 |   const resetTool = useCallback(() => {[0m
+[0m     |                                 ^^^^^^^[0m
+[0m> 55 |     setText('https://classrex.com');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 56 |     setFgColor('#0f172a');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 57 |     setBgColor('#ffffff');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 58 |     setIsConfigOpen(false);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 59 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 60 |   }, [settings.soundTheme]);[0m
+[0m     | ^^^^ Could not preserve existing manual memoization[0m
+[0m  61 |[0m
+[0m  62 |   useEffect(() => {[0m
+[0m  63 |     setHasConfig(true);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m60:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setBgColor', 'setFgColor', and 'setText'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\ReactionTime.tsx[24m[0m
+[0m  [2m83:34[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setHistory`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\ReactionTime.tsx:83:34[0m
+[0m  81 |   // Persistence handled by useLocalStorage[0m
+[0m  82 |[0m
+[0m> 83 |   const resetStats = useCallback(() => {[0m
+[0m     |                                  ^^^^^^^[0m
+[0m> 84 |     setHistory([]);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^[0m
+[0m> 85 |     setStatus('idle');[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^[0m
+[0m> 86 |     setLastResult(null);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^[0m
+[0m> 87 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^[0m
+[0m> 88 |   }, [settings.soundTheme]);[0m
+[0m     | ^^^^ Could not preserve existing manual memoization[0m
+[0m  89 |[0m
+[0m  90 |   useEffect(() => {[0m
+[0m  91 |     setOnReset(() => resetStats);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m88:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setHistory'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\SimonGame.tsx[24m[0m
+[0m  [2m111:41[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setHighScore`, but the source dependencies were [gameState, sequence, userStep, highScore, playSequence, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\SimonGame.tsx:111:41[0m
+[0m  109 |   };[0m
+[0m  110 |[0m
+[0m> 111 |   const handleButtonClick = useCallback(async (id: number) => {[0m
+[0m      |                                         ^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 112 |     if (gameState !== 'playing') return;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 113 |     [0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 143 |     }[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 144 |   }, [gameState, sequence, userStep, highScore, playSequence, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  145 |[0m
+[0m  146 |   useEffect(() => {[0m
+[0m  147 |     if (gameState !== 'menu') {  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m144:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setHighScore'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\SongMaker.tsx[24m[0m
+[0m   [2m41:14[22m  [33mwarning[39m  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2mreact-refresh/only-export-components[22m[0m
+[0m   [2m49:14[22m  [33mwarning[39m  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2mreact-refresh/only-export-components[22m[0m
+[0m   [2m89:7[22m   [31merror[39m    'getNoteName' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m109:70[22m  [31merror[39m    'hasConfig' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m158:6[22m   [33mwarning[39m  React Hook useEffect has a missing dependency: 'setGrid'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m160:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setConfig`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\SongMaker.tsx:160:33[0m
+[0m  158 |   }, [rows, cols]);[0m
+[0m  159 |[0m
+[0m> 160 |   const resetGrid = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 161 |     // Reset Config and Tempo[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 162 |     setConfig({[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 179 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 180 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  181 |[0m
+[0m  182 |   const resetGridRef = React.useRef(resetGrid);[0m
+[0m  183 |   useEffect(() => {  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m160:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setTempo`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\SongMaker.tsx:160:33[0m
+[0m  158 |   }, [rows, cols]);[0m
+[0m  159 |[0m
+[0m> 160 |   const resetGrid = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 161 |     // Reset Config and Tempo[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 162 |     setConfig({[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 179 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 180 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  181 |[0m
+[0m  182 |   const resetGridRef = React.useRef(resetGrid);[0m
+[0m  183 |   useEffect(() => {   [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m160:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setGrid`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\SongMaker.tsx:160:33[0m
+[0m  158 |   }, [rows, cols]);[0m
+[0m  159 |[0m
+[0m> 160 |   const resetGrid = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 161 |     // Reset Config and Tempo[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 162 |     setConfig({[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 179 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 180 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  181 |[0m
+[0m  182 |   const resetGridRef = React.useRef(resetGrid);[0m
+[0m  183 |   useEffect(() => {    [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m180:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setConfig', 'setGrid', and 'setTempo'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\StoryStarters.tsx[24m[0m
+[0m  [2m115:38[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setPrompt`, but the source dependencies were [yearLevel, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\StoryStarters.tsx:115:38[0m
+[0m  113 |   const [history, setHistory] = useLocalStorage<string[]>('story_starters_history', []);[0m
+[0m  114 |[0m
+[0m> 115 |   const generatePrompt = useCallback(() => {[0m
+[0m      |                                      ^^^^^^^[0m
+[0m> 116 |     setIsGenerating(true);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 117 |     setPrompt(null);[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     }, 600);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |   }, [yearLevel, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  128 |[0m
+[0m  129 |   const resetTool = useCallback(() => {[0m
+[0m  130 |     setPrompt(null);   [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m115:38[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setHistory`, but the source dependencies were [yearLevel, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\StoryStarters.tsx:115:38[0m
+[0m  113 |   const [history, setHistory] = useLocalStorage<string[]>('story_starters_history', []);[0m
+[0m  114 |[0m
+[0m> 115 |   const generatePrompt = useCallback(() => {[0m
+[0m      |                                      ^^^^^^^[0m
+[0m> 116 |     setIsGenerating(true);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 117 |     setPrompt(null);[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     }, 600);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |   }, [yearLevel, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  128 |[0m
+[0m  129 |   const resetTool = useCallback(() => {[0m
+[0m  130 |     setPrompt(null);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m127:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setHistory' and 'setPrompt'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m129:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setPrompt`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\StoryStarters.tsx:129:33[0m
+[0m  127 |   }, [yearLevel, settings.soundTheme]);[0m
+[0m  128 |[0m
+[0m> 129 |   const resetTool = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 130 |     setPrompt(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |     setHistory([]);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 132 |     setHasSelectedYear(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 133 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 134 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  135 |[0m
+[0m  136 |   useEffect(() => {[0m
+[0m  137 |     setOnReset(() => resetTool);                       [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m129:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setHistory`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\StoryStarters.tsx:129:33[0m
+[0m  127 |   }, [yearLevel, settings.soundTheme]);[0m
+[0m  128 |[0m
+[0m> 129 |   const resetTool = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 130 |     setPrompt(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |     setHistory([]);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 132 |     setHasSelectedYear(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 133 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 134 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  135 |[0m
+[0m  136 |   useEffect(() => {[0m
+[0m  137 |     setOnReset(() => resetTool);                      [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m129:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setHasSelectedYear`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\StoryStarters.tsx:129:33[0m
+[0m  127 |   }, [yearLevel, settings.soundTheme]);[0m
+[0m  128 |[0m
+[0m> 129 |   const resetTool = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 130 |     setPrompt(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 131 |     setHistory([]);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 132 |     setHasSelectedYear(false);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 133 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 134 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  135 |[0m
+[0m  136 |   useEffect(() => {[0m
+[0m  137 |     setOnReset(() => resetTool);              [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m134:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setHasSelectedYear', 'setHistory', and 'setPrompt'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx[24m[0m
+[0m  [2m167:32[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setStatus`, but the source dependencies were [difficulty]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:167:32[0m
+[0m  165 |   const [stats, setStats] = useLocalStorage<Record<string, number>>('sudoku_stats', { Easy: 0, Medium: 0, Hard: 0 });[0m
+[0m  166 |[0m
+[0m> 167 |   const initGame = useCallback((level = difficulty) => {[0m
+[0m      |                                ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 168 |     setStatus('loading');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 169 |     setTimeout(() => {[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 176 |     }, 100);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 177 |   }, [difficulty]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  178 |[0m
+[0m  179 |   useEffect(() => {[0m
+[0m  180 |     if (status === 'loading') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m167:32[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setGrid`, but the source dependencies were [difficulty]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:167:32[0m
+[0m  165 |   const [stats, setStats] = useLocalStorage<Record<string, number>>('sudoku_stats', { Easy: 0, Medium: 0, Hard: 0 });[0m
+[0m  166 |[0m
+[0m> 167 |   const initGame = useCallback((level = difficulty) => {[0m
+[0m      |                                ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 168 |     setStatus('loading');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 169 |     setTimeout(() => {[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 176 |     }, 100);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 177 |   }, [difficulty]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  178 |[0m
+[0m  179 |   useEffect(() => {[0m
+[0m  180 |     if (status === 'loading') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m167:32[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setInitialGrid`, but the source dependencies were [difficulty]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:167:32[0m
+[0m  165 |   const [stats, setStats] = useLocalStorage<Record<string, number>>('sudoku_stats', { Easy: 0, Medium: 0, Hard: 0 });[0m
+[0m  166 |[0m
+[0m> 167 |   const initGame = useCallback((level = difficulty) => {[0m
+[0m      |                                ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 168 |     setStatus('loading');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 169 |     setTimeout(() => {[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 176 |     }, 100);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 177 |   }, [difficulty]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  178 |[0m
+[0m  179 |   useEffect(() => {[0m
+[0m  180 |     if (status === 'loading') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m167:32[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setSolution`, but the source dependencies were [difficulty]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:167:32[0m
+[0m  165 |   const [stats, setStats] = useLocalStorage<Record<string, number>>('sudoku_stats', { Easy: 0, Medium: 0, Hard: 0 });[0m
+[0m  166 |[0m
+[0m> 167 |   const initGame = useCallback((level = difficulty) => {[0m
+[0m      |                                ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 168 |     setStatus('loading');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 169 |     setTimeout(() => {[0m
+[0m      …[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 176 |     }, 100);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 177 |   }, [difficulty]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  178 |[0m
+[0m  179 |   useEffect(() => {[0m
+[0m  180 |     if (status === 'loading') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m177:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setGrid', 'setInitialGrid', 'setSolution', and 'setStatus'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m183:6[22m   [33mwarning[39m  React Hook useEffect has missing dependencies: 'difficulty', 'initGame', and 'status'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m187:35[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setStatus`, but the source dependencies were [solution, difficulty, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:187:35[0m
+[0m  185 |   // Persistence handled by useLocalStorage[0m
+[0m  186 |[0m
+[0m> 187 |   const checkSolved = useCallback((currentGrid: number[][]) => {[0m
+[0m      |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 188 |     if (solution && currentGrid.every((row, r) => row.every((val, c) => val === solution[r][c]))) {[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 189 |       setStatus('solved');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 190 |       setStats((prev: any) => ({ ...prev, [difficulty]: (prev[difficulty] || 0) + 1 }));[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 191 |       setSelected(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 192 |       audioEngine.playSuccess(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 193 |     }[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 194 |   }, [solution, difficulty, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  195 |[0m
+[0m  196 |   const handleCellClick = (row: number, col: number) => {[0m
+[0m  197 |     if (status !== 'playing') return;                                                                                                                                                                             [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m187:35[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setStats`, but the source dependencies were [solution, difficulty, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:187:35[0m
+[0m  185 |   // Persistence handled by useLocalStorage[0m
+[0m  186 |[0m
+[0m> 187 |   const checkSolved = useCallback((currentGrid: number[][]) => {[0m
+[0m      |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 188 |     if (solution && currentGrid.every((row, r) => row.every((val, c) => val === solution[r][c]))) {[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 189 |       setStatus('solved');[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 190 |       setStats((prev: any) => ({ ...prev, [difficulty]: (prev[difficulty] || 0) + 1 }));[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 191 |       setSelected(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 192 |       audioEngine.playSuccess(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 193 |     }[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 194 |   }, [solution, difficulty, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  195 |[0m
+[0m  196 |   const handleCellClick = (row: number, col: number) => {[0m
+[0m  197 |     if (status !== 'playing') return;                                                                                                                                                                              [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m194:6[22m   [33mwarning[39m  React Hook useCallback has missing dependencies: 'setStats' and 'setStatus'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m221:41[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setGrid`, but the source dependencies were [selected, status, initialGrid, grid, settings.soundTheme, checkSolved]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:221:41[0m
+[0m  219 |   };[0m
+[0m  220 |[0m
+[0m> 221 |   const handleNumberInput = useCallback((num: number) => {[0m
+[0m      |                                         ^^^^^^^^^^^^^^^^^^[0m
+[0m> 222 |     if (!selected || status !== 'playing' || initialGrid[selected.row][selected.col] !== 0) return;[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 223 |     const newGrid = grid.map((row, r) => [0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 224 |       r === selected.row ? row.map((c, cIdx) => cIdx === selected.col ? num : c) : [...row][0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 225 |     );[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 226 |     setGrid(newGrid);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 227 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 228 |     checkSolved(newGrid);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 229 |   }, [selected, status, initialGrid, grid, settings.soundTheme, checkSolved]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  230 |[0m
+[0m  231 |   const handleKeyDown = useCallback((e: KeyboardEvent) => {[0m
+[0m  232 |     if (!selected || status !== 'playing') return;  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m229:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setGrid'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m246:33[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setGrid`, but the source dependencies were [initialGrid, settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Sudoku.tsx:246:33[0m
+[0m  244 |   }, [handleKeyDown]);[0m
+[0m  245 |[0m
+[0m> 246 |   const resetGame = useCallback(() => {[0m
+[0m      |                                 ^^^^^^^[0m
+[0m> 247 |     setGrid(initialGrid.map(row => [...row]));[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 248 |     setSelected(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 249 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 250 |   }, [initialGrid, settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  251 |[0m
+[0m  252 |   useEffect(() => {[0m
+[0m  253 |     setOnReset(() => resetGame);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m250:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setGrid'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m280:6[22m   [33mwarning[39m  React Hook useEffect has a missing dependency: 'setDifficulty'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\TimesTable.tsx[24m[0m
+[0m  [2m124:37[22m  [31merror[39m    Compilation Skipped: Existing memoization could not be preserved[0m
+[0m[0m
+[0mReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `setCellStates`, but the source dependencies were [settings.soundTheme]. Inferred different dependency than source.[0m
+[0m[0m
+[0mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\TimesTable.tsx:124:37[0m
+[0m  122 |   // Persistence handled by useLocalStorage[0m
+[0m  123 |[0m
+[0m> 124 |   const resetRegistry = useCallback(() => {[0m
+[0m      |                                     ^^^^^^^[0m
+[0m> 125 |     setCellStates({});[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 126 |     setSessionCount(1);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 127 |     setFeedback(null);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 128 |     audioEngine.playTick(settings.soundTheme);[0m
+[0m      | ^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 129 |   }, [settings.soundTheme]);[0m
+[0m      | ^^^^ Could not preserve existing manual memoization[0m
+[0m  130 |[0m
+[0m  131 |   useEffect(() => {[0m
+[0m  132 |     setOnReset(() => resetRegistry);  [2mreact-hooks/preserve-manual-memoization[22m[0m
+[0m  [2m129:6[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'setCellStates'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\Tournaments.tsx[24m[0m
+[0m  [2m1062:6[22m  [33mwarning[39m  React Hook useEffect has a missing dependency: 'activeTournament'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\TypingGame.tsx[24m[0m
+[0m  [2m172:6[22m  [33mwarning[39m  React Hook useCallback has a missing dependency: 'setIsPanelVisible'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\components\tools\WordManager.tsx[24m[0m
+[0m  [2m233:29[22m  [31merror[39m  'isEdited' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\utils\audio.ts[24m[0m
+[0m  [2m200:44[22m  [31merror[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m200:46[22m  [31merror[39m  Empty block statement          [2mno-empty[22m[0m
+[0m  [2m246:65[22m  [31merror[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m246:67[22m  [31merror[39m  Empty block statement          [2mno-empty[22m[0m
+[0m  [2m286:65[22m  [31merror[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m286:67[22m  [31merror[39m  Empty block statement          [2mno-empty[22m[0m
+[0m  [2m329:87[22m  [31merror[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m329:89[22m  [31merror[39m  Empty block statement          [2mno-empty[22m[0m
+[0m  [2m370:65[22m  [31merror[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m370:67[22m  [31merror[39m  Empty block statement          [2mno-empty[22m[0m
+[0m[0m
+[0m[4mC:\Users\natis\Documents\GitHub\teacher_tools\src\utils\midiExport.ts[24m[0m
+[0m  [2m33:9[22m  [31merror[39m  'ticksPerStep' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[31m[1m✖ 81 problems (46 errors, 35 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

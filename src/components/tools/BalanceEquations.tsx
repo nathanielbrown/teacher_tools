@@ -12,6 +12,7 @@ import confetti from 'canvas-confetti';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const YEAR_LEVELS = [
@@ -42,7 +43,7 @@ const HELP_INFO = (
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Click <b>Check Balance</b> to see if you are right. Try to get 10/10!</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">Click <b>Check</b> to see if you are right. Try to get 10/10!</p>
       </div>
     </div>
   </div>
@@ -59,59 +60,83 @@ const generateQuestion = (level: string) => {
   let answer = 0;
 
   if (level === 'Year 1-2') {
-    const a = Math.floor(Math.random() * 10) + 1;
-    const b = Math.floor(Math.random() * 10) + 1;
-    const total = a + b;
-    const c = Math.floor(Math.random() * total);
-    answer = total - c;
+    let a, b, c, total, ans;
+    do {
+      a = Math.floor(Math.random() * 9) + 1;
+      b = Math.floor(Math.random() * 9) + 1;
+      total = a + b;
+      c = Math.floor(Math.random() * (total - 1)) + 1;
+      ans = total - c;
+    } while (c === a || c === b || ans === a || ans === b || c === 0 || ans === 0);
+    answer = ans;
     leftSide = [a, '+', b];
     rightSide = [c, '+', '?'];
   } else if (level === 'Year 3-4') {
     const isAdd = Math.random() > 0.5;
     if (isAdd) {
-      const a = Math.floor(Math.random() * 20) + 5;
-      const b = Math.floor(Math.random() * 20) + 5;
-      const total = a + b;
-      const c = Math.floor(Math.random() * (total - 5)) + 2;
-      answer = total - c;
+      let a, b, c, total, ans;
+      do {
+        a = Math.floor(Math.random() * 20) + 5;
+        b = Math.floor(Math.random() * 20) + 5;
+        total = a + b;
+        c = Math.floor(Math.random() * (total - 5)) + 2;
+        ans = total - c;
+      } while (c === a || c === b || ans === a || ans === b);
+      answer = ans;
       leftSide = [a, '+', b];
       rightSide = [c, '+', '?'];
     } else {
-      const a = Math.floor(Math.random() * 30) + 20;
-      const b = Math.floor(Math.random() * 15) + 5;
-      const total = a - b;
-      const c = Math.floor(Math.random() * (total - 2)) + 1;
-      answer = total - c;
+      let a, b, c, total, ans;
+      do {
+        a = Math.floor(Math.random() * 30) + 20;
+        b = Math.floor(Math.random() * 15) + 5;
+        total = a - b;
+        c = Math.floor(Math.random() * (total - 2)) + 1;
+        ans = total - c;
+      } while (c === a || c === b || ans === a || ans === b);
+      answer = ans;
       leftSide = [a, '-', b];
       rightSide = [c, '+', '?'];
     }
   } else if (level === 'Year 5-6') {
     const isMult = Math.random() > 0.5;
     if (isMult) {
-      const a = Math.floor(Math.random() * 10) + 2;
-      const b = Math.floor(Math.random() * 10) + 2;
-      const total = a * b;
-      const c = Math.floor(Math.random() * (total - 5)) + 2;
-      answer = total - c;
+      let a, b, c, total, ans;
+      do {
+        a = Math.floor(Math.random() * 10) + 2;
+        b = Math.floor(Math.random() * 10) + 2;
+        total = a * b;
+        c = Math.floor(Math.random() * (total - 5)) + 2;
+        ans = total - c;
+      } while (c === a || c === b || ans === a || ans === b);
+      answer = ans;
       leftSide = [a, '×', b];
       rightSide = [c, '+', '?'];
     } else {
-      const a = Math.floor(Math.random() * 50) + 10;
-      const b = Math.floor(Math.random() * 50) + 10;
-      const total = a + b;
-      const c = Math.floor(Math.random() * 10) + 2;
-      const d = Math.floor(Math.random() * 5) + 2;
-      answer = total - (c * d);
+      let a, b, c, d, total, ans;
+      do {
+        a = Math.floor(Math.random() * 50) + 10;
+        b = Math.floor(Math.random() * 50) + 10;
+        total = a + b;
+        c = Math.floor(Math.random() * 10) + 2;
+        d = Math.floor(Math.random() * 5) + 2;
+        ans = total - (c * d);
+      } while (c === a || c === b || d === a || d === b || ans === a || ans === b || ans <= 0);
+      answer = ans;
       leftSide = [a, '+', b];
       rightSide = [c, '×', d, '+', '?'];
     }
   } else {
-    const a = Math.floor(Math.random() * 10) + 2;
-    const b = Math.floor(Math.random() * 10) + 2;
-    const c = Math.floor(Math.random() * 5) + 2;
-    const total = (a + b) * c;
-    const d = Math.floor(Math.random() * (total / 2)) + 10;
-    answer = total - d;
+    let a, b, c, d, total, ans;
+    do {
+      a = Math.floor(Math.random() * 10) + 2;
+      b = Math.floor(Math.random() * 10) + 2;
+      c = Math.floor(Math.random() * 5) + 2;
+      total = (a + b) * c;
+      d = Math.floor(Math.random() * (total / 2)) + 10;
+      ans = total - d;
+    } while (d === a || d === b || d === c || ans === a || ans === b || ans === c || ans <= 0);
+    answer = ans;
     leftSide = ['(', a, '+', b, ')', '×', c];
     rightSide = [d, '+', '?'];
   }
@@ -123,7 +148,7 @@ const generateQuestion = (level: string) => {
 export const BalanceEquations = () => {
   const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
   const [gameState, setGameState] = useState('menu'); // 'menu', 'playing', 'result'
-  const [yearLevel, setYearLevel] = useState('Year 3-4');
+  const [yearLevel, setYearLevel] = useLocalStorage('balance_equations_level', 'Year 3-4');
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -231,12 +256,12 @@ export const BalanceEquations = () => {
   useEffect(() => {
     if (gameState !== 'menu') {
       setHeaderActions(
-        <div className="flex items-center gap-4 italic">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => { setGameState('menu'); audioEngine.playTick(settings.soundTheme); }}
-            className="flex items-center gap-2 px-8 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 "
+            className="flex items-center gap-2 px-6 py-2 bg-slate-50 text-slate-500 rounded-xl font-black text-xs uppercase tracking-tight hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95"
           >
-            <ChevronLeft size={14} /> Exit Lab
+            <ChevronLeft size={14} /> Back
           </button>
         </div>
       );
@@ -246,7 +271,7 @@ export const BalanceEquations = () => {
   }, [gameState, settings.soundTheme, setHeaderActions]);
 
   return (
-    <div className="tool-container flex flex-col items-center justify-center h-full font-['Outfit'] select-none relative bg-white rounded-[4rem] p-4 lg:p-12 overflow-hidden italic ">
+    <div className="tool-container flex flex-col items-center justify-center h-full font-['Outfit'] select-none relative bg-white rounded-[4rem] p-4 lg:p-12 overflow-hidden">
       
       <div className="tool-grid-bg opacity-30 pointer-events-none" />
 
@@ -259,12 +284,8 @@ export const BalanceEquations = () => {
             exit={{ opacity: 0, scale: 1.05 }}
             className="w-full max-w-5xl flex flex-col items-center gap-16 lg:gap-20"
           >
-            <div className="text-center space-y-4">
-              <div className="w-24 h-24 bg-indigo-600 rounded-[2rem] flex items-center justify-center text-white mx-auto  rotate-3 border-4 border-white">
-                <Scale size={48} />
-              </div>
+            <div className="text-center">
               <h1 className="text-7xl lg:text-8xl font-black text-slate-900 tracking-tighter uppercase leading-none">Balance Equations</h1>
-              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.5em]">Equilibrium Training Protocol</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
@@ -297,8 +318,8 @@ export const BalanceEquations = () => {
             {/* Progress Bar */}
             <div className="w-full max-w-md space-y-4">
               <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol {currentIndex + 1} of 10</span>
-                <div className="bg-slate-900 px-4 py-1.5 rounded-full ">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Question {currentIndex + 1} of 10</span>
+                <div className="bg-indigo-600 px-4 py-1.5 rounded-full">
                    <span className="text-sm font-black text-white tabular-nums tracking-widest uppercase">Score: {score}</span>
                 </div>
               </div>
@@ -311,36 +332,36 @@ export const BalanceEquations = () => {
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24 w-full">
+            <div className="flex flex-col items-center gap-12 lg:gap-16 w-full">
               {/* Equation Area */}
               <div className="flex-1 flex flex-col items-center gap-12">
-                <div className="flex flex-wrap items-center justify-center gap-6 lg:gap-12">
+                <div className="flex items-center justify-center gap-4 lg:gap-8 w-full max-w-full">
                   {/* Left Side */}
-                  <div className="flex items-center gap-4 lg:gap-8 bg-white p-10 lg:p-14 rounded-[4rem] border-4 border-slate-50  relative overflow-hidden group">
+                  <div className="flex items-center gap-3 lg:gap-6 relative overflow-hidden group px-4">
                     <div className="tool-grid-bg opacity-10 pointer-events-none" />
                     {questions[currentIndex].leftSide.map((part: string | number, i: number) => (
-                      <span key={i} className={`text-7xl lg:text-9xl font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
+                      <span key={i} className={`text-5xl lg:text-7xl font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
                         {part}
                       </span>
                     ))}
                   </div>
 
-                  <span className="text-8xl lg:text-9xl font-black text-slate-200 tracking-tighter">=</span>
+                  <span className="text-6xl lg:text-8xl font-black text-slate-200 tracking-tighter">=</span>
 
                   {/* Right Side */}
-                  <div className="flex items-center gap-4 lg:gap-8 bg-white p-10 lg:p-14 rounded-[4rem] border-4 border-slate-50  relative overflow-hidden group">
+                  <div className="flex items-center gap-3 lg:gap-6 relative overflow-hidden group px-4">
                     <div className="tool-grid-bg opacity-10 pointer-events-none" />
                     {questions[currentIndex].rightSide.map((part: string | number, i: number) => (
                       <React.Fragment key={i}>
                         {part === '?' ? (
-                          <div className={`w-32 h-32 lg:w-40 lg:h-40 rounded-[2.5rem] border-8 flex items-center justify-center text-6xl lg:text-8xl font-black transition-all  tabular-nums ${
-                            feedback ? (feedback.isCorrect ? 'bg-emerald-500 border-white/20 text-white ' : 'bg-rose-500 border-white/20 text-white ') :
-                            'bg-indigo-600 border-indigo-400 text-white animate-pulse'
+                          <div className={`w-20 h-20 lg:w-28 lg:h-28 rounded-2xl border-4 flex items-center justify-center text-4xl lg:text-6xl font-black transition-all tabular-nums ${
+                            feedback ? (feedback.isCorrect ? 'bg-emerald-500 border-white/20 text-white' : 'bg-rose-500 border-white/20 text-white') :
+                            'bg-indigo-600 border-indigo-400 text-white'
                           }`}>
                             {userAnswer || (feedback ? '' : '?')}
                           </div>
                         ) : (
-                          <span key={i} className={`text-7xl lg:text-9xl font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
+                          <span key={i} className={`text-5xl lg:text-7xl font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
                             {part}
                           </span>
                         )}
@@ -360,38 +381,35 @@ export const BalanceEquations = () => {
                         className={`flex items-center gap-6 px-12 py-5 rounded-[2rem] text-3xl font-black uppercase tracking-tighter  ${feedback.isCorrect ? 'text-emerald-600 bg-emerald-50 border-4 border-white' : 'text-rose-600 bg-rose-50 border-4 border-white'}`}
                       >
                         {feedback.isCorrect ? <Star fill="currentColor" size={32} /> : <RotateCcw size={32} />}
-                        {feedback.isCorrect ? 'Equilibrium Achieved' : `Deviation: Answer was ${feedback.correctAnswer}`}
+                        {feedback.isCorrect ? 'Correct!' : `Wrong! It was ${feedback.correctAnswer}`}
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
-
-              {/* Numpad */}
-              <div className="w-full lg:w-96 flex flex-col gap-6">
-                <div className="grid grid-cols-3 gap-4">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'clear', 0].map((val) => (
+              </div>              {/* Numpad Area */}
+              <div className="w-full max-w-4xl flex flex-col md:flex-row items-start gap-8">
+                <div className="grid grid-cols-3 gap-3 flex-1 w-full">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'clear'].map((val) => (
                     <button
                       key={val}
                       onClick={() => handleNumpad(val.toString())}
-                      className={`h-20 lg:h-24 rounded-[2rem] text-4xl font-black transition-all active:scale-95  border-4 tabular-nums ${
-                        val === 'clear' ? 'bg-rose-50 border-white text-rose-500 ' : 'bg-white border-white text-slate-800 hover:border-indigo-100'
-                      } ${val === 0 ? 'col-span-2' : ''}`}
+                      className={`h-16 lg:h-20 rounded-2xl text-3xl font-black transition-all active:scale-95 border-4 tabular-nums ${
+                        val === 'clear' ? 'bg-rose-50 border-rose-200 text-rose-500' : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-100'
+                      } ${val === 'clear' ? 'col-span-3' : ''} ${val === 0 ? 'col-start-2' : ''}`}
                     >
-                      {val === 'clear' ? <RotateCcw size={32} strokeWidth={3} /> : val}
+                      {val === 'clear' ? <RotateCcw size={28} strokeWidth={3} /> : val}
                     </button>
                   ))}
                 </div>
                 <button
                   onClick={feedback ? handleNext : handleCheck}
                   disabled={!userAnswer && !feedback}
-                  className={`w-full py-8 rounded-[2.5rem] text-2xl font-black transition-all flex items-center justify-center gap-4  uppercase tracking-widest ${
-                    !userAnswer && !feedback ? 'bg-slate-100 text-slate-300 ' :
-                    feedback ? 'bg-slate-900 text-white hover:bg-indigo-600 border-4 border-white/10' : 'bg-indigo-600 text-white hover:bg-indigo-700 border-4 border-white/10'
+                  className={`w-full md:w-64 h-16 lg:h-20 rounded-2xl text-xl font-black transition-all flex items-center justify-center gap-3 uppercase tracking-widest ${
+                    !userAnswer && !feedback ? 'bg-slate-100 text-slate-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 border-4 border-white/10'
                   }`}
                 >
-                  {feedback ? 'Re-Initialize' : 'Verify State'}
-                  <ChevronRight size={32} strokeWidth={3} />
+                  {feedback ? 'Next' : 'Check'}
+                  <ChevronRight size={28} strokeWidth={3} />
                 </button>
               </div>
             </div>
@@ -411,9 +429,9 @@ export const BalanceEquations = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <h2 className="text-7xl font-black text-slate-900 uppercase tracking-tighter leading-none">Testing Cycle Complete</h2>
+                <h2 className="text-7xl font-black text-slate-900 uppercase tracking-tighter leading-none">Well Done!</h2>
                 <div className="flex flex-col items-center gap-2 mt-4">
-                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Accuracy Metric</span>
+                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Your Score</span>
                    <p className="text-9xl font-black text-indigo-600 tabular-nums tracking-tighter leading-none">
                      {score}<span className="text-3xl text-slate-200 ml-3">/10</span>
                    </p>
@@ -426,13 +444,13 @@ export const BalanceEquations = () => {
                 onClick={() => setGameState('menu')}
                 className="flex-1 py-8 bg-slate-100 text-slate-400 font-black text-xl rounded-[2rem] hover:bg-slate-200 transition-all active:scale-95 uppercase tracking-widest"
               >
-                Back to Lab
+                Menu
               </button>
               <button
                 onClick={() => startGame(yearLevel)}
-                className="flex-1 py-8 bg-slate-900 text-white font-black text-xl rounded-[2rem] hover:bg-indigo-600 transition-all active:scale-95   uppercase tracking-widest"
+                className="flex-1 py-8 bg-indigo-600 text-white font-black text-xl rounded-[2rem] hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest"
               >
-                Repeat Cycle
+                Play Again
               </button>
             </div>
           </motion.div>

@@ -8,8 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-teacher_tools
+
 dist-ssr
 *.local
 
@@ -27,6 +26,11 @@ dist-ssr
 node_modules/
 . e n v 
  
- 
+# Deployment build and generated content
+dist
+scripts
+scratch
+teacher_tools
+
 # Private premium content
 premium/

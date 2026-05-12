@@ -66,8 +66,8 @@ const getHelpInfo = () => (
 export const FractionWall = () => {
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
-  const [selectedDenominators, setSelectedDenominators] = useLocalStorage<number[]>('fractionwall-denominators', [1, 2, 4, 8]);
-  const [highlightedValue, setHighlightedValue] = useLocalStorage<{ num: number; den: number } | null>('fractionwall-highlight', null);
+  const [selectedDenominators, setSelectedDenominators] = useLocalStorage<number[]>('fraction_wall_denominators', [1, 2, 4, 8]);
+  const [highlightedValue, setHighlightedValue] = useLocalStorage<{ num: number; den: number } | null>('fraction_wall_highlight', null);
 
   const clearAll = useCallback(() => {
     setSelectedDenominators([1, 2, 4, 8]);

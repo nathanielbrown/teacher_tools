@@ -12,7 +12,7 @@ import confetti from 'canvas-confetti';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const COLORS = [
@@ -65,7 +65,7 @@ export const SimonGame = () => {
   const [sequence, setSequence] = useState<number[]>([]);
   const [userStep, setUserStep] = useState(0);
   const [activeButton, setActiveButton] = useState<number | null>(null);
-  const [highScore, setHighScore] = useState(() => parseInt(storage.getItem('simonHighScore') || '0'));
+  const [highScore, setHighScore] = useLocalStorage<number>('simon_game_high_score', 0);
 
   const resetGame = useCallback(() => {
     setGameState('menu');
@@ -124,7 +124,6 @@ export const SimonGame = () => {
         setSequence(nextSequence);
         if (nextSequence.length - 1 > highScore) {
           setHighScore(nextSequence.length - 1);
-          storage.setItem('simonHighScore', (nextSequence.length - 1).toString());
         }
         playSequence(nextSequence);
       } else {

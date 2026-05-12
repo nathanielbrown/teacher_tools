@@ -66,7 +66,7 @@ export const WouldYouRather = () => {
   const [view, setView] = useState<'selection' | 'game'>('selection');
   const [yearLevel, setYearLevel] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [history, setHistory] = useLocalStorage<any[]>('wyr_history', []);
+  const [history, setHistory] = useLocalStorage<any[]>('would_you_rather_history', []);
   const [questions, setQuestions] = useState<any[]>([]);
 
   const resetGame = useCallback(() => {

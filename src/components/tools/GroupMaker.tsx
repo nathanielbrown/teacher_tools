@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Users, 
   Shuffle, 
@@ -8,6 +8,7 @@ import {
   Users2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
@@ -73,20 +74,30 @@ const getHelpInfo = () => (
 export const GroupMaker = () => {
   const { settings } = useSettings();
   const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
-  const [selectedClassId, setSelectedClassId] = useState(settings.classes[0]?.id || '');
-  const [editedStudents, setEditedStudents] = useState<string[]>([]);
-  const [mode, setMode] = useState<'groups' | 'students'>('groups');
-  const [count, setCount] = useState(4);
-  const [groups, setGroups] = useState<string[][]>([]);
+  const [selectedClassId, setSelectedClassId] = useLocalStorage('group_maker_class_id', 'blank');
+  const [editedStudents, setEditedStudents] = useLocalStorage<string[]>('group_maker_students', []);
+  const [mode, setMode] = useLocalStorage<'groups' | 'students'>('group_maker_mode', 'groups');
+  const [count, setCount] = useLocalStorage('group_maker_count', 4);
+  const [groups, setGroups] = useLocalStorage<string[][]>('group_maker_groups', []);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isClassPanelOpen, setIsClassPanelOpen] = useState(true);
 
+  const prevClassIdRef = useRef(selectedClassId);
+
   useEffect(() => {
-    const cls = settings.classes.find(c => c.id === selectedClassId);
-    if (cls) {
-      setEditedStudents(cls.students);
+    // Only initialize/switch class if it's the first time or the class ID actually changed
+    if (editedStudents.length === 0 || prevClassIdRef.current !== selectedClassId) {
+      const cls = settings.classes.find(c => c.id === selectedClassId);
+      if (cls) {
+        setEditedStudents(cls.students);
+        setGroups([]); // Reset groups when class changes
+      } else if (selectedClassId === 'blank') {
+        setEditedStudents([]);
+        setGroups([]);
+      }
+      prevClassIdRef.current = selectedClassId;
     }
-  }, [selectedClassId, settings.classes]);
+  }, [selectedClassId, settings.classes, editedStudents.length, setEditedStudents, setGroups]);
 
   const makeGroups = () => {
     if (!editedStudents.length) return;
@@ -120,7 +131,7 @@ export const GroupMaker = () => {
   const resetGroups = useCallback(() => {
     setGroups([]);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setGroups]);
 
   useEffect(() => {
     setOnReset(() => resetGroups);

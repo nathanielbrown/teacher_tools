@@ -100,17 +100,17 @@ export const TypingGame = () => {
   const { setOnReset, clearHeader, setHelpContent, setHeaderActions } = useHeader();
   const { settings } = useSettings();
   
-  const [lists, setLists] = useLocalStorage<WordList[]>('spelling_lists', [
+  const [lists, setLists] = useLocalStorage<WordList[]>('word_manager_lists', [
     { id: '1', name: 'Colors', words: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'ORANGE', 'PURPLE'] }
   ]);
   
-  const [selectedListId, setSelectedListId] = useState(lists[0]?.id || '');
+  const [selectedListId, setSelectedListId] = useLocalStorage<string>('typing_game_selected_list_id', lists[0]?.id || '');
   const [status, setStatus] = useState<'setup' | 'playing' | 'gameover' | 'win'>('setup');
   const [fishes, setFishes] = useState<FishObject[]>([]);
   const [score, setScore] = useState(0);
   const [userInput, setUserInput] = useState('');
   const [targetFishId, setTargetFishId] = useState<string | null>(null);
-  const [isPanelVisible, setIsPanelVisible] = useState(true);
+  const [isPanelVisible, setIsPanelVisible] = useLocalStorage<boolean>('typing_game_panel_visible', true);
 
   const gameLoopRef = useRef<number | null>(null);
   const lastSpawnRef = useRef<number>(0);

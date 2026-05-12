@@ -15,6 +15,7 @@ import { audioEngine } from '../../utils/audio';
 import { ToolPanel } from '../shared/ToolPanel';
 import { ClassPanel } from '../shared/ClassPanel';
 import { FormattedMessage } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const COLORS = [
@@ -164,7 +165,7 @@ const ListView = ({ names, spinning, winner, onFinish }: { names: string[], spin
   useEffect(() => {
     if (names.length > 0 && !spinning && displayNames.length === 0) {
       // Fill initial list
-      const initial = Array.from({ length: LIST_SIZE }, (_, i) => names[i % names.length]);
+      const initial = Array.from({ length: LIST_SIZE }, (_, i) => names[(i - MIDDLE_INDEX + names.length) % names.length]);
       setDisplayNames(initial);
     }
   }, [names, spinning, displayNames.length]);
@@ -194,7 +195,7 @@ const ListView = ({ names, spinning, winner, onFinish }: { names: string[], spin
       });
       onFinish();
     }
-  }, [names, winner, onFinish]);
+  }, [names, winner, onFinish, settings.soundTheme]);
 
   useEffect(() => {
     if (spinning && names.length > 0) {
@@ -251,10 +252,10 @@ export const NamePicker = () => {
   const { settings } = useSettings();
   const { setHeaderActions, setOnReset, clearHeader } = useHeader();
   
-  const [selectedClassId, setSelectedClassId] = useState(settings.classes[0]?.id || '');
+  const [selectedClassId, setSelectedClassId] = useLocalStorage<string>('name_picker_class_id', 'blank');
   const [students, setStudents] = useState<string[]>([]);
-  const [mode, setMode] = useState<Mode>('wheel');
-  const [isClassPanelOpen, setIsClassPanelOpen] = useState(false);
+  const [mode, setMode] = useLocalStorage<Mode>('name_picker_mode', 'wheel');
+  const [isClassPanelOpen, setIsClassPanelOpen] = useLocalStorage<boolean>('name_picker_panel_open', true);
   const [isSpinning, setIsSpinning] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
   const [showWinner, setShowWinner] = useState(false);
@@ -266,6 +267,9 @@ export const NamePicker = () => {
     if (cls) {
       setStudents(cls.students);
       setAvailableStudents(cls.students);
+    } else if (selectedClassId === 'blank') {
+      setStudents([]);
+      setAvailableStudents([]);
     }
   }, [selectedClassId, settings.classes]);
 
@@ -280,7 +284,9 @@ export const NamePicker = () => {
 
   const removeWinner = () => {
     if (winner) {
-      setAvailableStudents(prev => prev.filter(s => s !== winner));
+      const newStudents = students.filter(s => s !== winner);
+      setStudents(newStudents);
+      setAvailableStudents(newStudents);
       setWinner(null);
       setShowWinner(false);
     }

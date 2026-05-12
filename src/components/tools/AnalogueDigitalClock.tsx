@@ -9,8 +9,7 @@ import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ToolPanel } from '../shared/ToolPanel';
 import { useIntl, FormattedMessage, IntlShape } from 'react-intl';
-
-// 2. Config (None)
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 3. Text (Help and Info)
 const getHelpInfo = () => (
@@ -59,10 +58,6 @@ const getHelpInfo = () => (
   </div>
 );
 
-// 4. Local Storage (None)
-
-// 5. Classes (None)
-
 const getTimeInWords = (date: Date, intl: IntlShape) => {
   const h = date.getHours();
   const m = date.getMinutes();
@@ -104,18 +99,23 @@ export const AnalogueDigitalClock = () => {
   const { clearHeader, setHelpContent, setHasConfig } = useHeader();
   const { settings } = useSettings();
   const intl = useIntl();
-  const [time, setTime] = useState(new Date());
-  const [isEditing, setIsEditing] = useState(false);
+  const [storedTime, setStoredTime] = useLocalStorage<number>('clock_time', new Date().getTime());
+  const [time, setTime] = useState(new Date(storedTime));
+  const [isEditing, setIsEditing] = useLocalStorage<boolean>('clock_is_editing', false);
   const svgRef = useRef<SVGSVGElement>(null);
   const isDragging = useRef(false);
   const dragType = useRef<'hour' | 'minute' | null>(null);
 
   useEffect(() => {
     if (!isEditing && !isDragging.current) {
-      const timer = setInterval(() => setTime(new Date()), 1000);
+      const timer = setInterval(() => {
+        const now = new Date();
+        setTime(now);
+        setStoredTime(now.getTime());
+      }, 1000);
       return () => clearInterval(timer);
     }
-  }, [isEditing]);
+  }, [isEditing, setStoredTime]);
 
 
   useEffect(() => {
@@ -142,6 +142,7 @@ export const AnalogueDigitalClock = () => {
         const minutes = Math.round((angle / 360) * 60) % 60;
         if (newTime.getMinutes() !== minutes) {
           newTime.setMinutes(minutes);
+          setStoredTime(newTime.getTime());
           return newTime;
         }
       } else if (dragType.current === 'hour') {
@@ -149,12 +150,13 @@ export const AnalogueDigitalClock = () => {
         const isCurrentlyPM = newTime.getHours() >= 12;
         newTime.setHours(isCurrentlyPM ? hours + 12 : hours);
         if (prevTime.getHours() !== newTime.getHours()) {
+          setStoredTime(newTime.getTime());
           return newTime;
         }
       }
       return prevTime;
     });
-  }, []);
+  }, [setStoredTime]);
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
@@ -174,6 +176,7 @@ export const AnalogueDigitalClock = () => {
     setTime(prev => {
       const newTime = new Date(prev);
       newTime.setHours((newTime.getHours() + delta + 24) % 24);
+      setStoredTime(newTime.getTime());
       return newTime;
     });
     audioEngine.playTick(settings.soundTheme);
@@ -183,6 +186,7 @@ export const AnalogueDigitalClock = () => {
     setTime(prev => {
       const newTime = new Date(prev);
       newTime.setMinutes((newTime.getMinutes() + delta + 60) % 60);
+      setStoredTime(newTime.getTime());
       return newTime;
     });
     audioEngine.playTick(settings.soundTheme);
@@ -192,6 +196,7 @@ export const AnalogueDigitalClock = () => {
     setTime(prev => {
       const newTime = new Date(prev);
       newTime.setHours((newTime.getHours() + 12) % 24);
+      setStoredTime(newTime.getTime());
       return newTime;
     });
     audioEngine.playTick(settings.soundTheme);
@@ -199,255 +204,257 @@ export const AnalogueDigitalClock = () => {
 
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden">
+    <div className="w-full h-full font-['Outfit'] select-none overflow-hidden">
       <ToolPanel className="font-['Outfit'] select-none italic flex-1" baseWidth={1400} baseHeight={900}>
-        {/* Primary Tool Area - Stacks Vertically */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-8 relative z-10 w-full h-full">
+        {/* Using Grid for more reliable side-by-side behavior on 1400x900 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-items-center gap-12 lg:gap-24 relative z-10 w-full h-full px-12 max-w-[1300px] mx-auto">
           
-          {/* 1. Analogue Clock (Top) */}
-          <div className="w-full max-w-[450px] aspect-square relative group/clock">
-            <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center border-8 border-slate-900 transition-transform duration-700 group-hover/clock:scale-[1.02]">
-              
-              <svg
-                ref={svgRef}
-                viewBox="0 0 100 100"
-                className="w-full h-full"
-                style={{ touchAction: 'none' }}
-              >
-
-                {/* Ticks */}
-                {[...Array(60)].map((_, i) => {
-                  const isMajor = i % 5 === 0;
-                  const y1 = "2";
-                  const y2 = isMajor ? "8" : "5";
-                  const strokeWidth = isMajor ? "2.5" : "1";
-                  const stroke = isMajor ? "#1e293b" : "#cbd5e1";
-                  
-                  return (
-                    <line
-                      key={i}
-                      x1="50" y1={y1} x2="50" y2={y2}
-                      stroke={stroke}
-                      strokeWidth={strokeWidth}
-                      transform={`rotate(${i * 6} 50 50)`}
-                    />
-                  );
-                })}
-
-                {/* Numbers */}
-                {[...Array(12)].map((_, i) => {
-                  const yPos = 20;
-                  const fontSize = "11";
-                  const className = "font-['Outfit'] select-none pointer-events-none font-bold";
-                  
-                  return (
-                    <text
-                      key={i}
-                      x="50"
-                      y={yPos}
-                      fill="#1e293b"
-                      fontSize={fontSize}
-                      textAnchor="middle"
-                      alignmentBaseline="middle"
-                      transform={`rotate(${(i + 1) * 30} 50 50) rotate(${-(i + 1) * 30} 50 ${yPos})`}
-                      className={className}
-                    >
-                      {i + 1}
-                    </text>
-                  );
-                })}
-
-                {/* Hour Hand */}
-                <g 
-                  transform={`rotate(${(time.getHours() % 12) * 30 + time.getMinutes() * 0.5} 50 50)`}
-                  onPointerDown={(e) => handlePointerDown(e, 'hour')}
-                  className={isEditing ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"}
+          {/* Left Side: Analogue Clock & Controls */}
+          <div className="flex flex-col items-center gap-10 w-full">
+            {/* 1. Analogue Clock */}
+            <div className="w-[450px] aspect-square relative group/clock">
+              <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center border-8 border-slate-900 transition-transform duration-700 group-hover/clock:scale-[1.02]">
+                <svg
+                  ref={svgRef}
+                  viewBox="0 0 100 100"
+                  className="w-full h-full"
+                  style={{ touchAction: 'none' }}
                 >
-                  <line
-                    x1="50" y1="50" x2="50" y2="28"
-                    stroke="#1e293b"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                  />
-                  <path d="M 50 28 L 47 33 L 53 33 Z" fill="#1e293b" />
-                  {isEditing && <circle cx="50" cy="28" r="15" fill="transparent" />}
-                </g>
+                  {/* Ticks */}
+                  {[...Array(60)].map((_, i) => {
+                    const isMajor = i % 5 === 0;
+                    const y1 = "2";
+                    const y2 = isMajor ? "8" : "5";
+                    const strokeWidth = isMajor ? "2.5" : "1";
+                    const stroke = isMajor ? "#1e293b" : "#cbd5e1";
+                    
+                    return (
+                      <line
+                        key={i}
+                        x1="50" y1={y1} x2="50" y2={y2}
+                        stroke={stroke}
+                        strokeWidth={strokeWidth}
+                        transform={`rotate(${i * 6} 50 50)`}
+                      />
+                    );
+                  })}
 
-                {/* Minute Hand */}
-                <g 
-                  transform={`rotate(${time.getMinutes() * 6} 50 50)`}
-                  onPointerDown={(e) => handlePointerDown(e, 'minute')}
-                  className={isEditing ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"}
-                >
-                  <line
-                    x1="50" y1="50" x2="50" y2="12"
-                    stroke="#2563eb"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                  />
-                  <path d="M 50 12 L 48 18 L 52 18 Z" fill="#2563eb" />
-                  {isEditing && <circle cx="50" cy="12" r="15" fill="transparent" />}
-                </g>
+                  {/* Numbers */}
+                  {[...Array(12)].map((_, i) => {
+                    const yPos = 20;
+                    const fontSize = "11";
+                    const className = "font-['Outfit'] select-none pointer-events-none font-bold";
+                    
+                    return (
+                      <text
+                        key={i}
+                        x="50"
+                        y={yPos}
+                        fill="#1e293b"
+                        fontSize={fontSize}
+                        textAnchor="middle"
+                        alignmentBaseline="middle"
+                        transform={`rotate(${(i + 1) * 30} 50 50) rotate(${-(i + 1) * 30} 50 ${yPos})`}
+                        className={className}
+                      >
+                        {i + 1}
+                      </text>
+                    );
+                  })}
 
-                {/* Second Hand */}
-                {!isEditing && (
-                  <g transform={`rotate(${time.getSeconds() * 6} 50 50)`}>
+                  {/* Hour Hand */}
+                  <g 
+                    transform={`rotate(${(time.getHours() % 12) * 30 + time.getMinutes() * 0.5} 50 50)`}
+                    onPointerDown={(e) => handlePointerDown(e, 'hour')}
+                    className={isEditing ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"}
+                  >
                     <line
-                      x1="50" y1="55" x2="50" y2="8"
-                      stroke="#ef4444"
-                      strokeWidth="1.5"
+                      x1="50" y1="50" x2="50" y2="28"
+                      stroke="#1e293b"
+                      strokeWidth="6"
                       strokeLinecap="round"
                     />
-                    <circle cx="50" cy="50" r="3" fill="#ef4444" stroke="white" strokeWidth="1" />
+                    <path d="M 50 28 L 47 33 L 53 33 Z" fill="#1e293b" />
+                    {isEditing && <circle cx="50" cy="28" r="15" fill="transparent" />}
                   </g>
-                )}
 
-                <circle cx="50" cy="50" r="2.5" fill="#000000" />
-              </svg>
+                  {/* Minute Hand */}
+                  <g 
+                    transform={`rotate(${time.getMinutes() * 6} 50 50)`}
+                    onPointerDown={(e) => handlePointerDown(e, 'minute')}
+                    className={isEditing ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"}
+                  >
+                    <line
+                      x1="50" y1="50" x2="50" y2="12"
+                      stroke="#2563eb"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <path d="M 50 12 L 48 18 L 52 18 Z" fill="#2563eb" />
+                    {isEditing && <circle cx="50" cy="12" r="15" fill="transparent" />}
+                  </g>
+
+                  {/* Second Hand */}
+                  {!isEditing && (
+                    <g transform={`rotate(${time.getSeconds() * 6} 50 50)`}>
+                      <line
+                        x1="50" y1="55" x2="50" y2="8"
+                        stroke="#ef4444"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="50" cy="50" r="3" fill="#ef4444" stroke="white" strokeWidth="1" />
+                    </g>
+                  )}
+
+                  <circle cx="50" cy="50" r="2.5" fill="#000000" />
+                </svg>
+              </div>
+            </div>
+
+            {/* 2. Time Controls */}
+            <div className="flex bg-slate-100 p-2 rounded-[1.5rem] border-2 border-white backdrop-blur-md">
+              <button 
+                onClick={() => { setIsEditing(false); setTime(new Date()); audioEngine.playTick(settings.soundTheme); }} 
+                className={`px-8 py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${!isEditing ? 'bg-slate-900 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <FormattedMessage id="clock.controls.now" defaultMessage="Time Now" />
+              </button>
+              <button 
+                onClick={() => { setIsEditing(true); audioEngine.playTick(settings.soundTheme); }} 
+                className={`px-8 py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${isEditing ? 'bg-slate-900 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <FormattedMessage id="clock.controls.set" defaultMessage="Set Time" />
+              </button>
             </div>
           </div>
 
-          {/* 2. Time Controls (Under Clock) */}
-          <div className="flex bg-slate-100 p-2 rounded-[1.5rem] border-2 border-white  backdrop-blur-md">
-            <button 
-              onClick={() => { setIsEditing(false); setTime(new Date()); audioEngine.playTick(settings.soundTheme); }} 
-              className={`px-8 py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${!isEditing ? 'bg-slate-900 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              <FormattedMessage id="clock.controls.now" defaultMessage="Time Now" />
-            </button>
-            <button 
-              onClick={() => { setIsEditing(true); audioEngine.playTick(settings.soundTheme); }} 
-              className={`px-8 py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${isEditing ? 'bg-slate-900 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              <FormattedMessage id="clock.controls.set" defaultMessage="Set Time" />
-            </button>
-          </div>
+          {/* Right Side: Digital & Word Clocks */}
+          <div className="flex flex-col items-center gap-10 w-full max-w-xl">
+            {/* 3. Digital Clock */}
+            <div className="w-full bg-white rounded-[2.5rem] border-4 border-white flex items-center justify-center py-10 px-10 gap-6 relative">
+              {/* Hours with Arrows */}
+              <div className="relative flex flex-col items-center group/edit">
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      onClick={() => adjustHours(1)} 
+                      className="absolute -top-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                    >
+                      <ChevronUp size={32} strokeWidth={3} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
 
+                <div className="text-6xl lg:text-8xl font-black tabular-nums tracking-tighter text-slate-900 italic">
+                  {(time.getHours() % 12 || 12).toString().padStart(2, '0')}
+                </div>
 
-          {/* 3. Digital Clock (Middle) */}
-          <div className="w-full max-w-2xl bg-white rounded-[2.5rem] border-4 border-white  flex items-center justify-center py-10 px-10 gap-6 relative">
-            
-            {/* Hours with Arrows */}
-            <div className="relative flex flex-col items-center group/edit">
-              <AnimatePresence>
-                {isEditing && (
-                  <motion.button 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    onClick={() => adjustHours(1)} 
-                    className="absolute -top-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
-                  >
-                    <ChevronUp size={32} strokeWidth={3} />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
-              <div className="text-6xl font-black tabular-nums tracking-tighter text-slate-900 italic">
-                {(time.getHours() % 12 || 12).toString().padStart(2, '0')}
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      onClick={() => adjustHours(-1)} 
+                      className="absolute -bottom-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                    >
+                      <ChevronDown size={32} strokeWidth={3} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <AnimatePresence>
-                {isEditing && (
-                  <motion.button 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    onClick={() => adjustHours(-1)} 
-                    className="absolute -bottom-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
-                  >
-                    <ChevronDown size={32} strokeWidth={3} />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </div>
+              <div className="text-5xl lg:text-7xl font-black text-indigo-600 animate-pulse">:</div>
 
-            <div className="text-5xl font-black text-indigo-600 animate-pulse">:</div>
+              {/* Minutes with Arrows */}
+              <div className="relative flex flex-col items-center group/edit">
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      onClick={() => adjustMinutes(1)} 
+                      className="absolute -top-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                    >
+                      <ChevronUp size={32} strokeWidth={3} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
 
-            {/* Minutes with Arrows */}
-            <div className="relative flex flex-col items-center group/edit">
-              <AnimatePresence>
-                {isEditing && (
-                  <motion.button 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    onClick={() => adjustMinutes(1)} 
-                    className="absolute -top-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
-                  >
-                    <ChevronUp size={32} strokeWidth={3} />
-                  </motion.button>
-                )}
-              </AnimatePresence>
+                <div className="text-6xl lg:text-8xl font-black tabular-nums tracking-tighter text-indigo-600 italic">
+                  {time.getMinutes().toString().padStart(2, '0')}
+                </div>
 
-              <div className="text-6xl font-black tabular-nums tracking-tighter text-indigo-600 italic">
-                {time.getMinutes().toString().padStart(2, '0')}
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      onClick={() => adjustMinutes(-1)} 
+                      className="absolute -bottom-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                    >
+                      <ChevronDown size={32} strokeWidth={3} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <AnimatePresence>
-                {isEditing && (
-                  <motion.button 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    onClick={() => adjustMinutes(-1)} 
-                    className="absolute -bottom-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
-                  >
-                    <ChevronDown size={32} strokeWidth={3} />
-                  </motion.button>
-                )}
-              </AnimatePresence>
+              <div className="text-5xl lg:text-7xl font-black text-slate-300">:</div>
+              <div className="text-4xl lg:text-6xl font-black tabular-nums text-rose-500 italic">
+                {time.getSeconds().toString().padStart(2, '0')}
+              </div>
+
+              {/* AM/PM with Toggles */}
+              <div className="flex flex-col ml-4 relative items-center group/edit">
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button 
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      onClick={toggleAMPM}
+                      className="absolute -top-10 text-indigo-400 hover:text-indigo-600 transition-colors"
+                    >
+                      <ChevronUp size={24} strokeWidth={3} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">
+                  <FormattedMessage id="clock.status" defaultMessage="Status" />
+                </span>
+                <span className={`text-xl lg:text-3xl font-black text-indigo-600 uppercase italic ${isEditing ? 'cursor-pointer hover:scale-110' : ''}`} onClick={isEditing ? toggleAMPM : undefined}>
+                  {time.getHours() >= 12 ? 'PM' : 'AM'}
+                </span>
+
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button 
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      onClick={toggleAMPM}
+                      className="absolute -bottom-10 text-indigo-400 hover:text-indigo-600 transition-colors"
+                    >
+                      <ChevronDown size={24} strokeWidth={3} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
-            <div className="text-5xl font-black text-slate-300">:</div>
-            <div className="text-4xl font-black tabular-nums text-rose-500 italic">
-              {time.getSeconds().toString().padStart(2, '0')}
+            {/* 4. Word Clock */}
+            <div className="w-full text-center py-10 lg:py-14 bg-white rounded-[2.5rem] border-4 border-slate-200">
+              <h2 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tight italic uppercase px-8 leading-tight">
+                {getTimeInWords(time, intl)}
+              </h2>
             </div>
-
-            {/* AM/PM with Toggles */}
-            <div className="flex flex-col ml-4 relative items-center group/edit">
-              <AnimatePresence>
-                {isEditing && (
-                  <motion.button 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    onClick={toggleAMPM}
-                    className="absolute -top-10 text-indigo-400 hover:text-indigo-600 transition-colors"
-                  >
-                    <ChevronUp size={24} strokeWidth={3} />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">
-                <FormattedMessage id="clock.status" defaultMessage="Status" />
-              </span>
-              <span className={`text-xl font-black text-indigo-600 uppercase italic ${isEditing ? 'cursor-pointer hover:scale-110' : ''}`} onClick={isEditing ? toggleAMPM : undefined}>
-                {time.getHours() >= 12 ? 'PM' : 'AM'}
-              </span>
-
-              <AnimatePresence>
-                {isEditing && (
-                  <motion.button 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    onClick={toggleAMPM}
-                    className="absolute -bottom-10 text-indigo-400 hover:text-indigo-600 transition-colors"
-                  >
-                    <ChevronDown size={24} strokeWidth={3} />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* 4. Word Clock (Bottom) */}
-          <div className="w-full max-w-2xl text-center py-8 bg-white rounded-[2.5rem] border-4 border-slate-200 ">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight italic uppercase px-6 leading-tight">
-              {getTimeInWords(time, intl)}
-            </h2>
           </div>
         </div>
       </ToolPanel>

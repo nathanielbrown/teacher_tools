@@ -8,8 +8,44 @@ import { tools } from '../data/tools';
 // Mock scrollIntoView as it's not implemented in JSDOM
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
+// Mock speechSynthesis
+Object.defineProperty(window, 'speechSynthesis', {
+  value: {
+    getVoices: vi.fn().mockReturnValue([]),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    speak: vi.fn(),
+    cancel: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    onvoiceschanged: null,
+  },
+  writable: true
+});
+
 import { IntlProvider } from 'react-intl';
 import enMessages from '../i18n/en.json';
+import Matter from 'matter-js';
+
+// Mock Matter.Bodies.fromVertices and Render as they might be missing in test env
+const patchMatter = (obj: any) => {
+  if (!obj) return;
+  if (obj.Bodies && !obj.Bodies.fromVertices) obj.Bodies.fromVertices = () => ({});
+  if (!obj.Render) obj.Render = {};
+  
+  // Always mock these to ensure they work in JSDOM
+  obj.Render.create = () => ({ 
+    canvas: { 
+      style: {}, 
+      remove: () => {} 
+    } 
+  });
+  obj.Render.run = () => {};
+  obj.Render.stop = () => {};
+};
+
+patchMatter(Matter);
+if ((Matter as any).default) patchMatter((Matter as any).default);
 
 describe('Tools Smoke Test', () => {
   // We iterate over the actual tools array used by the app

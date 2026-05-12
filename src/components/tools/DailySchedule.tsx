@@ -11,7 +11,7 @@ import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import { defaultSchedules, DAYS, SCHOOL_EMOJIS } from './DailySchedule/scheduleData';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { useIntl, FormattedMessage } from 'react-intl';
 
@@ -83,18 +83,16 @@ export const DailySchedule = () => {
   const { settings } = useSettings();
   const intl = useIntl();
 
-  const [currentDay, setCurrentDay] = useState('Monday');
-  const [allSchedules, setAllSchedules] = useState(() => {
-    const saved = storage.getItem('daily_schedules_v2');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse saved schedules', e);
-      }
+  const [currentDay, setCurrentDay] = useState(() => {
+    const dayIndex = new Date().getDay();
+    // DAYS is ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    // Monday is 1, Friday is 5. Sunday is 0, Saturday is 6.
+    if (dayIndex >= 1 && dayIndex <= 5) {
+      return DAYS[dayIndex - 1];
     }
-    return defaultSchedules;
+    return DAYS[0]; // Default to Monday on weekends
   });
+  const [allSchedules, setAllSchedules] = useLocalStorage<any>('daily_schedule_list', defaultSchedules);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState('');
 
@@ -141,9 +139,7 @@ export const DailySchedule = () => {
   const currentSchedule = useMemo(() => allSchedules[currentDay] || [], [allSchedules, currentDay]);
 
 
-  useEffect(() => {
-    storage.setItem('daily_schedules_v2', JSON.stringify(allSchedules));
-  }, [allSchedules]);
+  // Persistence handled by useLocalStorage
 
   const resetSchedule = useCallback(() => {
     setAllSchedules(prev => ({

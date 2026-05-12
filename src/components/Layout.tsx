@@ -95,7 +95,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
     ];
   }, [intl]);
 
-  const [sidebarMode, setSidebarMode] = useLocalStorage<'hidden' | 'mini' | 'full'>('sidebar-mode', 
+  const [sidebarMode, setSidebarMode] = useLocalStorage<'hidden' | 'mini' | 'full'>('layout_sidebar_mode', 
     window.innerWidth < 1024 ? 'hidden' : 'mini'
   );
 
@@ -414,7 +414,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               {/* Desktop Navigation Tabs */}
               <div className="hidden lg:flex items-center p-1.5 bg-slate-100/50 backdrop-blur-md rounded-[1.75rem] gap-1.5 border border-slate-200/50">
                 {['Teacher Tools', 'Classroom Games', 'Student Tools'].map(tab => {
-                  const isTabActive = activeTab === tab;
+                  const isTabActive = activeTab === tab && currentTool !== 'config';
                   const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
 
                   const tabLabel = tab === 'Teacher Tools'
@@ -447,7 +447,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveOverlay('about')}
-                  className={`p-3 rounded-2xl transition-all active:scale-90 ${activeOverlay === 'about' ? 'bg-slate-800 text-white shadow-lg' : 'hover:bg-slate-100/80 text-slate-600'}`}
+                  className={`p-3 rounded-2xl transition-all active:scale-90 ${activeOverlay === 'about' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-100/80 text-slate-600'}`}
                   title="About ClassRex"
                 >
                   {settings.theme === 'early-years' ? (
@@ -459,7 +459,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
 
                 <button
                   onClick={() => onNavigate('config')}
-                  className={`p-3 rounded-2xl transition-all active:scale-90 ${currentTool === 'config' ? 'bg-slate-800 text-white shadow-lg' : 'hover:bg-slate-100/80 text-slate-600'}`}
+                  className={`p-3 rounded-2xl transition-all active:scale-90 ${currentTool === 'config' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-100/80 text-slate-600'}`}
                   title={intl.formatMessage({ id: 'nav.settings', defaultMessage: 'Settings' })}
                 >
                   {settings.theme === 'early-years' ? (
@@ -474,7 +474,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
             {/* Mobile Navigation Tabs */}
             <div className="lg:hidden mt-2 flex items-center p-1 bg-white/50 backdrop-blur-md rounded-xl overflow-x-auto no-scrollbar border border-white/50">
               {['Teacher Tools', 'Classroom Games', 'Student Tools'].map(tab => {
-                const isTabActive = activeTab === tab;
+                const isTabActive = activeTab === tab && currentTool !== 'config';
                 const tabColorClass = tab === 'Teacher Tools' ? 'primary' : tab === 'Classroom Games' ? 'secondary' : 'accent';
 
                 const tabLabel = tab === 'Teacher Tools'
@@ -534,7 +534,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-48 md:top-64 right-12 md:right-16 w-[calc(100vw-4rem)] md:w-96 bg-slate-900 text-white p-8 rounded-[3rem] shadow-2xl pointer-events-auto text-sm leading-relaxed border border-white/10 premium-shadow"
+                className="absolute top-48 md:top-64 right-12 md:right-16 w-[calc(100vw-4rem)] md:w-96 bg-slate-800 text-white p-8 rounded-[3rem] shadow-2xl pointer-events-auto text-sm leading-relaxed border border-white/10 premium-shadow"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-6">
@@ -569,7 +569,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-800/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarMode('hidden')}
         />
       )}

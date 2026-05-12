@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  Plus, 
-  Minus, 
-  RotateCcw, 
-  Sparkles, 
-  Trophy, 
-  Settings, 
-  X, 
+import {
+  Plus,
+  Minus,
+  RotateCcw,
+  Sparkles,
+  Trophy,
+  Settings,
+  X,
   Target,
   Volume2,
   MousePointer2
@@ -17,7 +17,7 @@ import Matter from 'matter-js';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import { useHeader } from '../../contexts/HeaderContext';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { SettingsPanel } from '../shared/SettingsPanel';
 import { FormattedMessage } from 'react-intl';
@@ -25,11 +25,14 @@ import { FormattedMessage } from 'react-intl';
 // 1. Constants
 const MARBLE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#06b6d4'];
 const MARBLE_RADIUS = 20;
+const DEBUG_PHYSICS = false;
+const PANEL_WIDTH = 1200;
+const PANEL_HEIGHT = 800;
 
 const JAR_STYLES = [
-  { id: 'small-classic', nameId: 'marblejar.settings.style.small-classic', width: 220, height: 280 },
-  { id: 'large-classic', nameId: 'marblejar.settings.style.large-classic', width: 280, height: 380 },
-  { id: 'large-tall', nameId: 'marblejar.settings.style.large-tall', width: 240, height: 450 },
+  { id: 'jar-small', nameId: 'marblejar.settings.style.jar-small', width: 190, height: 260, wallAngle: 0 },
+  { id: 'jar-big', nameId: 'marblejar.settings.style.jar-big', width: 270, height: 320, wallAngle: 0 },
+  { id: 'basin', nameId: 'marblejar.settings.style.basin', width: 650, height: 100, wallAngle: Math.PI / 10 },
 ];
 
 // 3. Text (Help and Info)
@@ -42,9 +45,9 @@ const getHelpInfo = () => (
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage 
-            id="marblejar.help.step1" 
-            defaultMessage="Click anywhere inside the jar to <b>drop a marble</b>."
+          <FormattedMessage
+            id="marblejar.help.step1"
+            defaultMessage="Click anywhere to <b>drop a marble</b>."
             values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
           />
         </p>
@@ -52,8 +55,8 @@ const getHelpInfo = () => (
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage 
-            id="marblejar.help.step2" 
+          <FormattedMessage
+            id="marblejar.help.step2"
             defaultMessage="Click on a <b>single marble</b> to remove it if you made a mistake."
             values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
           />
@@ -62,8 +65,8 @@ const getHelpInfo = () => (
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-green-50 flex items-center justify-center text-xs font-black text-green-600 shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage 
-            id="marblejar.help.step3" 
+          <FormattedMessage
+            id="marblejar.help.step3"
             defaultMessage="Set a <b>goal</b> in the settings. When the jar is full, you get a reward!"
             values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
           />
@@ -72,8 +75,8 @@ const getHelpInfo = () => (
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-purple-50 flex items-center justify-center text-xs font-black text-purple-600 shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage 
-            id="marblejar.help.step4" 
+          <FormattedMessage
+            id="marblejar.help.step4"
             defaultMessage="You can change the <b>jar style</b> in the settings panel."
             values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
           />
@@ -85,36 +88,25 @@ const getHelpInfo = () => (
 
 export const MarbleJar = () => {
   const { settings } = useSettings();
-  const { 
-    setHasConfig, setHelpContent, setOnReset, 
-    clearHeader, isConfigOpen, setIsConfigOpen, setOnConfigToggle 
+  const {
+    setHasConfig, setHelpContent, setOnReset,
+    clearHeader, isConfigOpen, setIsConfigOpen, setOnConfigToggle
   } = useHeader();
-  
-  const [marbleCount, setMarbleCount] = useState(() => {
-    const saved = storage.getItem('teacherToolsMarbleJarCount');
-    return saved ? JSON.parse(saved) : 0;
-  });
 
-  const [target, setTarget] = useState(() => {
-    const saved = storage.getItem('teacherToolsMarbleJarTarget');
-    return saved ? JSON.parse(saved) : 10;
-  });
-  
-  const [jarStyleId, setJarStyleId] = useState(() => {
-    const saved = storage.getItem('teacherToolsMarbleJarStyle');
-    return saved ? JSON.parse(saved) : 'large-classic';
-  });
+  const [marbleCount, setMarbleCount] = useLocalStorage<number>('marble_jar_count', 0);
+  const [target, setTarget] = useLocalStorage<number>('marble_jar_target', 10);
+  const [jarStyleId, setJarStyleId] = useLocalStorage<string>('marble_jar_style', 'jar-big');
 
   const currentJarStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[1];
   const { width: JAR_WIDTH, height: JAR_HEIGHT } = currentJarStyle;
 
   const [isRewarding, setIsRewarding] = useState(false);
   const [hoverX, setHoverX] = useState<number | null>(null);
-  
+
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const jarContainerRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const marbleBodiesRef = useRef<Matter.Body[]>([]);
 
   const triggerReward = useCallback(() => {
@@ -129,39 +121,38 @@ export const MarbleJar = () => {
     }());
   }, [settings.soundTheme]);
 
-  const addMarble = useCallback((xPos = JAR_WIDTH / 2) => {
+  const addMarble = useCallback((xPos = PANEL_WIDTH / 2) => {
     if (isRewarding) return;
     audioEngine.playTick(settings.soundTheme);
-    
+
     const engine = engineRef.current;
     if (engine) {
-       const color = MARBLE_COLORS[marbleCount % MARBLE_COLORS.length];
-       const newMarble = Matter.Bodies.circle(
-         xPos + (Math.random() * 10 - 5), 
-         -50, 
-         MARBLE_RADIUS, 
-         { 
-           restitution: 0.7,
-           friction: 0.02,
-           density: 0.05,
-           render: { fillStyle: color } as any
-         }
-       );
-       Matter.World.add(engine.world, newMarble);
-       marbleBodiesRef.current.push(newMarble);
+      const color = MARBLE_COLORS[marbleCount % MARBLE_COLORS.length];
+      const newMarble = Matter.Bodies.circle(
+        xPos + (Math.random() * 10 - 5),
+        -50,
+        MARBLE_RADIUS,
+        {
+          restitution: 0.7,
+          friction: 0.02,
+          density: 0.05,
+          render: { fillStyle: color } as any
+        }
+      );
+      Matter.World.add(engine.world, newMarble);
+      marbleBodiesRef.current.push(newMarble);
+      setMarbleCount(prev => prev + 1);
     }
-    
-    setMarbleCount(prev => prev + 1);
-  }, [isRewarding, marbleCount, settings.soundTheme, JAR_WIDTH]);
+  }, [isRewarding, marbleCount, settings.soundTheme]);
 
   const removeMarbleAtPoint = useCallback((x: number, y: number) => {
     if (isRewarding) return;
     const engine = engineRef.current;
     if (!engine) return;
-    
+
     const bodies = marbleBodiesRef.current;
     const clickedBodies = Matter.Query.point(bodies, { x, y });
-    
+
     if (clickedBodies.length > 0 && marbleCount > 0) {
       const clickedBody = clickedBodies[0];
       Matter.World.remove(engine.world, clickedBody);
@@ -178,43 +169,154 @@ export const MarbleJar = () => {
     setIsRewarding(false);
     setIsConfigOpen(false);
     audioEngine.playTick(settings.soundTheme);
-    
+
     const engine = engineRef.current;
     if (engine) {
       Matter.World.clear(engine.world, false);
       marbleBodiesRef.current = [];
-      // Re-add walls
+
       const wallOptions = { isStatic: true, friction: 0.1, restitution: 0.5 };
-      const cornerRadius = 80;
       const wallThickness = 40;
-      const ground = Matter.Bodies.rectangle(JAR_WIDTH / 2, JAR_HEIGHT + wallThickness / 2 - 10, JAR_WIDTH - cornerRadius * 2, wallThickness, wallOptions);
-      const leftWall = Matter.Bodies.rectangle(-wallThickness / 2 + 10, JAR_HEIGHT / 2, wallThickness, JAR_HEIGHT * 2, wallOptions);
-      const rightWall = Matter.Bodies.rectangle(JAR_WIDTH + wallThickness / 2 - 10, JAR_HEIGHT / 2, wallThickness, JAR_HEIGHT * 2, wallOptions);
-      const leftCorner = Matter.Bodies.rectangle(cornerRadius / 3, JAR_HEIGHT - cornerRadius / 4, cornerRadius * 1.2, wallThickness, { ...wallOptions, angle: Math.PI / 5 });
-      const rightCorner = Matter.Bodies.rectangle(JAR_WIDTH - cornerRadius / 3, JAR_HEIGHT - cornerRadius / 4, cornerRadius * 1.2, { ...wallOptions, angle: -Math.PI / 5 });
-      Matter.World.add(engine.world, [ground, leftWall, rightWall, leftCorner, rightCorner]);
+
+      const currentStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[0];
+      const wallAngle = currentStyle.wallAngle || 0;
+
+      const centerX = PANEL_WIDTH / 2;
+      const centerY = PANEL_HEIGHT / 2;
+      const jarBottom = centerY + JAR_HEIGHT / 2;
+      const jarTop = centerY - JAR_HEIGHT / 2;
+
+      // Bottom
+      const ground = Matter.Bodies.rectangle(centerX, jarBottom + wallThickness / 2 - 10, JAR_WIDTH, wallThickness, wallOptions);
+
+      const jarTopHalfWidth = (JAR_WIDTH / 2) + (JAR_HEIGHT * Math.tan(wallAngle));
+      const jarBottomHalfWidth = JAR_WIDTH / 2;
+
+      const isJar = wallAngle === 0;
+
+      // Triangular Left Wall
+      const leftVerts = isJar 
+        ? [
+            { x: centerX - JAR_WIDTH / 2, y: jarTop },
+            { x: centerX - JAR_WIDTH / 2, y: jarBottom },
+            { x: centerX - JAR_WIDTH / 2 + wallThickness, y: jarBottom }
+          ]
+        : [
+            { x: centerX - jarTopHalfWidth, y: jarTop },
+            { x: centerX - jarBottomHalfWidth, y: jarBottom },
+            { x: centerX - jarBottomHalfWidth - wallThickness, y: jarBottom }
+          ];
+      const leftWall = Matter.Bodies.fromVertices(
+        (leftVerts[0].x + leftVerts[1].x + leftVerts[2].x) / 3,
+        (leftVerts[0].y + leftVerts[1].y + leftVerts[2].y) / 3,
+        [leftVerts],
+        wallOptions
+      );
+
+      // Triangular Right Wall
+      const rightVerts = isJar
+        ? [
+            { x: centerX + JAR_WIDTH / 2, y: jarTop },
+            { x: centerX + JAR_WIDTH / 2, y: jarBottom },
+            { x: centerX + JAR_WIDTH / 2 - wallThickness, y: jarBottom }
+          ]
+        : [
+            { x: centerX + jarTopHalfWidth, y: jarTop },
+            { x: centerX + jarBottomHalfWidth, y: jarBottom },
+            { x: centerX + jarBottomHalfWidth + wallThickness, y: jarBottom }
+          ];
+      const rightWall = Matter.Bodies.fromVertices(
+        (rightVerts[0].x + rightVerts[1].x + rightVerts[2].x) / 3,
+        (rightVerts[0].y + rightVerts[1].y + rightVerts[2].y) / 3,
+        [rightVerts],
+        wallOptions
+      );
+
+      Matter.World.add(engine.world, [ground, leftWall, rightWall]);
     }
-  }, [settings.soundTheme, JAR_WIDTH, JAR_HEIGHT, setIsConfigOpen]);
+  }, [settings.soundTheme, JAR_WIDTH, JAR_HEIGHT, setIsConfigOpen, jarStyleId]);
 
   useEffect(() => {
     const engine = Matter.Engine.create();
     engineRef.current = engine;
-    
+
     const wallOptions = { isStatic: true, friction: 0.1, restitution: 0.5 };
-    const cornerRadius = 80;
     const wallThickness = 40;
 
-    const ground = Matter.Bodies.rectangle(JAR_WIDTH / 2, JAR_HEIGHT + wallThickness / 2 - 10, JAR_WIDTH - cornerRadius * 2, wallThickness, wallOptions);
-    const leftWall = Matter.Bodies.rectangle(-wallThickness / 2 + 10, JAR_HEIGHT / 2, wallThickness, JAR_HEIGHT * 2, wallOptions);
-    const rightWall = Matter.Bodies.rectangle(JAR_WIDTH + wallThickness / 2 - 10, JAR_HEIGHT / 2, wallThickness, JAR_HEIGHT * 2, wallOptions);
-    const leftCorner = Matter.Bodies.rectangle(cornerRadius / 3, JAR_HEIGHT - cornerRadius / 4, cornerRadius * 1.2, wallThickness, { ...wallOptions, angle: Math.PI / 5 });
-    const rightCorner = Matter.Bodies.rectangle(JAR_WIDTH - cornerRadius / 3, JAR_HEIGHT - cornerRadius / 4, cornerRadius * 1.2, { ...wallOptions, angle: -Math.PI / 5 });
-    
-    Matter.World.add(engine.world, [ground, leftWall, rightWall, leftCorner, rightCorner]);
+    const currentStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[0];
+    const wallAngle = currentStyle.wallAngle || 0;
+
+    const centerX = PANEL_WIDTH / 2;
+    const centerY = PANEL_HEIGHT / 2;
+    const jarBottom = centerY + JAR_HEIGHT / 2;
+
+    const ground = Matter.Bodies.rectangle(centerX, jarBottom + wallThickness / 2 - 10, JAR_WIDTH, wallThickness, wallOptions);
+
+    const jarTopHalfWidth = (JAR_WIDTH / 2) + (JAR_HEIGHT * Math.tan(wallAngle));
+    const jarBottomHalfWidth = JAR_WIDTH / 2;
+    const jarTop = centerY - JAR_HEIGHT / 2;
+
+    const isJar = wallAngle === 0;
+
+    // Triangular Left Wall
+    const leftVerts = isJar
+      ? [
+          { x: centerX - JAR_WIDTH / 2, y: jarTop },
+          { x: centerX - JAR_WIDTH / 2, y: jarBottom },
+          { x: centerX - JAR_WIDTH / 2 + wallThickness, y: jarBottom }
+        ]
+      : [
+          { x: centerX - jarTopHalfWidth, y: jarTop },
+          { x: centerX - jarBottomHalfWidth, y: jarBottom },
+          { x: centerX - jarBottomHalfWidth - wallThickness, y: jarBottom }
+        ];
+    const leftWall = Matter.Bodies.fromVertices(
+      (leftVerts[0].x + leftVerts[1].x + leftVerts[2].x) / 3,
+      (leftVerts[0].y + leftVerts[1].y + leftVerts[2].y) / 3,
+      [leftVerts],
+      wallOptions
+    );
+
+    // Triangular Right Wall
+    const rightVerts = isJar
+      ? [
+          { x: centerX + JAR_WIDTH / 2, y: jarTop },
+          { x: centerX + JAR_WIDTH / 2, y: jarBottom },
+          { x: centerX + JAR_WIDTH / 2 - wallThickness, y: jarBottom }
+        ]
+      : [
+          { x: centerX + jarTopHalfWidth, y: jarTop },
+          { x: centerX + jarBottomHalfWidth, y: jarBottom },
+          { x: centerX + jarBottomHalfWidth + wallThickness, y: jarBottom }
+        ];
+    const rightWall = Matter.Bodies.fromVertices(
+      (rightVerts[0].x + rightVerts[1].x + rightVerts[2].x) / 3,
+      (rightVerts[0].y + rightVerts[1].y + rightVerts[2].y) / 3,
+      [rightVerts],
+      wallOptions
+    );
+
+    Matter.World.add(engine.world, [ground, leftWall, rightWall]);
 
     const runner = Matter.Runner.create();
     Matter.Runner.run(runner, engine);
     runnerRef.current = runner;
+
+    let render: Matter.Render | null = null;
+    if (DEBUG_PHYSICS) {
+      render = Matter.Render.create({
+        element: panelRef.current!,
+        engine: engine,
+        options: {
+          width: PANEL_WIDTH,
+          height: PANEL_HEIGHT,
+          wireframes: true,
+          background: 'transparent'
+        }
+      });
+      Matter.Render.run(render);
+      (render.canvas as HTMLCanvasElement).className = "absolute inset-0 z-50 pointer-events-none opacity-50";
+    }
 
     let animationFrameId: number;
     const renderLoop = () => {
@@ -222,7 +324,23 @@ export const MarbleJar = () => {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, JAR_WIDTH, JAR_HEIGHT);
+      ctx.clearRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+
+      // Destroy marbles that fall out
+      const toRemove: Matter.Body[] = [];
+      marbleBodiesRef.current.forEach(body => {
+        if (body.position.y > PANEL_HEIGHT + MARBLE_RADIUS * 2) {
+          toRemove.push(body);
+        }
+      });
+
+      if (toRemove.length > 0) {
+        toRemove.forEach(body => {
+          Matter.World.remove(engine.world, body);
+          marbleBodiesRef.current = marbleBodiesRef.current.filter(b => b !== body);
+        });
+        setMarbleCount(marbleBodiesRef.current.length);
+      }
 
       marbleBodiesRef.current.forEach((body: any) => {
         const { position, circleRadius } = body;
@@ -231,16 +349,16 @@ export const MarbleJar = () => {
         ctx.save();
         ctx.translate(position.x, position.y);
         ctx.rotate(body.angle);
-        
-        const gradient = ctx.createRadialGradient(-circleRadius*0.3, -circleRadius*0.3, circleRadius*0.1, 0, 0, circleRadius);
+
+        const gradient = ctx.createRadialGradient(-circleRadius * 0.3, -circleRadius * 0.3, circleRadius * 0.1, 0, 0, circleRadius);
         gradient.addColorStop(0, color);
-        gradient.addColorStop(1, '#000000');
-        
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+
         ctx.beginPath();
         ctx.arc(0, 0, circleRadius, 0, 2 * Math.PI);
         ctx.fillStyle = gradient;
         ctx.fill();
-        
+
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.stroke();
@@ -249,7 +367,7 @@ export const MarbleJar = () => {
         ctx.arc(-circleRadius * 0.4, -circleRadius * 0.4, circleRadius * 0.25, 0, 2 * Math.PI);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.fill();
-        
+
         ctx.restore();
       });
 
@@ -258,17 +376,19 @@ export const MarbleJar = () => {
     renderLoop();
 
     return () => {
+      if (render) {
+        Matter.Render.stop(render);
+        render.canvas.remove();
+      }
       Matter.Runner.stop(runner);
       Matter.Engine.clear(engine);
       cancelAnimationFrame(animationFrameId);
       marbleBodiesRef.current = [];
     };
-  }, [JAR_WIDTH, JAR_HEIGHT]);
+  }, [JAR_WIDTH, JAR_HEIGHT, jarStyleId]);
 
   useEffect(() => {
-    storage.setItem('teacherToolsMarbleJarCount', JSON.stringify(marbleCount));
-    storage.setItem('teacherToolsMarbleJarTarget', JSON.stringify(target));
-    storage.setItem('teacherToolsMarbleJarStyle', JSON.stringify(jarStyleId));
+    // Persistence handled by useLocalStorage
 
     const engine = engineRef.current;
     if (!engine) return;
@@ -276,10 +396,10 @@ export const MarbleJar = () => {
     while (marbleBodiesRef.current.length < marbleCount) {
       const color = MARBLE_COLORS[marbleBodiesRef.current.length % MARBLE_COLORS.length];
       const newMarble = Matter.Bodies.circle(
-        JAR_WIDTH / 2 + (Math.random() * 40 - 20), 
-        -50, 
-        MARBLE_RADIUS, 
-        { 
+        PANEL_WIDTH / 2 + (Math.random() * 40 - 20),
+        PANEL_HEIGHT / 2 + (Math.random() * 40 - 20),
+        MARBLE_RADIUS,
+        {
           restitution: 0.7,
           friction: 0.02,
           density: 0.05,
@@ -304,114 +424,139 @@ export const MarbleJar = () => {
   }, [clearHeader, setOnReset, resetJar, setHelpContent, setHasConfig, setOnConfigToggle, setIsConfigOpen]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!jarContainerRef.current) return;
-    const rect = jarContainerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const boundedX = Math.max(MARBLE_RADIUS, Math.min(x, JAR_WIDTH - MARBLE_RADIUS));
-    setHoverX(boundedX);
+    if (!panelRef.current) return;
+    const rect = panelRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (PANEL_WIDTH / rect.width);
+    setHoverX(x);
   };
 
   const handleMouseLeave = () => {
     setHoverX(null);
   };
 
-  const handleJarClick = (e: React.MouseEvent) => {
-    if (!jarContainerRef.current) return;
-    const rect = jarContainerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  const handlePanelClick = (e: React.MouseEvent) => {
+    if (!panelRef.current) return;
+    const rect = panelRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (PANEL_WIDTH / rect.width);
+    const y = (e.clientY - rect.top) * (PANEL_HEIGHT / rect.height);
     removeMarbleAtPoint(x, y);
   };
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden">
-      <ToolPanel className="flex-1" baseWidth={1200} baseHeight={800}>
-        <div className="flex flex-col items-center justify-center w-full h-full relative group">
-          
-          <div className="relative flex flex-col items-center z-10 w-full h-full">
-            {/* Drop Preview */}
-            <div className="h-[60px] w-full relative mb-8 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none">
-               {hoverX !== null && !isRewarding && (
-                 <motion.div 
-                   className="absolute top-0 w-12 h-12 rounded-full bg-white/40  backdrop-blur-xl border-4 border-white flex items-center justify-center overflow-hidden"
-                   style={{ left: hoverX, transform: 'translateX(-50%)' }}
-                   layoutId="drop-preview"
-                 >
-                    <div className="w-full h-full bg-gradient-to-tr from-slate-200/50 to-transparent" />
-                 </motion.div>
-               )}
+      <ToolPanel className="flex-1" baseWidth={PANEL_WIDTH} baseHeight={PANEL_HEIGHT} fluid={false}>
+        <div
+          ref={panelRef}
+          onClick={handlePanelClick}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className="flex flex-col items-center justify-center w-full h-full relative group cursor-crosshair overflow-hidden"
+        >
+          {/* Container Visual Centered */}
+          <div className="relative z-10 flex items-center justify-center">
+            {(() => {
+              const currentStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[0];
+              const wallAngle = currentStyle.wallAngle || 0;
+              const isJar = wallAngle === 0;
+              const wallThickness = 40;
+
+              const visualTopWidth = isJar ? JAR_WIDTH : JAR_WIDTH + (2 * JAR_HEIGHT * Math.tan(wallAngle));
+              const bottomWidth = isJar ? JAR_WIDTH - (2 * wallThickness) : JAR_WIDTH;
+              const bottomPercent = (bottomWidth / visualTopWidth) * 100;
+              const sidePadding = (100 - bottomPercent) / 2;
+
+              return (
+                <div
+                  className="relative bg-white/10 backdrop-blur-[2px] border-[10px] border-white/90 shadow-[inset_0_0_80px_rgba(255,255,255,0.5)]"
+                  style={{
+                    width: visualTopWidth,
+                    height: JAR_HEIGHT,
+                    clipPath: `polygon(0% 0%, 100% 0%, ${100 - sidePadding}% 100%, ${sidePadding}% 100%)`,
+                    borderRadius: isJar ? '0 0 4rem 4rem' : '0 0 1rem 1rem'
+                  }}
+                >
+                  {/* Optical Effects */}
+                  <div className="absolute inset-0 pointer-events-none z-30 bg-gradient-to-tr from-white/10 via-transparent to-white/5" />
+                  <div className="absolute left-8 top-8 bottom-8 w-3 bg-white/10 rounded-full blur-[3px] pointer-events-none z-30 opacity-60" />
+                  <div className="absolute right-12 top-12 w-2 h-20 bg-white/20 rounded-full blur-[1px] pointer-events-none z-30 opacity-40 rotate-6" />
+                </div>
+              );
+            })()}
+          </div>
+
+          <canvas
+            ref={canvasRef}
+            width={PANEL_WIDTH}
+            height={PANEL_HEIGHT}
+            className="w-full h-full absolute inset-0 z-20 pointer-events-none"
+          />
+
+          {/* Status Display inside ToolPanel */}
+          <div className="absolute bottom-10 left-0 right-0 flex items-center justify-center gap-16 pointer-events-none z-30 italic">
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
+                <FormattedMessage id="marblejar.status.marbles" defaultMessage="Marbles" />
+              </span>
+              <motion.span
+                key={marbleCount}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="text-8xl font-black text-slate-900 italic tracking-tighter leading-none tabular-nums"
+              >
+                {marbleCount}
+              </motion.span>
             </div>
 
-            {/* Jar Container */}
-            <div 
-              ref={jarContainerRef}
-              onClick={handleJarClick}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              className="relative bg-white/10 backdrop-blur-[2px] rounded-b-[5rem] border-[10px] border-t-0 border-white/90 -[0_50px_100px_-20px_rgba(0,0,0,0.1),inset_0_0_80px_rgba(255,255,255,0.5)] overflow-hidden cursor-crosshair"
-              style={{ width: JAR_WIDTH, height: JAR_HEIGHT }}
+            <div className="w-px h-20 bg-slate-200" />
+
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
+                <FormattedMessage id="marblejar.status.goal" defaultMessage="Goal" />
+              </span>
+              <span className="text-8xl font-black text-indigo-600 italic tracking-tighter leading-none tabular-nums">
+                {target}
+              </span>
+            </div>
+          </div>
+
+          {/* Drop Preview following mouse horizontally at top */}
+          {hoverX !== null && !isRewarding && (
+            <div
+              style={{
+                position: 'absolute',
+                left: hoverX,
+                top: 20,
+                zIndex: 40,
+                pointerEvents: 'none'
+              }}
             >
-               <div className="absolute top-0 left-0 right-0 h-14 bg-white/30 border-b-4 border-white/40 z-20 pointer-events-none flex items-center justify-center">
-                  <div className="w-1/3 h-2 bg-white/20 rounded-full" />
-               </div>
-               
-               <canvas 
-                 ref={canvasRef} 
-                 width={JAR_WIDTH} 
-                 height={JAR_HEIGHT} 
-                 className="w-full h-full absolute inset-0 z-10 pointer-events-none"
-               />
-
-               {/* Optical Effects */}
-               <div className="absolute inset-0 pointer-events-none z-30 bg-gradient-to-tr from-white/10 via-transparent to-white/5" />
-               <div className="absolute left-8 top-16 bottom-16 w-3 bg-white/10 rounded-full blur-[3px] pointer-events-none z-30 opacity-60" />
-               <div className="absolute right-12 top-24 w-2 h-32 bg-white/20 rounded-full blur-[1px] pointer-events-none z-30 opacity-40 rotate-6" />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-10 h-10 rounded-full bg-white/40 backdrop-blur-xl border-4 border-white flex items-center justify-center overflow-hidden"
+                style={{ x: '-50%' }}
+              >
+                <div className="w-full h-full bg-gradient-to-tr from-slate-200/50 to-transparent" />
+              </motion.div>
             </div>
+          )}
 
-            {/* Tap Instruction */}
-            <div className="mt-8 flex items-center gap-4 bg-white/80 border-2 border-slate-100 px-6 py-3 rounded-2xl backdrop-blur-md  pointer-events-none italic">
-               <div className="text-right">
-                  <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">
-                    <FormattedMessage id="marblejar.status.ready" defaultMessage="Tap to add" />
-                  </p>
-               </div>
-               <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white ">
-                  <MousePointer2 size={16} strokeWidth={3} />
-               </div>
+          {/* Tap Instruction */}
+          <div className="absolute top-8 right-8 flex items-center gap-4 bg-white/80 border-2 border-slate-100 px-6 py-3 rounded-2xl backdrop-blur-md pointer-events-none italic z-30">
+            <div className="text-right">
+              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">
+                <FormattedMessage id="marblejar.status.ready" defaultMessage="Tap to add" />
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white ">
+              <MousePointer2 size={16} strokeWidth={3} />
             </div>
           </div>
         </div>
       </ToolPanel>
 
       {/* Sidebar with Settings and Status */}
-      <div className="w-full lg:w-[400px] flex flex-col gap-8 italic">
-        
-        {/* Status Card */}
-        <div className="bg-slate-900 p-10 rounded-[3rem] border-4 border-slate-800  flex flex-col items-center gap-6 relative overflow-hidden shrink-0">
-           <div className="relative z-10 flex flex-col items-center w-full">
-              <div className="flex items-center gap-4 mb-2">
-                 <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse -[0_0_15px_rgba(16,185,129,0.5)]" />
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">
-                   <FormattedMessage id="marblejar.status.marbles" defaultMessage="Marbles" />
-                 </span>
-              </div>
-              <motion.span 
-                key={marbleCount}
-                initial={{ scale: 0.8, opacity: 0, y: 10 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="text-[8rem] font-black text-white italic tracking-tighter leading-none tabular-nums"
-              >
-                {marbleCount}
-              </motion.span>
-              <div className="mt-6 flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-2 rounded-2xl">
-                 <Target size={14} className="text-indigo-400" />
-                 <span className="text-xs font-black text-indigo-200 uppercase tracking-widest">
-                   <FormattedMessage id="marblejar.status.goal" defaultMessage="Goal" />: {target}
-                 </span>
-              </div>
-           </div>
-        </div>
-
+      <div className={`transition-all duration-500 shrink-0 ${isConfigOpen ? 'w-full lg:w-[400px]' : 'w-0 opacity-0 pointer-events-none'}`}>
         {/* Settings Panel */}
         <SettingsPanel
           isOpen={isConfigOpen}
@@ -419,50 +564,49 @@ export const MarbleJar = () => {
           className="flex-1 overflow-y-auto"
         >
           <div className="space-y-10">
-             {/* Goal Setting */}
-             <div className="space-y-6">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
-                  <FormattedMessage id="marblejar.settings.goal" defaultMessage="Reward Goal" />
-                </label>
-                <div className="flex items-center justify-center gap-8">
-                   <button 
-                     onClick={() => { setTarget(t => Math.max(1, t - 5)); audioEngine.playTick(settings.soundTheme); }}
-                     className="p-4 bg-white rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-indigo-600 hover:border-indigo-100 active:scale-90 transition-all "
-                   >
-                     <Minus size={20} strokeWidth={4} />
-                   </button>
-                   <span className="text-5xl font-black text-slate-900 tabular-nums italic">{target}</span>
-                   <button 
-                     onClick={() => { setTarget(t => Math.min(100, t + 5)); audioEngine.playTick(settings.soundTheme); }}
-                     className="p-4 bg-white rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-indigo-600 hover:border-indigo-100 active:scale-90 transition-all "
-                   >
-                     <Plus size={20} strokeWidth={4} />
-                   </button>
-                </div>
-             </div>
+            {/* Goal Setting */}
+            <div className="space-y-6">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
+                <FormattedMessage id="marblejar.settings.goal" defaultMessage="Reward Goal" />
+              </label>
+              <div className="flex items-center justify-center gap-8">
+                <button
+                  onClick={() => { setTarget(t => Math.max(1, t - 5)); audioEngine.playTick(settings.soundTheme); }}
+                  className="p-4 bg-white rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-indigo-600 hover:border-indigo-100 active:scale-90 transition-all "
+                >
+                  <Minus size={20} strokeWidth={4} />
+                </button>
+                <span className="text-5xl font-black text-slate-900 tabular-nums italic">{target}</span>
+                <button
+                  onClick={() => { setTarget(t => Math.min(100, t + 5)); audioEngine.playTick(settings.soundTheme); }}
+                  className="p-4 bg-white rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-indigo-600 hover:border-indigo-100 active:scale-90 transition-all "
+                >
+                  <Plus size={20} strokeWidth={4} />
+                </button>
+              </div>
+            </div>
 
-             {/* Style Setting */}
-             <div className="space-y-6">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
-                  <FormattedMessage id="marblejar.settings.style" defaultMessage="Jar Style" />
-                </label>
-                <div className="grid grid-cols-1 gap-2">
-                   {JAR_STYLES.map(style => (
-                     <button
-                       key={style.id}
-                       onClick={() => { setJarStyleId(style.id); audioEngine.playTick(settings.soundTheme); }}
-                       className={`px-6 py-4 rounded-[1.5rem] border-4 transition-all flex items-center justify-between font-black text-xs uppercase tracking-widest ${
-                         jarStyleId === style.id 
-                           ? 'bg-slate-900 border-indigo-500 text-white ' 
-                           : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'
-                       }`}
-                     >
-                       <FormattedMessage id={style.nameId} defaultMessage={style.id} />
-                       <RotateCcw size={14} className={jarStyleId === style.id ? 'text-indigo-400' : 'opacity-0'} />
-                     </button>
-                   ))}
-                </div>
-             </div>
+            {/* Style Setting */}
+            <div className="space-y-6">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
+                <FormattedMessage id="marblejar.settings.style" defaultMessage="Jar Style" />
+              </label>
+              <div className="grid grid-cols-1 gap-2">
+                {JAR_STYLES.map(style => (
+                  <button
+                    key={style.id}
+                    onClick={() => { setJarStyleId(style.id); audioEngine.playTick(settings.soundTheme); }}
+                    className={`px-6 py-4 rounded-[1.5rem] border-4 transition-all flex items-center justify-between font-black text-xs uppercase tracking-widest ${jarStyleId === style.id
+                      ? 'bg-indigo-600 border-indigo-400 text-white '
+                      : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'
+                      }`}
+                  >
+                    <FormattedMessage id={style.nameId} defaultMessage={style.id} />
+                    <RotateCcw size={14} className={jarStyleId === style.id ? 'text-indigo-400' : 'opacity-0'} />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </SettingsPanel>
       </div>
@@ -474,7 +618,7 @@ export const MarbleJar = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-2xl p-8"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-900/40 backdrop-blur-2xl p-8"
           >
             <motion.div
               initial={{ scale: 0.5, y: 100 }}
@@ -484,13 +628,13 @@ export const MarbleJar = () => {
               <div className="relative">
                 <div className="absolute -inset-12 bg-indigo-500 blur-3xl opacity-20 animate-pulse rounded-full" />
                 <div className="w-40 h-40 rounded-[3rem] bg-indigo-600 flex items-center justify-center text-white relative z-10 rotate-3  border-8 border-white">
-                   <Trophy size={80} strokeWidth={1.5} className=" text-yellow-400" />
+                  <Trophy size={80} strokeWidth={1.5} className=" text-yellow-400" />
                 </div>
                 <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white  animate-bounce z-20 border-4 border-white">
-                   <Sparkles size={24} strokeWidth={3} />
+                  <Sparkles size={24} strokeWidth={3} />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <h3 className="text-5xl font-black text-slate-900 leading-none uppercase tracking-tighter">
                   <FormattedMessage id="marblejar.reward.title" defaultMessage="Well Done!" />
@@ -500,10 +644,10 @@ export const MarbleJar = () => {
                   <FormattedMessage id="marblejar.reward.subtitle" defaultMessage="Goal Reached!" />
                 </p>
               </div>
-              
+
               <button
                 onClick={resetJar}
-                className="w-full h-20 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg hover:bg-indigo-600 transition-all  flex items-center justify-center gap-4 border-4 border-white active:scale-95"
+                className="w-full h-20 bg-indigo-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg hover:bg-indigo-700 transition-all  flex items-center justify-center gap-4 border-4 border-white active:scale-95"
               >
                 <RotateCcw size={24} strokeWidth={4} />
                 <FormattedMessage id="marblejar.reward.reset" defaultMessage="Reset Jar" />

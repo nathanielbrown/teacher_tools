@@ -101,7 +101,10 @@ const HelpContent = () => (
         <div key={step} className="flex gap-3 text-left">
           <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">{step}</div>
           <p className="text-sm text-slate-600 font-medium leading-tight">
-            <FormattedMessage id={`colourpicker.help.step${step}`} />
+            <FormattedMessage 
+              id={`colourpicker.help.step${step}`} 
+              values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
+            />
           </p>
         </div>
       ))}

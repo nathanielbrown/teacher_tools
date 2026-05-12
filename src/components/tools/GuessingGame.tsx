@@ -17,10 +17,10 @@ const TIME_PER_QUESTION = 10;
 // 3. Text (Help and Info)
 const getHelpInfo = () => (
   <div className="space-y-4 font-['Outfit']">
-    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight italic">
+    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
       <FormattedMessage id="guessingGame.help.title" defaultMessage="How to Play the Guessing Game" />
     </h3>
-    <div className="space-y-3 italic">
+    <div className="space-y-3">
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
@@ -212,7 +212,7 @@ export const GuessingGame = () => {
   }, [clearHeader, setHelpContent]);
 
   return (
-    <ToolPanel className="italic" baseWidth={900} baseHeight={700}>
+    <ToolPanel baseWidth={900} baseHeight={700}>
       <AnimatePresence mode="wait">
         {status === 'setup' ? (
           <motion.div
@@ -222,7 +222,7 @@ export const GuessingGame = () => {
             exit={{ opacity: 0, scale: 0.95 }}
             className="flex-1 flex flex-col gap-10 items-center justify-center py-10 w-full"
           >
-            <div className="text-center space-y-4 italic">
+            <div className="text-center space-y-4">
                <h2 className="text-5xl font-black text-slate-800 tracking-tighter uppercase leading-none">
                  <FormattedMessage id="guessingGame.title" defaultMessage="Guessing Game" />
                </h2>
@@ -236,10 +236,10 @@ export const GuessingGame = () => {
                 <button
                   key={key}
                   onClick={() => initGame(key)}
-                  className="group relative p-10 bg-white border-4 border-slate-50 rounded-[4rem] transition-all flex items-center justify-between   hover:border-indigo-100 active:scale-95 overflow-hidden italic"
+                  className="group relative p-10 bg-white border-4 border-slate-50 rounded-[4rem] transition-all flex items-center justify-between   hover:border-indigo-100 active:scale-95 overflow-hidden"
                 >
                   <div className="flex items-center gap-8 relative z-10">
-                    <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-4xl  group-hover:scale-110 transition-transform ${getColorClasses(topic.color)}`}>
+                    <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-4xl not-italic group-hover:scale-110 transition-transform ${getColorClasses(topic.color)}`}>
                       {topic.icon}
                     </div>
                     <div className="text-left">
@@ -266,7 +266,7 @@ export const GuessingGame = () => {
             key="playing"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 flex flex-col items-center justify-center gap-12 w-full max-w-4xl mx-auto italic"
+            className="flex-1 flex flex-col items-center justify-center gap-12 w-full max-w-4xl mx-auto"
           >
             <div className="flex justify-between items-center w-full px-10 py-8 bg-white rounded-[3rem] border-4 border-slate-50 ">
                <div className="flex items-center gap-4">
@@ -316,7 +316,7 @@ export const GuessingGame = () => {
                       key={idx}
                       onClick={() => handleAnswerSelect(option.name)}
                       disabled={isEvaluating}
-                      className={`py-6 px-8 rounded-[2rem] border-4 font-black text-2xl transition-all uppercase italic tracking-tighter ${buttonStyle} disabled:cursor-default`}
+                      className={`py-6 px-8 rounded-[2rem] border-4 font-black text-2xl transition-all uppercase tracking-tighter ${buttonStyle} disabled:cursor-default`}
                     >
                       {option.name}
                     </button>
@@ -327,7 +327,7 @@ export const GuessingGame = () => {
 
             <button
               onClick={() => { setStatus('setup'); audioEngine.playTick(settings.soundTheme); }}
-              className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95  italic"
+              className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95"
             >
               <RotateCcw size={14} /> <FormattedMessage id="guessingGame.quit" defaultMessage="Quit Game" />
             </button>
@@ -337,7 +337,7 @@ export const GuessingGame = () => {
             key="finished"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 bg-slate-900 rounded-[5rem] flex flex-col items-center justify-center p-20 text-center text-white space-y-16  relative overflow-hidden italic w-full"
+            className="flex-1 bg-slate-900 rounded-[5rem] flex flex-col items-center justify-center p-20 text-center text-white space-y-16  relative overflow-hidden w-full"
           >
             <div className="tool-grid-bg-dark opacity-[0.05]" />
             <div className="relative">

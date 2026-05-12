@@ -13,7 +13,7 @@ import { ToolPanel } from '../shared/ToolPanel';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants (None outside functions)
 
@@ -156,16 +156,13 @@ export const Sudoku = () => {
   const { setHeaderActions, setHelpContent, setOnReset, clearHeader } = useHeader();
   const { settings } = useSettings();
   
-  const [grid, setGrid] = useState(Array(9).fill(null).map(() => Array(9).fill(0)));
-  const [initialGrid, setInitialGrid] = useState(Array(9).fill(null).map(() => Array(9).fill(0)));
-  const [solution, setSolution] = useState<number[][] | null>(null);
+  const [grid, setGrid] = useLocalStorage('sudoku_grid', Array(9).fill(null).map(() => Array(9).fill(0)));
+  const [initialGrid, setInitialGrid] = useLocalStorage('sudoku_initial_grid', Array(9).fill(null).map(() => Array(9).fill(0)));
+  const [solution, setSolution] = useLocalStorage<number[][] | null>('sudoku_solution', null);
   const [selected, setSelected] = useState<{row: number, col: number} | null>(null);
-  const [difficulty, setDifficulty] = useState('Easy');
-  const [status, setStatus] = useState('loading');
-  const [stats, setStats] = useState<Record<string, number>>(() => {
-    const saved = storage.getItem('teacherToolsSudokuStats');
-    return saved ? JSON.parse(saved) : { Easy: 0, Medium: 0, Hard: 0 };
-  });
+  const [difficulty, setDifficulty] = useLocalStorage('sudoku_difficulty', 'Easy');
+  const [status, setStatus] = useLocalStorage('sudoku_status', 'loading');
+  const [stats, setStats] = useLocalStorage<Record<string, number>>('sudoku_stats', { Easy: 0, Medium: 0, Hard: 0 });
 
   const initGame = useCallback((level = difficulty) => {
     setStatus('loading');
@@ -180,15 +177,12 @@ export const Sudoku = () => {
   }, [difficulty]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (status === 'loading') {
       initGame(difficulty);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [difficulty, initGame]);
+    }
+  }, []);
 
-  useEffect(() => {
-    storage.setItem('teacherToolsSudokuStats', JSON.stringify(stats));
-  }, [stats]);
+  // Persistence handled by useLocalStorage
 
   const checkSolved = useCallback((currentGrid: number[][]) => {
     if (solution && currentGrid.every((row, r) => row.every((val, c) => val === solution[r][c]))) {

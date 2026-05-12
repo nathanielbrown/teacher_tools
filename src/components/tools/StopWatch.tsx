@@ -81,9 +81,9 @@ export const StopWatch = () => {
 
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [laps, setLaps] = useLocalStorage<any[]>('teacherToolsStopwatchLaps', []);
-  const [isMuted, setIsMuted] = useLocalStorage('teacherToolsStopwatchMuted', false);
-  const [tickSound, setTickSound] = useLocalStorage('teacherToolsStopwatchTickSound', 'classic');
+  const [laps, setLaps] = useLocalStorage<any[]>('stopwatch_laps', []);
+  const [isMuted, setIsMuted] = useLocalStorage('stopwatch_is_muted', false);
+  const [tickSound, setTickSound] = useLocalStorage('stopwatch_sound', 'classic');
 
   const lastTickRef = useRef(0);
 
@@ -109,7 +109,7 @@ export const StopWatch = () => {
     audioEngine.playTick(tickSound);
   }, [time, laps, setLaps, tickSound]);
 
-  const [isHistoryVisible, setIsHistoryVisible] = useLocalStorage('teacherToolsStopwatchHistoryVisible', true);
+  const [isHistoryVisible, setIsHistoryVisible] = useLocalStorage('stopwatch_history_visible', true);
 
   useEffect(() => {
     setHasConfig(true);

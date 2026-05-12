@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const CANVAS_WIDTH = 800;
@@ -159,7 +159,7 @@ export const ClassRex = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState('START'); // START, PLAYING, GAMEOVER
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(parseInt(storage.getItem('classrex-highscore') || '0'));
+  const [highScore, setHighScore] = useLocalStorage<number>('class_rex_high_score', 0);
   const requestRef = useRef<number>(0);
   
   const rex = useRef({
@@ -218,9 +218,8 @@ export const ClassRex = () => {
     setGameState('GAMEOVER');
     shakeFrames.current = 15;
     spawnDust(rex.current.x + rex.current.width, rex.current.y + rex.current.height / 2, 20);
-    if (Math.floor(scoreRef.current / 10) > Math.floor(highScore / 10)) {
+    if (scoreRef.current > highScore) {
       setHighScore(scoreRef.current);
-      storage.setItem('classrex-highscore', scoreRef.current.toString());
     }
     audioEngine.playAlarm(settings.soundTheme);
   }, [highScore, settings.soundTheme]);

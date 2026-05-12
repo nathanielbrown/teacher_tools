@@ -10,8 +10,14 @@ import { IntlProvider, useIntl } from 'react-intl';
 import { loadMessages, Locale } from './i18n';
 import { useSettings } from './contexts/SettingsContext';
 import { storage } from './utils/storage';
+import { initSpeech } from './utils/speech';
 
 function App() {
+  useEffect(() => {
+    const cleanup = initSpeech();
+    return () => cleanup?.();
+  }, []);
+
   const [currentTool, setCurrentTool] = useState<string>(() => {
     const pathParts = window.location.pathname.split('/').filter(Boolean);
     const validTabsMap: Record<string, string> = { 'TeacherTools': 'Teacher Tools', 'StudentTools': 'Student Tools', 'ClassroomGames': 'Classroom Games' };
@@ -23,7 +29,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('tool')) return params.get('tool')!;
     
-    return storage.getItem('teacherToolsCurrentTool') || 'home';
+    return storage.getItem('app_current_tool') || 'home';
   });
 
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -38,7 +44,7 @@ function App() {
       if (params.get('tab')) {
         tab = params.get('tab')!;
       } else {
-        tab = storage.getItem('teacherToolsActiveTab') || 'Teacher Tools';
+        tab = storage.getItem('app_active_tab') || 'Teacher Tools';
       }
     }
 
@@ -49,7 +55,7 @@ function App() {
     else {
       const params = new URLSearchParams(window.location.search);
       if (params.get('tool')) tempTool = params.get('tool')!;
-      else tempTool = storage.getItem('teacherToolsCurrentTool') || 'home';
+      else tempTool = storage.getItem('app_current_tool') || 'home';
     }
 
     if (tempTool !== 'home' && tempTool !== 'privacy' && tempTool !== 'privacy-policy') {
@@ -142,8 +148,8 @@ function App() {
       }
     }
 
-    storage.setItem('teacherToolsCurrentTool', currentTool);
-    storage.setItem('teacherToolsActiveTab', activeTab);
+    storage.setItem('app_current_tool', currentTool);
+    storage.setItem('app_active_tab', activeTab);
   }, [currentTool, activeTab]);
 
 

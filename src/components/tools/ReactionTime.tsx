@@ -12,7 +12,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { ToolPanel } from '../shared/ToolPanel';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import HistoryPanel from '../shared/HistoryPanel';
 
 // 1. Constants (None)
@@ -68,10 +68,7 @@ export const ReactionTime = () => {
   const [status, setStatus] = useState('idle'); // 'idle', 'waiting', 'ready', 'result'
   const [startTime, setStartTime] = useState(0);
   const [lastResult, setLastResult] = useState<number | 'failed' | null>(null);
-  const [history, setHistory] = useState<{ attempt: number; ms: number | null; failed: boolean }[]>(() => {
-    const saved = storage.getItem('teacherToolsReactionTime');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [history, setHistory] = useLocalStorage<{ attempt: number; ms: number | null; failed: boolean }[]>('reaction_time_history', []);
   const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -81,9 +78,7 @@ export const ReactionTime = () => {
     };
   }, [clearHeader]);
 
-  useEffect(() => {
-    storage.setItem('teacherToolsReactionTime', JSON.stringify(history));
-  }, [history]);
+  // Persistence handled by useLocalStorage
 
   const resetStats = useCallback(() => {
     setHistory([]);

@@ -9,6 +9,7 @@ interface SettingsPanelProps {
   title?: string;
   className?: string;
   compact?: boolean;
+  side?: 'left' | 'right';
 }
 
 /**
@@ -21,16 +22,19 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   children,
   title = "Settings",
   className = "",
-  compact = false
+  compact = false,
+  side = 'right'
 }) => {
+  const xOffset = side === 'left' ? -50 : 50;
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           layout
-          initial={{ opacity: 0, x: 50 }}
+          initial={{ opacity: 0, x: xOffset }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 50 }}
+          exit={{ opacity: 0, x: xOffset }}
           transition={{ layout: { duration: 0.5, type: "spring", bounce: 0.2 } }}
           className={`w-full bg-slate-50/80 backdrop-blur-xl rounded-[3rem] border-4 border-white flex flex-col relative z-20 h-fit lg:h-full overflow-hidden custom-scrollbar italic ${className}`}
         >

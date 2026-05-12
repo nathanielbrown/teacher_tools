@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
 import { useIntl, FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
 
@@ -87,10 +87,7 @@ export const LetterTracing = () => {
   const [charSet, setCharSet] = useState<keyof typeof CHAR_SETS>('upper');
   const [currentLetter, setCurrentLetter] = useState('A');
   const [score, setScore] = useState<{ accuracy: number; msg: string } | null>(null);
-  const [mastery, setMastery] = useState(() => {
-    const saved = storage.getItem('teacherToolsLetterMastery');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [mastery, setMastery] = useLocalStorage<Record<string, number>>('letter_tracing_mastery', {});
   const [isFontLoaded, setIsFontLoaded] = useState(false);
   
   const baseCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -156,9 +153,7 @@ export const LetterTracing = () => {
     setScore(null);
   }, []);
 
-  useEffect(() => {
-    storage.setItem('teacherToolsLetterMastery', JSON.stringify(mastery));
-  }, [mastery]);
+  // Persistence handled by useLocalStorage
 
   useEffect(() => {
     if (document.fonts && document.fonts.load) {

@@ -60,7 +60,7 @@ export const TeacherMath = () => {
   const { setHasConfig, setHelpContent, setOnReset, clearHeader } = useHeader();
   const { settings } = useSettings();
   
-  const [elements, setElements] = useLocalStorage('teachermath-elements', [
+  const [elements, setElements] = useLocalStorage('teacher_math_elements', [
     { id: 1, raw: '(2, 3)', color: '#6366f1' },
     { id: 2, raw: '(-4, 1)', color: '#ec4899' },
     { id: 3, raw: 'x', color: '#10b981' },

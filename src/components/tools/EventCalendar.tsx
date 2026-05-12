@@ -14,7 +14,7 @@ import {
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { FormattedMessage, useIntl } from 'react-intl';
 
@@ -85,10 +85,7 @@ export const EventCalendar = () => {
   const [showCountdownAddModal, setShowCountdownAddModal] = useState(false);
   
   // Events state
-  const [events, setEvents] = useState<any[]>(() => {
-    const saved = storage.getItem('teacherToolsEventCountdowns');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [events, setEvents] = useLocalStorage<any[]>('event_calendar_events', []);
   
   // Countdown specific state
   const [newEventName, setNewEventName] = useState('');
@@ -104,9 +101,7 @@ export const EventCalendar = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  useEffect(() => {
-    storage.setItem('teacherToolsEventCountdowns', JSON.stringify(events));
-  }, [events]);
+  // Persistence handled by useLocalStorage
 
   useEffect(() => {
     if (view === 'countdowns') {

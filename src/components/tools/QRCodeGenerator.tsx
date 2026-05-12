@@ -10,6 +10,7 @@ import { useHeader } from '../../contexts/HeaderContext';
 import { ToolPanel } from '../shared/ToolPanel';
 import { SettingsPanel } from '../shared/SettingsPanel';
 import { FormattedMessage } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 3. Text (Help and Info)
 const HELP_INFO = (
@@ -44,9 +45,9 @@ export const QRCodeGenerator = () => {
   const { setHasConfig, setOnConfigToggle, setHelpContent, setOnReset, clearHeader } = useHeader();
   const { settings } = useSettings();
   
-  const [text, setText] = useState('https://classrex.com');
-  const [fgColor, setFgColor] = useState('#0f172a');
-  const [bgColor, setBgColor] = useState('#ffffff');
+  const [text, setText] = useLocalStorage<string>('qrcode_generator_text', 'https://classrex.com');
+  const [fgColor, setFgColor] = useLocalStorage<string>('qrcode_generator_fg_color', '#0f172a');
+  const [bgColor, setBgColor] = useLocalStorage<string>('qrcode_generator_bg_color', '#ffffff');
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
 

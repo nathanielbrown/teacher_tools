@@ -54,7 +54,7 @@ export const Spelling = () => {
   const { settings } = useSettings();
   
   const [status, setStatus] = useState('setup'); // 'setup', 'playing', 'finished'
-  const [lists, setLists] = useLocalStorage<WordList[]>('spelling_lists', DEFAULT_SPELLING_LISTS);
+  const [lists, setLists] = useLocalStorage<WordList[]>('word_manager_lists', DEFAULT_SPELLING_LISTS);
   
   const [selectedListId, setSelectedListId] = useState(lists[0]?.id || '');
   const [isPanelVisible, setIsPanelVisible] = useState(true);
@@ -178,7 +178,7 @@ export const Spelling = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full w-full italic overflow-hidden transition-all duration-500 ease-in-out gap-8">
+    <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden transition-all duration-500 ease-in-out gap-8">
       <AnimatePresence>
         {isPanelVisible && (
           <div className="flex flex-col gap-6 w-full lg:w-[400px] shrink-0 h-full overflow-hidden">
@@ -214,14 +214,14 @@ export const Spelling = () => {
                 className="flex flex-col items-center gap-12 z-10 w-full"
               >
                 <div className="text-center">
-                  <h1 className="text-7xl font-black text-slate-900 uppercase tracking-tighter italic">
+                  <h1 className="text-7xl font-black text-slate-900 uppercase tracking-tighter">
                     <FormattedMessage id="spelling.setup.title" />
                   </h1>
                 </div>
 
                 <button
                   onClick={startGame}
-                  className="w-full max-w-sm h-24 bg-slate-900 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-indigo-600 transition-all  flex items-center justify-center gap-6 border-4 border-white active:scale-95"
+                  className="w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-indigo-700 transition-all  flex items-center justify-center gap-6 border-4 border-white active:scale-95"
                 >
                   <Play size={28} fill="currentColor" /> <FormattedMessage id="spelling.setup.start" />
                 </button>
@@ -237,10 +237,10 @@ export const Spelling = () => {
                 className="flex-1 flex flex-col items-center justify-center gap-12 z-10 w-full max-w-2xl"
               >
                 <div className="flex items-center gap-6">
-                  <div className="px-6 py-2 bg-white rounded-full border-2 border-slate-100 font-black text-slate-400 uppercase tracking-widest text-xs italic">
+                  <div className="px-6 py-2 bg-white rounded-full border-2 border-slate-100 font-black text-slate-400 uppercase tracking-widest text-xs">
                     <FormattedMessage id="spelling.playing.progress" values={{ current: totalWords - queue.length + 1, total: totalWords }} />
                   </div>
-                  <div className="px-6 py-2 bg-indigo-600 text-white rounded-full font-black uppercase tracking-widest text-xs italic  ">
+                  <div className="px-6 py-2 bg-indigo-600 text-white rounded-full font-black uppercase tracking-widest text-xs">
                     <FormattedMessage id="spelling.playing.score" values={{ score }} />
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export const Spelling = () => {
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    className="w-full text-center text-6xl font-black p-10 bg-white border-[12px] border-slate-100 rounded-[3.5rem] focus:border-indigo-600 transition-all outline-none italic tabular-nums  uppercase tracking-tighter"
+                    className="w-full text-center text-6xl font-black p-10 bg-white border-[12px] border-slate-100 rounded-[3.5rem] focus:border-indigo-600 transition-all outline-none tabular-nums  uppercase tracking-tighter"
                     placeholder={intl.formatMessage({ id: 'spelling.playing.placeholder' })}
                     autoComplete="off"
                     autoCorrect="off"
@@ -271,7 +271,7 @@ export const Spelling = () => {
                   <button
                     type="submit"
                     disabled={!userInput.trim() || !!feedback}
-                    className="w-full h-24 bg-slate-900 text-white font-black text-3xl rounded-[3rem] hover:bg-indigo-600  transition-all disabled:opacity-50 tracking-[0.2em] italic uppercase"
+                    className="w-full h-24 bg-indigo-600 text-white font-black text-3xl rounded-[3rem] hover:bg-indigo-700  transition-all disabled:opacity-50 tracking-[0.2em] uppercase"
                   >
                     <FormattedMessage id="spelling.playing.verify" />
                   </button>
@@ -290,7 +290,7 @@ export const Spelling = () => {
                       <div className={`p-4 rounded-2xl ${feedback.type === 'success' ? 'bg-white/20' : 'bg-rose-600 text-white'} `}>
                         {feedback.type === 'success' ? <CheckCircle2 size={40} strokeWidth={3} /> : <XCircle size={40} strokeWidth={3} />}
                       </div>
-                      <span className="font-black text-3xl tracking-tighter italic uppercase">{feedback.message}</span>
+                      <span className="font-black text-3xl tracking-tighter uppercase">{feedback.message}</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -306,13 +306,13 @@ export const Spelling = () => {
               >
                 <div className="relative">
                   <div className="absolute inset-0 bg-emerald-500 blur-[80px] opacity-20" />
-                  <div className="relative w-48 h-48 bg-slate-900 text-emerald-400 rounded-[3.5rem] flex items-center justify-center  rotate-12 border-8 border-slate-800">
+                  <div className="relative w-48 h-48 bg-slate-800 text-emerald-400 rounded-[3.5rem] flex items-center justify-center  rotate-12 border-8 border-slate-800">
                     <CheckCircle2 size={96} strokeWidth={3} />
                   </div>
                 </div>
                 
                 <div className="space-y-4">
-                  <h3 className="text-7xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
+                  <h3 className="text-7xl font-black uppercase tracking-tighter text-slate-900 leading-none">
                     <FormattedMessage id="spelling.finished.title" />
                   </h3>
                   <p className="text-slate-400 text-xl font-black uppercase tracking-[0.4em]">
@@ -322,7 +322,7 @@ export const Spelling = () => {
                 
                 <button
                   onClick={resetToSetup}
-                  className="flex items-center justify-center gap-6 w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3.5rem] hover:bg-slate-900 transition-all font-black text-2xl  tracking-[0.2em] italic uppercase"
+                  className="flex items-center justify-center gap-6 w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3.5rem] hover:bg-indigo-700 transition-all font-black text-2xl  tracking-[0.2em] uppercase"
                 >
                   <ListRestart size={32} strokeWidth={3} /> <FormattedMessage id="spelling.finished.restart" />
                 </button>

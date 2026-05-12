@@ -18,7 +18,7 @@ export interface Settings {
 }
 
 const defaultSettings: Settings = {
-  theme: 'early-years',
+  theme: 'secondary',
   soundTheme: 'classic',
   selectedYear: 'All',
   classes: [{ id: 'class-demo', name: 'Demo', students: demoStudents }],

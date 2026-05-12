@@ -60,7 +60,7 @@ export const FlipCoin = () => {
   const [result, setResult] = useState('heads');
   const [isFlipping, setIsFlipping] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [history, setHistory] = useLocalStorage<any[]>('coin_flip_history', []);
+  const [history, setHistory] = useLocalStorage<any[]>('flip_coin_history', []);
 
   const reset = useCallback(() => {
     setHistory([]);

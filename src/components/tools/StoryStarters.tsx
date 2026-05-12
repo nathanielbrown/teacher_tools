@@ -15,6 +15,7 @@ import { useIntl, FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
 import SettingsPanel from '../shared/SettingsPanel';
 import HistoryPanel from '../shared/HistoryPanel';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const STORY_PROMPTS = {
@@ -105,11 +106,11 @@ export const StoryStarters = () => {
   const { setHelpContent, setOnReset, setHasConfig, clearHeader, isConfigOpen, setIsConfigOpen } = useHeader();
   const { settings } = useSettings();
   
-  const [yearLevel, setYearLevel] = useState(3);
-  const [hasSelectedYear, setHasSelectedYear] = useState(false);
-  const [prompt, setPrompt] = useState<string | null>(null);
+  const [yearLevel, setYearLevel] = useLocalStorage<number>('story_starters_year_level', 3);
+  const [hasSelectedYear, setHasSelectedYear] = useLocalStorage<boolean>('story_starters_year_selected', false);
+  const [prompt, setPrompt] = useLocalStorage<string | null>('story_starters_prompt', null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useLocalStorage<string[]>('story_starters_history', []);
 
   const generatePrompt = useCallback(() => {
     setIsGenerating(true);

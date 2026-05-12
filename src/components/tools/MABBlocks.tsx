@@ -6,6 +6,8 @@ import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ToolPanel } from '../shared/ToolPanel';
 import { audioEngine } from '../../utils/audio';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+
 
 // 1. Constants
 const BLOCK_TYPES = [
@@ -18,6 +20,16 @@ const UNIT_SIZE = 15;
 const FLAT_SIZE = 10 * UNIT_SIZE + 9;
 const LONG_W = UNIT_SIZE;
 const LONG_H = 10 * UNIT_SIZE + 9;
+
+interface MABBlock {
+  id: string;
+  typeId: string;
+  x: number;
+  y: number;
+  value: number;
+  color: string;
+}
+
 
 // 2. Config (None)
 
@@ -85,12 +97,26 @@ const renderBlockVisual = (typeId: string, color: string) => {
 export const MABBlocks = () => {
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
-  const [blocks, setBlocks] = useState<any[]>([]);
+  const [blocks, setBlocks] = useLocalStorage<MABBlock[]>('mabblocks_blocks', []);
   const [mode, setMode] = useState<'move' | 'cut'>('move');
+
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const blockIdCounter = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize blockIdCounter from existing blocks
+  useEffect(() => {
+    if (blocks.length > 0) {
+      const maxId = Math.max(...blocks.map(b => {
+        const idMatch = b.id.match(/block-(\d+)/);
+        return idMatch ? parseInt(idMatch[1]) : 0;
+      }));
+      blockIdCounter.current = maxId + 1;
+    }
+  }, [blocks]); // Only on mount
+
+
 
   const handlePointerDown = (e: React.PointerEvent, block: any) => {
     e.stopPropagation();
@@ -247,7 +273,8 @@ export const MABBlocks = () => {
       audioEngine.playTick(settings.soundTheme);
       return sorted;
     });
-  }, [regroupBlocksInternal, settings.soundTheme]);
+  }, [regroupBlocksInternal, settings.soundTheme, setBlocks]);
+
 
   const mergeAndSort = useCallback(() => {
     const total = blocks.reduce((acc, b) => acc + b.value, 0);
@@ -281,7 +308,8 @@ export const MABBlocks = () => {
 
     setBlocks(regroupBlocksInternal(nextBlocks));
     audioEngine.playTick(settings.soundTheme);
-  }, [blocks, regroupBlocksInternal, settings.soundTheme]);
+  }, [blocks, regroupBlocksInternal, settings.soundTheme, setBlocks]);
+
 
   const removeBlock = (id: string) => {
     setBlocks(prev => prev.filter(b => b.id !== id));
@@ -291,7 +319,8 @@ export const MABBlocks = () => {
   const resetBlocks = useCallback(() => {
     setBlocks([]);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setBlocks]);
+
 
   useEffect(() => {
     setOnReset(() => resetBlocks);

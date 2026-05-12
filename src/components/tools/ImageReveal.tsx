@@ -156,6 +156,7 @@ export const ImageReveal = () => {
 
   useEffect(() => {
     setHasConfig(true);
+    setIsConfigOpen(true);
     setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
     setOnReset(() => resetReveal);
     setHelpContent(<HelpContent />);
@@ -250,8 +251,111 @@ export const ImageReveal = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-full w-full italic">
-      <ToolPanel baseWidth={1000} baseHeight={800}>
+    <div className="flex flex-col lg:flex-row gap-8 w-full h-full italic overflow-hidden relative">
+      <AnimatePresence>
+        {isConfigOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+          >
+            <SettingsPanel
+              isOpen={isConfigOpen}
+              onClose={() => setIsConfigOpen(false)}
+              className="shrink-0 lg:h-fit"
+              compact
+              title={intl.formatMessage({ id: 'imagereveal.config.title', defaultMessage: 'Settings' })}
+            >
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
+                    <FormattedMessage id="imagereveal.config.effect" defaultMessage="Reveal Effect" />
+                  </label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {REVEAL_EFFECTS.map(effect => (
+                      <button
+                        key={effect.id}
+                        onClick={() => { setRevealEffect(effect.id); resetReveal(); }}
+                        className={`p-4 rounded-2xl border-4 transition-all text-left flex items-center gap-6 ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${revealEffect === effect.id ? 'bg-white/10 text-white' : 'bg-white text-slate-200'}`}>
+                          <effect.icon size={20} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest">
+                          <FormattedMessage id={`imagereveal.effect.${effect.id}`} defaultMessage={effect.label} />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
+                    <FormattedMessage id="imagereveal.config.speed" defaultMessage="Reveal Speed" />
+                  </label>
+                  <div className="space-y-3 p-4 bg-slate-50 rounded-2xl border-4 border-white">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Speed</span>
+                      <span className="text-xl font-black text-indigo-600 tabular-nums italic leading-none">{revealSpeed}x</span>
+                    </div>
+                    <input 
+                      type="range" min="0.5" max="3" step="0.5" value={revealSpeed}
+                      onChange={(e) => setRevealSpeed(parseFloat(e.target.value))}
+                      className="w-full h-2 bg-white rounded-full appearance-none cursor-pointer accent-indigo-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
+                    <FormattedMessage id="imagereveal.config.images" defaultMessage="Manage Images" />
+                  </label>
+                  
+                  <div className="grid grid-cols-1 gap-3">
+                    <label className="flex items-center gap-4 p-4 rounded-2xl border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50 transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group">
+                      <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50">
+                        <Upload size={20} strokeWidth={3} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        <FormattedMessage id="imagereveal.action.add" defaultMessage="Add New Image" />
+                      </span>
+                    </label>
+
+                    <AnimatePresence mode="popLayout">
+                      {images.map((img, idx) => (
+                        <motion.div 
+                          layout
+                          key={img}
+                          onClick={() => { setCurrentIndex(idx); resetReveal(); }}
+                          className={`relative flex items-center gap-4 p-3 rounded-2xl border-4 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-indigo-50' : 'border-slate-50 bg-white hover:border-indigo-100'}`}
+                        >
+                          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border-2 border-white">
+                            <img src={img} className="w-full h-full object-cover" alt="" />
+                          </div>
+                          <span className="flex-1 text-[10px] font-black text-slate-600 uppercase truncate">
+                            <FormattedMessage id="imagereveal.imageIndex" values={{ index: idx + 1 }} defaultMessage={`Image ${idx + 1}`} />
+                          </span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                            className="p-2 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
+                          >
+                            <Trash2 size={14} strokeWidth={3} />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </SettingsPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={1100} baseHeight={800}>
         <div className="w-full h-full flex flex-col gap-6 relative z-10 overflow-hidden">
           <div className="flex-1 relative bg-white rounded-[3rem] border-4 border-slate-50  overflow-hidden flex flex-col">
             <div 
@@ -354,94 +458,8 @@ export const ImageReveal = () => {
         </div>
       </ToolPanel>
 
-      <SettingsPanel
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-        title={intl.formatMessage({ id: 'imagereveal.config.title', defaultMessage: 'Settings' })}
-      >
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
-              <FormattedMessage id="imagereveal.config.effect" defaultMessage="Reveal Effect" />
-            </label>
-            <div className="grid grid-cols-1 gap-3">
-              {REVEAL_EFFECTS.map(effect => (
-                <button
-                  key={effect.id}
-                  onClick={() => { setRevealEffect(effect.id); resetReveal(); }}
-                  className={`p-4 rounded-2xl border-4 transition-all text-left flex items-center gap-6 ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-indigo-100'}`}
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${revealEffect === effect.id ? 'bg-white/10 text-white' : 'bg-white text-slate-200'}`}>
-                    <effect.icon size={20} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    <FormattedMessage id={`imagereveal.effect.${effect.id}`} defaultMessage={effect.label} />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
-              <FormattedMessage id="imagereveal.config.speed" defaultMessage="Reveal Speed" />
-            </label>
-            <div className="space-y-3 p-4 bg-slate-50 rounded-2xl border-4 border-white">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Speed</span>
-                <span className="text-xl font-black text-indigo-600 tabular-nums italic leading-none">{revealSpeed}x</span>
-              </div>
-              <input 
-                type="range" min="0.5" max="3" step="0.5" value={revealSpeed}
-                onChange={(e) => setRevealSpeed(parseFloat(e.target.value))}
-                className="w-full h-2 bg-white rounded-full appearance-none cursor-pointer accent-indigo-600"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
-              <FormattedMessage id="imagereveal.config.images" defaultMessage="Manage Images" />
-            </label>
-            
-            <div className="grid grid-cols-1 gap-3">
-              <label className="flex items-center gap-4 p-4 rounded-2xl border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50 transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group">
-                <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50">
-                  <Upload size={20} strokeWidth={3} />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  <FormattedMessage id="imagereveal.action.add" defaultMessage="Add New Image" />
-                </span>
-              </label>
-
-              <AnimatePresence mode="popLayout">
-                {images.map((img, idx) => (
-                  <motion.div 
-                    layout
-                    key={img}
-                    onClick={() => { setCurrentIndex(idx); resetReveal(); }}
-                    className={`relative flex items-center gap-4 p-3 rounded-2xl border-4 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-indigo-50' : 'border-slate-50 bg-white hover:border-indigo-100'}`}
-                  >
-                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border-2 border-white">
-                      <img src={img} className="w-full h-full object-cover" alt="" />
-                    </div>
-                    <span className="flex-1 text-[10px] font-black text-slate-600 uppercase truncate">
-                      <FormattedMessage id="imagereveal.imageIndex" values={{ index: idx + 1 }} defaultMessage={`Image ${idx + 1}`} />
-                    </span>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
-                      className="p-2 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
-                    >
-                      <Trash2 size={14} strokeWidth={3} />
-                    </button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </SettingsPanel>
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
   );
 };

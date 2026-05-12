@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
+
 import { 
   ChevronUp, 
-  ChevronDown, 
-  RotateCcw,
-  Palette,
-  X,
-  Settings
+  ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHeader } from '../../contexts/HeaderContext';
@@ -14,6 +11,8 @@ import { ToolPanel } from '../shared/ToolPanel';
 import { SettingsPanel } from '../shared/SettingsPanel';
 import { audioEngine } from '../../utils/audio';
 import { FormattedMessage } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+
 
 // 1. Constants
 const COLORS = [
@@ -91,9 +90,10 @@ export const FractionTool = () => {
   const { setHasConfig, setOnConfigToggle, setOnReset, isConfigOpen, setIsConfigOpen, setHelpContent, clearHeader } = useHeader();
   const { settings } = useSettings();
   
-  const [numerator, setNumerator] = useState(2);
-  const [denominator, setDenominator] = useState(4);
-  const [activeColor, setActiveColor] = useState('#ef4444');
+  const [numerator, setNumerator] = useLocalStorage('fractiontool_numerator', 2);
+  const [denominator, setDenominator] = useLocalStorage('fractiontool_denominator', 4);
+  const [activeColor, setActiveColor] = useLocalStorage('fractiontool_color', '#ef4444');
+
   const lineRef = useRef<HTMLDivElement>(null);
 
   const resetTool = useCallback(() => {
@@ -102,7 +102,8 @@ export const FractionTool = () => {
     setActiveColor('#ef4444');
     setIsConfigOpen(false);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme, setIsConfigOpen]);
+  }, [settings.soundTheme, setIsConfigOpen, setNumerator, setDenominator, setActiveColor]);
+
 
   useEffect(() => {
     setHasConfig(true);
@@ -143,23 +144,61 @@ export const FractionTool = () => {
 
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden">
-    <ToolPanel className="flex-1 italic" baseWidth={1200} baseHeight={800}>
+    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden relative">
+      <AnimatePresence>
+        {isConfigOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+          >
+            <SettingsPanel
+              isOpen={isConfigOpen}
+              onClose={() => setIsConfigOpen(false)}
+              compact
+            >
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
+                    <FormattedMessage id="fractionTool.settings.color" defaultMessage="Fraction Color" />
+                  </h4>
+                  <div className="grid grid-cols-4 gap-4">
+                    {COLORS.map((c) => (
+                      <button
+                        key={c.name}
+                        onClick={() => { setActiveColor(c.value); audioEngine.playTick(settings.soundTheme); }}
+                        className={`aspect-square rounded-2xl border-4 transition-all hover:scale-110 flex items-center justify-center ${activeColor === c.value ? 'border-indigo-600 scale-110 ' : 'border-white '}`}
+                        style={{ backgroundColor: c.value }}
+                      >
+                         {activeColor === c.value && <div className="w-4 h-4 rounded-full bg-white " />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SettingsPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ToolPanel className="flex-1 italic" baseWidth={1200} baseHeight={800}>
       <div className="flex gap-8 w-full h-full relative z-10 p-8">
         
         {/* Left: Fraction Readout Core */}
         <div className="w-[450px] shrink-0 bg-white rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group">
-           <div className="flex flex-col items-center gap-8 bg-white p-12 rounded-[5rem] border-4 border-white relative group/core">
+           <div className="flex flex-col items-center gap-7 bg-white p-10 rounded-[5rem] border-4 border-white relative group/core">
               <div className="flex flex-col items-center">
-                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronUp size={80} strokeWidth={4} /></button>
-                <span className="text-[14rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
-                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronDown size={80} strokeWidth={4} /></button>
+                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronUp size={72} strokeWidth={4} /></button>
+                <span className="text-[12.6rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
+                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronDown size={72} strokeWidth={4} /></button>
               </div>
               <div className="w-full h-4 bg-slate-800 rounded-full" />
               <div className="flex flex-col items-center">
-                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronUp size={80} strokeWidth={4} /></button>
-                <span className="text-[14rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
-                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronDown size={80} strokeWidth={4} /></button>
+                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronUp size={72} strokeWidth={4} /></button>
+                <span className="text-[12.6rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
+                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronDown size={72} strokeWidth={4} /></button>
               </div>
             </div>
         </div>
@@ -250,32 +289,6 @@ export const FractionTool = () => {
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </ToolPanel>
-
-    <SettingsPanel
-      isOpen={isConfigOpen}
-      onClose={() => setIsConfigOpen(false)}
-      title={settings.theme === 'early-years' ? "🎨" : "Settings"}
-    >
-      <div className="space-y-6">
-        <div className="space-y-3">
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
-            <FormattedMessage id="fractionTool.settings.color" defaultMessage="Fraction Color" />
-          </h4>
-          <div className="grid grid-cols-4 gap-4">
-            {COLORS.map((c) => (
-              <button
-                key={c.name}
-                onClick={() => { setActiveColor(c.value); audioEngine.playTick(settings.soundTheme); }}
-                className={`aspect-square rounded-2xl border-4 transition-all hover:scale-110 flex items-center justify-center ${activeColor === c.value ? 'border-indigo-600 scale-110 ' : 'border-white '}`}
-                style={{ backgroundColor: c.value }}
-              >
-                 {activeColor === c.value && <div className="w-4 h-4 rounded-full bg-white " />}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </SettingsPanel>
     </div>
   );
 };

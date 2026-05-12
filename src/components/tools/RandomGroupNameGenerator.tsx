@@ -95,19 +95,19 @@ export const RandomGroupNameGenerator = () => {
           <div className="w-full flex-1 flex flex-col justify-center italic min-h-[320px]">
             <AnimatePresence mode="wait">
               {groups.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {groups.map((name, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-4 p-4 bg-white rounded-[2rem] border-4 border-slate-50  group hover:border-indigo-100 transition-all"
+                      className="flex items-center gap-4 py-2 px-6 bg-white rounded-[1.5rem] border-4 border-slate-50  group hover:border-indigo-100 transition-all"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-lg shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-black text-base shrink-0">
                         {index + 1}
                       </div>
-                      <span className="text-2xl font-black text-slate-800 tracking-tight">
+                      <span className="text-xl font-black text-slate-800 tracking-tight">
                         {name}
                       </span>
                     </motion.div>
@@ -131,11 +131,11 @@ export const RandomGroupNameGenerator = () => {
             </AnimatePresence>
           </div>
 
-          <div className="w-full shrink-0 mt-8">
+          <div className="w-full shrink-0 mt-6">
             <button
               onClick={generateGroups}
               disabled={isGenerating}
-              className="w-full py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black text-2xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-6 group italic border-4 border-white"
+              className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-6 group italic border-4 border-white"
             >
               {isGenerating ? (
                 <RefreshCw size={32} className="animate-spin" />

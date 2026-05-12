@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import { useHeader } from '../../contexts/HeaderContext';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { FormattedMessage, useIntl } from 'react-intl';
 
@@ -70,20 +70,15 @@ export const GroupScoreBoard = () => {
   const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
   const intl = useIntl();
   
-  const [groups, setGroups] = useState<any[]>(() => {
-    const saved = storage.getItem('teacherToolsGroupScores');
-    return saved ? JSON.parse(saved) : [
-      { id: '1', name: 'Group 1', score: 0 },
-      { id: '2', name: 'Group 2', score: 0 },
-    ];
-  });
+  const [groups, setGroups] = useLocalStorage<any[]>('group_score_board_scores', [
+    { id: '1', name: 'Group 1', score: 0 },
+    { id: '2', name: 'Group 2', score: 0 },
+  ]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
 
-  useEffect(() => {
-    storage.setItem('teacherToolsGroupScores', JSON.stringify(groups));
-  }, [groups]);
+  // Persistence handled by useLocalStorage
 
   const addGroup = useCallback(() => {
     const newGroup = {

@@ -84,7 +84,7 @@ export const Abacus = () => {
   const { settings } = useSettings();
   
   const [columnStates, setColumnStates] = useLocalStorage<ColumnState[]>(
-    'abacus-column-states',
+    'abacus_value',
     new Array(COLUMNS).fill(null).map(() => ({ upper: 0, lower: 0 }))
   );
 

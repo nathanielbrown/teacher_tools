@@ -62,8 +62,8 @@ export const NumberSpinner = () => {
   const intl = useIntl();
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
-  const [min, setMin] = useState(1);
-  const [max, setMax] = useState(10);
+  const [min, setMin] = useLocalStorage('number_spinner_min', 1);
+  const [max, setMax] = useLocalStorage('number_spinner_max', 10);
   const [, setResult] = useState<number | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);

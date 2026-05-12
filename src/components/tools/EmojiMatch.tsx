@@ -233,7 +233,7 @@ export const EmojiMatch = () => {
               </button>
               <button
                 onClick={() => initGame(level)}
-                className="flex-1 py-6 bg-slate-900 text-white font-black text-lg rounded-2xl hover:bg-indigo-600 transition-all active:scale-95   uppercase tracking-widest"
+                className="flex-1 py-6 bg-indigo-600 text-white font-black text-lg rounded-2xl hover:bg-indigo-700 transition-all active:scale-95   uppercase tracking-widest"
               >
                 Play Again
               </button>
@@ -254,7 +254,7 @@ export const EmojiMatch = () => {
                   <span className="text-3xl font-black text-indigo-600 tabular-nums leading-none mt-1">{matched.length / 2} / {cards.length / 2}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-4 bg-slate-900 px-8 py-3 rounded-2xl ">
+              <div className="flex items-center gap-4 bg-slate-800 px-8 py-3 rounded-2xl ">
                 <Timer size={20} className="text-indigo-400" />
                 <span className="text-2xl tabular-nums font-black text-white">{elapsed}s</span>
               </div>

@@ -40,7 +40,7 @@ export const Config = () => {
           onClick={() => navigateToTab(tab.id)}
           className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 ${
             activeTab === tab.id
-              ? 'bg-slate-950 text-white '
+              ? 'bg-indigo-600 text-white '
               : 'text-slate-400 hover:text-slate-600 hover:bg-white/80'
           }`}
         >
@@ -130,7 +130,8 @@ export const Config = () => {
     const dataToExport: Record<string, any> = {};
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
-      if (key && key.startsWith('teacherTools')) {
+      const isAppKey = key && (key.startsWith('teacherTools') || key.includes('_') || key === 'gdprConsent');
+      if (isAppKey) {
         const item = storage.getItem(key);
         if (item) {
           dataToExport[key] = JSON.parse(item);
@@ -159,7 +160,8 @@ export const Config = () => {
         const importedData = JSON.parse(event.target?.result as string);
 
         Object.keys(importedData).forEach(key => {
-          if (key.startsWith('teacherTools')) {
+          const isAppKey = key && (key.startsWith('teacherTools') || key.includes('_') || key === 'gdprConsent');
+          if (isAppKey) {
             storage.setItem(key, JSON.stringify(importedData[key]));
           }
         });
@@ -183,7 +185,8 @@ export const Config = () => {
       const keysToRemove: string[] = [];
       for (let i = 0; i < storage.length; i++) {
         const key = storage.key(i);
-        if (key && key.startsWith('teacherTools')) {
+        const isAppKey = key && (key.startsWith('teacherTools') || key.includes('_') || key === 'gdprConsent');
+        if (isAppKey) {
           keysToRemove.push(key);
         }
       }
@@ -309,7 +312,7 @@ export const Config = () => {
 
                 <button
                   onClick={handleClearData}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
                 >
                   <span className="text-xl">🧹</span>
                   <span>
@@ -419,7 +422,7 @@ export const Config = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Add New Class */}
-            <div className="bg-slate-50/50 border border-slate-100 p-8 rounded-3xl space-y-4 ">
+            <div className="bg-white border border-slate-100 p-6 rounded-3xl space-y-4 shadow-sm hover:shadow-md transition-all">
               <h4 className="font-bold text-slate-800 text-lg">
                 <FormattedMessage id="config.classes.create.title" defaultMessage="Create New Class" />
               </h4>
@@ -458,7 +461,7 @@ export const Config = () => {
               <button
                 onClick={handleAddClass}
                 disabled={!newClassName.trim() || !newClassStudents.trim()}
-                className="w-full flex items-center justify-center space-x-2 bg-primary text-white px-6 py-4 rounded-xl text-sm font-bold   transition-all active:scale-[0.98] disabled:opacity-30 mt-2"
+                className="w-full flex items-center justify-center space-x-2 bg-indigo-600 text-white px-6 py-4 rounded-xl text-sm font-bold   transition-all active:scale-[0.98] disabled:opacity-30 mt-2"
               >
                 <span className="text-xl">➕</span>
                 <span>
@@ -477,7 +480,7 @@ export const Config = () => {
                   <FormattedMessage id="config.classes.list.empty" defaultMessage="No classes added yet" />
                 </div>
               ) : (
-                <div className="space-y-4 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar">
+                <div className="space-y-4 overflow-y-auto max-h-[900px] pr-2 custom-scrollbar">
                   {settings.classes.map(cls => (
                     <div key={cls.id} className="bg-white border border-slate-100 p-6 rounded-3xl flex gap-4   transition-all">
                       <div className="flex-1 space-y-3">
@@ -496,7 +499,7 @@ export const Config = () => {
                       </div>
                       <button
                         onClick={() => deleteClass(cls.id)}
-                        className="self-start p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-90"
+                        className="self-start p-3 text-slate-400 hover:bg-slate-100 rounded-xl transition-all active:scale-90"
                         title={intl.formatMessage({ id: 'config.classes.list.delete', defaultMessage: 'Delete Class' })}
                       >
                         <span className="text-xl">🗑️</span>
@@ -512,7 +515,7 @@ export const Config = () => {
     )}
 
     {activeTab === 'words' && (
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100vh-200px)]">
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100vh-280px)]">
         <WordManager preActions={configTabs} />
       </div>
     )}

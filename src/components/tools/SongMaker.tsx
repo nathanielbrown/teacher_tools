@@ -18,57 +18,63 @@ import {
   Star, 
   Pentagon, 
   Diamond,
+  Download
 } from 'lucide-react';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
+import { SettingsPanel } from '../shared/SettingsPanel';
+import { exportMidi } from '../../utils/midiExport';
 
 // 1. Constants
 const SCALES = {
   Major: [0, 2, 4, 5, 7, 9, 11],
   Minor: [0, 2, 3, 5, 7, 8, 10],
   Pentatonic: [0, 2, 4, 7, 9],
+  Chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
 };
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-const INSTRUMENTS = [
-  { id: 'marimba', label: 'Marimba', color: '#f59e0b', bg: 'bg-amber-500', shape: 'circle' },
-  { id: 'piano', label: 'Piano', color: '#3b82f6', bg: 'bg-blue-500', shape: 'square' },
-  { id: 'synth', label: 'Synth', color: '#a855f7', bg: 'bg-purple-500', shape: 'triangle' },
-  { id: 'strings', label: 'Strings', color: '#f43f5e', bg: 'bg-rose-500', shape: 'pentagon' },
+export const INSTRUMENTS = [
+  { id: 'marimba', label: 'Marimba', color: '#ff9500', bg: 'bg-[#ff9500]', shape: 'circle' },
+  { id: 'piano', label: 'Piano', color: '#4a90e2', bg: 'bg-[#4a90e2]', shape: 'square' },
+  { id: 'woodwind', label: 'Woodwind', color: '#2ecc71', bg: 'bg-[#2ecc71]', shape: 'pentagon' },
+  { id: 'synth', label: 'Synth', color: '#9013fe', bg: 'bg-[#9013fe]', shape: 'triangle' },
+  { id: 'strings', label: 'Strings', color: '#50e3c2', bg: 'bg-[#50e3c2]', shape: 'star' },
 ];
 
-const PERCUSSION = [
-  { id: 'drum', label: 'Kick', color: '#1e293b', shape: 'circle' },
-  { id: 'snare', label: 'Snare', color: '#475569', shape: 'square' },
-  { id: 'cymbal', label: 'Cymbal', color: '#64748b', shape: 'star' },
-  { id: 'hihat', label: 'Hi-Hat', color: '#94a3b8', shape: 'diamond' },
+export const PERCUSSION = [
+  { id: 'kick', label: 'Kick', color: '#475569', shape: 'none', midi: 36 },
+  { id: 'tom', label: 'Tom', color: '#64748b', shape: 'none', midi: 45 },
+  { id: 'snare', label: 'Snare', color: '#94a3b8', shape: 'none', midi: 38 },
+  { id: 'hihat', label: 'Hi-Hat', color: '#cbd5e1', shape: 'none', midi: 42 },
+  { id: 'symbol', label: 'Symbol', color: '#e2e8f0', shape: 'none', midi: 49 },
 ];
 
 // 2. Config (None)
 
-// 3. Text (Help and Info)
 const HELP_INFO = (
   <div className="space-y-4 font-['Outfit']">
-    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Use</h3>
-    <div className="space-y-3">
+    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight italic">How to use</h3>
+    <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Pick an <b>Instrument</b> or <b>Drum</b> from the sidebar.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">Choose a <b>sound</b> from the side.</p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Click on the <b>Grid</b> to add notes. High notes are at the top.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">Tap the <b>squares</b> to make music.</p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Change the <b>Speed</b> to make your song faster or slower.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">High sounds are at the <b>top</b>.</p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center text-xs font-black text-amber-600 shrink-0">4</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">The bottom 4 rows are for <b>Drums</b>.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">The <b>bottom</b> part is for drums.</p>
       </div>
     </div>
   </div>
@@ -81,7 +87,7 @@ const HELP_INFO = (
 // 6. Functions
 const midiToFreq = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
 const getNoteName = (midi: number) => {
-  const name = NOTE_NAMES[midi % 12];
+  const name = NOTE_NAMES[midi % 12].replace('#', 'S');
   const octave = Math.floor(midi / 12) - 1;
   return `${name}${octave}`;
 };
@@ -100,24 +106,28 @@ const ShapeIcon = ({ shape, className, size = 16 }: { shape: string, className?:
 
 // 7. Component
 export const SongMaker = () => {
-  const { setHeaderActions, setHelpContent, setOnReset, clearHeader } = useHeader();
+  const { setHeaderActions, setHelpContent, setOnReset, clearHeader, hasConfig, setHasConfig, isConfigOpen, setIsConfigOpen, setOnConfigToggle } = useHeader();
   const { settings } = useSettings();
   
   const [selectedInstrument, setSelectedInstrument] = useState(INSTRUMENTS[0]);
-  const [tempo, setTempo] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeStep, setActiveStep] = useState(-1);
-
-  const [config] = useState({
-    bars: 4,
-    beatsPerBar: 4,
+  const [activeBar, setActiveBar] = useState(0);
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const [config, setConfig] = useLocalStorage('song_maker_config', {
+    bars: 2,
+    beatsPerBar: 2,
     splits: 2,
-    scale: 'Major',
+    range: 2,
     startNote: 60,
-    range: 1
+    scale: 'Major'
   });
 
-  const cols = config.bars * config.beatsPerBar * config.splits;
+  const [tempo, setTempo] = useLocalStorage('song_maker_tempo', 120);
+
+  const colsPerBar = config.beatsPerBar * config.splits;
+  const cols = config.bars * colsPerBar;
+  
   const notes = useMemo(() => {
     const n = [];
     const scaleIntervals = SCALES[config.scale as keyof typeof SCALES];
@@ -130,26 +140,77 @@ export const SongMaker = () => {
   }, [config]);
 
   const rows = notes.length + PERCUSSION.length;
-  const [grid, setGrid] = useState(() => Array(rows).fill(null).map(() => Array(cols).fill(null)));
-  const [prevDimensions, setPrevDimensions] = useState({ rows, cols });
+  
+  const [grid, setGrid] = useLocalStorage<any[][]>('song_maker_grid', Array(rows).fill(null).map(() => Array(cols).fill(null)));
 
-  if (prevDimensions.rows !== rows || prevDimensions.cols !== cols) {
-    setPrevDimensions({ rows, cols });
-    setGrid(Array(rows).fill(null).map(() => Array(cols).fill(null)));
-  }
+  // Persistence Effects (Handled by useLocalStorage)
+
+  useEffect(() => {
+    setGrid(prev => {
+      const newGrid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+      for (let r = 0; r < Math.min(prev.length, rows); r++) {
+        for (let c = 0; c < Math.min(prev[r].length, cols); c++) {
+          newGrid[r][c] = prev[r][c];
+        }
+      }
+      return newGrid;
+    });
+  }, [rows, cols]);
 
   const resetGrid = useCallback(() => {
-    setGrid(Array(rows).fill(null).map(() => Array(cols).fill(null)));
+    // Reset Config and Tempo
+    setConfig({
+      bars: 2,
+      beatsPerBar: 2,
+      splits: 2,
+      range: 2,
+      startNote: 60,
+      scale: 'Major'
+    });
+    setTempo(120);
+
+    // Calculate default dimensions for immediate grid reset
+    const defaultCols = 2 * (2 * 2);
+    const defaultRows = (2 * 7) + 5;
+    setGrid(Array(defaultRows).fill(null).map(() => Array(defaultCols).fill(null)));
+    
     setIsPlaying(false);
     setActiveStep(-1);
     audioEngine.playTick(settings.soundTheme);
-  }, [rows, cols, settings.soundTheme]);
+  }, [settings.soundTheme]);
+
+  const resetGridRef = React.useRef(resetGrid);
+  useEffect(() => {
+    resetGridRef.current = resetGrid;
+  }, [resetGrid]);
 
   useEffect(() => {
-    setOnReset(() => resetGrid);
+    setIsConfigOpen(false);
+  }, [setIsConfigOpen]);
+
+  useEffect(() => {
+    setOnReset(() => () => resetGridRef.current());
     setHelpContent(HELP_INFO);
+    setHasConfig(true);
+    setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
     return () => clearHeader();
-  }, [clearHeader, setOnReset, resetGrid, setHelpContent]);
+  }, [clearHeader, setOnReset, setHelpContent, setHasConfig, setIsConfigOpen, setOnConfigToggle]);
+
+  const handleExportWav = async () => {
+    try {
+      await audioEngine.exportWav(grid, notes, tempo, config.splits, PERCUSSION);
+    } catch (e) {
+      console.error("Failed to export WAV", e);
+    }
+  };
+
+  const handleExportMidi = () => {
+    try {
+      exportMidi(grid, notes, tempo, config.splits, config.beatsPerBar);
+    } catch (e) {
+      console.error("Failed to export MIDI", e);
+    }
+  };
 
   const toggleCell = (r: number, c: number) => {
     const newGrid = [...grid.map(row => [...row])];
@@ -161,14 +222,14 @@ export const SongMaker = () => {
         newGrid[r][c] = null;
       } else {
         newGrid[r][c] = perc.id;
-        audioEngine.playTone(100, 0.1, 'perc');
+        audioEngine.playDrum(perc.id);
       }
     } else {
       if (newGrid[r][c] === selectedInstrument.id) {
         newGrid[r][c] = null;
       } else {
         newGrid[r][c] = selectedInstrument.id;
-        audioEngine.playTone(midiToFreq(notes[r]), 0.1, selectedInstrument.id);
+        audioEngine.playInstrument(midiToFreq(notes[r]), selectedInstrument.id);
       }
     }
     setGrid(newGrid);
@@ -184,9 +245,10 @@ export const SongMaker = () => {
           grid.forEach((row, rIdx) => {
             if (row[next]) {
               if (rIdx >= notes.length) {
-                audioEngine.playTone(100, 0.1, 'perc');
+                const perc = PERCUSSION[rIdx - notes.length];
+                audioEngine.playDrum(perc.id);
               } else {
-                audioEngine.playTone(midiToFreq(notes[rIdx]), 0.1, row[next]);
+                audioEngine.playInstrument(midiToFreq(notes[rIdx]), row[next], 0.2);
               }
             }
           });
@@ -205,156 +267,322 @@ export const SongMaker = () => {
   }, [isPlaying, activeStep]);
 
   useEffect(() => {
-    setHeaderActions(
-      <div className="flex items-center gap-4 italic">
-         <button 
-          onClick={() => { setIsPlaying(!isPlaying); audioEngine.playTick(settings.soundTheme); }}
-          className={`flex items-center gap-2 px-8 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95  ${isPlaying ? 'bg-rose-500 text-white ' : 'bg-white border-2 border-slate-100 text-slate-300 hover:border-indigo-100 hover:text-indigo-600'}`}
-         >
-           {isPlaying ? <><Square size={14} fill="currentColor" /> Stop</> : <><Play size={14} fill="currentColor" /> Play</>}
-         </button>
-         <button 
-          onClick={resetGrid}
-          className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 "
-         >
-           <RotateCcw size={14} strokeWidth={3} /> Reset
-         </button>
-      </div>
-    );
-  }, [isPlaying, resetGrid, settings.soundTheme, setHeaderActions]);
+    setHeaderActions(null);
+  }, [setHeaderActions]);
+
+  const scrollToBar = (barIdx: number) => {
+    setActiveBar(barIdx);
+    if (gridRef.current) {
+      const barWidth = colsPerBar * 60; // 60 is column min-width
+      gridRef.current.scrollTo({
+        left: barIdx * barWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
-    <ToolPanel className="flex-row gap-8 p-4 lg:p-12 italic">
-      {/* Primary Sequencer Grid */}
-      <div className="flex-1 bg-slate-50/50 rounded-[4rem] border-4 border-white  flex flex-col relative overflow-hidden group h-full">
-        <div className="tool-grid-bg opacity-20 pointer-events-none" />
-        
-        <div className="flex-1 overflow-auto custom-scrollbar no-scrollbar p-8 relative z-10">
-           <div className="flex min-w-max min-h-full">
-             {/* Note Descriptor Axis */}
-             <div className="w-16 shrink-0 sticky left-0 z-20 bg-white border-r-4 border-slate-100 flex flex-col  rounded-l-3xl overflow-hidden">
-               {notes.map((midi, i) => (
-                 <div key={i} className="h-10 shrink-0 flex items-center justify-center text-[10px] font-black text-slate-300 leading-none bg-white border-b border-slate-50">
-                   {getNoteName(midi)}
-                 </div>
-               ))}
-               {PERCUSSION.map((perc) => (
-                 <div key={perc.id} className="h-10 shrink-0 flex items-center justify-center text-[10px] font-black uppercase leading-none border-b border-slate-100 bg-slate-100 text-slate-500">
-                   {perc.label[0]}
-                 </div>
-               ))}
-             </div>
+    <ToolPanel baseWidth={1400} baseHeight={800} alignTop fluid>
+      <div className="flex w-full h-full gap-6 p-4 lg:p-6 italic overflow-hidden">
+        {/* Sidebar Area (Palette & Sliding Config) */}
+        <div className="flex shrink-0 transition-all duration-500" style={{ width: isConfigOpen ? '320px' : '96px' }}>
+        <AnimatePresence mode="wait">
+          {!isConfigOpen ? (
+            <motion.div 
+              key="palette"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-20 lg:w-24 shrink-0 flex flex-col gap-4 py-8 items-center pr-4"
+            >
+              <div className="flex items-center justify-center mb-4 text-slate-400">
+                <Paintbrush size={24} />
+              </div>
+              <div className="flex flex-col gap-6">
+                {INSTRUMENTS.map(inst => (
+                  <div key={inst.id} className="flex flex-col items-center gap-2">
+                    <button
+                      onClick={() => setSelectedInstrument(inst)}
+                      className={`w-16 lg:w-20 aspect-square rounded-2xl border-4 transition-all flex items-center justify-center group ${selectedInstrument.id === inst.id ? 'bg-white border-indigo-500' : 'bg-white border-white text-slate-400 hover:border-indigo-100'}`}
+                      title={inst.label}
+                    >
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: inst.color }}>
+                        <ShapeIcon shape={inst.shape} className="text-white fill-white/20" size={24} />
+                      </div>
+                    </button>
+                    <span className={`text-[8px] font-black uppercase tracking-[0.15em] text-center leading-none ${selectedInstrument.id === inst.id ? 'text-indigo-600' : 'text-slate-400'}`}>
+                      {inst.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex flex-col gap-2 mt-4 w-full">
+                <button
+                  onClick={handleExportMidi}
+                  className="w-full flex flex-col items-center justify-center py-3 bg-indigo-50 text-indigo-500 rounded-2xl border-2 border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-all active:scale-95 group"
+                  title="Export as MIDI"
+                >
+                  <Download size={18} className="mb-1 group-hover:-translate-y-0.5 transition-transform" />
+                  <span className="text-[8px] font-black uppercase tracking-widest">MIDI</span>
+                </button>
+                <button
+                  onClick={handleExportWav}
+                  className="w-full flex flex-col items-center justify-center py-3 bg-indigo-50 text-indigo-500 rounded-2xl border-2 border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-all active:scale-95 group"
+                  title="Export as WAV Audio"
+                >
+                  <Download size={18} className="mb-1 group-hover:-translate-y-0.5 transition-transform" />
+                  <span className="text-[8px] font-black uppercase tracking-widest">WAV</span>
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="config"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ type: "spring", damping: 20, stiffness: 100 }}
+              className="w-[320px] h-full"
+            >
+              <SettingsPanel 
+                isOpen={isConfigOpen} 
+                onClose={() => setIsConfigOpen(false)}
+                title="Song Settings"
+                className="h-full !rounded-[2.5rem]"
+                compact
+                side="left"
+              >
+                <div className="space-y-5">
+                  {/* Bars */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bars</label>
+                    <input 
+                      type="number" min="1" max="16" value={config.bars} 
+                      onChange={(e) => setConfig(prev => ({ ...prev, bars: parseInt(e.target.value) || 1 }))}
+                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors"
+                    />
+                  </div>
 
-             {/* Temporal Data Grid */}
-             <div className="flex-1 flex bg-white/50 backdrop-blur-sm rounded-r-3xl overflow-hidden border-y-4 border-r-4 border-slate-100">
-               {grid[0] && grid[0].map((_, c) => (
-                 <div 
-                   key={c} 
-                   className={`flex-1 flex flex-col transition-colors relative min-w-[60px]
-                     ${activeStep === c ? 'bg-indigo-50/50 z-10 -[inset_0_0_0_2px_rgba(79,70,229,0.2)]' : 'bg-transparent'}
-                     ${c % config.beatsPerBar === 0 ? 'border-l-4 border-slate-200' : 'border-l border-slate-100'}
-                   `}
-                 >
-                   {grid.map((row, r) => {
-                     const cellVal = row[c];
-                     const isPercussion = r >= notes.length;
-                     const item = isPercussion ? PERCUSSION[r - notes.length] : INSTRUMENTS.find(i => i.id === cellVal);
-                     
-                     return (
-                       <motion.div
-                         key={r}
-                         onClick={() => toggleCell(r, c)}
-                         style={{ backgroundColor: cellVal ? item?.color : 'transparent' }}
-                         animate={{ scale: activeStep === c && cellVal ? 1.1 : 1 }}
-                         className={`
-                           h-10 shrink-0 flex items-center justify-center border-b border-slate-100 cursor-pointer transition-all
-                           ${!cellVal ? 'bg-transparent hover:bg-white/40' : ' z-10 rounded-sm'}
-                         `}
-                       >
-                         {cellVal && <ShapeIcon shape={item?.shape || 'circle'} className="text-white fill-white/20" size={18} />}
-                       </motion.div>
-                     );
-                   })}
-                 </div>
-               ))}
-             </div>
-           </div>
-        </div>
+                  {/* Beats per Bar */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Beats / Bar</label>
+                    <input 
+                      type="number" min="1" max="16" value={config.beatsPerBar} 
+                      onChange={(e) => setConfig(prev => ({ ...prev, beatsPerBar: parseInt(e.target.value) || 1 }))}
+                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors"
+                    />
+                  </div>
+
+                  {/* Splits */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Splits</label>
+                    <select 
+                      value={config.splits}
+                      onChange={(e) => setConfig(prev => ({ ...prev, splits: parseInt(e.target.value) }))}
+                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                    >
+                      {[1, 2, 3, 4].map(s => (
+                        <option key={s} value={s}>{s} {s === 1 ? 'Subdivision' : 'Subdivisions'}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Range */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Range</label>
+                    <select 
+                      value={config.range}
+                      onChange={(e) => setConfig(prev => ({ ...prev, range: parseInt(e.target.value) }))}
+                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                    >
+                      {[1, 2, 3].map(o => (
+                        <option key={o} value={o}>{o} {o === 1 ? 'Octave' : 'Octaves'}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Start Note */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Start</label>
+                    <select 
+                      value={config.startNote}
+                      onChange={(e) => setConfig(prev => ({ ...prev, startNote: parseInt(e.target.value) }))}
+                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                    >
+                      <option value={48}>Low</option>
+                      <option value={60}>Middle</option>
+                      <option value={72}>High</option>
+                    </select>
+                  </div>
+
+                  {/* Scale */}
+                  <div className="space-y-1.5 pb-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Scale</label>
+                    <select 
+                      value={config.scale}
+                      onChange={(e) => setConfig(prev => ({ ...prev, scale: e.target.value }))}
+                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                    >
+                      {Object.keys(SCALES).map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </SettingsPanel>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Synthesis Sidebar */}
-      <div className="w-full lg:w-[450px] shrink-0 flex flex-col gap-8 relative z-20 italic h-full">
-        
-        {/* Temporal Core Readout */}
-        <div className="bg-slate-900 p-12 rounded-[4rem] border-4 border-slate-800  flex flex-col items-center gap-8 relative overflow-hidden shrink-0">
-           <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
-           
-           <div className="flex items-center justify-between w-full relative z-10">
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Speed</span>
-           </div>
+      {/* Main Tool Area */}
+      <div className="flex-1 flex flex-col relative h-full min-w-0 gap-4">
+          
+          {/* Top Bar Navigation (when not playing) */}
+          <AnimatePresence>
+            {!isPlaying && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex gap-2 justify-center shrink-0 overflow-x-auto no-scrollbar py-2"
+              >
+                {Array.from({ length: config.bars }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => scrollToBar(i)}
+                    className={`px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest transition-all ${activeBar === i ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400 hover:bg-indigo-50'}`}
+                  >
+                    Bar {i + 1}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-           <div className="relative z-10 w-full space-y-6">
-              <div className="flex justify-between items-end">
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tempo</span>
-                 <span className="text-5xl font-black text-white italic tabular-nums leading-none">{tempo} <span className="text-xs uppercase tracking-widest text-slate-500">BPM</span></span>
-              </div>
-              <div className="h-6 bg-white/5 rounded-full p-1 border border-white/10 relative group">
-                 <input 
-                   type="range" min="60" max="200" value={tempo} 
-                   onChange={(e) => { setTempo(parseInt(e.target.value)); audioEngine.playTick(settings.soundTheme); }}
-                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                 />
-                 <motion.div 
-                    className="h-full bg-gradient-to-r from-indigo-500 to-rose-500 rounded-full"
-                    initial={false}
-                    animate={{ width: `${((tempo - 60) / 140) * 100}%` }}
-                 />
-              </div>
-           </div>
-        </div>
+          <div className="flex-1 bg-white rounded-[3rem] border-4 border-white flex flex-col relative overflow-hidden h-full">
+            {/* Timeline Viewport */}
+            <motion.div 
+              ref={gridRef}
+              animate={{ 
+                scale: isPlaying ? 0.9 : 1
+              }}
+              style={{ transformOrigin: 'center center' }}
+              className="flex-1 overflow-x-hidden overflow-y-auto no-scrollbar relative z-10"
+            >
+              <div className="flex min-w-max min-h-full">
+                {/* Note Labels (Sticky Left) */}
+                <div className="w-20 shrink-0 sticky left-0 z-30 bg-white/95 backdrop-blur-md border-r-2 border-slate-50 flex flex-col py-4">
+                  {notes.map((midi, i) => {
+                    const name = NOTE_NAMES[midi % 12];
+                    const octave = Math.floor(midi / 12) - 1;
+                    return (
+                      <div key={i} className="h-10 shrink-0 flex flex-col items-center justify-center leading-none">
+                        <span className="text-[12px] font-black text-slate-400">{name}</span>
+                        <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">{octave > 4 ? 'High' : octave < 4 ? 'Low' : 'Mid'}</span>
+                      </div>
+                    );
+                  })}
+                  {PERCUSSION.map((perc, i) => (
+                    <div 
+                      key={perc.id} 
+                      className={`h-10 shrink-0 flex items-center justify-center text-[10px] font-black uppercase text-slate-400
+                        ${i === 0 ? 'border-t-4 border-black mt-1' : ''}
+                      `}
+                    >
+                      {perc.label}
+                    </div>
+                  ))}
+                </div>
 
-        {/* Harmonic Matrix Controller */}
-        <div className="flex-1 bg-slate-50/50 p-10 rounded-[4rem] border-4 border-white  flex flex-col gap-8 min-h-0">
-           <div className="flex items-center gap-4 shrink-0 border-b-4 border-white pb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
-                 <Paintbrush size={24} strokeWidth={3} />
+                {/* Music Grid */}
+                <div className="flex-1 flex py-4">
+                  {grid[0]?.map((_, c) => {
+                    const isBarStart = c % colsPerBar === 0;
+                    const barIdx = Math.floor(c / colsPerBar);
+                    
+                    return (
+                      <div 
+                        key={c} 
+                        className={`flex flex-col min-w-[60px] relative transition-colors duration-200
+                          ${activeStep === c ? 'bg-indigo-50/50' : (Math.floor(c / config.splits) % 2 === 1 ? 'bg-slate-100/30' : '')}
+                          ${isBarStart && c !== 0 ? 'border-l-4 border-indigo-100/50' : 'border-l border-slate-50'}
+                        `}
+                      >
+                        {isBarStart && (
+                          <div className="absolute top-0 left-2 -translate-y-full pt-1 text-[8px] font-black text-indigo-300 uppercase tracking-widest whitespace-nowrap">
+                            Bar {barIdx + 1}
+                          </div>
+                        )}
+                        {grid.map((row, r) => {
+                          const cellVal = row[c];
+                          const isPercussion = r >= notes.length;
+                          const isFirstPercussion = r === notes.length;
+                          const item = isPercussion ? PERCUSSION[r - notes.length] : INSTRUMENTS.find(i => i.id === cellVal);
+                          
+                          return (
+                            <div
+                              key={r}
+                              onClick={() => toggleCell(r, c)}
+                              className={`h-10 shrink-0 flex items-center justify-center border-b border-slate-50 cursor-pointer transition-all relative
+                                ${!cellVal ? 'hover:bg-slate-50/50' : ''}
+                                ${isFirstPercussion ? 'border-t-4 border-black mt-1' : ''}
+                              `}
+                            >
+                              {cellVal && (
+                                <motion.div
+                                  layoutId={`cell-${r}-${c}`}
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="w-full h-full flex items-center justify-center"
+                                  style={{ backgroundColor: item?.color }}
+                                >
+                                  {!isPercussion && (
+                                    <ShapeIcon shape={item?.shape || 'circle'} className="text-white/40 fill-white/10" size={16} />
+                                  )}
+                                </motion.div>
+                              )}
+                              {activeStep === c && !cellVal && (
+                                <div className="absolute inset-0 bg-indigo-500/10 pointer-events-none" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none">Sounds</h4>
-           </div>
+            </motion.div>
+          </div>
 
-           <div className="flex-1 grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar pr-2 pb-4">
-              {INSTRUMENTS.map(inst => (
-                <button
-                   key={inst.id}
-                   onClick={() => { setSelectedInstrument(inst); audioEngine.playTick(settings.soundTheme); }}
-                   className={`
-                     w-full p-6 rounded-[2.5rem] border-4 transition-all flex items-center gap-6 group
-                     ${selectedInstrument.id === inst.id ? 'bg-slate-900 border-indigo-600 text-white  scale-105 z-10' : 'bg-white border-white text-slate-500 hover:border-indigo-100 '}
-                   `}
-                >
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center  transition-transform group-hover:scale-110" style={{ backgroundColor: inst.color }}>
-                    <ShapeIcon shape={inst.shape} className="text-white fill-white/20" size={28} />
-                  </div>
-                  <div className="flex flex-col items-start">
-                     <span className="text-sm font-black uppercase tracking-widest">{inst.label}</span>
-                  </div>
-                </button>
-              ))}
-           </div>
+          {/* Bottom Control Bar */}
+          <div className="bg-white p-4 rounded-[2.5rem] border-4 border-white flex items-center gap-6 shrink-0">
+            {/* Play Button */}
+            <button 
+              onClick={() => { setIsPlaying(!isPlaying); audioEngine.playTick(settings.soundTheme); }}
+              className={`flex items-center gap-3 px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 ${isPlaying ? 'bg-rose-500 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            >
+              {isPlaying ? <><Square size={16} fill="currentColor" /> Stop</> : <><Play size={16} fill="currentColor" /> Play</>}
+            </button>
 
-           <div className="p-8 bg-indigo-600 rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
-              <div className="tool-grid-bg opacity-10 pointer-events-none" />
-              <div className="flex items-center gap-4 relative z-10">
-                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white border border-white/20">
-                    <Volume2 size={20} strokeWidth={3} />
-                 </div>
-                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Status</h4>
+            {/* Tempo Control */}
+            <div className="flex-1 flex items-center gap-6 border-l-2 border-slate-50 pl-6">
+              <div className="flex items-center gap-3 text-slate-400 uppercase tracking-widest text-[10px] font-black shrink-0">
+                <Clock size={16} />
+                Tempo
               </div>
-              <p className="text-xs font-black leading-relaxed italic text-indigo-100 uppercase tracking-widest relative z-10">
-                Playing your song. <br/>
-                Happy music making!
-              </p>
-           </div>
+              <div className="flex-1">
+                <input 
+                  type="range" min="60" max="200" value={tempo} 
+                  onChange={(e) => setTempo(parseInt(e.target.value))}
+                  className="w-full h-2 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
+                />
+              </div>
+              <span className="text-2xl font-black text-indigo-600 italic tabular-nums leading-none w-12 text-right">{tempo}</span>
+            </div>
+          </div>
         </div>
       </div>
     </ToolPanel>

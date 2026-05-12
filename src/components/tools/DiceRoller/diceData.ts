@@ -1,8 +1,8 @@
 export const DICE_TYPES = [
-  { sides: 4, color: '#2baf4a', label: 'D4' },     // Green
-  { sides: 6, color: '#1eb8c6', label: 'D6' },     // Teal
-  { sides: 8, color: '#6829b5', label: 'D8' },     // Purple
-  { sides: 10, color: '#be1562', label: 'D10' },   // Magenta
-  { sides: 12, color: '#da1e24', label: 'D12' },   // Red
-  { sides: 20, color: '#ff6900', label: 'D20' },   // Orange
+  { sides: 4, color: '#ffab24', label: 'D4' },     // Orange
+  { sides: 6, color: '#b52222', label: 'D6' },     // Dark Red
+  { sides: 8, color: '#1fa332', label: 'D8' },     // Green
+  { sides: 10, color: '#c41a1a', label: 'D10' },   // Crimson
+  { sides: 12, color: '#1a1a1a', label: 'D12' },   // Black
+  { sides: 20, color: '#1e9fb8', label: 'D20' },   // Teal
 ];

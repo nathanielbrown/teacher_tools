@@ -23,6 +23,7 @@ import { audioEngine } from '../../utils/audio';
 import { ToolPanel } from '../shared/ToolPanel';
 import { SettingsPanel } from '../shared/SettingsPanel';
 import { useIntl, FormattedMessage, IntlShape } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const SOUND_OPTIONS = [
@@ -99,14 +100,14 @@ export const CountDown = () => {
   const { setHasConfig, setHelpContent, setOnReset, setOnConfigToggle, clearHeader, isConfigOpen, setIsConfigOpen } = useHeader();
   const intl = useIntl();
   
-  const [initialMinutes, setInitialMinutes] = useState(5);
-  const [initialSeconds, setInitialSeconds] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(300);
-  const [totalTime, setTotalTime] = useState(300);
+  const [initialMinutes, setInitialMinutes] = useLocalStorage<number>('countdown_initial_minutes', 5);
+  const [initialSeconds, setInitialSeconds] = useLocalStorage<number>('countdown_initial_seconds', 0);
+  const [timeLeft, setTimeLeft] = useLocalStorage<number>('countdown_time_left', 300);
+  const [totalTime, setTotalTime] = useLocalStorage<number>('countdown_total_time', 300);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [visualMode, setVisualMode] = useState('circle');
-  const [soundOverride, setSoundOverride] = useState('default');
+  const [visualMode, setVisualMode] = useLocalStorage<string>('countdown_visual_mode', 'circle');
+  const [soundOverride, setSoundOverride] = useLocalStorage<string>('countdown_sound_override', 'default');
 
   const reset = useCallback(() => {
     setIsRunning(false);
@@ -271,9 +272,80 @@ export const CountDown = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden">
-      <ToolPanel className="flex-1" baseWidth={1200} baseHeight={800}>
-        <div className="flex flex-col items-center justify-center gap-12 w-full max-w-4xl italic">
+    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden relative">
+      <AnimatePresence>
+        {isConfigOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+          >
+            <SettingsPanel
+              isOpen={isConfigOpen}
+              onClose={() => setIsConfigOpen(false)}
+              title={intl.formatMessage({ id: 'header.tooltip.config', defaultMessage: 'Configuration' })}
+              compact
+            >
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                    <FormattedMessage id="countdown.settings.visual_mode" defaultMessage="Visual Mode" />
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {VISUAL_MODES.map(mode => (
+                      <button
+                        key={mode.id}
+                        onClick={() => { setVisualMode(mode.id); audioEngine.playTick(settings.soundTheme); }}
+                        className={`p-4 rounded-2xl border-4 transition-all flex flex-col items-center gap-2 italic ${
+                          visualMode === mode.id 
+                            ? 'bg-indigo-600 border-indigo-400 text-white ' 
+                            : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'
+                        }`}
+                      >
+                        <mode.icon size={24} />
+                        <span className="text-[9px] font-black uppercase tracking-widest">
+                          <FormattedMessage id={`countdown.visual_mode.${mode.id}`} />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                    <FormattedMessage id="countdown.settings.alarm_sound" defaultMessage="Alarm Sound" />
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {SOUND_OPTIONS.map(soundId => (
+                      <button
+                        key={soundId}
+                        onClick={() => {
+                          setSoundOverride(soundId);
+                          if (soundId !== 'none') {
+                            audioEngine.playAlarm(soundId === 'default' ? settings.soundTheme : soundId);
+                          }
+                        }}
+                        className={`py-3 px-2 rounded-xl border-2 transition-all text-[8px] font-black uppercase italic tracking-widest truncate ${
+                          soundOverride === soundId 
+                            ? 'bg-indigo-600 border-indigo-400 text-white ' 
+                            : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'
+                        }`}
+                      >
+                        <FormattedMessage id={`countdown.sound.${soundId}`} defaultMessage={soundId} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SettingsPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={1200} baseHeight={800}>
+        <div className="flex flex-col items-center justify-center gap-12 w-full max-w-4xl italic relative z-10">
           <div className="flex flex-col items-center gap-12 w-full">
             {/* Numerical Interface - Stabilized */}
             <div className="flex items-center gap-8 md:gap-16 shrink-0">
@@ -327,64 +399,10 @@ export const CountDown = () => {
         </div>
       </ToolPanel>
 
-      <SettingsPanel
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-        title={intl.formatMessage({ id: 'header.tooltip.config', defaultMessage: 'Configuration' })}
-      >
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
-              <FormattedMessage id="countdown.settings.visual_mode" defaultMessage="Visual Mode" />
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {VISUAL_MODES.map(mode => (
-                <button
-                  key={mode.id}
-                  onClick={() => { setVisualMode(mode.id); audioEngine.playTick(settings.soundTheme); }}
-                  className={`p-4 rounded-2xl border-4 transition-all flex flex-col items-center gap-2 italic ${
-                    visualMode === mode.id 
-                      ? 'bg-slate-900 border-indigo-500 text-white ' 
-                      : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'
-                  }`}
-                >
-                  <mode.icon size={24} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">
-                    <FormattedMessage id={`countdown.visual_mode.${mode.id}`} />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
-              <FormattedMessage id="countdown.settings.alarm_sound" defaultMessage="Alarm Sound" />
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {SOUND_OPTIONS.map(soundId => (
-                <button
-                  key={soundId}
-                  onClick={() => {
-                    setSoundOverride(soundId);
-                    if (soundId !== 'none') {
-                      audioEngine.playAlarm(soundId === 'default' ? settings.soundTheme : soundId);
-                    }
-                  }}
-                  className={`py-3 px-2 rounded-xl border-2 transition-all text-[8px] font-black uppercase italic tracking-widest truncate ${
-                    soundOverride === soundId 
-                      ? 'bg-indigo-600 border-indigo-400 text-white ' 
-                      : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'
-                  }`}
-                >
-                  <FormattedMessage id={`countdown.sound.${soundId}`} defaultMessage={soundId} />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </SettingsPanel>
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
+
   );
 };
 

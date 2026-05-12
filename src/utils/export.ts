@@ -29,3 +29,18 @@ export const downloadCSV = (data: Record<string, any>[], filename = 'export.csv'
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+/**
+ * Downloads a canvas element as a PNG image.
+ * @param canvas The canvas element to download.
+ * @param filename The name of the file to download.
+ */
+export const downloadCanvasAsPNG = (canvas: HTMLCanvasElement, filename = 'export.png') => {
+  const url = canvas.toDataURL('image/png');
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};

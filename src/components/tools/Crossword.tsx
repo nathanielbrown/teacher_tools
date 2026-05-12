@@ -12,6 +12,7 @@ import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
+import { speak } from '../../utils/speech';
 
 import { useIntl, FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
@@ -48,7 +49,7 @@ const HelpContent = () => (
 const generateCrossword = (words: string[]) => {
   const MAX_DIM = 25;
   const grid = Array(MAX_DIM).fill(null).map(() => Array(MAX_DIM).fill(''));
-  const placed: { word: string, r: number, c: number, dir: 'across' | 'down' }[] = [];
+  const placed: { word: string, r: number, c: number, dir: 'across' | 'down', number?: number }[] = [];
 
   const sortedWords = [...words]
     .map(w => w.toUpperCase().trim())
@@ -198,7 +199,7 @@ export const Crossword = () => {
   const intl = useIntl();
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
-  const [lists, setLists] = useLocalStorage<WordList[]>('spelling_lists', [
+  const [lists, setLists] = useLocalStorage<WordList[]>('word_manager_lists', [
     { id: '1', name: 'Animals', words: ['CAT', 'DOG', 'LION', 'TIGER'] }
   ]);
   
@@ -307,13 +308,6 @@ export const Crossword = () => {
   const handleManageLists = () => {
     window.history.pushState({}, '', '/config/wordmanager');
     window.dispatchEvent(new PopStateEvent('popstate'));
-  };
-
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-    }
   };
 
   useEffect(() => {

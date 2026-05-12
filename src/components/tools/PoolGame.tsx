@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Matter from 'matter-js';
-import { 
-  Gamepad2, 
+// 0. Debug Settings
+const DEBUG_PHYSICS = false;
+import {
+  Gamepad2,
   RotateCcw,
   Activity,
   MousePointer2,
@@ -21,7 +23,7 @@ const TABLE_WIDTH = 800;
 const TABLE_HEIGHT = 400;
 const BALL_RADIUS = 12;
 const POCKET_RADIUS = 25;
-const CUSHION_WIDTH = 20;
+const CUSHION_WIDTH = 100;
 
 const COLORS = [
   '#ffffff', // Cue ball
@@ -79,11 +81,12 @@ const HELP_INFO = (
 export const PoolGame = () => {
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
+  const renderRef = useRef<Matter.Render | null>(null);
   const requestRef = useRef<number>(0);
-  
+
   const [balls, setBalls] = useState<any[]>([]);
   const [cueBall, setCueBall] = useState<any>(null);
   const [isAiming, setIsAiming] = useState(false);
@@ -92,14 +95,20 @@ export const PoolGame = () => {
   const [prediction, setPrediction] = useState<any>(null);
 
   const initPhysics = useCallback(() => {
-    if (engineRef.current) {
-        Matter.Engine.clear(engineRef.current);
+    if (renderRef.current) {
+      Matter.Render.stop(renderRef.current);
+      renderRef.current.canvas.remove();
+      renderRef.current = null;
     }
-    
+
+    if (engineRef.current) {
+      Matter.Engine.clear(engineRef.current);
+    }
+
     const engine = Matter.Engine.create();
-    engine.gravity.y = 0; 
-    engine.positionIterations = 10;
-    engine.velocityIterations = 10;
+    engine.gravity.y = 0;
+    engine.positionIterations = 20;
+    engine.velocityIterations = 20;
     engineRef.current = engine;
 
     const world = engine.world;
@@ -150,6 +159,32 @@ export const PoolGame = () => {
 
     Matter.World.add(world, [...cushions, ...pockets, ...newBalls]);
 
+    // Debug Renderer
+    if (DEBUG_PHYSICS && containerRef.current) {
+      const render = Matter.Render.create({
+        element: containerRef.current,
+        engine: engine,
+        options: {
+          width: TABLE_WIDTH,
+          height: TABLE_HEIGHT,
+          wireframes: true,
+          background: 'transparent',
+        }
+      });
+
+      if (render.canvas && render.canvas.style) {
+        render.canvas.style.position = 'absolute';
+        render.canvas.style.top = '0';
+        render.canvas.style.left = '0';
+        render.canvas.style.pointerEvents = 'none';
+        render.canvas.style.opacity = '0.7';
+        render.canvas.style.zIndex = '100';
+      }
+
+      Matter.Render.run(render);
+      renderRef.current = render;
+    }
+
     Matter.Events.on(engine, 'collisionStart', (event) => {
       event.pairs.forEach(pair => {
         const { bodyA, bodyB } = pair;
@@ -172,10 +207,10 @@ export const PoolGame = () => {
     };
 
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    
+
     const update = (_time: number) => {
       Matter.Engine.update(engine, 1000 / 60);
-      
+
       const currentBodies = Matter.Composite.allBodies(engine.world);
       const currentBalls = currentBodies
         .filter(b => b.label && b.label.startsWith('ball-'))
@@ -201,7 +236,7 @@ export const PoolGame = () => {
             index: parseInt(b.label.split('-')[1])
           };
         });
-      
+
       setBalls(currentBalls);
       const cue = currentBalls.find(b => b.id === 'ball-0');
       setCueBall(cue);
@@ -216,6 +251,11 @@ export const PoolGame = () => {
     initPhysics();
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (renderRef.current) {
+        Matter.Render.stop(renderRef.current);
+        renderRef.current.canvas.remove();
+        renderRef.current = null;
+      }
       if (engineRef.current) Matter.Engine.clear(engineRef.current);
     };
   }, [initPhysics]);
@@ -235,7 +275,7 @@ export const PoolGame = () => {
     const direction = { x: Math.cos(angle), y: Math.sin(angle) };
     const bodies = Matter.Composite.allBodies(engineRef.current.world)
       .filter(b => b.label && b.label.startsWith('ball-') && b.label !== 'ball-0');
-    
+
     let closestCollision: any = null;
     let minT = 2000;
     let hitBall: any = null;
@@ -275,10 +315,10 @@ export const PoolGame = () => {
         const hitX = start.x + direction.x * t;
         const hitY = start.y + direction.y * t;
         if (hitX >= 0 && hitX <= TABLE_WIDTH && hitY >= 0 && hitY <= TABLE_HEIGHT) {
-           minT = t;
-           closestCollision = { x: hitX, y: hitY };
-           hitBall = null;
-           hitNormal = bound.normal;
+          minT = t;
+          closestCollision = { x: hitX, y: hitY };
+          hitBall = null;
+          hitNormal = bound.normal;
         }
       }
     });
@@ -293,15 +333,15 @@ export const PoolGame = () => {
         const dot = cueDir.x * impactUnit.x + cueDir.y * impactUnit.y;
         const tangentDir = { x: cueDir.x - dot * impactUnit.x, y: cueDir.y - dot * impactUnit.y };
         const tangentDist = Math.sqrt(tangentDir.x * tangentDir.x + tangentDir.y * tangentDir.y);
-        
+
         setPrediction({
           type: 'ball',
           impact: closestCollision,
-          cuePath: { 
-            x: closestCollision.x, 
-            y: closestCollision.y, 
-            dx: (tangentDir.x / (tangentDist || 1)) * 100, 
-            dy: (tangentDir.y / (tangentDist || 1)) * 100 
+          cuePath: {
+            x: closestCollision.x,
+            y: closestCollision.y,
+            dx: (tangentDir.x / (tangentDist || 1)) * 100,
+            dy: (tangentDir.y / (tangentDist || 1)) * 100
           },
           targetPath: {
             x: hitBall.position.x,
@@ -381,7 +421,7 @@ export const PoolGame = () => {
     const endX = cx + r * Math.cos(angleRad);
     const endY = cy + r * Math.sin(angleRad);
     const largeArcFlag = compassDeg > 180 ? 1 : 0;
-    const bisectAngle = -Math.PI/2 + (compassRad / 2);
+    const bisectAngle = -Math.PI / 2 + (compassRad / 2);
     return (
       <g>
         <line x1={cx} y1={cy} x2={cx} y2={cy - r} stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="2,2" />
@@ -394,15 +434,15 @@ export const PoolGame = () => {
   };
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
+    <ToolPanel baseWidth={1200} baseHeight={800}>
       <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden group bg-[#1a1a1a] rounded-[3.5rem] border-[12px] border-[#3e2723]">
         <div className="tool-grid-bg opacity-30 pointer-events-none" />
 
-        <div 
+        <div
           ref={containerRef}
           className="relative overflow-visible z-10"
-          style={{ 
-            width: TABLE_WIDTH, 
+          style={{
+            width: TABLE_WIDTH,
             height: TABLE_HEIGHT,
             background: 'radial-gradient(ellipse at center, #1e824c 0%, #0a3d1c 100%)',
             boxShadow: 'inset 0 0 100px rgba(0,0,0,0.9)'
@@ -480,12 +520,12 @@ export const PoolGame = () => {
                   </>
                 )}
                 {prediction.type === 'cushion' && (
-                   <>
-                     <circle cx={prediction.impact.x} cy={prediction.impact.y} r={BALL_RADIUS} fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-                     <line x1={prediction.impact.x} y1={prediction.impact.y} x2={prediction.impact.x + prediction.bouncePath.dx} y2={prediction.impact.y + prediction.bouncePath.dy} stroke="#3498db" strokeWidth="3" strokeLinecap="round" strokeDasharray="8,6" opacity="0.9" />
-                     <circle cx={prediction.impact.x + prediction.bouncePath.dx} cy={prediction.impact.y + prediction.bouncePath.dy} r="4" fill="#3498db" />
-                     {renderCompassAngle(prediction.impact.x, prediction.impact.y, prediction.bouncePath.dx, prediction.bouncePath.dy)}
-                   </>
+                  <>
+                    <circle cx={prediction.impact.x} cy={prediction.impact.y} r={BALL_RADIUS} fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+                    <line x1={prediction.impact.x} y1={prediction.impact.y} x2={prediction.impact.x + prediction.bouncePath.dx} y2={prediction.impact.y + prediction.bouncePath.dy} stroke="#3498db" strokeWidth="3" strokeLinecap="round" strokeDasharray="8,6" opacity="0.9" />
+                    <circle cx={prediction.impact.x + prediction.bouncePath.dx} cy={prediction.impact.y + prediction.bouncePath.dy} r="4" fill="#3498db" />
+                    {renderCompassAngle(prediction.impact.x, prediction.impact.y, prediction.bouncePath.dx, prediction.bouncePath.dy)}
+                  </>
                 )}
               </g>
             )}
@@ -505,7 +545,7 @@ export const PoolGame = () => {
                     <g>
                       <line x1={cueBall.x} y1={cueBall.y} x2={cueBall.x + r} y2={cueBall.y} stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
                       <path d={`M ${cueBall.x + r} ${cueBall.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${endX} ${endY}`} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" />
-                      <text x={cueBall.x + (r + 20) * Math.cos(angleRad / 2)} y={cueBall.y + (r + 20) * Math.sin(angleRad / 2)} fill="white" fontSize="14" textAnchor="middle" alignmentBaseline="middle" fontWeight="black" className=" italic">
+                      <text x={cueBall.x + (r + 20) * Math.cos(angleRad / 2)} y={cueBall.y + (r + 20) * Math.sin(angleRad / 2)} fill="white" fontSize="14" textAnchor="middle" alignmentBaseline="middle" fontWeight="black">
                         {angleDeg}°
                       </text>
                     </g>
@@ -547,13 +587,13 @@ export const PoolGame = () => {
 
         {/* Operational Interface Control */}
         <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-white/5 border-2 border-white/10 p-8 rounded-[3rem] backdrop-blur-md pointer-events-none">
-           <div className="text-right">
-              <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Impulse Module</p>
-              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-2 leading-none">Drag Cue Ball</p>
-           </div>
-           <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20">
-              <MousePointer2 size={24} strokeWidth={3} />
-           </div>
+          <div className="text-right">
+            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Impulse Module</p>
+            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-2 leading-none">Drag Cue Ball</p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20">
+            <MousePointer2 size={24} strokeWidth={3} />
+          </div>
         </div>
       </div>
     </ToolPanel>

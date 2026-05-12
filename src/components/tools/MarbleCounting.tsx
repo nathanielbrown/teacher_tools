@@ -310,7 +310,7 @@ export const MarbleCounting = () => {
 
             <button 
               onClick={resetGame} 
-              className="w-full py-6 bg-slate-900 text-white font-black text-xl rounded-[2rem] hover:bg-indigo-600 transition-all active:scale-95  flex items-center justify-center gap-4 uppercase tracking-widest"
+              className="w-full py-6 bg-indigo-600 text-white font-black text-xl rounded-[2rem] hover:bg-indigo-700 transition-all active:scale-95  flex items-center justify-center gap-4 uppercase tracking-widest"
             >
               <RotateCcw size={24} /> Try Again
             </button>
@@ -328,7 +328,7 @@ export const MarbleCounting = () => {
                    <span className="text-2xl font-black text-slate-800 tabular-nums leading-none mt-1">{currentIndex + 1} / 10</span>
                 </div>
               </div>
-              <div className="flex items-center gap-4 bg-slate-900 px-8 py-4 rounded-[2rem] ">
+              <div className="flex items-center gap-4 bg-slate-800 px-8 py-4 rounded-[2rem] ">
                 <Trophy size={20} className="text-amber-400" />
                 <span className="text-2xl font-black text-white tabular-nums leading-none">SCORE: {score}</span>
               </div>

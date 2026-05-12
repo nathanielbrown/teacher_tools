@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, X, SortAsc, Shuffle, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, X, SortAsc, Shuffle, Plus, Trash2, Pencil } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { shuffle } from '../../utils/random';
@@ -21,6 +21,7 @@ interface WordPanelProps {
   onWordsChange: (words: string[]) => void;
   onAddList?: () => void;
   onDeleteList?: (id: string) => void;
+  onRenameList?: (id: string, name: string) => void;
   onManageLists?: () => void;
   manageListsLabel?: React.ReactNode;
   className?: string;
@@ -40,6 +41,7 @@ export const WordPanel: React.FC<WordPanelProps> = ({
   onWordsChange,
   onAddList,
   onDeleteList,
+  onRenameList,
   onManageLists,
   manageListsLabel,
   className = "",
@@ -51,8 +53,24 @@ export const WordPanel: React.FC<WordPanelProps> = ({
   const currentList = lists.find(l => l.id === selectedListId);
   const words = currentList?.words || [];
 
+  const [localText, setLocalText] = React.useState(words.join('\n'));
+
+  // Sync local text when selection or external words change
+  React.useEffect(() => {
+    // Only update local text if the words themselves changed (ignoring formatting)
+    const currentWords = localText.split('\n').map(w => w.trim()).filter(s => s.length > 0);
+    const incomingWords = words;
+    
+    if (JSON.stringify(currentWords) !== JSON.stringify(incomingWords)) {
+      setLocalText(words.join('\n'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedListId, words]);
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const list = e.target.value.split('\n').map(w => w.trim()).filter(s => s.length > 0);
+    const newText = e.target.value;
+    setLocalText(newText);
+    const list = newText.split('\n').map(w => w.trim()).filter(s => s.length > 0);
     onWordsChange(list);
   };
 
@@ -111,6 +129,21 @@ export const WordPanel: React.FC<WordPanelProps> = ({
                       title="Add List"
                     >
                       <Plus size={14} strokeWidth={3} />
+                    </button>
+                  )}
+                  {onRenameList && currentList && (
+                    <button 
+                      onClick={() => {
+                        const newName = prompt(intl.formatMessage({ id: 'wordpanel.prompt.rename', defaultMessage: 'Enter new list name:' }), currentList.name);
+                        if (newName && newName.trim()) {
+                          onRenameList(currentList.id, newName.trim());
+                          audioEngine.playTick(settings.soundTheme);
+                        }
+                      }}
+                      className="p-1.5 text-indigo-400 hover:text-indigo-600 transition-colors"
+                      title="Rename List"
+                    >
+                      <Pencil size={14} strokeWidth={3} />
                     </button>
                   )}
                   {onDeleteList && lists.length > 1 && (
@@ -176,7 +209,7 @@ export const WordPanel: React.FC<WordPanelProps> = ({
                 </span>
               </div>
               <textarea
-                value={words.join('\n')}
+                value={localText}
                 onChange={handleTextareaChange}
                 className="flex-1 w-full p-6 text-sm bg-white border-4 border-transparent focus:border-indigo-100 rounded-[2rem] outline-none transition-all font-black text-slate-900 resize-none custom-scrollbar min-h-0"
                 placeholder={intl.formatMessage({ id: 'wordpanel.placeholder.words', defaultMessage: 'Enter words...' })}

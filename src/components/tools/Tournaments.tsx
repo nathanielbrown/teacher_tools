@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import {
   Trophy, 
   Users, 
   Play, 
-  RotateCcw,
+  RotateCcw, 
+  ChevronDown,
+  Sparkles,
+  Users2,
   Trash2, 
   Plus, 
-  Shuffle, 
-  List as ListIcon, 
+  Shuffle,   List as ListIcon, 
   Settings, 
   X,
   Shield, 
@@ -16,7 +18,6 @@ import {
   Check, 
   MousePointer2, 
   ChevronUp,
-  ChevronDown, 
   Maximize2, 
   UserPlus, 
   Info, 
@@ -30,58 +31,170 @@ import {
   Layout,
   Crown,
   BrainCircuit,
-  Volume2
+  Volume2,
+  Download
 } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { SettingsPanel } from '../shared/SettingsPanel';
+import { ClassPanel } from '../shared/ClassPanel';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
-import { shuffle } from '../../utils/random';
-
+import { downloadCanvasAsPNG } from '../../utils/export';
+// Custom Bracket Implementation
 // 1. Constants
 const K_FACTOR = 32;
 const BASE_RATING = 1200;
 
-// 2. Config (None)
+// Bracket Helpers
+const getNextPowerOfTwo = (n: number) => {
+  let power = 2;
+  while (power < n) power *= 2;
+  return power;
+};
+
+const generateSingleElimination = (players: string[]) => {
+  const count = players.length;
+  const size = getNextPowerOfTwo(count);
+  const matches: any[] = [];
+  const matchIds: any[] = [];
+  
+  // Round 1
+  const round1Count = size / 2;
+  for (let i = 0; i < round1Count; i++) {
+    const matchId = `r1-m${i}`;
+    matchIds.push(matchId);
+    const p1 = players[i * 2] || null;
+    const p2 = players[i * 2 + 1] || null;
+    matches.push({
+      id: matchId,
+      nextMatchId: null,
+      tournamentRoundText: '1',
+      state: (p1 && p2) ? 'SCHEDULED' : 'DONE',
+      participants: [
+        { id: p1 || 'bye', name: p1 || '-', isWinner: p1 && !p2, resultText: p1 && !p2 ? 'ADVANCED' : '' },
+        { id: p2 || 'bye', name: p2 || '-', isWinner: !p1 && p2, resultText: !p1 && p2 ? 'ADVANCED' : '' }
+      ]
+    });
+  }
+
+  let currentRoundMatchIds = matchIds;
+  let round = 2;
+  while (currentRoundMatchIds.length > 1) {
+    const nextRoundMatchIds = [];
+    for (let i = 0; i < currentRoundMatchIds.length; i += 2) {
+      const matchId = `r${round}-m${i / 2}`;
+      nextRoundMatchIds.push(matchId);
+      const m1 = matches.find(m => m.id === currentRoundMatchIds[i]);
+      const m2 = matches.find(m => m.id === currentRoundMatchIds[i + 1]);
+      if (m1) m1.nextMatchId = matchId;
+      if (m2) m2.nextMatchId = matchId;
+      matches.push({
+        id: matchId,
+        nextMatchId: null,
+        tournamentRoundText: round.toString(),
+        state: 'SCHEDULED',
+        participants: [{ id: '', name: 'TBD' }, { id: '', name: 'TBD' }]
+      });
+    }
+    currentRoundMatchIds = nextRoundMatchIds;
+    round++;
+  }
+  return matches;
+};
+
+const generateDoubleElimination = (players: string[]) => {
+  const count = players.length;
+  const size = getNextPowerOfTwo(count);
+  const matches: any[] = [];
+  
+  // 1. Winners Bracket
+  const winnersMatches = generateSingleElimination(players);
+  winnersMatches.forEach(m => {
+    m.id = `W-${m.id}`;
+    m.nextMatchId = m.nextMatchId ? `W-${m.nextMatchId}` : 'GF-1';
+    m.tournamentRoundText = `W${m.tournamentRoundText}`;
+    // Flag losers to go to Losers bracket
+    const roundIdx = parseInt(m.tournamentRoundText.replace('W', '')) - 1;
+    m.loserNextMatchId = `L-R${roundIdx + 1}-M${Math.floor(parseInt(m.id.split('-m')[1]) / 2)}`;
+  });
+  matches.push(...winnersMatches);
+
+  // 2. Losers Bracket
+  const winnersRoundsCount = Math.log2(size);
+  const losersMatchIds: Record<string, string[]> = {};
+  
+  for (let r = 1; r < winnersRoundsCount; r++) {
+    const lRound = `L${r}`;
+    losersMatchIds[lRound] = [];
+    const count = size / Math.pow(2, r + 1);
+    
+    for (let i = 0; i < count; i++) {
+      const id = `L-R${r}-M${i}`;
+      losersMatchIds[lRound].push(id);
+      matches.push({
+        id,
+        nextMatchId: null,
+        tournamentRoundText: lRound,
+        state: 'SCHEDULED',
+        participants: [{ id: '', name: 'TBD' }, { id: '', name: 'TBD' }]
+      });
+    }
+  }
+
+  // Link Losers
+  Object.keys(losersMatchIds).forEach((lRound, idx) => {
+    const currentIds = losersMatchIds[lRound];
+    const nextRoundKey = `L${idx + 2}`;
+    const nextIds = losersMatchIds[nextRoundKey];
+    if (nextIds) {
+      currentIds.forEach((id, i) => {
+        const m = matches.find(match => match.id === id);
+        if (m) m.nextMatchId = nextIds[Math.floor(i / 2)];
+      });
+    } else {
+      currentIds.forEach(id => {
+        const m = matches.find(match => match.id === id);
+        if (m) m.nextMatchId = 'GF-1';
+      });
+    }
+  });
+
+  // 3. Grand Final
+  matches.push({
+    id: 'GF-1',
+    nextMatchId: null,
+    tournamentRoundText: 'Final',
+    state: 'SCHEDULED',
+    participants: [{ id: '', name: 'TBD' }, { id: '', name: 'TBD' }]
+  });
+
+  return matches;
+};
 
 // 3. Text (Help and Info)
 const HELP_INFO = (
   <div className="space-y-4 font-['Outfit']">
-    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Tournament Arena Protocol</h3>
+    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Tournament Rules</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Configure your <b>Tournament Type</b> (Single, Double, or Elo) and participant capacity in the setup stage.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">Pick your players in the setup screen.</p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">In <b>Elimination</b> modes, click on a participant to advance them to the next bracket round.</p>
-      </div>
-      <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">In <b>Elo</b> mode, select a winner and a loser to recalibrate the skill ratings across the entire class matrix.</p>
-      </div>
-      <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">The <b>Grand Final</b> winner is crowned automatically once the final bracket match is resolved.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">Pick a winner and a loser to see who is the best.</p>
       </div>
     </div>
   </div>
 );
 
-// 4. Local Storage (None)
-
-// 5. Classes (EloManager, etc. - converted to components)
-
-// 6. Functions (Helper Components and Logic)
-const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEloHistory }: any) => {
+const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEloHistory, onBack }: any) => {
   const [selectedWinner, setSelectedWinner] = useState('');
   const [editingMatchId, setEditingMatchId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { settings } = useSettings();
-  const itemsPerPage = 8;
   const matchIdCounter = useRef(0);
 
   useEffect(() => {
@@ -94,26 +207,15 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
 
     const processedHistory = [...history].reverse().map(m => {
       if (!m.winner || !m.loser) return m;
-
       const rW = newRatings[m.winner] || BASE_RATING;
       const rL = newRatings[m.loser] || BASE_RATING;
-
       const eW = 1 / (1 + Math.pow(10, (rL - rW) / 400));
       const eL = 1 / (1 + Math.pow(10, (rW - rL) / 400));
-
       const nW = Math.round(rW + K_FACTOR * (1 - eW));
       const nL = Math.round(rL + K_FACTOR * (0 - eL));
-
       newRatings[m.winner] = nW;
       newRatings[m.loser] = nL;
-
-      return {
-        ...m,
-        winnerOld: rW,
-        winnerNew: nW,
-        loserOld: rL,
-        loserNew: nL
-      };
+      return { ...m, winnerOld: rW, winnerNew: nW, loserOld: rL, loserNew: nL };
     });
 
     setEloRatings(newRatings);
@@ -122,26 +224,16 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
 
   const recordMatch = (winner: string, loser: string) => {
     if (!winner || !loser || winner === loser) return;
-
     const rW = eloRatings[winner] || BASE_RATING;
     const rL = eloRatings[loser] || BASE_RATING;
-
     const eW = 1 / (1 + Math.pow(10, (rL - rW) / 400));
     const eL = 1 / (1 + Math.pow(10, (rW - rL) / 400));
-
     const nW = Math.round(rW + K_FACTOR * (1 - eW));
     const nL = Math.round(rL + K_FACTOR * (0 - eL));
-
     setEloRatings((prev: any) => ({ ...prev, [winner]: nW, [loser]: nL }));
-
     const match = {
       id: matchIdCounter.current++,
-      winner,
-      loser,
-      winnerOld: rW,
-      winnerNew: nW,
-      loserOld: rL,
-      loserNew: nL,
+      winner, loser, winnerOld: rW, winnerNew: nW, loserOld: rL, loserNew: nL,
       date: new Date().toISOString()
     };
     setEloHistory([match, ...eloHistory]);
@@ -153,26 +245,18 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
     if (editingMatchId) {
       const match = eloHistory.find((m: any) => m.id === editingMatchId);
       if (!match) return;
-
       let newHistory;
-      if (match.winner === student) {
-        newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, winner: null } : m);
-      } else if (match.loser === student) {
-        newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, loser: null } : m);
-      } else if (!match.winner) {
-        newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, winner: student } : m);
-      } else if (!match.loser) {
-        newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, loser: student } : m);
-      } else {
-        return;
-      }
-
+      if (match.winner === student) newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, winner: null } : m);
+      else if (match.loser === student) newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, loser: null } : m);
+      else if (!match.winner) newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, winner: student } : m);
+      else if (!match.loser) newHistory = eloHistory.map((m: any) => m.id === editingMatchId ? { ...m, loser: student } : m);
+      else return;
       recalculateAll(newHistory);
       const updatedMatch = newHistory.find((m: any) => m.id === editingMatchId);
       if (updatedMatch.winner && updatedMatch.loser) setEditingMatchId(null);
       return;
     }
-
+    // Two-step selection: first click = winner (green), second click = loser (red)
     if (!selectedWinner) {
       setSelectedWinner(student);
     } else if (selectedWinner === student) {
@@ -191,797 +275,1089 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
   };
 
   const sortedParticipants = [...participants].sort((a: string, b: string) => (eloRatings[b] || 1200) - (eloRatings[a] || 1200));
-  const totalPages = Math.ceil(eloHistory.length / itemsPerPage);
-  const currentHistory = eloHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // History is stored newest-first; display oldest-first ascending
+  const orderedHistory = [...eloHistory].reverse();
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(orderedHistory.length / itemsPerPage);
+  const currentHistory = orderedHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const matchOffset = (currentPage - 1) * itemsPerPage;
+
+  const handleExport = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = 1200;
+    canvas.height = 800;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#4f46e5';
+    ctx.fillRect(0, 0, canvas.width, 100);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 32px Outfit';
+    ctx.fillText('TOURNAMENT LEADERBOARD', 40, 65);
+
+    const sorted = [...participants].sort((a: string, b: string) => (eloRatings[b] || 1200) - (eloRatings[a] || 1200));
+    
+    ctx.fillStyle = '#1e293b';
+    ctx.font = '900 20px Outfit';
+    ctx.fillText('RANKINGS', 40, 150);
+
+    sorted.forEach((p, i) => {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+      const x = 40 + col * 380;
+      const y = 180 + row * 80;
+      const rating = eloRatings[p] || 1200;
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.roundRect(x, y, 360, 65, 16);
+      ctx.fill();
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '900 40px Outfit';
+      ctx.fillText((i + 1).toString(), x + 15, y + 48);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.font = '900 24px Outfit';
+      ctx.fillText(rating, x + 70, y + 35);
+      
+      ctx.fillStyle = '#64748b';
+      ctx.font = '900 12px Outfit';
+      ctx.fillText(p.toUpperCase(), x + 70, y + 52);
+    });
+
+    const historyY = 180 + Math.ceil(sorted.length / 3) * 80 + 40;
+    if (historyY < canvas.height - 100) {
+      ctx.fillStyle = '#4f46e5';
+      ctx.font = '900 20px Outfit';
+      ctx.fillText('RECENT MATCHES', 40, historyY);
+
+      const ordered = [...eloHistory].slice(0, 5);
+      ordered.forEach((m, i) => {
+        const y = historyY + 30 + i * 45;
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.roundRect(40, y, 1120, 35, 12);
+        ctx.fill();
+
+        ctx.font = '900 12px Outfit';
+        ctx.fillStyle = '#10b981';
+        ctx.fillText(m.winner?.toUpperCase() || '?', 60, y + 22);
+        
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('DEFEATED', 250, y + 22);
+        
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillText(m.loser?.toUpperCase() || '?', 400, y + 22);
+
+        if (m.winnerNew) {
+          ctx.fillStyle = '#10b981';
+          ctx.fillText(`+${m.winnerNew - m.winnerOld} PTS`, 600, y + 22);
+        }
+      });
+    }
+
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '900 10px Outfit';
+    ctx.fillText(`GENERATED ON ${new Date().toLocaleDateString()} • CLASSREX TEACHER TOOLS`, 40, canvas.height - 30);
+
+    downloadCanvasAsPNG(canvas, `leaderboard-${Date.now()}.png`);
+    audioEngine.playTick(settings.soundTheme);
+  };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-full min-h-0 italic">
-      {/* Rankings Board */}
-      <div className="flex-1 bg-slate-50/50 rounded-[4rem] border-4 border-white  flex flex-col gap-8 p-12 overflow-hidden">
-        <div className="flex items-center justify-between shrink-0">
-           <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
-                 <Trophy size={24} strokeWidth={3} />
-              </div>
-              <div className="flex flex-col">
-                 <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Apex Leaderboard</h3>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Skill-Based Tier Synthesis</span>
-              </div>
-           </div>
-           <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end">
-                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Total Active</span>
-                 <span className="text-sm font-black text-slate-800 tabular-nums">{participants.length} Candidates</span>
-              </div>
-           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto pr-2 no-scrollbar pb-8 flex-1">
-           {sortedParticipants.map((p: string, i: number) => {
-             const isWinner = eloHistory.find((m: any) => m.id === editingMatchId)?.winner === p;
-             const isLoser = eloHistory.find((m: any) => m.id === editingMatchId)?.loser === p;
-             const isSelected = selectedWinner === p || isWinner || isLoser;
-             const rating = eloRatings[p] || 1200;
-             const rank = i + 1;
-
-             return (
-               <button 
-                 key={p} 
-                 onClick={() => handleStudentClick(p)}
-                 className={`group flex items-center gap-4 p-5 rounded-[2.5rem] border-4 transition-all duration-300 relative overflow-hidden ${
-                   isWinner ? 'bg-emerald-500 border-emerald-400 text-white ' :
-                   isLoser ? 'bg-rose-500 border-rose-400 text-white ' :
-                   selectedWinner === p ? 'bg-indigo-600 border-indigo-500 text-white ' :
-                   'bg-white border-white hover:border-indigo-100 '
-                 }`}
-               >
-                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-black  transition-colors ${
-                   isSelected ? 'bg-white/20 border-white/20 text-white' : 
-                   (rank === 1 ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-300')
-                 }`}>
-                   {rank}
-                 </div>
-                 <div className="flex flex-col items-start truncate flex-1">
-                    <span className={`text-[9px] font-black uppercase tracking-widest ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>Competitor</span>
-                    <span className="font-black text-sm uppercase tracking-tighter truncate w-full text-left">{p}</span>
-                 </div>
-                 <div className="flex flex-col items-end">
-                    <span className={`text-[9px] font-black uppercase tracking-widest ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>Rating</span>
-                    <span className="font-black text-lg tabular-nums tracking-tighter italic">{rating}</span>
-                 </div>
-               </button>
-             );
-           })}
-        </div>
-      </div>
-
-      {/* History & Controls Sidebar */}
-      <div className="w-full lg:w-[450px] flex flex-col gap-8 min-h-0">
-        <div className="bg-slate-900 p-12 rounded-[4rem] border-4 border-slate-800  flex flex-col gap-10 relative overflow-hidden flex-1 min-h-0">
-           <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
-           
-           <div className="flex items-center justify-between w-full relative z-10 shrink-0">
-              <div className="flex items-center gap-3">
-                 <History size={20} className="text-indigo-400" />
-                 <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Match Stream</h4>
-              </div>
-              <div className="px-4 py-1 bg-white/10 rounded-full text-[10px] font-black tabular-nums text-white">
-                 {eloHistory.length}
-              </div>
-           </div>
-
-           <div className="flex-1 overflow-y-auto space-y-4 pr-2 no-scrollbar relative z-10">
-              <AnimatePresence mode="popLayout">
-                {currentHistory.map((m: any) => {
-                  const isEditing = editingMatchId === m.id;
-                  return (
-                    <motion.div 
-                      key={m.id}
-                      layout
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className={`p-6 rounded-[2.5rem] border-4 transition-all group relative cursor-pointer ${
-                        isEditing ? 'bg-white/10 border-indigo-500 ' : 'bg-white/5 border-transparent hover:bg-white/[0.08]'
-                      }`}
-                      onClick={() => { if (!isEditing) { setEditingMatchId(m.id); setSelectedWinner(''); } }}
-                    >
-                       <div className="flex items-center justify-between gap-3 mb-6">
-                          <div className={`flex-1 text-center p-3 rounded-2xl text-[10px] font-black uppercase truncate transition-all ${m.winner ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/10 text-white/20 border-white/5 animate-pulse'}`}>
-                             {m.winner || 'PENDING'}
-                          </div>
-                          <Zap size={14} className="text-white/20" />
-                          <div className={`flex-1 text-center p-3 rounded-2xl text-[10px] font-black uppercase truncate transition-all ${m.loser ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-white/10 text-white/20 border-white/5 animate-pulse'}`}>
-                             {m.loser || 'PENDING'}
-                          </div>
-                       </div>
-                       
-                       <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black text-white/30 uppercase tracking-widest italic">
-                             {new Date(m.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                          <div className="flex items-center gap-4">
-                             {isEditing ? (
-                               <div className="flex gap-3">
-                                  <button onClick={(e) => { e.stopPropagation(); deleteMatch(m.id); }} className="text-rose-400 hover:scale-110 transition-transform"><Trash2 size={18} /></button>
-                                  <button onClick={(e) => { e.stopPropagation(); setEditingMatchId(null); }} className="text-white/40 hover:scale-110 transition-transform"><X size={18} /></button>
-                               </div>
-                             ) : (
-                               <div className="flex items-center gap-3">
-                                  <span className="text-[10px] font-black text-emerald-400">+{m.winnerNew - m.winnerOld}</span>
-                                  <span className="text-[10px] font-black text-rose-400">{m.loserNew - m.loserOld}</span>
-                               </div>
-                             )}
-                          </div>
-                       </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-           </div>
-
-           {totalPages > 1 && (
-             <div className="flex items-center justify-between pt-6 border-t border-white/10 relative z-10 shrink-0">
-                <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all disabled:opacity-20 text-white"><ChevronLeft size={20} /></button>
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Page {currentPage} / {totalPages}</span>
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all disabled:opacity-20 text-white"><ChevronRight size={20} /></button>
-             </div>
-           )}
-        </div>
-
-        <div className="p-10 bg-indigo-600 rounded-[4rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
-           <div className="tool-grid-bg opacity-10 pointer-events-none" />
-           <div className="flex items-center gap-4 relative z-10">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white border border-white/20">
-                 <Volume2 size={20} strokeWidth={3} />
-              </div>
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Theoretical Matrix</h4>
-           </div>
-           <p className="text-xs font-black leading-relaxed italic text-indigo-100 uppercase tracking-widest relative z-10">
-             Elo algorithms mapped. <br/>
-             Skill tiers stabilized.
-           </p>
-           <div className="flex justify-end relative z-10">
-              <BrainCircuit size={24} className="text-white/20" />
-           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ChampionNode = ({ winner }: { winner: string | null }) => (
-  <div className="flex flex-col items-center gap-6 mb-16 italic">
-    <div className="relative">
-      <AnimatePresence mode="wait">
-        {winner ? (
-          <motion.div
-            key="champion"
-            initial={{ scale: 0, rotate: -20 }}
-            animate={{ scale: 1, rotate: 0 }}
-            className="w-40 h-40 rounded-[3.5rem] bg-slate-900 border-[12px] border-amber-400 flex items-center justify-center text-amber-400 -[0_48px_96px_-12px_rgba(251,191,36,0.4)] z-20"
-          >
-            <Crown size={80} fill="currentColor" strokeWidth={1} />
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-[-16px] border-4 border-dashed border-amber-400/30 rounded-[4rem] pointer-events-none"
-            />
-          </motion.div>
-        ) : (
-          <div className="w-40 h-40 rounded-[3.5rem] bg-slate-50 border-[12px] border-slate-100 flex items-center justify-center text-slate-100">
-             <Trophy size={80} strokeWidth={1} />
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
-    <div className="text-center space-y-3">
-       <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.6em]">Tournament Champion</span>
-       <h2 className="text-6xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
-          {winner || "Awaiting Final"}
-       </h2>
-    </div>
-  </div>
-);
-
-const MatchNode = ({ match, onSelectWinner, mirrored = false, isCenter = false }: any) => {
-  const hasWinner = !!match.winner;
-
-  return (
-    <div className={`relative flex items-center italic ${mirrored ? 'flex-row-reverse' : ''}`}>
-      <div className={`flex flex-col gap-3 p-3 bg-white rounded-[2.5rem] border-4 transition-all duration-500 min-w-[240px]   hover:-translate-y-1 ${hasWinner ? 'border-indigo-100' : 'border-white'}`}>
-        {match.participants.map((player: string, i: number) => {
-          const isWinner = match.winner === player;
-          const isLoser = match.winner && player && match.winner !== player;
-          const isEmpty = !player;
-
-          return (
-            <button
-              key={i}
-              onClick={() => player && onSelectWinner(match.id, player)}
-              disabled={isEmpty || hasWinner}
-              className={`group flex items-center justify-between p-4 rounded-2xl transition-all border-4 ${
-                isWinner ? 'bg-emerald-500 border-emerald-400 text-white ' :
-                isLoser ? 'bg-slate-50 border-transparent text-slate-300 opacity-60' :
-                isEmpty ? 'bg-slate-50/50 border-dashed border-slate-100 text-slate-200' :
-                'bg-white border-white text-slate-800 hover:border-indigo-100 hover:bg-indigo-50/50'
-              }`}
+    <div className="flex flex-col lg:flex-row-reverse gap-4 h-full min-h-0 italic">
+      {/* Best Players Panel */}
+      <div className="flex-1 bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden">
+        <div className="px-6 py-4 flex items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={onBack}
+              className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white transition-all active:scale-90"
             >
-              <div className="flex items-center gap-4 truncate">
-                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black ${isWinner ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-400'}`}>
-                    {match.seeds?.[i] || '?'}
-                 </div>
-                 <span className="font-black text-xs uppercase tracking-widest truncate">{player || "TBD"}</span>
-              </div>
-              {isWinner && <Check size={18} strokeWidth={4} />}
+              <ChevronLeft size={20} strokeWidth={3} />
             </button>
-          );
-        })}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
+                <Trophy size={18} strokeWidth={3} />
+              </div>
+              <h3 className="text-base font-black text-slate-800 uppercase tracking-tight leading-none">Leaderboard</h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleExport}
+              className="px-4 py-2 rounded-xl bg-white border-2 border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+              title="Export as PNG"
+            >
+              <Download size={14} strokeWidth={3} />
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div className="p-3 grid grid-cols-3 gap-2 overflow-y-auto no-scrollbar flex-1">
+          {sortedParticipants.map((p: string, _i: number) => {
+            const isEditWinner = eloHistory.find((m: any) => m.id === editingMatchId)?.winner === p;
+            const isEditLoser = eloHistory.find((m: any) => m.id === editingMatchId)?.loser === p;
+            // Pending selection: first pick = green (winner), second pick = red (loser)
+            const isPendingWinner = !editingMatchId && selectedWinner === p;
+            const rating = eloRatings[p] || 1200;
+            return (
+              <button 
+                key={p} 
+                onClick={() => handleStudentClick(p)} 
+                className={`flex items-center gap-2 px-2 py-2 rounded-xl border-2 transition-all duration-200 min-w-0 ${
+                  isEditWinner 
+                    ? 'bg-emerald-500 border-emerald-400 text-white' 
+                    : isEditLoser 
+                      ? 'bg-rose-500 border-rose-400 text-white' 
+                      : isPendingWinner
+                        ? 'bg-emerald-500 border-emerald-400 text-white'
+                        : 'bg-slate-50 border-transparent hover:border-indigo-100 hover:bg-white'
+                }`}
+              >
+                <div className="flex flex-col min-w-0 flex-1 items-center text-center">
+                  <span className={`text-2xl font-black tabular-nums leading-none ${
+                    (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white' : 'text-slate-700'
+                  }`}>{rating}</span>
+                  <span className={`font-black text-xs uppercase tracking-tighter truncate w-full text-center leading-tight mt-1 ${
+                    (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white/80' : 'text-slate-500'
+                  }`}>{p}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Connection Lines */}
-      {!isCenter && (
-        <div className={`w-16 h-px bg-slate-200 relative ${mirrored ? 'mr-0' : 'ml-0'}`}>
-           <div className={`absolute w-4 h-4 rounded-full bg-slate-200 -top-2 ${mirrored ? '-left-2' : '-right-2'}`} />
+      {/* Match History Panel */}
+      <div className="w-full lg:w-[380px] bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden shrink-0">
+        <div className="px-6 py-4 flex items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <History size={16} strokeWidth={3} />
+            </div>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-600">History</h4>
+          </div>
+          <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{eloHistory.length} matches</span>
         </div>
-      )}
+
+        <div className="px-3 py-2 flex-1 overflow-y-auto no-scrollbar relative z-10">
+          {/* Column headers */}
+          <div className="grid grid-cols-[1.5rem_1fr_auto_1fr_auto] gap-1 px-1 mb-1 items-center">
+            <span className="text-[7px] font-black text-slate-300 uppercase text-center">#</span>
+            <span className="text-[7px] font-black text-emerald-400 uppercase text-center">Winner</span>
+            <span />
+            <span className="text-[7px] font-black text-rose-400 uppercase text-center">Loser</span>
+            <span />
+          </div>
+          <AnimatePresence mode="popLayout">
+            {currentHistory.map((m: any, rowIdx: number) => {
+              const matchNum = matchOffset + rowIdx + 1;
+              const isEditing = editingMatchId === m.id;
+              return (
+                <motion.div 
+                  key={m.id} 
+                  layout 
+                  initial={{ opacity: 0, x: 10 }} 
+                  animate={{ opacity: 1, x: 0 }} 
+                  className={`grid grid-cols-[1.5rem_1fr_auto_1fr_auto] gap-1 items-center px-1 py-1 rounded-xl border-2 mb-1 cursor-pointer transition-all ${
+                    isEditing ? 'bg-indigo-50 border-indigo-200' : 'border-transparent hover:bg-slate-50 hover:border-slate-100'
+                  }`}
+                  onClick={() => { if (!isEditing) { setEditingMatchId(m.id); setSelectedWinner(''); } }}
+                >
+                  <span className="text-[8px] font-black text-slate-300 text-center">{matchNum}</span>
+                  <div className={`text-center px-1.5 py-1 rounded-lg text-[8px] font-black uppercase truncate ${
+                    m.winner ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-50 text-slate-300 animate-pulse'
+                  }`}>{m.winner || '?'}</div>
+                  <Zap size={10} className="text-slate-200 shrink-0" />
+                  <div className={`text-center px-1.5 py-1 rounded-lg text-[8px] font-black uppercase truncate ${
+                    m.loser ? 'bg-rose-100 text-rose-700' : 'bg-slate-50 text-slate-300 animate-pulse'
+                  }`}>{m.loser || '?'}</div>
+                  {isEditing ? (
+                    <div className="flex gap-1">
+                      <button onClick={(e) => { e.stopPropagation(); deleteMatch(m.id); }} className="p-1 hover:bg-rose-50 rounded text-rose-400 transition-colors"><Trash2 size={12} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); setEditingMatchId(null); }} className="p-1 hover:bg-slate-100 rounded text-slate-300 transition-colors"><X size={12} /></button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-end gap-0.5">
+                      {m.winnerNew !== undefined && <span className="text-[7px] font-black text-emerald-500">+{m.winnerNew - m.winnerOld}</span>}
+                      {m.loserNew !== undefined && <span className="text-[7px] font-black text-rose-400">{m.loserNew - m.loserOld}</span>}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Paging - always visible when there are matches */}
+        <div className="px-4 py-3 bg-slate-50/50 border-t-4 border-slate-50 flex items-center justify-between shrink-0">
+          <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronLeft size={14} /></button>
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{currentPage} / {Math.max(1, totalPages)}</span>
+          <button onClick={() => setCurrentPage(p => Math.min(Math.max(1, totalPages), p + 1))} disabled={currentPage >= Math.max(1, totalPages)} className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronRight size={14} /></button>
+        </div>
+      </div>
     </div>
   );
 };
 
-// 7. Component
-export const Tournaments = () => {
+const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack }: any) => {
   const { settings } = useSettings();
-  const { setHeaderActions, setHelpContent, setHasConfig, setOnConfigToggle, setOnReset, clearHeader, isConfigOpen, setIsConfigOpen } = useHeader();
-  const [tournaments, setTournaments] = useLocalStorage('tournaments_list', []);
-  const [activeTournamentId, setActiveTournamentId] = useLocalStorage('active_tournament_id', null);
-
-  const [step, setStep] = useState('setup');
-  const [tournamentType, setTournamentType] = useState('single');
-  const [bracketSize, setBracketSize] = useState(16);
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState(settings.classes[0]?.id || '');
-  const [zoom, setZoom] = useState(0.8);
-  const [minZoom, setMinZoom] = useState(0.2);
-  const bracketRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const scale = useMotionValue(1);
+  const [matchPositions, setMatchPositions] = useState<Record<string, { x: number, y: number }>>({});
   const containerRef = useRef<HTMLDivElement>(null);
-  const tournamentIdCounter = useRef(0);
+  const roundsRef = useRef<HTMLDivElement>(null);
+  const matchRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const matches = useMemo(() => tournament.matches || [], [tournament.matches]);
 
-  useEffect(() => {
-    if (tournamentIdCounter.current === 0) tournamentIdCounter.current = Date.now();
+  const handleExport = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const roundWidth = 450;
+    const matchHeight = 180;
+    const padding = 150;
+    const canvasWidth = rounds.length * roundWidth + padding * 2;
+    const maxMatches = Math.max(...rounds.map(r => r.length));
+    const canvasHeight = Math.max(800, maxMatches * matchHeight + padding * 2);
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#4f46e5';
+    ctx.fillRect(0, 0, canvas.width, 120);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 40px Outfit';
+    ctx.fillText(tournament.name.toUpperCase(), padding, 75);
+    ctx.font = '900 14px Outfit';
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillText(`${tournament.type.toUpperCase()} ELIMINATION`, padding, 100);
+
+    rounds.forEach((roundMatches, roundIdx) => {
+      const x = padding + roundIdx * roundWidth;
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '900 16px Outfit';
+      ctx.fillText(roundMatches[0]?.tournamentRoundText.toUpperCase() || '', x, 170);
+
+      roundMatches.forEach((m, mIdx) => {
+        const spacing = (canvasHeight - 300) / roundMatches.length;
+        const y = 250 + mIdx * spacing + spacing / 2 - 60;
+
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.roundRect(x, y, 350, 120, 32);
+        ctx.fill();
+
+        m.participants.forEach((p: any, pIdx: number) => {
+          const py = y + pIdx * 60;
+          if (p.isWinner) {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.roundRect(x, py, 350, 60, pIdx === 0 ? [32, 32, 0, 0] : [0, 0, 32, 32]);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+          } else {
+            ctx.fillStyle = '#1e293b';
+          }
+          
+          ctx.font = '900 20px Outfit';
+          ctx.fillText(p.name?.toUpperCase() || 'TBD', x + 40, py + 38);
+          
+          if (p.isWinner) {
+             ctx.font = '900 10px Outfit';
+             ctx.fillText('WINNER', x + 280, py + 38);
+          }
+        });
+      });
+    });
+
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '900 12px Outfit';
+    ctx.fillText(`GENERATED BY CLASSREX TEACHER TOOLS • ${new Date().toLocaleDateString()}`, padding, canvas.height - 40);
+
+    downloadCanvasAsPNG(canvas, `tournament-${tournament.name.toLowerCase().replace(/\s+/g, '-')}.png`);
+    audioEngine.playTick(settings.soundTheme);
+  };
+
+  const updatePositions = useCallback(() => {
+    const positions: Record<string, { x: number, y: number }> = {};
+    const root = roundsRef.current;
+    if (!root) return;
+
+    Object.entries(matchRefs.current).forEach(([id, el]) => {
+      if (el) {
+        let curr = el as HTMLElement;
+        let px = curr.offsetWidth / 2;
+        let py = curr.offsetHeight / 2;
+        
+        while (curr && curr !== root) {
+          px += curr.offsetLeft;
+          py += curr.offsetTop;
+          curr = curr.offsetParent as HTMLElement;
+        }
+        positions[id] = { x: px, y: py };
+      }
+    });
+    setMatchPositions(positions);
   }, []);
 
-  const activeTournament = useMemo(() =>
-    tournaments.find((t: any) => t.id === activeTournamentId),
-    [tournaments, activeTournamentId]
+  const zoomToFitAll = useCallback(() => {
+    const container = containerRef.current;
+    const rounds = roundsRef.current;
+    if (!container || !rounds) return;
+
+    // Wait for layout to settle
+    setTimeout(() => {
+      const rw = rounds.offsetWidth;
+      const rh = rounds.offsetHeight;
+      const cw = container.offsetWidth;
+      const ch = container.offsetHeight;
+
+      const targetScale = Math.min(Math.max(Math.min((cw * 0.9) / rw, (ch * 0.9) / rh), 0.1), 1.5);
+      
+      animate(scale, targetScale, { type: 'spring', damping: 25, stiffness: 200 });
+      animate(x, (cw / 2) - (rw / 2 * targetScale), { type: 'spring', damping: 25, stiffness: 200 });
+      animate(y, (ch / 2) - (rh / 2 * targetScale), { type: 'spring', damping: 25, stiffness: 200 });
+    }, 100);
+  }, [scale, x, y]);
+
+  useLayoutEffect(() => {
+    updatePositions();
+    zoomToFitAll();
+    const timer = setTimeout(updatePositions, 500);
+    window.addEventListener('resize', updatePositions);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updatePositions);
+    };
+  }, [updatePositions, tournament.id, matches, zoomToFitAll]);
+  
+  const { rounds, roundMap } = useMemo(() => {
+    const rounds: any[][] = [];
+    const roundMap: Record<string, number> = {};
+    let nextRoundIdx = 0;
+
+    matches.forEach((m: any) => {
+      const text = m.tournamentRoundText;
+      if (roundMap[text] === undefined) {
+        roundMap[text] = nextRoundIdx++;
+      }
+      const idx = roundMap[text];
+      if (!rounds[idx]) rounds[idx] = [];
+      rounds[idx].push(m);
+    });
+    return { rounds, roundMap };
+  }, [matches]);
+
+  const jumpToRound = useCallback((roundIdx: number, wing?: 'left' | 'right' | 'center') => {
+    let roundMatches = rounds[roundIdx];
+    if (!roundMatches || roundMatches.length === 0) return;
+    
+    if (wing === 'left' && roundIdx < rounds.length - 1) {
+      roundMatches = roundMatches.slice(0, Math.ceil(roundMatches.length / 2));
+    } else if (wing === 'right' && roundIdx < rounds.length - 1) {
+      roundMatches = roundMatches.slice(Math.ceil(roundMatches.length / 2));
+    }
+
+    let minY = Infinity, maxY = -Infinity;
+    let sumX = 0, count = 0;
+    
+    roundMatches.forEach(m => {
+      const pos = matchPositions[m.id];
+      if (pos) {
+        sumX += pos.x;
+        minY = Math.min(minY, pos.y - 150); 
+        maxY = Math.max(maxY, pos.y + 150);
+        count++;
+      }
+    });
+    
+    if (count === 0) return;
+
+    const avgX = sumX / count;
+    const roundHeight = maxY - minY;
+    const container = containerRef.current;
+    if (!container) return;
+
+    const targetScale = Math.min(Math.max((container.offsetHeight * 0.8) / roundHeight, 0.15), 1.5);
+    const midY = (minY + maxY) / 2;
+
+    // Center the target point in the viewport
+    animate(scale, targetScale, { type: 'spring', damping: 25, stiffness: 200 });
+    animate(x, (container.offsetWidth / 2) - (avgX * targetScale), { type: 'spring', damping: 25, stiffness: 200 });
+    animate(y, (container.offsetHeight / 2) - (midY * targetScale), { type: 'spring', damping: 25, stiffness: 200 });
+    
+    audioEngine.playTick(settings.soundTheme);
+  }, [rounds, matchPositions, scale, x, y, settings.soundTheme]);
+
+  const navigationButtons = useMemo(() => {
+    if (tournament.type === 'double') {
+      const winnersRounds = rounds.filter((rm, i) => Object.keys(roundMap)[i].startsWith('W'));
+      const losersRounds = rounds.filter((rm, i) => Object.keys(roundMap)[i].startsWith('L'));
+      const finalRound = rounds.filter((rm, i) => Object.keys(roundMap)[i] === 'Final');
+
+      return [
+        ...winnersRounds.map((rm) => ({
+          label: rm[0].tournamentRoundText,
+          onClick: () => jumpToRound(roundMap[rm[0].tournamentRoundText], 'center'),
+          color: 'bg-white text-emerald-600 hover:text-emerald-700'
+        })),
+        ...finalRound.map(() => ({
+          label: 'Final',
+          onClick: () => jumpToRound(roundMap['Final'], 'center'),
+          color: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+        })),
+        ...losersRounds.map((rm) => ({
+          label: rm[0].tournamentRoundText,
+          onClick: () => jumpToRound(roundMap[rm[0].tournamentRoundText], 'center'),
+          color: 'bg-white text-rose-600 hover:text-rose-700'
+        })).reverse()
+      ];
+    } else {
+      // Single elimination - split layout
+      const wingRounds = rounds.slice(0, -1);
+      return [
+        ...wingRounds.map((rm, idx) => ({
+          label: `L${idx + 1}`,
+          onClick: () => jumpToRound(idx, 'left'),
+          color: 'bg-white text-emerald-600 hover:text-emerald-700'
+        })),
+        {
+          label: 'Final',
+          onClick: () => jumpToRound(rounds.length - 1, 'center'),
+          color: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+        },
+        ...wingRounds.map((rm, idx) => ({
+          label: `R${idx + 1}`,
+          onClick: () => jumpToRound(idx, 'right'),
+          color: 'bg-white text-rose-600 hover:text-rose-700'
+        })).reverse()
+      ];
+    }
+  }, [tournament.type, rounds, roundMap, jumpToRound]);
+
+  const updateWinner = (matchId: string, winnerId: string) => {
+    audioEngine.playTick(settings.soundTheme);
+    setTournaments((prev: any) => {
+      const updatedTournaments = prev.map((t: any) => {
+        if (t.id !== activeTournamentId) return t;
+        
+        const newMatches = [...t.matches];
+        const matchIndex = newMatches.findIndex(m => m.id === matchId);
+        if (matchIndex === -1) return t;
+
+        const match = { ...newMatches[matchIndex] };
+        match.participants = match.participants.map((p: any) => ({
+          ...p,
+          isWinner: p.id === winnerId,
+          resultText: p.id === winnerId ? 'WON' : (winnerId ? 'LOST' : '')
+        }));
+        match.state = winnerId ? 'DONE' : 'SCHEDULED';
+        newMatches[matchIndex] = match;
+
+        if (match.nextMatchId) {
+          const nextMatchIndex = newMatches.findIndex(m => m.id === match.nextMatchId);
+          if (nextMatchIndex !== -1) {
+            const nextMatch = { ...newMatches[nextMatchIndex], participants: [...newMatches[nextMatchIndex].participants] };
+            const existingIndex = nextMatch.participants.findIndex((p: any) => p.sourceMatchId === matchId);
+            
+            if (existingIndex !== -1) {
+              nextMatch.participants[existingIndex] = { ...nextMatch.participants[existingIndex], id: winnerId, name: winnerId || 'TBD' };
+            } else {
+              const emptySlotIndex = nextMatch.participants.findIndex((p: any) => !p.id || p.id === 'bye');
+              if (emptySlotIndex !== -1) {
+                nextMatch.participants[emptySlotIndex] = { ...nextMatch.participants[emptySlotIndex], id: winnerId, name: winnerId || 'TBD', sourceMatchId: matchId };
+              }
+            }
+            newMatches[nextMatchIndex] = nextMatch;
+          }
+        }
+
+        // Handle Loser Advancement for Double Elimination
+        if (match.loserNextMatchId) {
+          const loserId = match.participants.find(p => p.id !== winnerId)?.id;
+          if (loserId && loserId !== 'bye') {
+            const nextMatchIndex = newMatches.findIndex(m => m.id === match.loserNextMatchId);
+            if (nextMatchIndex !== -1) {
+              const nextMatch = { ...newMatches[nextMatchIndex], participants: [...newMatches[nextMatchIndex].participants] };
+              const existingIndex = nextMatch.participants.findIndex((p: any) => p.sourceMatchId === `${matchId}-loser`);
+              
+              if (existingIndex !== -1) {
+                nextMatch.participants[existingIndex] = { ...nextMatch.participants[existingIndex], id: loserId, name: loserId || 'TBD' };
+              } else {
+                const emptySlotIndex = nextMatch.participants.findIndex((p: any) => !p.id || p.id === 'bye');
+                if (emptySlotIndex !== -1) {
+                  nextMatch.participants[emptySlotIndex] = { ...nextMatch.participants[emptySlotIndex], id: loserId, name: loserId || 'TBD', sourceMatchId: `${matchId}-loser` };
+                }
+              }
+              newMatches[nextMatchIndex] = nextMatch;
+            }
+          }
+        }
+
+        return { ...t, matches: newMatches };
+      });
+      return updatedTournaments;
+    });
+  };
+
+  const handleMatchClick = (match: any, participantId: string) => {
+    if (!participantId || participantId === 'bye' || participantId === 'TBD') return;
+    updateWinner(match.id, participantId);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newScale = Math.min(Math.max(scale.get() * delta, 0.1), 3);
+      scale.set(newScale);
+    }
+  };
+
+  const resetView = () => {
+    zoomToFitAll();
+    audioEngine.playTick(settings.soundTheme);
+  };
+
+  const renderRound = (roundMatches: any[]) => (
+    <div key={roundMatches[0]?.tournamentRoundText} className="flex flex-col justify-around gap-16 py-4 relative min-w-[320px]">
+      <div className="absolute -top-16 left-1/2 -translate-x-1/2">
+        <div className="px-6 py-2 bg-white rounded-full border-2 border-slate-100 shadow-sm min-w-[120px]">
+          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] italic block text-center">{roundMatches[0]?.tournamentRoundText}</span>
+        </div>
+      </div>
+      
+      {roundMatches.map((m) => (
+        <div key={m.id} className="relative flex items-center">
+          <div 
+            ref={(el) => { matchRefs.current[m.id] = el; }}
+            className="w-80 bg-white rounded-[2.5rem] border-4 border-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] overflow-hidden group/match transition-all z-10"
+          >
+            {m.participants.map((p: any, pIdx: number) => {
+              const isTBD = !p.id || p.id === 'TBD';
+              const isBye = p.id === 'bye';
+              const isSelectedWinner = p.isWinner;
+              
+              return (
+                <button
+                  key={pIdx}
+                  onClick={(e) => { e.stopPropagation(); handleMatchClick(m, p.id); }}
+                  disabled={isTBD || isBye}
+                  className={`w-full px-10 py-7 flex items-center justify-between border-b-4 border-slate-50 last:border-b-0 transition-all relative overflow-hidden text-left ${
+                    isSelectedWinner 
+                      ? 'bg-[#35B995] text-white' 
+                      : isTBD || isBye 
+                        ? 'bg-slate-50/50 text-slate-300' 
+                        : 'bg-white text-slate-800 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-5 truncate relative z-10">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-black transition-colors ${
+                      isSelectedWinner ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'
+                    }`}>{pIdx + 1}</div>
+                    <div className="flex flex-col items-start truncate">
+                      <span className={`text-[8px] font-black uppercase tracking-[0.15em] ${isSelectedWinner ? 'text-white/70' : 'text-slate-400'}`}>Competitor</span>
+                      <span className={`text-base font-black uppercase truncate tracking-tight leading-none mt-0.5 ${isSelectedWinner ? 'text-white' : 'text-slate-700'}`}>{isBye ? 'BYE' : (p.name || 'TBD')}</span>
+                    </div>
+                  </div>
+                  {isSelectedWinner && (
+                    <div className="flex flex-col items-end relative z-10 shrink-0">
+                       <Check size={20} strokeWidth={4} className="text-white mb-0.5" />
+                       <span className="text-[7px] font-black uppercase tracking-widest text-white/90">Winner</span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 
-  const [prevTournamentId, setPrevTournamentId] = useState(activeTournamentId);
-  if (activeTournamentId !== prevTournamentId) {
-    setPrevTournamentId(activeTournamentId);
-    if (activeTournament) {
-      setTournamentType(activeTournament.type);
-      setBracketSize(activeTournament.bracketSize || 16);
-      setSelectedClassId(activeTournament.classId || '');
-      setStep(activeTournament.step || 'setup');
-    } else {
-      setStep('setup');
-    }
-  }
+
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 italic overflow-hidden">
+      <div className="px-10 py-8 flex items-center justify-between border-b-4 border-slate-50 bg-white shrink-0">
+        <div className="flex-1 flex items-center gap-6">
+          <button 
+            onClick={onBack}
+            className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-md transition-all active:scale-90"
+          >
+            <ChevronLeft size={24} strokeWidth={3} />
+          </button>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+              <Trophy size={24} strokeWidth={3} />
+            </div>
+            <div className="flex flex-col">
+              <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight leading-none">{tournament.name}</h3>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{tournament.type === 'single' ? 'Single' : 'Double'} Elimination</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex-none flex items-center justify-center px-4">
+          <div className="flex items-center justify-center gap-2 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto max-w-[800px] no-scrollbar">
+            {navigationButtons.map((btn, idx) => (
+              <button
+                key={`${btn.label}-${idx}`}
+                onClick={btn.onClick}
+                className={`px-4 py-2 rounded-xl text-[9px] font-black shadow-sm transition-all active:scale-95 uppercase tracking-widest shrink-0 ${btn.color}`}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-end gap-3">
+          <button 
+            onClick={handleExport}
+            className="px-6 py-3 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+            title="Export as PNG"
+          >
+            <Download size={18} strokeWidth={3} />
+            Export Image
+          </button>
+          <button 
+            onClick={resetView} 
+            className="p-3 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all active:scale-95"
+            title="Reset View"
+          >
+            <Maximize2 size={18} strokeWidth={3} />
+          </button>
+        </div>
+      </div>
+      <div 
+        ref={containerRef}
+        onWheel={handleWheel}
+        className="flex-1 relative overflow-hidden bg-slate-50/10 cursor-grab active:cursor-grabbing"
+      >
+        <motion.div 
+          drag
+          dragMomentum={true}
+          dragElastic={0}
+          style={{ x, y, scale, transformOrigin: '0 0' }}
+          className="absolute top-0 left-0"
+        >
+          <div ref={roundsRef} className="relative rounds-container">
+            {/* Connector SVG Layer - now inside the rounds container */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-0">
+              {matches.map((m: any) => {
+                if (!m.nextMatchId) return null;
+                const start = matchPositions[m.id];
+                const nextMatch = matches.find((nm: any) => nm.id === m.nextMatchId);
+                if (!nextMatch) return null;
+                const end = matchPositions[nextMatch.id];
+                if (!start || !end) return null;
+
+                return (
+                  <g key={`link-${m.id}`}>
+                    <line
+                      x1={start.x}
+                      y1={start.y}
+                      x2={end.x}
+                      y2={end.y}
+                      stroke="black"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      style={{ opacity: 0.8 }}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            <div className="flex gap-60 min-w-max items-center justify-center relative z-10 p-80">
+              {/* Split Layout logic */}
+              {(() => {
+                const totalRounds = rounds.length;
+                if (totalRounds === 0) return null;
+                
+                if (tournament.type === 'double') {
+                  const winners = rounds.filter((_, i) => Object.keys(roundMap)[i].startsWith('W'));
+                  const losers = rounds.filter((_, i) => Object.keys(roundMap)[i].startsWith('L'));
+                  const final = rounds.filter((_, i) => Object.keys(roundMap)[i] === 'Final');
+                  
+                  return (
+                    <>
+                      {winners.map((rm) => renderRound(rm))}
+                      {final.map((rm) => renderRound(rm))}
+                      {losers.reverse().map((rm) => renderRound(rm))}
+                    </>
+                  );
+                }
+
+                const finalRoundIdx = totalRounds - 1;
+                
+                // If it's a very small bracket, just do standard left-to-right
+                if (totalRounds < 2) return rounds.map((roundMatches) => renderRound(roundMatches));
+
+                // For a split layout:
+                // Left Wing: Rounds 1 to (N-1), top half
+                // Center: Final
+                // Right Wing: Rounds 1 to (N-1), bottom half (reversed order)
+                
+                const leftWing = rounds.slice(0, finalRoundIdx).map(rm => rm.slice(0, Math.ceil(rm.length / 2)));
+                const rightWing = rounds.slice(0, finalRoundIdx).map(rm => rm.slice(Math.ceil(rm.length / 2))).reverse();
+                const center = rounds[finalRoundIdx];
+
+                return (
+                  <>
+                    {leftWing.map((rm) => renderRound(rm))}
+                    {renderRound(center)}
+                    {rightWing.map((rm) => renderRound(rm))}
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </motion.div>
+        
+      </div>
+    </div>
+  );
+};
+
+export const Tournaments = () => {
+  const { settings, updateClass } = useSettings();
+  const { setHeaderActions, setHelpContent, clearHeader } = useHeader();
+  const [tournaments, setTournaments] = useLocalStorage('tournaments_list', []);
+  const [activeTournamentId, setActiveTournamentId] = useLocalStorage('tournaments_active_id', null);
+  const [step, setStep] = useState('setup');
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState('blank');
+  const tournamentIdCounter = useRef(0);
+
+  useEffect(() => { if (tournamentIdCounter.current === 0) tournamentIdCounter.current = Date.now(); }, []);
+
+  const activeTournament = useMemo(() => tournaments.find((t: any) => t.id === activeTournamentId), [tournaments, activeTournamentId]);
 
   useEffect(() => {
-    if (step === 'active' && bracketRef.current && containerRef.current && tournamentType !== 'elo') {
-      const updateZoom = () => {
-        if (!containerRef.current || !bracketRef.current) return;
-        const containerWidth = containerRef.current.clientWidth - 100;
-        const containerHeight = containerRef.current.clientHeight - 100;
-        const bracketWidth = bracketRef.current.scrollWidth;
-        const bracketHeight = bracketRef.current.scrollHeight;
-
-        if (bracketWidth > 0 && bracketHeight > 0) {
-          const fitZoom = Math.min(1.5, containerWidth / bracketWidth, containerHeight / bracketHeight);
-          setMinZoom(fitZoom);
-          setZoom(fitZoom);
-        }
-      };
-      setTimeout(updateZoom, 300);
+    if (activeTournament) {
+      setSelectedClassId(activeTournament.classId || 'blank');
+      setStep(activeTournament.step || 'setup');
+      setSelectedStudents(activeTournament.participants || []);
+    } else {
+      setStep('setup');
+      setSelectedStudents([]);
     }
-  }, [step, activeTournamentId, activeTournament?.data?.numRounds, tournamentType]);
+  }, [activeTournamentId]);
+
+  const deleteTournament = useCallback(() => {
+    if (activeTournamentId) {
+      if (window.confirm('Are you sure you want to delete this tournament? This cannot be undone.')) {
+        setTournaments((prev: any) => prev.filter((t: any) => t.id !== activeTournamentId));
+        setActiveTournamentId(null);
+        audioEngine.playTick(settings.soundTheme);
+      }
+    }
+  }, [activeTournamentId, setTournaments, setActiveTournamentId, settings.soundTheme]);
 
   const addTournament = useCallback(() => {
     let nextNum = 1;
     while (tournaments.map((t: any) => t.name).includes(`Tournament ${nextNum}`)) nextNum++;
-    const newTournament = {
-      id: (tournamentIdCounter.current++).toString(),
-      name: `Tournament ${nextNum}`,
-      type: 'single',
-      step: 'setup',
-      participants: [],
-      bracketSize: 16,
-      data: null,
-      classId: settings.classes[0]?.id || ''
-    };
+    const newTournament = { id: (tournamentIdCounter.current++).toString(), name: `Tournament ${nextNum}`, type: 'elo', step: 'setup', participants: [], classId: settings.classes[0]?.id || '' };
     setTournaments([...tournaments, newTournament]);
     setActiveTournamentId(newTournament.id);
     audioEngine.playTick(settings.soundTheme);
   }, [tournaments, settings.classes, settings.soundTheme, setTournaments, setActiveTournamentId]);
 
-  const generateSingleElimination = (players: (string | null)[]) => {
-    const n = players.length;
-    const numRounds = Math.ceil(Math.log2(n));
-    const bracketSize = Math.pow(2, numRounds);
-    const matches: any[] = [];
-    for (let r = 0; r < numRounds; r++) {
-      const matchesInRound = bracketSize / Math.pow(2, r + 1);
-      for (let i = 0; i < matchesInRound; i++) {
-        const side = r === numRounds - 1 ? 'center' : (i < matchesInRound / 2 ? 'left' : 'right');
-        matches.push({
-          id: `m-${r}-${i}`, round: r, participants: [null, null], seeds: [null, null],
-          winner: null, nextMatchId: r === numRounds - 1 ? null : `m-${r + 1}-${Math.floor(i / 2)}`,
-          position: i, side
-        });
+  useEffect(() => {
+    if (activeTournamentId && activeTournament) {
+      const currentParticipants = activeTournament.participants || [];
+      const currentClassId = activeTournament.classId || 'blank';
+      if (JSON.stringify(currentParticipants) !== JSON.stringify(selectedStudents) || currentClassId !== selectedClassId) {
+        setTournaments((prev: any) => prev.map((t: any) => 
+          t.id === activeTournamentId ? { ...t, participants: selectedStudents, classId: selectedClassId } : t
+        ));
       }
     }
-    const round0Matches = matches.filter(m => m.round === 0);
-    for (let i = 0; i < bracketSize; i++) {
-      const player = players[i] || null;
-      const matchIndex = Math.floor(i / 2);
-      const slotIndex = i % 2;
-      round0Matches[matchIndex].participants[slotIndex] = player;
-      round0Matches[matchIndex].seeds[slotIndex] = player ? i + 1 : null;
-    }
-    round0Matches.forEach(match => {
-      if (match.participants[0] && !match.participants[1]) match.winner = match.participants[0];
-      else if (!match.participants[0] && match.participants[1]) match.winner = match.participants[1];
-    });
-    let changed = true;
-    while (changed) {
-      changed = false;
-      matches.forEach(match => {
-        if (match.winner && match.nextMatchId) {
-          const nextMatch = matches.find(m => m.id === match.nextMatchId);
-          if (!nextMatch) return;
-          if (nextMatch.participants[match.position % 2] !== match.winner) {
-            nextMatch.participants[match.position % 2] = match.winner;
-            changed = true;
-          }
-        }
-      });
-    }
-    return { type: 'single', participants: players, matches, numRounds, bracketSize };
-  };
+  }, [selectedStudents, selectedClassId, activeTournamentId, setTournaments, activeTournament]);
 
-  const generateDoubleElimination = (players: (string | null)[]) => {
-    const n = players.length;
-    const numRounds = Math.ceil(Math.log2(n));
-    const bracketSize = Math.pow(2, numRounds);
-    
-    // Create Winners Bracket (same as single elimination)
-    const winnersData = generateSingleElimination(players);
-    const winnersMatches = winnersData.matches.map(m => ({ ...m, id: `w-${m.id}`, nextMatchId: m.nextMatchId ? `w-${m.nextMatchId}` : 'final', bracket: 'winners' }));
-    
-    // Create Losers Bracket
-    const losersMatches: any[] = [];
-    const numLoserRounds = (numRounds - 1) * 2;
-    for (let r = 0; r < numLoserRounds; r++) {
-      const matchesInRound = Math.pow(2, Math.floor((numLoserRounds - r - 1) / 2));
-      for (let i = 0; i < matchesInRound; i++) {
-        losersMatches.push({
-          id: `l-${r}-${i}`, round: r, participants: [null, null], seeds: [null, null],
-          winner: null, nextMatchId: r === numLoserRounds - 1 ? 'final' : `l-${r + 1}-${Math.floor(i / 2)}`,
-          position: i, bracket: 'losers', side: i < matchesInRound / 2 ? 'left' : 'right'
-        });
-      }
-    }
-
-    // Final Match
-    const finalMatch = {
-      id: 'final', round: numRounds, participants: [null, null], seeds: [null, null],
-      winner: null, nextMatchId: null, position: 0, side: 'center', bracket: 'final'
-    };
-
-    return { 
-      type: 'double', 
-      participants: players, 
-      matches: [...winnersMatches, ...losersMatches, finalMatch], 
-      numRounds: numRounds + 1, 
-      bracketSize 
-    };
-  };
-
-  const handleSelectWinner = (matchId: string, winnerName: string) => {
-    audioEngine.playTick(settings.soundTheme);
-    setTournaments((prev: any) => prev.map((t: any) => {
-      if (t.id !== activeTournamentId) return t;
-      const newMatches = JSON.parse(JSON.stringify(t.data.matches));
-      const match = newMatches.find((m: any) => m.id === matchId);
-      if (!match) return t;
-      
-      const loserName = match.participants.find((p: string | null) => p && p !== winnerName);
-      match.winner = winnerName;
-
-      // Move Winner
-      if (match.nextMatchId) {
-        const nextMatch = newMatches.find((m: any) => m.id === match.nextMatchId);
-        if (nextMatch) {
-          if (match.id === 'final') {
-             // Grand Final winner is already set
-          } else {
-             nextMatch.participants[match.position % 2] = winnerName;
-          }
-        }
-      }
-
-      // Move Loser (Double Elimination only)
-      if (t.type === 'double' && match.bracket === 'winners' && loserName) {
-        const loserRound = match.round; 
-        const loserTargetMatch = newMatches.find((m: any) => m.bracket === 'losers' && m.round === loserRound * 2 && m.participants.includes(null));
-        if (loserTargetMatch) {
-          const emptySlot = loserTargetMatch.participants.indexOf(null);
-          if (emptySlot !== -1) loserTargetMatch.participants[emptySlot] = loserName;
-        }
-      }
-
-      return { ...t, data: { ...t.data, matches: newMatches } };
-    }));
-  };
-
-  const resetTournament = useCallback(() => {
+  /* const resetTournament = useCallback(() => {
     if (window.confirm('Reset all match results?')) {
       setTournaments((prev: any) => prev.map((t: any) => {
         if (t.id !== activeTournamentId) return t;
-        if (t.type === 'elo') return { ...t, eloRatings: {}, eloHistory: [] };
-        const newMatches = t.data.matches.map((match: any) => {
-          const m = { ...match, winner: null };
-          if (m.round > 0) m.participants = [null, null];
-          return m;
-        });
-        return { ...t, data: { ...t.data, matches: newMatches } };
+        return { ...t, eloRatings: {}, eloHistory: [] };
       }));
       audioEngine.playTick(settings.soundTheme);
     }
-  }, [activeTournamentId, setTournaments, settings.soundTheme]);
+  }, [activeTournamentId, setTournaments, settings.soundTheme]); */
 
   useEffect(() => {
-    setHasConfig(true);
-    setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
-    setOnReset(() => resetTournament);
     setHelpContent(HELP_INFO);
     return () => clearHeader();
-  }, [clearHeader, setHasConfig, setOnConfigToggle, setIsConfigOpen, setOnReset, activeTournamentId, resetTournament, setHelpContent, setTournaments]);
+  }, [clearHeader, setHelpContent]);
 
   useEffect(() => {
     setHeaderActions(
       <div className="flex items-center gap-4 italic">
-        {step === 'active' && tournamentType !== 'elo' && (
-          <div className="flex items-center gap-3 bg-white px-6 py-2 rounded-xl border-2 border-slate-100 ">
-            <Maximize2 size={14} className="text-slate-400" />
-            <input type="range" min={minZoom} max="1.5" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-20 accent-indigo-600 h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer" />
-          </div>
-        )}
         <div className="flex bg-white p-1.5 rounded-2xl border-2 border-slate-100 ">
-           <select 
-            value={activeTournamentId || ''} 
-            onChange={(e) => e.target.value === 'new' ? addTournament() : setActiveTournamentId(e.target.value)} 
-            className="px-6 py-2 bg-transparent rounded-xl font-black text-[10px] text-slate-800 outline-none transition-all uppercase tracking-widest cursor-pointer"
-           >
+           <select value={activeTournamentId || ''} onChange={(e) => e.target.value === 'new' ? addTournament() : setActiveTournamentId(e.target.value)} className="px-6 py-2 bg-transparent rounded-xl font-black text-[10px] text-slate-800 outline-none transition-all uppercase tracking-widest cursor-pointer">
             <option value="" disabled>Active Session</option>
             {tournaments.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            <option value="new" className="text-indigo-600 font-black">+ Initialize New</option>
+            <option value="new" className="text-indigo-600 font-black">+ Start New</option>
            </select>
         </div>
       </div>
     );
-  }, [activeTournamentId, tournaments, step, zoom, minZoom, tournamentType, setHeaderActions, addTournament, setActiveTournamentId]);
+  }, [activeTournamentId, tournaments, addTournament, setActiveTournamentId, setHeaderActions]);
 
   const initiateTournament = () => {
-    if (!selectedStudents.length && tournamentType !== 'elo') return;
+    if (!selectedStudents.length) return;
     audioEngine.playTick(settings.soundTheme);
-    const shuffled = shuffle([...selectedStudents]);
     
-    if (tournamentType !== 'elo') {
-      while (shuffled.length < bracketSize) shuffled.push(null);
+    const type = activeTournament?.type || 'elo';
+
+    // For ELO: always preserve existing data, just go to active
+    if (type === 'elo') {
+      setTournaments((prev: any) => prev.map((t: any) => {
+        if (t.id !== activeTournamentId) return t;
+        return { 
+          ...t, 
+          step: 'active', 
+          participants: selectedStudents,
+          // Only initialise ratings/history if they don't exist yet
+          eloRatings: t.eloRatings && Object.keys(t.eloRatings).length > 0 ? t.eloRatings : {},
+          eloHistory: t.eloHistory && t.eloHistory.length > 0 ? t.eloHistory : [],
+        };
+      }));
+      setStep('active');
+      return;
+    }
+
+    // If matches already exist for bracket types, just resume
+    if (activeTournament?.matches && activeTournament.matches.length > 0) {
+      setTournaments((prev: any) => prev.map((t: any) => 
+        t.id === activeTournamentId ? { ...t, step: 'active' } : t
+      ));
+      setStep('active');
+      return;
+    }
+
+    let matches: any[] = [];
+    if (type === 'single') {
+      matches = generateSingleElimination(selectedStudents);
+    } else if (type === 'double') {
+      matches = generateDoubleElimination(selectedStudents);
     }
 
     setTournaments((prev: any) => prev.map((t: any) => {
       if (t.id !== activeTournamentId) return t;
-      if (tournamentType === 'elo') {
-        const classStudents = settings.classes.find(c => c.id === selectedClassId)?.students || [];
-        return { ...t, step: 'active', type: 'elo', participants: classStudents, eloRatings: {}, eloHistory: [] };
-      }
-      
-      if (tournamentType === 'double') {
-        return { ...t, step: 'active', type: 'double', data: generateDoubleElimination(shuffled) };
-      }
-
-      return { ...t, step: 'active', type: tournamentType, data: generateSingleElimination(shuffled) };
+      return { 
+        ...t, 
+        step: 'active', 
+        participants: selectedStudents, 
+        matches: matches
+      };
     }));
+    setStep('active');
+  };
+
+  const handleManageClasses = () => {
+    window.history.pushState({}, '', '/config/classes');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   return (
-    <ToolPanel alignTop fluid baseWidth={1200} baseHeight={800}>
-      <div className="flex w-full h-full gap-8 p-4 lg:p-8">
+    <div className="flex h-full w-full italic overflow-hidden transition-all duration-500 ease-in-out" style={{ gap: step === 'setup' ? '2rem' : '0' }}>
+      <ClassPanel
+        isOpen={step === 'setup'}
+        selectedClassId={selectedClassId}
+        onClassChange={setSelectedClassId}
+        students={settings.classes.find(c => c.id === selectedClassId)?.students || (selectedClassId === 'blank' ? selectedStudents : [])}
+        onStudentsChange={(students) => {
+          setSelectedStudents(students);
+          const cls = settings.classes.find(c => c.id === selectedClassId);
+          if (cls) updateClass({ ...cls, students });
+        }}
+        onManageClasses={handleManageClasses}
+        onClose={() => {}} // Satisfy required prop
+      />
 
-      {!activeTournament ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-12 bg-slate-50/50 rounded-[4rem] border-4 border-white  relative overflow-hidden group">
-           <div className="tool-grid-bg opacity-20 pointer-events-none" />
-           <div className="relative group/icon">
-              <div className="absolute inset-0 bg-indigo-600 rounded-[4rem] blur-[80px] opacity-20" />
-              <div className="relative w-48 h-48 rounded-[4rem] bg-slate-900 flex items-center justify-center text-indigo-400 border-[12px] border-slate-800  rotate-3">
-                 <Trophy size={96} strokeWidth={1} />
+      <ToolPanel alignTop fluid baseWidth={1200} baseHeight={800}>
+        <div className="w-full flex flex-col relative z-10 h-full overflow-hidden">
+          {!activeTournament ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-12 relative overflow-hidden group">
+              <div className="tool-grid-bg opacity-20 pointer-events-none" />
+              <div className="relative w-48 h-48 rounded-[4rem] bg-indigo-600 flex items-center justify-center text-white border-[12px] border-white rotate-3 shadow-2xl">
+                <Trophy size={96} strokeWidth={1} />
               </div>
-           </div>
-           <div className="text-center space-y-4">
-              <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Apex Arena Registry</h2>
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] mt-4">Initialize a new tournament bracket or skill matrix</p>
-           </div>
-           <button onClick={addTournament} className="h-20 px-16 bg-indigo-600 text-white rounded-[2.5rem] font-black text-lg uppercase tracking-[0.2em]  hover:bg-slate-900 transition-all active:scale-95 border-8 border-white">
-              Initialize Protocol
-           </button>
-        </div>
-      ) : step === 'setup' ? (
-        <div className="flex-1 flex flex-col lg:flex-row gap-8 min-h-0 italic">
-          {/* Setup Sidebar */}
-          <SettingsPanel isOpen={isConfigOpen} onClose={() => setIsConfigOpen(false)} title="Tournament Settings">
-            <div className="flex flex-col gap-8 relative z-20 h-full">
-               <div className="bg-slate-900 p-8 rounded-[3rem] border-4 border-slate-800 flex flex-col gap-8 shrink-0">
-
-               <div className="space-y-10 relative z-10">
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] ml-1">Format Logic</label>
-                     <div className="grid grid-cols-1 gap-3">
-                        {[
-                          { id: 'single', label: 'Single Elimination', icon: Layout },
-                          { id: 'double', label: 'Double Elimination', icon: ListIcon },
-                          { id: 'elo', label: 'Elo Skill System', icon: TrendingUp }
-                        ].map(type => (
-                          <button 
-                            key={type.id} 
-                            onClick={() => setTournamentType(type.id)} 
-                            className={`p-6 rounded-[2rem] border-4 font-black text-[11px] transition-all flex items-center justify-between ${tournamentType === type.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
-                          >
-                             <div className="flex items-center gap-4">
-                                <type.icon size={20} strokeWidth={3} />
-                                <span className="uppercase tracking-[0.2em]">{type.label}</span>
-                             </div>
-                             {tournamentType === type.id && <Check size={18} strokeWidth={4} />}
-                          </button>
-                        ))}
-                     </div>
-                  </div>
-
-                  {tournamentType !== 'elo' && (
-                    <div className="space-y-4">
-                       <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] ml-1">Bracket Resolution</label>
-                       <div className="grid grid-cols-3 gap-3">
-                          {[4, 8, 16].map(size => (
-                            <button 
-                              key={size} 
-                              onClick={() => setBracketSize(size)}
-                              className={`p-5 rounded-2xl border-4 font-black text-lg transition-all ${bracketSize === size ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
-                            >
-                               {size}
-                            </button>
-                          ))}
-                       </div>
-                    </div>
-                  )}
-  
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] ml-1">Candidate Registry</label>
-                     <div className="relative">
-                        <select 
-                          value={selectedClassId} 
-                          onChange={(e) => {
-                            setSelectedClassId(e.target.value);
-                            setSelectedStudents([]);
-                          }} 
-                          className="w-full h-16 px-8 bg-white/5 border-4 border-transparent rounded-[1.5rem] text-sm font-black text-white outline-none focus:bg-white/10 focus:border-indigo-400 transition-all uppercase tracking-widest appearance-none"
-                        >
-                           {settings.classes.map(c => <option key={c.id} value={c.id} className="text-slate-900">{c.name}</option>)}
-                        </select>
-                        <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
-                           <ChevronDown size={20} />
-                        </div>
-                     </div>
-                  </div>
-               </div>
-  
-               <button 
-                 onClick={initiateTournament} 
-                 disabled={tournamentType !== 'elo' && selectedStudents.length < 2}
-                 className="w-full h-24 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-lg  hover:bg-white hover:text-indigo-600 transition-all active:scale-95 border-8 border-white/5 disabled:opacity-20 disabled:grayscale"
-               >
-                  <Play size={24} fill="currentColor" className="inline mr-4" /> Start Protocol
-               </button>
+              <div className="text-center space-y-4">
+                <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Tournament Maker</h2>
+                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] mt-4">Make a new game or leaderboard</p>
+              </div>
+              <button 
+                onClick={addTournament} 
+                className="h-20 px-16 bg-indigo-600 text-white rounded-[2.5rem] font-black text-lg uppercase tracking-[0.2em] hover:bg-slate-900 transition-all active:scale-95 border-8 border-white shadow-xl"
+              >
+                Start
+              </button>
             </div>
-          </div>
-          </SettingsPanel>
-  
-          {/* Main Setup View */}
-          <div className="flex-1 bg-slate-50/50 p-12 rounded-[4rem] border-4 border-white  flex flex-col gap-10 relative overflow-hidden group">
-             <div className="tool-grid-bg opacity-20 pointer-events-none" />
-             
-             <div className="flex items-center justify-between shrink-0 border-b-4 border-white pb-8 relative z-10">
+          ) : step === 'setup' ? (
+            <div className="flex-1 flex flex-col gap-6 relative overflow-hidden group">
+              {/* Tournament Config */}
+              <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-md rounded-[2.5rem] border-4 border-white p-8 shrink-0 relative z-10">
+                <div className="flex items-center gap-6 mb-2">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                    <Trophy size={28} strokeWidth={3} />
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Name</span>
+                    <input 
+                      type="text" 
+                      value={activeTournament?.name || ''}
+                      onChange={(e) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, name: e.target.value } : t))}
+                      className="w-full text-2xl font-black text-slate-800 uppercase tracking-tight bg-transparent border-none outline-none focus:text-indigo-600 transition-colors placeholder:text-slate-200"
+                      placeholder="Enter Tournament Name..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 pt-4 border-t-2 border-white/50">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shrink-0 border-2 border-white">
+                    <Settings size={20} strokeWidth={3} />
+                  </div>
+                  <div className="flex-1 flex gap-2">
+                    {[
+                      { id: 'single', label: 'Single', icon: <Trophy size={14} /> },
+                      { id: 'double', label: 'Double', icon: <RotateCcw size={14} /> },
+                      { id: 'elo', label: 'Ranking', icon: <TrendingUp size={14} /> }
+                    ].map((t) => {
+                      const isStarted = activeTournament?.matches && activeTournament.matches.length > 0;
+                      const isDisabled = isStarted;
+                      
+                      return (
+                        <button
+                          key={t.id}
+                          disabled={isDisabled}
+                          onClick={() => {
+                            setTournaments((prev: any) => prev.map((curr: any) => curr.id === activeTournamentId ? { ...curr, type: t.id } : curr));
+                            audioEngine.playTick(settings.soundTheme);
+                          }}
+                          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                            (activeTournament?.type || 'elo') === t.id
+                              ? 'bg-indigo-600 text-white shadow-lg scale-105'
+                              : isDisabled
+                                ? 'bg-slate-50 border-2 border-slate-50 text-slate-200 cursor-not-allowed opacity-50'
+                                : 'bg-white border-2 border-slate-100 text-slate-400 hover:border-indigo-100 hover:text-indigo-600'
+                          }`}
+                        >
+                          {t.icon} {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Header Bar */}
+              <div className="flex items-center justify-between shrink-0 bg-white/40 backdrop-blur-md rounded-[2.5rem] border-4 border-white px-10 py-6 relative z-10">
                 <div className="flex items-center gap-4">
-                   <div className="w-14 h-14 rounded-[1.5rem] bg-indigo-600 flex items-center justify-center text-white ">
-                      <Users size={28} strokeWidth={3} />
-                   </div>
-                   <div className="flex flex-col">
-                      <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Candidate Selection</h3>
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Populating Active Stream</span>
-                   </div>
+                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 border-2 border-slate-50">
+                    <Users size={24} strokeWidth={3} />
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Players</h3>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Select participants</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-6">
-                   <div className="flex gap-3">
-                      <button 
-                        onClick={() => {
-                          const all = settings.classes.find(c => c.id === selectedClassId)?.students || [];
-                          setSelectedStudents(all);
-                          audioEngine.playTick(settings.soundTheme);
-                        }}
-                        className="px-6 py-3 bg-white border-4 border-white  hover:border-indigo-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest transition-all"
-                      >
-                        All Candidates
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const all = settings.classes.find(c => c.id === selectedClassId)?.students || [];
-                          const shuffled = [...all].sort(() => 0.5 - Math.random());
-                          setSelectedStudents(shuffled.slice(0, bracketSize));
-                          audioEngine.playTick(settings.soundTheme);
-                        }}
-                        className="px-6 py-3 bg-white border-4 border-white  hover:border-indigo-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest transition-all"
-                      >
-                        Random {bracketSize}
-                      </button>
-                   </div>
-                   <div className="h-14 px-8 bg-indigo-600 rounded-full flex items-center justify-center text-[11px] font-black text-white uppercase tracking-[0.2em]  border-4 border-white">
-                      {selectedStudents.length} / {bracketSize} Selected
-                   </div>
+                  <button 
+                    onClick={() => { setSelectedStudents(settings.classes.find(c => c.id === selectedClassId)?.students || []); audioEngine.playTick(settings.soundTheme); }} 
+                    className="px-6 py-3 bg-white border-2 border-slate-100 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all"
+                  >
+                    All
+                  </button>
+                  <div className="h-12 px-8 bg-white/60 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-2 border-white">
+                    <span className="text-indigo-600 mr-2">{selectedStudents.length}</span> Selected
+                  </div>
                 </div>
-             </div>
+              </div>
 
-             <div className="flex-1 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 no-scrollbar relative z-10 pb-8">
+              {/* Grid Area */}
+              <div className="flex-1 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 no-scrollbar relative z-10 pb-4">
                 {(settings.classes.find(c => c.id === selectedClassId)?.students || []).map((s, i) => {
                   const isSelected = selectedStudents.includes(s);
                   return (
                     <button 
                       key={i} 
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedStudents(prev => prev.filter(name => name !== s));
-                        } else if (selectedStudents.length < bracketSize || tournamentType === 'elo') {
-                          setSelectedStudents(prev => [...prev, s]);
-                        }
-                        audioEngine.playTick(settings.soundTheme);
-                      }}
-                      className={`p-6 rounded-[2.5rem] border-4 transition-all group/item flex items-center gap-4 ${isSelected ? 'bg-indigo-600 border-indigo-500 text-white ' : 'bg-white border-white hover:border-indigo-100  text-slate-800'}`}
+                      onClick={() => { if (isSelected) setSelectedStudents(prev => prev.filter(name => name !== s)); else setSelectedStudents(prev => [...prev, s]); audioEngine.playTick(settings.soundTheme); }} 
+                      className={`p-3 min-h-[4rem] rounded-2xl border-4 transition-none group/item flex items-center gap-3 ${
+                        isSelected 
+                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' 
+                          : 'bg-white border-white text-slate-600 hover:border-slate-50'
+                      }`}
                     >
-                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-300'}`}>{i+1}</div>
-                       <span className="text-sm font-black uppercase tracking-tight truncate flex-1 text-left">{s}</span>
-                       {isSelected && <Check size={18} strokeWidth={4} />}
+                      <div className={`w-8 h-8 shrink-0 rounded-xl flex items-center justify-center text-xs font-black ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-300'
+                      }`}>{i + 1}</div>
+                      <span className="text-xs font-black uppercase tracking-tight whitespace-normal break-words leading-tight flex-1 text-left line-clamp-2">{s}</span>
+                      {isSelected && <Check size={18} strokeWidth={4} />}
                     </button>
                   );
                 })}
-             </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col min-h-0 italic">
-           {tournamentType === 'elo' ? (
-             <EloManager 
-              participants={activeTournament.participants}
-              eloRatings={activeTournament.eloRatings || {}}
-              setEloRatings={(r: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloRatings: typeof r === 'function' ? r(t.eloRatings || {}) : r } : t))}
-              eloHistory={activeTournament.eloHistory || []}
-              setEloHistory={(h: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloHistory: typeof h === 'function' ? h(t.eloHistory || []) : h } : t))}
-             />
-           ) : (
-             <div ref={containerRef} className="flex-1 overflow-auto bg-slate-50/50 rounded-[4rem] border-4 border-white  relative no-scrollbar">
-               <motion.div 
-                 ref={bracketRef} 
-                 style={{ scale: zoom, transformOrigin: 'top left' }} 
-                 className="p-32 transition-all duration-300 ease-out inline-flex flex-col items-center min-w-full min-h-full"
-               >
-                 <ChampionNode winner={activeTournament.data?.matches?.find((m: any) => m.id === 'final' || (m.side === 'center' && activeTournament.type !== 'double'))?.winner} />
-                 
-                 {activeTournament.type === 'double' ? (
-                   <div className="flex flex-col gap-40">
-                      {/* Winners Bracket */}
-                      <div className="flex flex-col items-center gap-12">
-                        <div className="flex items-center gap-6 bg-slate-900 px-10 py-4 rounded-3xl border-4 border-slate-800 ">
-                           <Shield size={24} className="text-indigo-400" />
-                           <h3 className="text-xl font-black text-white uppercase tracking-[0.4em]">Winners Sector</h3>
-                        </div>
-                        <div className="flex gap-0 items-center justify-center">
-                          {Array.from({ length: activeTournament.data.numRounds - 1 }).map((_, rIdx) => (
-                            <div key={`W-${rIdx}`} className="flex flex-col h-full justify-center">
-                              <div className="flex-1 flex flex-col justify-around">
-                                {activeTournament.data?.matches?.filter((m: any) => m.round === rIdx && m.bracket === 'winners').map((m: any) => (
-                                  <div key={m.id} className="px-16 py-12 relative"><MatchNode match={m} onSelectWinner={handleSelectWinner} round={rIdx} /></div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+              </div>
 
-                      {/* Losers Bracket */}
-                      <div className="flex flex-col items-center gap-12">
-                        <div className="flex items-center gap-6 bg-white px-10 py-4 rounded-3xl border-4 border-white ">
-                           <Activity size={24} className="text-rose-500" />
-                           <h3 className="text-xl font-black text-slate-800 uppercase tracking-[0.4em]">Recovery Sector</h3>
-                        </div>
-                        <div className="flex gap-0 items-center justify-center">
-                          {Array.from({ length: (activeTournament.data.numRounds - 2) * 2 }).map((_, rIdx) => (
-                            <div key={`L-${rIdx}`} className="flex flex-col h-full justify-center">
-                              <div className="flex-1 flex flex-col justify-around">
-                                {activeTournament.data?.matches?.filter((m: any) => m.round === rIdx && m.bracket === 'losers').map((m: any) => (
-                                  <div key={m.id} className="px-16 py-12 relative"><MatchNode match={m} onSelectWinner={handleSelectWinner} round={rIdx} /></div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+              {/* Bottom Action */}
+              <div className="shrink-0 flex justify-center items-center gap-6 pb-4">
+                <button 
+                  onClick={deleteTournament}
+                  className="h-20 px-10 bg-white border-8 border-white text-slate-400 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-sm hover:text-rose-500 transition-all active:scale-95 shadow-xl flex items-center gap-3"
+                >
+                  <Trash2 size={20} /> Delete
+                </button>
 
-                      {/* Grand Final */}
-                      <div className="flex flex-col items-center gap-12">
-                         <div className="h-20 px-12 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white border-8 border-white ">
-                            <h3 className="text-2xl font-black uppercase tracking-[0.6em]">Apex Final</h3>
-                         </div>
-                         {activeTournament.data?.matches?.filter((m: any) => m.id === 'final').map((m: any) => (
-                           <MatchNode key={m.id} match={m} onSelectWinner={handleSelectWinner} isCenter round={activeTournament.data.numRounds - 1} />
-                         ))}
-                      </div>
-                   </div>
-                 ) : (
-                   <div className="flex gap-0 min-w-max items-center justify-center">
-                      {/* Left Brackets */}
-                      {Array.from({ length: Math.max(0, (activeTournament.data?.numRounds || 1) - 1) }).map((_, rIdx) => (
-                        <div key={`L-${rIdx}`} className="flex flex-col h-full min-h-[700px] justify-center">
-                          <span className="text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-6">Sector L-{rIdx + 1}</span>
-                          <div className="flex-1 flex flex-col justify-around">
-                            {activeTournament.data?.matches?.filter((m: any) => m.round === rIdx && m.side === 'left').map((m: any) => (
-                              <div key={m.id} className="px-16 py-12 relative"><MatchNode match={m} onSelectWinner={handleSelectWinner} round={rIdx} /></div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-  
-                      {/* Center Final */}
-                      <div className="flex flex-col items-center justify-center px-24 relative min-h-[700px]">
-                         <div className="px-10 py-3 bg-indigo-600 rounded-full text-white mb-10  border-4 border-white">
-                            <span className="text-center text-[11px] font-black uppercase tracking-[0.6em]">Apex Terminal</span>
-                         </div>
-                         {activeTournament.data?.matches?.filter((m: any) => m.side === 'center').map((m: any) => (
-                           <MatchNode key={m.id} match={m} onSelectWinner={handleSelectWinner} isCenter round={activeTournament.data.numRounds - 1} />
-                         ))}
-                      </div>
-  
-                      {/* Right Brackets */}
-                      {Array.from({ length: Math.max(0, (activeTournament.data?.numRounds || 1) - 1) }).reverse().map((_, revIdx, arr) => {
-                        const rIdx = arr.length - 1 - revIdx;
-                        return (
-                          <div key={`R-${rIdx}`} className="flex flex-col h-full min-h-[700px] justify-center">
-                            <span className="text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-6">Sector R-{rIdx + 1}</span>
-                            <div className="flex-1 flex flex-col justify-around">
-                              {activeTournament.data?.matches?.filter((m: any) => m.round === rIdx && m.side === 'right').map((m: any) => (
-                                <div key={m.id} className="px-16 py-12 relative"><MatchNode match={m} onSelectWinner={handleSelectWinner} mirrored round={rIdx} /></div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                   </div>
-                 )}
-               </motion.div>
-             </div>
-           )}
+                <button 
+                  onClick={initiateTournament} 
+                  disabled={selectedStudents.length < 2} 
+                  className="h-20 px-20 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-lg hover:bg-slate-900 transition-all active:scale-95 border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                >
+                  <Play size={24} fill="currentColor" className="inline mr-4" /> 
+                  {(activeTournament?.type === 'elo' && activeTournament?.eloHistory?.length > 0) || (activeTournament?.matches?.length > 0) ? 'Resume' : 'Start'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col min-h-0 italic overflow-hidden">
+              {activeTournament.type === 'elo' ? (
+                <EloManager participants={activeTournament.participants} eloRatings={activeTournament.eloRatings || {}} setEloRatings={(r: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloRatings: typeof r === 'function' ? r(t.eloRatings || {}) : r } : t))} eloHistory={activeTournament.eloHistory || []} setEloHistory={(h: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloHistory: typeof h === 'function' ? h(t.eloHistory || []) : h } : t))} 
+                onBack={() => {
+                  setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
+                  setStep('setup');
+                }}
+                />
+              ) : (
+                <BracketManager tournament={activeTournament} setTournaments={setTournaments} activeTournamentId={activeTournamentId} 
+                onBack={() => {
+                  setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
+                  setStep('setup');
+                }}
+                />
+              )}
+            </div>
+          )}
         </div>
-      )}
-      </div>
-    </ToolPanel>
+      </ToolPanel>
+    </div>
   );
 };
 

@@ -13,6 +13,8 @@ import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
 import { ToolPanel } from '../shared/ToolPanel';
 import { useIntl, FormattedMessage } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+
 
 // 3. Text (Help and Info)
 const getHelpInfo = () => (
@@ -71,10 +73,11 @@ export const ExamClock = () => {
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const intl = useIntl();
   
-  const [readingTime, setReadingTime] = useState(5);
-  const [examTime, setExamTime] = useState(60);
-  const [warningTime, setWarningTime] = useState(5);
-  const [examName, setExamName] = useState('Final Examination');
+  const [readingTime, setReadingTime] = useLocalStorage('examclock_reading_time', 5);
+  const [examTime, setExamTime] = useLocalStorage('examclock_exam_time', 60);
+  const [warningTime, setWarningTime] = useLocalStorage('examclock_warning_time', 5);
+  const [examName, setExamName] = useLocalStorage('examclock_name', 'Final Examination');
+
   const [phase, setPhase] = useState<'setup' | 'reading' | 'paused' | 'exam' | 'finished'>('setup');
   const [timeLeft, setTimeLeft] = useState(0);
 

@@ -12,7 +12,7 @@ import { CHEMICALS } from './ChemicalFireworks/chemicalData';
 import { formatFormula } from '../../utils/format';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
-import { storage } from '../../utils/storage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const EMISSION_LINES: Record<string, number[]> = {
@@ -153,7 +153,7 @@ export const ChemicalFireworks = () => {
   const { settings } = useSettings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [selectedChemId, setSelectedChemId] = useState<string | null>(() => storage.getItem('chemical_fireworks_selected') || CHEMICALS[0].id);
+  const [selectedChemId, setSelectedChemId] = useLocalStorage<string | null>('chemical_fireworks_selected_id', CHEMICALS[0].id);
   const [showExplanation, setShowExplanation] = useState(false);
 
   const particles = useRef<Particle[]>([]);
@@ -174,11 +174,7 @@ export const ChemicalFireworks = () => {
     return () => clearHeader();
   }, [clearHeader, setOnReset, setOnConfigToggle, resetTool, setHelpContent, setHasConfig]);
 
-  useEffect(() => {
-    if (selectedChemId) {
-      storage.setItem('chemical_fireworks_selected', selectedChemId);
-    }
-  }, [selectedChemId]);
+  // Persistence handled by useLocalStorage
   
   const explode = useCallback((x: number, y: number, color: string) => {
     const count = 60;

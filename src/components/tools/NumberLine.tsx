@@ -89,11 +89,11 @@ export const NumberLine = () => {
   const { settings } = useSettings();
   
   // Local Storage Hooks
-  const [range, setRange] = useLocalStorage('numberline-range', { start: 0, end: 20 });
-  const [step, setStep] = useLocalStorage('numberline-step', 1);
-  const [showLabels, setShowLabels] = useLocalStorage('numberline-labels', true);
-  const [pins, setPins] = useLocalStorage('numberline-pins', []); 
-  const [jumps, setJumps] = useLocalStorage('numberline-jumps', []); 
+  const [range, setRange] = useLocalStorage('number_line_range', { start: 0, end: 20 });
+  const [step, setStep] = useLocalStorage('number_line_step', 1);
+  const [showLabels, setShowLabels] = useLocalStorage('number_line_labels', true);
+  const [pins, setPins] = useLocalStorage('number_line_pins', []); 
+  const [jumps, setJumps] = useLocalStorage('number_line_jumps', []); 
   
   // State
   const [dragStart, setDragStart] = useState<{ value: number, x: number } | null>(null);

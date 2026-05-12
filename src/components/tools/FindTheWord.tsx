@@ -17,6 +17,7 @@ import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
+import { speak } from '../../utils/speech';
 
 import { useIntl, FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
@@ -115,7 +116,7 @@ export const FindTheWord = () => {
   const { setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
   
-  const [lists, setLists] = useLocalStorage<WordList[]>('spelling_lists', [
+  const [lists, setLists] = useLocalStorage<WordList[]>('word_manager_lists', [
     { id: '1', name: 'Animals', words: ['LION', 'TIGER', 'ZEBRA', 'GIRAFFE', 'ELEPHANT'] }
   ]);
   
@@ -131,13 +132,6 @@ export const FindTheWord = () => {
   
   const containerRef = useRef<HTMLDivElement>(null);
 
-
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-    }
-  };
 
   const handleWordsChange = (newWords: string[]) => {
     setLists(prev => prev.map(l => l.id === selectedListId ? { ...l, words: newWords } : l));

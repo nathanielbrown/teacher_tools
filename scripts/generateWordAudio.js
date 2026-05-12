@@ -1,85 +1,102 @@
-import { GoogleGenAI } from '@google/genai';
+import 'dotenv/config';
 import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
-import util from 'util';
-
-const execPromise = util.promisify(exec);
-
-// Initialize the Google Gen AI SDK. 
-// Make sure you have GEMINI_API_KEY set in your environment variables.
-const ai = new GoogleGenAI({});
+import { execSync } from 'child_process';
 
 /**
- * Generates an audio file for a given word using Gemini's audio modality,
- * converts it to OGG format using ffmpeg, and saves it to the premium folder.
+ * Gets an authentication header or query parameter for the Google Cloud TTS API.
+ * 
+ * @returns {Promise<{ urlSuffix: string, headers: Record<string, string> }>}
+ */
+async function getAuth() {
+  try {
+    const token = execSync('gcloud auth print-access-token', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const project = execSync('gcloud config get-value project', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    
+    if (token) {
+      const headers = { 'Authorization': `Bearer ${token}` };
+      if (project) {
+        headers['x-goog-user-project'] = project;
+      }
+      return { urlSuffix: '', headers };
+    }
+  } catch (e) {
+    // gcloud failed or not logged in
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    return { urlSuffix: `?key=${apiKey}`, headers: {} };
+  }
+
+  throw new Error('No authentication found. Please provide GEMINI_API_KEY in .env or login with "gcloud auth login"');
+}
+
+/**
+ * Generates an audio file for a given word using Google Cloud TTS REST API,
+ * and saves it to the premium folder.
  * 
  * @param {string[]} words - List of words to generate audio for.
  */
 export async function generateWordAudio(words) {
-  // Define the target premium folder
-  const outputDir = path.join(process.cwd(), 'public', 'premium', 'audio');
-  
-  // Ensure the output directory exists
+  const outputDir = path.join(process.cwd(), 'premium', 'audio');
   await fs.mkdir(outputDir, { recursive: true });
 
+  const { urlSuffix, headers: authHeaders } = await getAuth();
+  const url = `https://texttospeech.googleapis.com/v1/text:synthesize${urlSuffix}`;
+
+  console.log(`Target directory: ${outputDir}`);
+
   for (const word of words) {
-    console.log(`Generating audio for word: "${word}"`);
+    console.log(`\n--- Generating audio for word: "${word}" ---`);
     try {
-      // 1. Generate audio using Gemini 2.0 Flash
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: `Clearly and naturally speak the following word: "${word}"`,
-        config: {
-          responseModalities: ["AUDIO"],
-          systemInstruction: "You are a professional voice actor for an educational app. Speak the word clearly and naturally with good pronunciation. Only output the spoken word, no extra text or sounds."
-        }
+      const finalOggPath = path.join(outputDir, `${word.toLowerCase()}.ogg`);
+      
+      if (existsSync(finalOggPath)) {
+        console.log(`Skipping "${word}", file already exists at ${finalOggPath}`);
+        continue;
+      }
+
+      const body = {
+        input: { text: word },
+        voice: { 
+          name: 'en-AU-Standard-C',
+          languageCode: 'en-AU' 
+        },
+        audioConfig: { audioEncoding: 'OGG_OPUS' },
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
+        body: JSON.stringify(body)
       });
 
-      // 2. Extract audio data from the response
-      const audioPart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-      
-      if (!audioPart || !audioPart.inlineData) {
-         console.error(`Failed to get audio data for "${word}". Did the model return text instead?`);
-         continue;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Google Cloud TTS API error: ${response.status} ${JSON.stringify(errorData)}`);
       }
 
-      const { data, mimeType } = audioPart.inlineData;
-      console.log(`Received audio with mime type: ${mimeType}`);
-
-      // Create a temporary file for the raw audio.
-      const tempFilePath = path.join(outputDir, `temp_${word}.raw`);
-      const buffer = Buffer.from(data, 'base64');
-      await fs.writeFile(tempFilePath, buffer);
-
-      // 3. Convert to OGG using ffmpeg
-      const finalOggPath = path.join(outputDir, `${word.toLowerCase()}.ogg`);
-      console.log(`Converting to OGG: ${finalOggPath}`);
+      const data = await response.json();
+      const audioBuffer = Buffer.from(data.audioContent, 'base64');
       
-      // Determine input arguments based on mime type. 
-      // Gemini usually returns raw PCM data at 24kHz for audio modalities.
-      let ffmpegInputArgs = '-i';
-      if (mimeType.includes('audio/pcm')) {
-         ffmpegInputArgs = '-f s16le -ar 24000 -ac 1 -i';
-      }
-
-      await execPromise(`ffmpeg -y ${ffmpegInputArgs} "${tempFilePath}" -c:a libvorbis "${finalOggPath}"`);
-      
-      // Clean up the temporary raw file
-      await fs.unlink(tempFilePath);
-      
+      await fs.writeFile(finalOggPath, audioBuffer);
       console.log(`✅ Successfully created ${finalOggPath}`);
       
-      // Add a small delay to respect API rate limits
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
     } catch (error) {
-      console.error(`❌ Error generating audio for "${word}":`, error);
+      console.error(`❌ Error generating audio for "${word}":`, error.message);
     }
   }
 }
 
-// Example usage:
-// generateWordAudio(['Cat', 'Dog', 'Elephant', 'Alphabet'])
-//   .then(() => console.log('Finished generating all audio files.'))
-//   .catch(console.error);
+const numbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
+
+generateWordAudio(numbers)
+  .then(() => console.log('\nFinished generating all audio files.'))
+  .catch(console.error);

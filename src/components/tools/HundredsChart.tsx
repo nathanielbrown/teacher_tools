@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Hash, Palette, Zap, Eraser, EyeOff
+  Hash, Palette, Zap, Eraser, EyeOff, Volume2, VolumeX, MessageCircle, Settings2
 } from 'lucide-react';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
+import { speak, isLanguageSupported } from '../../utils/speech';
 import { ToolPanel } from '../shared/ToolPanel';
+import { SettingsPanel } from '../shared/SettingsPanel';
 import { useIntl, FormattedMessage } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { FlagIcon } from '../shared/FlagIcon';
 
 // 1. Constants
 const getColors = (intl: any) => [
@@ -25,6 +29,15 @@ const getAnimationSpeeds = (intl: any) => [
   { label: intl.formatMessage({ id: 'hundredschart.speed.slow', defaultMessage: '2 Seconds' }), value: 2000 },
   { label: intl.formatMessage({ id: 'hundredschart.speed.fast', defaultMessage: '1 Second' }), value: 1000 },
   { label: intl.formatMessage({ id: 'hundredschart.speed.instant', defaultMessage: 'Instant' }), value: 0 },
+];
+
+const LANGUAGES = [
+  { code: 'en-AU', country: 'AU', label: 'English', hello: 'Hello' },
+  { code: 'zh-CN', country: 'CN', label: '中文', hello: '你好' },
+  { code: 'fr-FR', country: 'FR', label: 'Français', hello: 'Bonjour' },
+  { code: 'ja-JP', country: 'JP', label: '日本語', hello: 'こんにちは' },
+  { code: 'vi-VN', country: 'VN', label: 'Tiếng Việt', hello: 'Xin chào' },
+  { code: 'th-TH', country: 'TH', label: 'ไทย', hello: 'สวัสดี' },
 ];
 
 // 2. Config (None)
@@ -118,81 +131,166 @@ const ChartCell = ({ num, isHidden, highlightColor, onClick }: {
 
 // 7. Component
 export const HundredsChart = () => {
-  const { setOnReset, clearHeader, setHelpContent } = useHeader();
+  const { 
+    setHasConfig, setHelpContent, setOnReset, 
+    clearHeader, isConfigOpen, setIsConfigOpen, setOnConfigToggle
+  } = useHeader();
   const { settings } = useSettings();
   const intl = useIntl();
   
   const colors = getColors(intl);
   const animationSpeeds = getAnimationSpeeds(intl);
 
-  const [hiddenNumbers, setHiddenNumbers] = useState(new Set<number>());
-  const [highlighted, setHighlighted] = useState<Record<number, string>>({});
-  const [activeColor, setActiveColor] = useState<string | null>(colors[2].value);
-  const [animSpeed, setAnimSpeed] = useState(2000);
+  const [hiddenNumbersArr, setHiddenNumbersArr] = useLocalStorage<number[]>('hundredschart_hidden', []);
+  const hiddenNumbers = useMemo(() => new Set(hiddenNumbersArr), [hiddenNumbersArr]);
+  
+  const [highlighted, setHighlighted] = useLocalStorage<Record<number, string>>('hundredschart_highlighted', {});
+  const [activeColor, setActiveColor] = useLocalStorage<string | null>('hundredschart_color', colors[2].value);
+  const [animSpeed, setAnimSpeed] = useLocalStorage('hundredschart_speed', 2000);
   const [animState, setAnimState] = useState({ isRunning: false, multiple: 1, current: 1 });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const clearAll = useCallback(() => {
-    setHiddenNumbers(new Set());
-    setHighlighted({});
-    setAnimState({ isRunning: false, multiple: 1, current: 1 });
-    audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  const [soundMode, setSoundMode] = useLocalStorage<'speak' | 'sound' | 'mute'>('hundreds_chart_sound_mode', 'sound');
+  const [speakLanguage, setSpeakLanguage] = useLocalStorage('hundreds_chart_lang', 'en-AU');
+  const [availableLangs, setAvailableLangs] = useState<string[]>([]);
 
   useEffect(() => {
+    const updateAvailable = () => {
+      const supported = LANGUAGES.filter(l => isLanguageSupported(l.code)).map(l => l.code);
+      setAvailableLangs(supported);
+    };
+
+    updateAvailable();
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.addEventListener('voiceschanged', updateAvailable);
+      return () => window.speechSynthesis.removeEventListener('voiceschanged', updateAvailable);
+    }
+  }, []);
+
+  const playSound = useCallback((num: number, onEnd?: () => void) => {
+    if (soundMode === 'speak') {
+      const isEnglish = speakLanguage.startsWith('en');
+      
+      if (isEnglish) {
+        if (!audioRef.current) audioRef.current = new Audio();
+        const audio = audioRef.current;
+        
+        // Cancel previous
+        audio.pause();
+        audio.onended = null;
+        audio.onerror = null;
+
+        let finished = false;
+        const done = () => {
+          if (finished) return;
+          finished = true;
+          onEnd?.();
+        };
+        
+        audio.src = `/premium/audio/${num}.ogg`;
+        audio.onended = done;
+        audio.onerror = () => speak(num.toString(), 1.2, done, speakLanguage);
+        
+        // Safety timeout for audio events
+        const safetyTimeout = setTimeout(done, 4000);
+        
+        audio.play().then(() => {
+          // Playback started successfully
+        }).catch(() => {
+          clearTimeout(safetyTimeout);
+          speak(num.toString(), 1.2, done, speakLanguage);
+        });
+
+        return () => {
+          clearTimeout(safetyTimeout);
+          audio.onended = null;
+          audio.onerror = null;
+        };
+      } else {
+        // Non-English uses TTS directly
+        speak(num.toString(), 1.0, onEnd, speakLanguage);
+        return () => {};
+      }
+    } else if (soundMode === 'sound') {
+      audioEngine.playTick(settings.soundTheme);
+      onEnd?.();
+    } else {
+      onEnd?.();
+    }
+    return () => {};
+  }, [soundMode, settings.soundTheme, speakLanguage]);
+
+  const clearAll = useCallback(() => {
+    setHiddenNumbersArr([]);
+    setHighlighted({});
+    setAnimState({ isRunning: false, multiple: 1, current: 1 });
+
+    if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme);
+  }, [settings.soundTheme, soundMode, setHiddenNumbersArr, setHighlighted]);
+
+
+  useEffect(() => {
+    setHasConfig(true);
+    setIsConfigOpen(true);
     setOnReset(() => clearAll);
     setHelpContent(<HelpContent />);
-    return () => clearHeader();
-  }, [clearAll, clearHeader, setOnReset, setHelpContent]);
+    setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
+
+    return () => {
+      clearHeader();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    };
+  }, [clearAll, clearHeader, setOnReset, setHelpContent, setHasConfig, setOnConfigToggle, setIsConfigOpen]);
 
   const handleCellClick = (num: number) => {
-    audioEngine.playTick(settings.soundTheme);
+    playSound(num);
     if (activeColor === '#000000') {
       // Black hides the number
-      setHiddenNumbers(prev => {
-        const next = new Set(prev);
-        if (next.has(num)) next.delete(num);
-        else {
-          next.add(num);
-          setHighlighted(prevH => {
-            const nextH = { ...prevH };
-            delete nextH[num];
-            return nextH;
-          });
-        }
-        return next;
-      });
+      const next = new Set(hiddenNumbers);
+      if (next.has(num)) next.delete(num);
+      else {
+        next.add(num);
+        setHighlighted(prevH => {
+          const nextH = { ...prevH };
+          delete nextH[num];
+          return nextH;
+        });
+      }
+      setHiddenNumbersArr(Array.from(next));
     } else if (activeColor === '#ffffff') {
       // White clears everything
-      setHiddenNumbers(prev => {
-        const next = new Set(prev);
-        next.delete(num);
-        return next;
-      });
+      const next = new Set(hiddenNumbers);
+      next.delete(num);
+      setHiddenNumbersArr(Array.from(next));
+
       setHighlighted(prev => {
-        const next = { ...prev };
-        delete next[num];
-        return next;
+        const nextH = { ...prev };
+        delete nextH[num];
+        return nextH;
       });
     } else if (activeColor) {
       // Other colors highlight
       setHighlighted(prev => {
-        const next = { ...prev };
-        if (next[num] === activeColor) delete next[num];
+        const nextH = { ...prev };
+        if (nextH[num] === activeColor) delete nextH[num];
         else {
-          next[num] = activeColor;
-          setHiddenNumbers(prevHidden => {
-            const nextHidden = new Set(prevHidden);
-            nextHidden.delete(num);
-            return nextHidden;
-          });
+          nextH[num] = activeColor;
+          const nextHidden = new Set(hiddenNumbers);
+          nextHidden.delete(num);
+          setHiddenNumbersArr(Array.from(nextHidden));
         }
-        return next;
+        return nextH;
       });
     }
+
   };
 
   const highlightMultiples = (multiple: number) => {
-    audioEngine.playTick(settings.soundTheme);
+    if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme);
     if (multiple === 0) {
       setAnimState({ isRunning: false, multiple: 1, current: 1 });
       return;
@@ -222,8 +320,9 @@ export const HundredsChart = () => {
         }
         return nextH;
       });
-      setHiddenNumbers(prevHidden => {
-        const nextHidden = new Set(prevHidden);
+      
+      setHiddenNumbersArr(prevArr => {
+        const nextHidden = new Set(prevArr);
         let c = animState.current;
         while (c <= 100) {
           if (activeColor === '#000000') {
@@ -233,55 +332,63 @@ export const HundredsChart = () => {
           }
           c += animState.multiple;
         }
-        return nextHidden;
+        return Array.from(nextHidden);
       });
+
       setAnimState(prev => ({ ...prev, isRunning: false }));
       return;
     }
 
     const num = animState.current;
     
-    if (num !== animState.multiple) {
-      audioEngine.playTick(settings.soundTheme);
-    }
-
+    // 1. Visual update (Immediate)
     if (activeColor === '#000000') {
-      setHiddenNumbers(prev => {
+      setHiddenNumbersArr(prev => {
         const next = new Set(prev);
         next.add(num);
-        return next;
+        return Array.from(next);
       });
+
       setHighlighted(prev => {
-        const next = { ...prev };
-        delete next[num];
-        return next;
+        const nextH = { ...prev };
+        delete nextH[num];
+        return nextH;
       });
     } else if (activeColor === '#ffffff') {
-      setHiddenNumbers(prev => {
+      setHiddenNumbersArr(prev => {
         const next = new Set(prev);
         next.delete(num);
-        return next;
+        return Array.from(next);
       });
+
       setHighlighted(prev => {
-        const next = { ...prev };
-        delete next[num];
-        return next;
+        const nextH = { ...prev };
+        delete nextH[num];
+        return nextH;
       });
     } else {
       setHighlighted(prev => ({ ...prev, [num]: activeColor as string }));
-      setHiddenNumbers(prev => {
+      setHiddenNumbersArr(prev => {
         const next = new Set(prev);
         next.delete(num);
-        return next;
+        return Array.from(next);
       });
     }
 
-    const timer = setTimeout(() => {
-      setAnimState(prev => ({ ...prev, current: prev.current + prev.multiple }));
-    }, animSpeed);
+    // 2. Sound and progression
+    let timer: NodeJS.Timeout;
+    const cleanupSound = playSound(num, () => {
+      timer = setTimeout(() => {
+        setAnimState(prev => ({ ...prev, current: prev.current + prev.multiple }));
+      }, animSpeed);
+    });
 
-    return () => clearTimeout(timer);
-  }, [animState, activeColor, animSpeed, settings.soundTheme]);
+    return () => {
+      cleanupSound();
+      if (timer) clearTimeout(timer);
+    };
+  }, [animState, activeColor, animSpeed, playSound, setHiddenNumbersArr, setHighlighted]);
+
 
   const rows = useMemo(() => {
     const r = [];
@@ -294,68 +401,119 @@ export const HundredsChart = () => {
   }, []);
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="flex-1 flex flex-col lg:flex-row gap-12 min-h-0 relative z-10">
-        {/* Main Chart Area */}
-        <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
-           <div className="w-full max-w-2xl aspect-square relative z-10 p-4 bg-white rounded-3xl  border-4 border-slate-50 overflow-hidden">
-              <div className="grid grid-cols-10 h-full bg-white rounded-none overflow-hidden border-none ">
-                {rows.flat().map(num => (
-                  <div key={num} className="aspect-square">
-                    <ChartCell
-                      num={num}
-                      isHidden={hiddenNumbers.has(num)}
-                      highlightColor={highlighted[num] || null}
-                      onClick={handleCellClick}
-                    />
-                  </div>
-                ))}
-              </div>
-           </div>
-        </div>
-
-        {/* Interaction Sidebar (Right Side) */}
-        <div className="w-full lg:w-[360px] flex flex-col gap-8 shrink-0 overflow-y-auto no-scrollbar">
-           <div className="bg-white rounded-3xl p-8 space-y-10 border-4 border-slate-50  italic">
-              
-              {/* Tool Selection */}
+    <div className="flex flex-col lg:flex-row gap-8 w-full h-full italic overflow-hidden relative">
+      <AnimatePresence>
+        {isConfigOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+          >
+            <SettingsPanel
+              isOpen={isConfigOpen}
+              onClose={() => setIsConfigOpen(false)}
+              className="shrink-0 lg:h-fit"
+              compact
+              title={intl.formatMessage({ id: 'hundredschart.settings.title', defaultMessage: 'Config' })}
+            >
               <div className="space-y-6">
-                 <div className="flex items-center gap-3 text-indigo-600">
-                    <Palette size={24} />
-                    <h4 className="text-xl font-black uppercase tracking-tight">
+                {/* Color Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                    <Palette size={14} />
+                    <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.tools" defaultMessage="Colors" />
-                    </h4>
-                 </div>
-                 
-                  <div className="grid grid-cols-4 gap-4">
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
                     {colors.map(c => (
                       <button
                         key={c.id}
-                        onClick={() => setActiveColor(c.value)}
-                        className={`aspect-square rounded-2xl transition-all border-4 flex items-center justify-center ${activeColor === c.value ? 'scale-110  border-slate-900' : 'border-white opacity-60 hover:opacity-100 '}`}
+                        onClick={() => { setActiveColor(c.value); if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme); }}
+                        className={`aspect-square rounded-xl transition-all border-2 flex items-center justify-center ${activeColor === c.value ? 'scale-105 border-slate-900' : 'border-white opacity-60 hover:opacity-100 '}`}
                         style={{ backgroundColor: c.id === 'white' || c.id === 'black' ? (c.id === 'white' ? '#f8fafc' : '#1e293b') : c.value }}
                         title={c.label}
                       >
-                        {c.icon && <c.icon size={20} className={c.id === 'white' ? 'text-slate-400' : 'text-white'} />}
+                        {c.icon && <c.icon size={14} className={c.id === 'white' ? 'text-slate-400' : 'text-white'} />}
                       </button>
                     ))}
                   </div>
-              </div>
+                </div>
 
-              {/* Multiples Selection */}
-              <div className="space-y-6">
-                 <div className="flex items-center gap-3 text-indigo-600">
-                    <Zap size={20} />
-                    <h4 className="text-lg font-black uppercase tracking-tight">
+                {/* Sound Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                    <Volume2 size={14} />
+                    <label className="text-[10px] font-black uppercase tracking-widest block">
+                      <FormattedMessage id="hundredschart.sidebar.sound" defaultMessage="Sound" />
+                    </label>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex bg-slate-50 p-1 rounded-2xl border-4 border-white">
+                      <button
+                        onClick={() => { 
+                          setSoundMode('speak'); 
+                          const currentLang = LANGUAGES.find(l => l.code === speakLanguage) || LANGUAGES[0];
+                          speak(currentLang.hello, 1.0, undefined, speakLanguage); 
+                        }}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'speak' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        <MessageCircle size={12} />
+                        <FormattedMessage id="hundredschart.sound.speak" defaultMessage="Speak" />
+                      </button>
+                      <button
+                        onClick={() => { setSoundMode('sound'); audioEngine.playTick(settings.soundTheme); }}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'sound' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        <Volume2 size={12} />
+                        <FormattedMessage id="hundredschart.sound.sound" defaultMessage="Sound" />
+                      </button>
+                      <button
+                        onClick={() => { setSoundMode('mute'); }}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'mute' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        <VolumeX size={12} />
+                        <FormattedMessage id="hundredschart.sound.mute" defaultMessage="Mute" />
+                      </button>
+                    </div>
+
+                    {soundMode === 'speak' && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-6 gap-1 p-1 bg-white rounded-xl border border-slate-100"
+                      >
+                        {LANGUAGES.filter(l => availableLangs.includes(l.code)).map(lang => (
+                          <button
+                            key={lang.code}
+                            onClick={() => { setSpeakLanguage(lang.code); speak(lang.hello, 1.0, undefined, lang.code); }}
+                            className={`aspect-square rounded-lg transition-all flex items-center justify-center ${speakLanguage === lang.code ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-slate-50 border-transparent'} border`}
+                            title={lang.label}
+                          >
+                            <FlagIcon country={lang.country} className="w-5 h-5 rounded-sm overflow-hidden" />
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Multiples Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                    <Zap size={14} />
+                    <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.highlight" defaultMessage="Patterns" />
-                    </h4>
-                 </div>
-                  <div className="grid grid-cols-2 gap-4">
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
                     {[0, 1, 2, 3, 5, 10].map(m => (
                       <button
                         key={m}
                         onClick={() => highlightMultiples(m)}
-                        className="py-4 bg-white border-4 border-slate-50 rounded-2xl text-xs font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95 uppercase tracking-widest "
+                        className="py-3 bg-white border-2 border-slate-100 rounded-xl text-[8px] font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95 uppercase tracking-widest"
                       >
                         {m === 0 ? (
                           <FormattedMessage id="hundredschart.sidebar.stop" defaultMessage="Stop" />
@@ -367,32 +525,64 @@ export const HundredsChart = () => {
                       </button>
                     ))}
                   </div>
-              </div>
+                </div>
 
-              {/* Speed Selection */}
-              <div className="space-y-6">
-                 <div className="flex items-center gap-3 text-indigo-600">
-                    <Zap size={20} />
-                    <h4 className="text-lg font-black uppercase tracking-tight">
+                {/* Speed Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                    <Zap size={14} />
+                    <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.animation" defaultMessage="Speed" />
-                    </h4>
-                 </div>
-                 <div className="flex bg-slate-50 p-1 rounded-2xl border-4 border-white ">
+                    </label>
+                  </div>
+                  <div className="flex bg-slate-50 p-1 rounded-2xl border-4 border-white">
                     {animationSpeeds.map(s => (
                       <button
                         key={s.label}
-                        onClick={() => { setAnimSpeed(s.value); audioEngine.playTick(settings.soundTheme); }}
-                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${animSpeed === s.value ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+                        onClick={() => { setAnimSpeed(s.value); if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme); }}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${animSpeed === s.value ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
                       >
                         {s.label}
                       </button>
                     ))}
-                 </div>
+                  </div>
+                </div>
               </div>
-           </div>
+            </SettingsPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ToolPanel className="flex-1 italic" baseWidth={1100} baseHeight={800}>
+        <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden gap-8">
+          <div className="w-full max-w-2xl aspect-square relative z-10 p-4 bg-white rounded-3xl border-4 border-slate-50 overflow-hidden">
+            <div className="grid grid-cols-10 h-full bg-white rounded-none overflow-hidden border-none ">
+              {rows.flat().map(num => (
+                <div key={num} className="aspect-square">
+                  <ChartCell
+                    num={num}
+                    isHidden={hiddenNumbers.has(num)}
+                    highlightColor={highlighted[num] || null}
+                    onClick={handleCellClick}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={clearAll}
+            className="flex items-center gap-2 px-8 py-3 bg-white border-2 border-slate-100 rounded-2xl text-xs font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95 uppercase tracking-widest"
+          >
+            <Eraser size={14} />
+            <FormattedMessage id="hundredschart.clearall" defaultMessage="Clear All" />
+          </button>
         </div>
-      </div>
-    </ToolPanel>
+      </ToolPanel>
+
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+    </div>
   );
 };
 

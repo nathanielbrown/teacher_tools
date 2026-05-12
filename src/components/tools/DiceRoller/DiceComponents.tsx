@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
+export const DieSVG = ({ 
+  sides, 
+  value, 
+  isRolling, 
+  size = 64, 
+  delay = 0, 
+  showValue = true,
+  className = "" 
+}) => {
   const [displayValue, setDisplayValue] = useState(value);
 
   useEffect(() => {
@@ -27,11 +35,8 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
       </linearGradient>
 
       <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="1" dy="1" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.8" />
-      </filter>
-      
-      <filter id="diceShadow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="2" dy="5" stdDeviation="4" floodColor="#000000" floodOpacity="0.4" />
+        <feGaussianBlur stdDeviation="1" result="blur" />
+        <feComposite in="SourceGraphic" in2="blur" operator="over" />
       </filter>
 
       {/* D20 - Teal/Blue Resin */}
@@ -70,7 +75,7 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
     switch (sides) {
       case 4: // D4
         return (
-          <g filter="url(#diceShadow)">
+          <g>
             <polygon points="50,10 95,85 5,85" fill="url(#d4-1)" />
             <polygon points="50,10 50,85 5,85" fill="rgba(255,255,255,0.15)" />
             <polygon points="5,85 95,85 50,75" fill="rgba(0,0,0,0.15)" />
@@ -79,7 +84,7 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
         );
       case 6: // D6
         return (
-          <g filter="url(#diceShadow)">
+          <g>
             <polygon points="25,35 40,15 90,15 75,35" fill="url(#d6-1)" />
             <polygon points="75,35 90,15 90,65 75,85" fill="rgba(94, 7, 7, 0.9)" />
             <polygon points="25,35 75,35 75,85 25,85" fill="url(#d6-1)" />
@@ -93,7 +98,7 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
         );
       case 8: // D8
         return (
-          <g filter="url(#diceShadow)">
+          <g>
             <polygon points="50,5 89,72.5 11,72.5" fill="url(#d8-1)" />
             <polygon points="50,5 11,27.5 11,72.5" fill="url(#d8-2)" />
             <polygon points="50,5 89,27.5 89,72.5" fill="url(#d8-3)" />
@@ -108,25 +113,25 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
         );
       case 10: // D10
         return (
-          <g filter="url(#diceShadow)">
-            <polygon points="50,5 80,45 50,80 20,45" fill="url(#d10-3)" />
-            <polygon points="50,5 20,45 5,35" fill="url(#d10-1)" />
-            <polygon points="50,5 95,35 80,45" fill="url(#d10-2)" />
-            <polygon points="5,35 20,45 50,80 50,95" fill="url(#d10-4)" />
-            <polygon points="95,35 80,45 50,80 50,95" fill="url(#d10-1)" />
-            <polygon points="50,5 20,45 5,35" fill="rgba(255,255,255,0.2)" />
-            <polygon points="50,5 80,45 50,80 20,45" fill="rgba(255,255,255,0.1)" />
-            <polygon points="5,35 20,45 50,80 50,95" fill="rgba(0,0,0,0.3)" />
-            <polygon points="95,35 80,45 50,80 50,95" fill="rgba(0,0,0,0.5)" />
-            <line x1="50" y1="5" x2="20" y2="45" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-            <line x1="50" y1="5" x2="80" y2="45" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-            <line x1="20" y1="45" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-            <line x1="80" y1="45" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+          <g>
+            <polygon points="50,5 80,55 50,80 20,55" fill="url(#d10-3)" />
+            <polygon points="50,5 20,55 5,45" fill="url(#d10-1)" />
+            <polygon points="50,5 95,45 80,55" fill="url(#d10-2)" />
+            <polygon points="5,45 20,55 50,80 50,95" fill="url(#d10-4)" />
+            <polygon points="95,45 80,55 50,80 50,95" fill="url(#d10-1)" />
+            <polygon points="50,5 20,55 5,45" fill="rgba(255,255,255,0.2)" />
+            <polygon points="50,5 80,55 50,80 20,55" fill="rgba(255,255,255,0.1)" />
+            <polygon points="5,45 20,55 50,80 50,95" fill="rgba(0,0,0,0.3)" />
+            <polygon points="95,45 80,55 50,80 50,95" fill="rgba(0,0,0,0.5)" />
+            <line x1="50" y1="5" x2="20" y2="55" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <line x1="50" y1="5" x2="80" y2="55" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <line x1="20" y1="55" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+            <line x1="80" y1="55" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
           </g>
         );
       case 12: // D12
         return (
-          <g filter="url(#diceShadow)">
+          <g>
             <polygon points="50,75 26.2,57.7 7.2,63.9 23.5,86.4 50,95" fill="url(#d12-4)" />
             <polygon points="73.8,57.7 50,75 50,95 76.4,86.4 92.7,63.9" fill="url(#d12-3)" />
             <polygon points="26.2,57.7 35.3,29.7 23.5,13.5 7.2,36 7.2,63.9" fill="url(#d12-2)" />
@@ -142,23 +147,23 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
         );
       case 20: // D20
         return (
-          <g filter="url(#diceShadow)">
-            <polygon points="27.5,68.75 72.5,68.75 50,95" fill="url(#d20-4)" />
-            <polygon points="27.5,68.75 50,95 11,72.5" fill="url(#d20-3)" />
-            <polygon points="72.5,68.75 89,72.5 50,95" fill="url(#d20-3)" />
-            <polygon points="27.5,68.75 11,72.5 11,27.5" fill="url(#d20-2)" />
-            <polygon points="72.5,68.75 89,27.5 89,72.5" fill="url(#d20-2)" />
-            <polygon points="50,35 27.5,68.75 11,27.5" fill="url(#d20-1)" />
-            <polygon points="50,35 89,27.5 72.5,68.75" fill="url(#d20-1)" />
-            <polygon points="50,35 11,27.5 50,5" fill="url(#d20-2)" />
-            <polygon points="50,35 50,5 89,27.5" fill="url(#d20-2)" />
-            <polygon points="50,35 27.5,68.75 72.5,68.75" fill="url(#d20-1)" />
-            <polygon points="50,35 27.5,68.75 72.5,68.75" fill="rgba(255,255,255,0.15)" />
-            <polygon points="50,35 11,27.5 50,5" fill="rgba(255,255,255,0.25)" />
-            <polygon points="50,35 50,5 89,27.5" fill="rgba(255,255,255,0.1)" />
-            <polygon points="27.5,68.75 72.5,68.75 50,95" fill="rgba(0,0,0,0.5)" />
-            <line x1="50" y1="35" x2="27.5" y2="68.75" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-            <line x1="50" y1="35" x2="72.5" y2="68.75" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+          <g>
+            <polygon points="20,72.5 80,72.5 50,95" fill="url(#d20-4)" />
+            <polygon points="20,72.5 50,95 11,72.5" fill="url(#d20-3)" />
+            <polygon points="80,72.5 89,72.5 50,95" fill="url(#d20-3)" />
+            <polygon points="20,72.5 11,72.5 11,27.5" fill="url(#d20-2)" />
+            <polygon points="80,72.5 89,27.5 89,72.5" fill="url(#d20-2)" />
+            <polygon points="50,25 20,72.5 11,27.5" fill="url(#d20-1)" />
+            <polygon points="50,25 89,27.5 80,72.5" fill="url(#d20-1)" />
+            <polygon points="50,25 11,27.5 50,5" fill="url(#d20-2)" />
+            <polygon points="50,25 50,5 89,27.5" fill="url(#d20-2)" />
+            <polygon points="50,25 20,72.5 80,72.5" fill="url(#d20-1)" />
+            <polygon points="50,25 20,72.5 80,72.5" fill="rgba(255,255,255,0.15)" />
+            <polygon points="50,25 11,27.5 50,5" fill="rgba(255,255,255,0.25)" />
+            <polygon points="50,25 50,5 89,27.5" fill="rgba(255,255,255,0.1)" />
+            <polygon points="20,72.5 80,72.5 50,95" fill="rgba(0,0,0,0.5)" />
+            <line x1="50" y1="25" x2="20" y2="72.5" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+            <line x1="50" y1="25" x2="80" y2="72.5" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
           </g>
         );
       default:
@@ -166,9 +171,21 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
     }
   };
 
+  const getTextY = () => {
+    switch (sides) {
+      case 4: return "65";
+      case 6: return "60";
+      case 8: return "45";
+      case 10: return "48";
+      case 12: return "50";
+      case 20: return "57";
+      default: return "60";
+    }
+  };
+
   return (
     <motion.div
-      className="relative cursor-pointer"
+      className={`relative cursor-pointer ${className}`}
       style={{ width: size, height: size }}
       animate={isRolling ? {
         rotate: [0, -12, 12, -12, 0],
@@ -185,20 +202,23 @@ export const DieSVG = ({ sides, value, isRolling, size = 64, delay = 0 }) => {
       <svg viewBox="0 0 100 100" className="w-full h-full ">
         {getDefs()}
         {renderShape()}
-        <text 
-          x="50" y={sides === 4 ? "65" : "60"} 
-          textAnchor="middle" 
-          fill="url(#goldText)"
-          filter="url(#goldGlow)"
-          style={{ 
-            fontSize: sides === 20 ? '26px' : '32px', 
-            fontWeight: '900', 
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-            letterSpacing: '-1px'
-          }}
-        >
-          {displayValue}
-        </text>
+        {showValue && displayValue > 0 && (
+          <text 
+            x="50" y={getTextY()} 
+            textAnchor="middle" 
+            dominantBaseline="central"
+            fill="url(#goldText)"
+            filter="url(#goldGlow)"
+            style={{ 
+              fontSize: sides === 20 ? '26px' : '32px', 
+              fontWeight: '900', 
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              letterSpacing: '-1px'
+            }}
+          >
+            {displayValue}
+          </text>
+        )}
       </svg>
     </motion.div>
   );

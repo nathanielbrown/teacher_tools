@@ -19,7 +19,6 @@ import { GroupScoreBoard } from '../components/tools/GroupScoreBoard';
 import { MarbleJar } from '../components/tools/MarbleJar';
 import { EmotionPicker } from '../components/tools/EmotionPicker';
 import { SoundLevel } from '../components/tools/SoundLevel';
-import { SeatingPlanGenerator } from '../components/tools/SeatingPlanGenerator';
 import { Tournaments } from '../components/tools/Tournaments';
 import { FractionTool } from '../components/tools/FractionTool';
 import { HundredsChart } from '../components/tools/HundredsChart';
@@ -57,7 +56,6 @@ import { SpringScales } from '../components/tools/SpringScales';
 import { InkDiffusion } from '../components/tools/InkDiffusion';
 import { StandingWaveSynthesis } from '../components/tools/StandingWaveSynthesis';
 import { SandSimulation } from '../components/tools/SandSimulation';
-import NewtonsCradle from '../components/tools/NewtonsCradle';
 import PoolGame from '../components/tools/PoolGame';
 import { TimesTable } from '../components/tools/TimesTable';
 import { MoneyTool } from '../components/tools/MoneyTool';
@@ -66,7 +64,7 @@ import { MissingSubtraction } from '../components/tools/MissingSubtraction';
 import { MissingMultiplication } from '../components/tools/MissingMultiplication';
 import { MissingDivision } from '../components/tools/MissingDivision';
 import { MarbleCounting } from '../components/tools/MarbleCounting';
-import { BinaryTool } from '../components/tools/BinaryTool';
+import { BinaryNumbers } from '../components/tools/BinaryNumbers';
 import { BalanceEquations } from '../components/tools/BalanceEquations';
 import { TeacherMath } from '../components/tools/TeacherMath';
 import { SimonGame } from '../components/tools/SimonGame';
@@ -278,8 +276,7 @@ export const tools: Tool[] = [
     yearRange: [0, 6],
     description: "Behavioral Reward Simulation",
     infoContent: "Click inside the jar to add a marble. Click on an existing marble to remove it. Reach the marble goal to trigger a celebratory reward for the class!",
-    component: MarbleJar,
-    hidden: true
+    component: MarbleJar
   },
   { 
     id: 'emotionpicker', 
@@ -308,20 +305,6 @@ export const tools: Tool[] = [
     component: SoundLevel
   },
   { 
-    id: 'seatingplan', 
-    name: 'Seating Plan Generator', 
-    icon: Grid3X3, 
-    emoji: '🪑', 
-    mainSection: 'Teacher Tools', 
-    section: 'Classroom Management', 
-    color: '#ffa502', 
-    yearRange: [0, 12],
-    description: "Dynamic Classroom Layout Architect",
-    infoContent: "Drag and drop desks and tables to match your physical classroom layout. Select a class list to populate the seats, or use the shuffle tool to randomly assign students.",
-    component: SeatingPlanGenerator,
-    hidden: true
-  },
-  { 
     id: 'tournaments', 
     name: 'Tournaments', 
     icon: Trophy, 
@@ -332,8 +315,7 @@ export const tools: Tool[] = [
     yearRange: [3, 12],
     description: "Multi-format Bracket & Ranking Engine",
     infoContent: "Run single or double elimination tournaments for your class. Use the Elo system to track skill levels over time. Perfect for classroom games, spelling bees, or sports.",
-    component: Tournaments,
-    hidden: true
+    component: Tournaments
   },
 
   // Teacher Tools - Teaching Aids
@@ -442,8 +424,7 @@ export const tools: Tool[] = [
     yearRange: [0, 12],
     description: "Multi-sided 3D Dice Laboratory",
     infoContent: "Click dice buttons to add them to your pool. You can add up to 24 dice! Roll the pool to see random values and their total sum.",
-    component: DiceRoller,
-    hidden: true
+    component: DiceRoller
   },
   { 
     id: 'flipcoin', 
@@ -533,8 +514,7 @@ export const tools: Tool[] = [
         <p><strong>Presets:</strong> Quickly switch between common tempos like Allegro, Moderato, or Adagio.</p>
       </div>
     ),
-    component: Metronome,
-    hidden: true
+    component: Metronome
   },
   { 
     id: 'qrcodegenerator', 
@@ -769,8 +749,7 @@ export const tools: Tool[] = [
         <p><strong>Audio:</strong> Hear the sounds of the letters as you build your words.</p>
       </div>
     ),
-    component: WordBuilder,
-    hidden: true
+    component: WordBuilder
   },
   { 
     id: 'crossword', 
@@ -962,25 +941,6 @@ export const tools: Tool[] = [
     hidden: true
   },
   { 
-    id: 'newtonscradle', 
-    name: `Newton's Cradle`, 
-    icon: Activity, 
-    emoji: '⚛️', 
-    mainSection: 'Student Tools', 
-    section: 'Science', 
-    color: '#3b82f6', 
-    yearRange: [3, 12],
-    description: "Momentum & Energy Conservation Laboratory",
-    infoContent: (
-      <div className="space-y-4">
-        <p>Explore the laws of physics with this classic Newton's Cradle simulation. Observe the transfer of energy and momentum between spheres.</p>
-        <p><strong>Variables:</strong> Adjust the number of balls and their masses to see how it affects the collision dynamics.</p>
-      </div>
-    ),
-    component: NewtonsCradle,
-    hidden: true
-  },
-  { 
     id: 'poolgame', 
     name: 'Pool Game', 
     icon: Target, 
@@ -1016,8 +976,7 @@ export const tools: Tool[] = [
         <p><strong>Modes:</strong> Sequence mode for learning, and Shuffle mode for testing recall.</p>
       </div>
     ),
-    component: TimesTable,
-    hidden: true
+    component: TimesTable
   },
   { 
     id: 'moneytool', 
@@ -1129,22 +1088,21 @@ export const tools: Tool[] = [
   },
   { 
     id: 'binarynumbers', 
-    name: 'Binary Tool', 
+    name: 'Binary Numbers', 
     icon: Cpu, 
     emoji: '💻', 
     mainSection: 'Student Tools', 
     section: 'Math', 
     color: '#1e90ff', 
     yearRange: [5, 12],
-    description: "Computational Logic & Data Representation",
+    description: "Learn how binary numbers work",
     infoContent: (
       <div className="space-y-4">
-        <p>Learn how computers represent numbers using binary. Toggle the bits to see how the decimal value changes.</p>
-        <p><strong>Place Value:</strong> Each bit represents a power of 2, starting from 1 on the right.</p>
+        <p>A fun way to learn how computers use 0s and 1s to make numbers.</p>
+        <p><strong>Place Value:</strong> Each card has a value. Add them up to find the total number.</p>
       </div>
     ),
-    component: BinaryTool,
-    hidden: true
+    component: BinaryNumbers
   },
   { 
     id: 'balanceequations', 
@@ -1162,8 +1120,7 @@ export const tools: Tool[] = [
         <p><strong>Balance:</strong> Both sides of the equation must equal the same value for the scale to balance.</p>
       </div>
     ),
-    component: BalanceEquations,
-    hidden: true
+    component: BalanceEquations
   },
   { 
     id: 'teachermath', 
@@ -1272,8 +1229,7 @@ export const tools: Tool[] = [
         <p><strong>Settings:</strong> Change the instrument, scale, and grid size in the settings panel.</p>
       </div>
     ),
-    component: SongMaker,
-    hidden: true
+    component: SongMaker
   },
 ];
 

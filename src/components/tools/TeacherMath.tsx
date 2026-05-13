@@ -146,13 +146,16 @@ export const TeacherMath = () => {
 
   const handleSvgClick = (e: React.MouseEvent) => {
     if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const scaleX = SIZE / rect.width;
-    const scaleY = SIZE / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-    const cartX = Math.round(toCartX(x) * 2) / 2;
-    const cartY = Math.round(toCartY(y) * 2) / 2;
+    const svg = svgRef.current;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    
+    const svgP = pt.matrixTransform(svg.getScreenCTM()?.inverse());
+    if (!svgP) return;
+
+    const cartX = Math.round(toCartX(svgP.x) * 2) / 2;
+    const cartY = Math.round(toCartY(svgP.y) * 2) / 2;
 
     if (Math.abs(cartX) <= gridConfig.range && Math.abs(cartY) <= gridConfig.range) {
       const newPoint = {
@@ -210,17 +213,17 @@ export const TeacherMath = () => {
 
   return (
     <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="w-full h-full flex flex-col lg:flex-row gap-8 p-8 lg:p-12">
+      <div className="w-full h-full flex flex-col-reverse lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8">
         
         {/* Sidebar (Formulas) */}
-        <div className="w-full lg:w-[320px] shrink-0 flex flex-col gap-4 relative z-20">
+        <div className="w-full lg:w-[320px] shrink-0 flex-1 lg:flex-none flex flex-col justify-center lg:justify-start gap-4 relative z-20">
           
-          <div className="flex-1 bg-white/50 p-6 rounded-[3rem] border-4 border-white flex flex-col gap-4 min-h-0">
-             <div className="flex items-center justify-between shrink-0 border-b-4 border-white pb-2 text-left">
-                <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white ">
-                      <Terminal size={18} strokeWidth={3} />
-                   </div>
+          <div className="flex-1 bg-white/50 p-6 rounded-[2rem] border-4 border-white flex flex-col gap-4 min-h-0">
+             <div className="flex items-center justify-between shrink-0 border-b-4 border-white pb-1 text-left">
+                 <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white ">
+                       <Terminal size={20} strokeWidth={3} />
+                    </div>
                    <div className="flex flex-col">
                      <h4 className="text-lg font-black text-slate-900 uppercase tracking-tight leading-none">
                        <FormattedMessage id="teachermath.title" />
@@ -249,11 +252,11 @@ export const TeacherMath = () => {
                         key={element.id}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className={`p-2 rounded-xl border-4 transition-all flex flex-col gap-1 italic ${isInvalid ? 'border-rose-100 bg-rose-50/20' : 'bg-white border-white hover:border-indigo-100 '}`}
+                        className={`p-3 lg:p-4 rounded-xl border-4 transition-all flex flex-col gap-1 italic ${isInvalid ? 'border-rose-100 bg-rose-50/20' : 'bg-white border-white hover:border-indigo-100 '}`}
                       >
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-white font-black" style={{ backgroundColor: element.raw.trim() ? element.color : '#f1f5f9' }}>
-                             {isPoint ? <Target size={14} strokeWidth={3} /> : isFormula ? <TrendingUp size={14} strokeWidth={3} /> : <Calculator size={14} strokeWidth={3} className="opacity-20 text-slate-400" />}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-white font-black" style={{ backgroundColor: element.raw.trim() ? element.color : '#f1f5f9' }}>
+                             {isPoint ? <Target size={18} strokeWidth={3} /> : isFormula ? <TrendingUp size={18} strokeWidth={3} /> : <Calculator size={18} strokeWidth={3} className="opacity-20 text-slate-400" />}
                           </div>
                           <div className="flex-1 min-w-0">
                              <input
@@ -261,8 +264,8 @@ export const TeacherMath = () => {
                                value={element.raw}
                                onChange={(e) => updateElement(element.id, e.target.value)}
                                onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-                               placeholder={index === elements.length - 1 ? "Add..." : "(x, y) or y=mx+b"}
-                               className="w-full bg-transparent border-none focus:ring-0 text-base font-black font-['Outfit'] text-slate-900 placeholder:text-slate-200 p-0 leading-none italic"
+                               placeholder={index === elements.length - 1 ? "Add" : "x, y or y=..."}
+                               className="w-full bg-transparent border-none focus:ring-0 text-lg lg:text-xl font-black font-['Outfit'] text-slate-900 placeholder:text-slate-200 p-0 leading-none italic"
                              />
                           </div>
                           {index < elements.length - 1 && (
@@ -280,9 +283,9 @@ export const TeacherMath = () => {
         </div>
 
         {/* Primary Stage (Grid) */}
-        <div className="flex-1 shrink-0 bg-white/50 rounded-[3rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden p-8">
+        <div className="flex-none lg:flex-1 shrink-0 bg-white/50 rounded-[2rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden p-6 lg:p-8">
           
-          <div className="w-full max-w-[700px] aspect-square flex items-center justify-center">
+          <div className="w-full lg:max-w-[700px] lg:max-h-[500px] xl:max-h-[600px] aspect-square flex items-center justify-center">
              <svg 
               ref={svgRef}
               viewBox={`0 0 ${SIZE} ${SIZE}`}
@@ -343,9 +346,9 @@ export const TeacherMath = () => {
           </div>
 
           {/* Grid Settings Below */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-8 bg-white/80 backdrop-blur-md p-4 px-8 rounded-[2rem] border-4 border-white shadow-sm relative z-30">
+          <div className="mt-4 lg:mt-6 flex flex-col sm:flex-row items-center gap-6 bg-white/80 backdrop-blur-md p-4 lg:p-5 px-8 rounded-[2rem] border-4 border-white shadow-sm relative z-30">
             <div className="flex items-center gap-4 min-w-[240px]">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic shrink-0">
+              <span className="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest italic shrink-0">
                 <FormattedMessage id="teachermath.settings.resolution" />
               </span>
               <input 
@@ -361,7 +364,7 @@ export const TeacherMath = () => {
             <div className="w-px h-6 bg-slate-200 hidden sm:block" />
 
             <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic shrink-0">
+              <span className="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest italic shrink-0">
                 <FormattedMessage id="teachermath.settings.labels" />
               </span>
               <button 

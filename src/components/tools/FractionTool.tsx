@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useCallback } from 'react';
 
 import { 
   ChevronUp, 
-  ChevronDown
+  ChevronDown,
+  Plus,
+  Minus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHeader } from '../../contexts/HeaderContext';
@@ -41,13 +43,13 @@ const HelpContent = () => (
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="fractionTool.help.step2" defaultMessage="Watch the circle and number line change to show your fraction." />
+          <FormattedMessage id="fractionTool.help.step2" defaultMessage="Watch the rectangle and number line change to show your fraction." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="fractionTool.help.step3" defaultMessage="Click on pieces of the circle to select how many you have." />
+          <FormattedMessage id="fractionTool.help.step3" defaultMessage="Click on pieces of the rectangle to select how many you have." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
@@ -65,25 +67,7 @@ const HelpContent = () => (
 // 5. Classes (None)
 
 // 6. Functions
-const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
-  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-  return {
-    x: centerX + (radius * Math.cos(angleInRadians)),
-    y: centerY + (radius * Math.sin(angleInRadians))
-  };
-};
-
-const describeArc = (x: number, y: number, radius: number, startAngle: number, endAngle: number) => {
-  const start = polarToCartesian(x, y, radius, endAngle);
-  const end = polarToCartesian(x, y, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-  return [
-    "M", x, y,
-    "L", start.x, start.y,
-    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-    "Z"
-  ].join(" ");
-};
+// 6. Functions (None)
 
 // 7. Component
 export const FractionTool = () => {
@@ -152,12 +136,18 @@ export const FractionTool = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+            className={`
+              ${isConfigOpen ? 'flex' : 'hidden'} 
+              fixed inset-0 z-[100] p-4 bg-slate-900/20 backdrop-blur-sm
+              lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none
+              lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0
+            `}
           >
             <SettingsPanel
               isOpen={isConfigOpen}
               onClose={() => setIsConfigOpen(false)}
               compact
+              className="h-full lg:h-full"
             >
               <div className="space-y-6">
                 <div className="space-y-3">
@@ -184,57 +174,52 @@ export const FractionTool = () => {
       </AnimatePresence>
 
       <ToolPanel className="flex-1 italic" baseWidth={1200} baseHeight={800}>
-      <div className="flex gap-8 w-full h-full relative z-10 p-8">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 w-full h-full relative z-10 p-4 lg:p-8 overflow-y-auto lg:overflow-hidden custom-scrollbar">
         
         {/* Left: Fraction Readout Core */}
-        <div className="w-[450px] shrink-0 bg-white rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group">
-           <div className="flex flex-col items-center gap-7 bg-white p-10 rounded-[5rem] border-4 border-white relative group/core">
-              <div className="flex flex-col items-center">
-                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronUp size={72} strokeWidth={4} /></button>
-                <span className="text-[12.6rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
-                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronDown size={72} strokeWidth={4} /></button>
+        <div className="w-full lg:w-[400px] shrink-0 bg-white rounded-[3rem] lg:rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group py-12 lg:py-0">
+           <div className="flex flex-col items-center gap-6 lg:gap-4 bg-white p-6 lg:p-8 rounded-[3rem] lg:rounded-[5rem] border-4 border-white relative group/core">
+              <div className="flex items-center gap-6 lg:gap-8">
+                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={48} strokeWidth={4} /></button>
+                <span className="text-[10rem] lg:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
+                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={48} strokeWidth={4} /></button>
               </div>
+              
               <div className="w-full h-4 bg-slate-800 rounded-full" />
-              <div className="flex flex-col items-center">
-                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronUp size={72} strokeWidth={4} /></button>
-                <span className="text-[12.6rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
-                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all hover:scale-125 active:scale-95"><ChevronDown size={72} strokeWidth={4} /></button>
+              
+              <div className="flex items-center gap-6 lg:gap-8">
+                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={48} strokeWidth={4} /></button>
+                <span className="text-[10rem] lg:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
+                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={48} strokeWidth={4} /></button>
               </div>
             </div>
         </div>
 
         {/* Right Column: Circle (Top) and Line (Bottom) */}
         <div className="flex-1 flex flex-col gap-8">
-           {/* Circle Visualization Module (Top Right) */}
-           <div className="flex-1 bg-white rounded-[4rem] border-4 border-white flex items-center justify-center relative overflow-hidden">
-              <div className="relative w-full max-w-[500px] aspect-square rounded-full bg-white flex items-center justify-center border-8 border-white p-8">
-                 <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90 overflow-visible">
-                    <circle cx="100" cy="100" r="95" fill="#f8fafc" stroke="white" strokeWidth="2" />
-                    {Array.from({ length: denominator }).map((_, i) => {
-                      const angle = 360 / denominator;
-                      const start = i * angle;
-                      const end = (i + 1) * angle;
-                      const isActive = i < numerator;
-                      return (
-                        <motion.path
-                          key={i}
-                          d={describeArc(100, 100, 92, start, end)}
-                          initial={false}
-                          animate={{ fill: isActive ? activeColor : 'white' }}
-                          className="cursor-pointer transition-all hover:brightness-95 stroke-white"
-                          style={{ strokeWidth: '1' }}
-                          onClick={() => { setNumerator(i + 1); audioEngine.playTick(settings.soundTheme); }}
-                        />
-                      );
-                    })}
-                    <circle cx="100" cy="100" r="4" fill="#cbd5e1" stroke="white" strokeWidth="2" />
-                 </svg>
+           {/* Rectangle Visualization Module (Top Right) */}
+           <div className="flex-1 bg-white rounded-[3rem] lg:rounded-[4rem] border-4 border-white flex items-center justify-center relative overflow-hidden p-8">
+              <div className="w-full max-w-[900px] h-48 lg:h-32 border-4 border-slate-100 rounded-[2rem] lg:rounded-[2rem] overflow-hidden flex bg-slate-50 relative group/rect">
+                 {Array.from({ length: denominator }).map((_, i) => {
+                   const isActive = i < numerator;
+                   return (
+                     <motion.div
+                       key={i}
+                       initial={false}
+                       animate={{ 
+                         backgroundColor: isActive ? activeColor : '#ffffff',
+                       }}
+                       onClick={() => { setNumerator(i + 1); audioEngine.playTick(settings.soundTheme); }}
+                       className="flex-1 border-r-4 last:border-r-0 border-white cursor-pointer hover:brightness-95 transition-all relative"
+                     />
+                   );
+                 })}
               </div>
            </div>
 
            {/* Number Line Module (Bottom Right) */}
-           <div className="h-[250px] bg-white p-10 rounded-[4rem] border-4 border-white flex flex-col justify-center relative overflow-hidden shrink-0 select-none">
-              <div className="px-8 py-12 relative z-10">
+           <div className="h-[240px] lg:h-[250px] bg-white p-6 lg:p-8 rounded-[3rem] lg:rounded-[4rem] border-4 border-white flex flex-col justify-end pb-8 lg:pb-12 relative overflow-hidden shrink-0 select-none">
+              <div className="px-8 pt-24 pb-8 relative z-10">
                  <div ref={lineRef} onClick={handleLineClick} className="h-4 bg-slate-50 rounded-full w-full relative cursor-pointer group ">
                     <div className="absolute top-1/2 -translate-y-1/2 left-0 h-16 w-1 bg-slate-100">
                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
@@ -252,10 +237,10 @@ export const FractionTool = () => {
                     </div>
                     {denominator > 1 && Array.from({ length: denominator - 1 }).map((_, i) => (
                       <div key={i} className="absolute top-1/2 -translate-y-1/2 w-0.5 h-8 bg-slate-100" style={{ left: `${((i + 1) / denominator) * 100}%` }}>
-                         <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className="text-sm font-black text-slate-400">{i + 1}</span>
-                            <div className="w-4 h-0.5 bg-slate-200 my-0.5" />
-                            <span className="text-sm font-black text-slate-400">{denominator}</span>
+                         <div className="absolute -top-20 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                            <span className={`text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{i + 1}</span>
+                            <div className={`w-6 h-1 bg-slate-200 my-0.5 ${denominator > 12 ? 'hidden sm:block' : ''}`} />
+                            <span className={`text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{denominator}</span>
                          </div>
                       </div>
                     ))}

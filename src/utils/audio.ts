@@ -170,46 +170,78 @@ class AudioEngine {
     if (instrument === 'marimba') {
       const osc1 = context.createOscillator();
       const osc2 = context.createOscillator();
+      const osc3 = context.createOscillator();
       const gain = context.createGain();
       
+      // Fundamental
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(freq, now);
       
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(freq * 3.9, now); // Typical marimba overtone
+      // Characteristic marimba overtones (approximate)
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 3.9, now);
+      
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(freq * 9.2, now);
+      
+      // Mallet strike (short noise burst)
+      const strikeBuffer = context.createBuffer(1, context.sampleRate * 0.05, context.sampleRate);
+      const strikeData = strikeBuffer.getChannelData(0);
+      for (let i = 0; i < strikeBuffer.length; i++) strikeData[i] = Math.random() * 2 - 1;
+      const strikeSource = context.createBufferSource();
+      strikeSource.buffer = strikeBuffer;
+      const strikeGain = context.createGain();
+      const strikeFilter = context.createBiquadFilter();
+      strikeFilter.type = 'lowpass';
+      strikeFilter.frequency.setValueAtTime(freq * 2, now);
+      
+      strikeGain.gain.setValueAtTime(0.4, now);
+      strikeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
       
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.6, now + 0.005); // Sharp attack
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3); // Quick decay
+      gain.gain.linearRampToValueAtTime(0.8, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
       
-      // Ensure node is disconnected to avoid memory leaks
       const stopTime = now + 0.5;
       
       osc1.connect(gain);
       osc2.connect(gain);
+      osc3.connect(gain);
+      strikeSource.connect(strikeFilter);
+      strikeFilter.connect(strikeGain);
+      strikeGain.connect(context.destination);
       gain.connect(context.destination);
       
       osc1.start(now);
       osc2.start(now);
+      osc3.start(now);
+      strikeSource.start(now);
       osc1.stop(stopTime);
       osc2.stop(stopTime);
+      osc3.stop(stopTime);
       
-      // Only disconnect if it's realtime to avoid offline rendering drops
       if (!overrideCtx) {
         setTimeout(() => {
-          try { gain.disconnect(); } catch(e){}
+          try { gain.disconnect(); strikeGain.disconnect(); strikeFilter.disconnect(); } catch { /* ignore */ }
         }, (stopTime - now) * 1000 + 100);
       }
 
     } else if (instrument === 'piano') {
-      const osc1 = context.createOscillator();
-      const osc2 = context.createOscillator();
-      const osc3 = context.createOscillator();
       const gain = context.createGain();
       const filter = context.createBiquadFilter();
       
+      // Fundamental with slight detune for richness
+      const osc1 = context.createOscillator();
+      const osc1b = context.createOscillator();
+      const osc2 = context.createOscillator();
+      const osc3 = context.createOscillator();
+      const osc4 = context.createOscillator();
+      
       osc1.type = 'triangle';
       osc1.frequency.setValueAtTime(freq, now);
+      
+      osc1b.type = 'triangle';
+      osc1b.frequency.setValueAtTime(freq + 0.5, now); // Slight detune
       
       osc2.type = 'sine';
       osc2.frequency.setValueAtTime(freq * 2, now); // Octave
@@ -217,16 +249,213 @@ class AudioEngine {
       osc3.type = 'sine';
       osc3.frequency.setValueAtTime(freq * 3, now); // Fifth
       
-      // Filter sweep to mimic hammer and resonance
+      osc4.type = 'sine';
+      osc4.frequency.setValueAtTime(freq * 4, now); // Second Octave
+      
+      // Hammer Impact (High frequency "tine" and noise)
+      const hammer = context.createOscillator();
+      const hammerGain = context.createGain();
+      hammer.type = 'sine';
+      hammer.frequency.setValueAtTime(freq * 12.5, now);
+      hammerGain.gain.setValueAtTime(0.15, now);
+      hammerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      
+      // Filter sweep for resonance and warmth
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(freq * 5, now);
-      filter.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.5);
+      filter.frequency.setValueAtTime(freq * 6, now);
+      filter.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.8);
+      filter.Q.setValueAtTime(0.8, now);
       
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0); // Longer decay
+      gain.gain.linearRampToValueAtTime(0.6, now + 0.005); // Sharp attack
+      gain.gain.exponentialRampToValueAtTime(0.3, now + 0.15); // Initial decay
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0); // Natural long decay
       
-      const stopTime = now + 1.2;
+      const stopTime = now + 2.1;
+      
+      osc1.connect(filter);
+      osc1b.connect(filter);
+      osc2.connect(filter);
+      osc3.connect(filter);
+      osc4.connect(filter);
+      hammer.connect(hammerGain);
+      hammerGain.connect(filter);
+      filter.connect(gain);
+      gain.connect(context.destination);
+      
+      osc1.start(now);
+      osc1b.start(now);
+      osc2.start(now);
+      osc3.start(now);
+      osc4.start(now);
+      hammer.start(now);
+      
+      osc1.stop(stopTime);
+      osc1b.stop(stopTime);
+      osc2.stop(stopTime);
+      osc3.stop(stopTime);
+      osc4.stop(stopTime);
+      hammer.stop(now + 0.04);
+      
+      if (!overrideCtx) {
+        setTimeout(() => {
+          try { 
+            gain.disconnect(); 
+            filter.disconnect(); 
+            hammerGain.disconnect();
+          } catch { /* ignore */ }
+        }, (stopTime - now) * 1000 + 100);
+      }
+
+    } else if (instrument === 'strings') {
+      const osc1 = context.createOscillator();
+      const osc2 = context.createOscillator();
+      const osc3 = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
+      
+      // Ensemble effect with three detuned sawtooths
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(freq, now);
+      
+      osc2.type = 'sawtooth';
+      osc2.frequency.setValueAtTime(freq * 1.005, now);
+      
+      osc3.type = 'sawtooth';
+      osc3.frequency.setValueAtTime(freq * 0.995, now);
+      
+      // LFO for vibrato
+      const vibrato = context.createOscillator();
+      const vibratoGain = context.createGain();
+      vibrato.frequency.setValueAtTime(5, now);
+      vibratoGain.gain.setValueAtTime(freq * 0.005, now);
+      vibrato.connect(vibratoGain);
+      vibratoGain.connect(osc1.frequency);
+      vibratoGain.connect(osc2.frequency);
+      vibratoGain.connect(osc3.frequency);
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(freq * 3, now);
+      filter.frequency.linearRampToValueAtTime(freq * 5, now + duration);
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.4, now + 0.15); // Rich attack
+      gain.gain.setValueAtTime(0.4, now + duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration + 0.4);
+      
+      const stopTime = now + duration + 0.5;
+      
+      osc1.connect(filter);
+      osc2.connect(filter);
+      osc3.connect(filter);
+      filter.connect(gain);
+      gain.connect(context.destination);
+      
+      osc1.start(now);
+      osc2.start(now);
+      osc3.start(now);
+      vibrato.start(now);
+      osc1.stop(stopTime);
+      osc2.stop(stopTime);
+      osc3.stop(stopTime);
+      vibrato.stop(stopTime);
+      
+      if (!overrideCtx) {
+        setTimeout(() => {
+          try { gain.disconnect(); filter.disconnect(); vibratoGain.disconnect(); } catch { /* ignore */ }
+        }, (stopTime - now) * 1000 + 100);
+      }
+
+    } else if (instrument === 'woodwind') {
+      const osc = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      
+      // Breath noise component
+      const breathBuffer = context.createBuffer(1, context.sampleRate * (duration + 0.2), context.sampleRate);
+      const breathData = breathBuffer.getChannelData(0);
+      for (let i = 0; i < breathBuffer.length; i++) breathData[i] = Math.random() * 2 - 1;
+      const breathSource = context.createBufferSource();
+      breathSource.buffer = breathBuffer;
+      const breathFilter = context.createBiquadFilter();
+      const breathGain = context.createGain();
+      
+      breathFilter.type = 'bandpass';
+      breathFilter.frequency.setValueAtTime(freq * 2, now);
+      breathFilter.Q.setValueAtTime(1, now);
+      
+      breathGain.gain.setValueAtTime(0, now);
+      breathGain.gain.linearRampToValueAtTime(0.05, now + 0.1);
+      breathGain.gain.linearRampToValueAtTime(0, now + duration + 0.1);
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(freq * 4, now);
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.4, now + 0.1);
+      gain.gain.setValueAtTime(0.4, now + duration - 0.05);
+      gain.gain.linearRampToValueAtTime(0, now + duration + 0.2);
+      
+      const lfo = context.createOscillator();
+      const lfoGain = context.createGain();
+      lfo.frequency.setValueAtTime(6, now);
+      lfoGain.gain.setValueAtTime(0, now);
+      lfoGain.gain.linearRampToValueAtTime(freq * 0.015, now + 0.3);
+      
+      const stopTime = now + duration + 0.3;
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      osc.connect(filter);
+      breathSource.connect(breathFilter);
+      breathFilter.connect(breathGain);
+      breathGain.connect(context.destination);
+      filter.connect(gain);
+      gain.connect(context.destination);
+      
+      lfo.start(now);
+      osc.start(now);
+      breathSource.start(now);
+      lfo.stop(stopTime);
+      osc.stop(stopTime);
+      
+      if (!overrideCtx) {
+        setTimeout(() => {
+          try { gain.disconnect(); filter.disconnect(); lfoGain.disconnect(); breathGain.disconnect(); breathFilter.disconnect(); } catch { /* ignore */ }
+        }, (stopTime - now) * 1000 + 100);
+      }
+
+    } else {
+      // Default / Synth (Modern Poly-style)
+      const osc1 = context.createOscillator();
+      const osc2 = context.createOscillator();
+      const osc3 = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
+      
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(freq, now);
+      
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(freq * 1.002, now); // Supersaw feel
+      
+      osc3.type = 'sawtooth';
+      osc3.frequency.setValueAtTime(freq / 2, now); // Sub oscillator
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(freq * 10, now);
+      filter.frequency.exponentialRampToValueAtTime(freq * 2, now + 0.3);
+      filter.Q.setValueAtTime(4, now);
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.01);
+      gain.gain.setValueAtTime(0.2, now + 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+      
+      const stopTime = now + duration + 0.1;
       
       osc1.connect(filter);
       osc2.connect(filter);
@@ -243,131 +472,7 @@ class AudioEngine {
       
       if (!overrideCtx) {
         setTimeout(() => {
-          try { gain.disconnect(); filter.disconnect(); } catch(e){}
-        }, (stopTime - now) * 1000 + 100);
-      }
-
-    } else if (instrument === 'strings') {
-      const osc1 = context.createOscillator();
-      const osc2 = context.createOscillator();
-      const gain = context.createGain();
-      const filter = context.createBiquadFilter();
-      
-      osc1.type = 'sawtooth';
-      osc1.frequency.setValueAtTime(freq, now);
-      
-      // Detune second oscillator for chorus effect
-      osc2.type = 'sawtooth';
-      osc2.frequency.setValueAtTime(freq * 1.008, now); 
-      
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(freq * 4, now);
-      filter.frequency.linearRampToValueAtTime(freq * 2, now + duration);
-      
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3, now + 0.15); // Slow attack
-      gain.gain.setValueAtTime(0.3, now + duration - 0.1); // Sustain
-      gain.gain.linearRampToValueAtTime(0, now + duration + 0.3); // Smooth release
-      
-      const stopTime = now + duration + 0.4;
-      
-      osc1.connect(filter);
-      osc2.connect(filter);
-      filter.connect(gain);
-      gain.connect(context.destination);
-      
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(stopTime);
-      osc2.stop(stopTime);
-      
-      if (!overrideCtx) {
-        setTimeout(() => {
-          try { gain.disconnect(); filter.disconnect(); } catch(e){}
-        }, (stopTime - now) * 1000 + 100);
-      }
-
-    } else if (instrument === 'woodwind') {
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      const filter = context.createBiquadFilter();
-      
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, now);
-      
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(freq * 3, now);
-      
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3, now + 0.08); // Soft attack
-      gain.gain.setValueAtTime(0.3, now + duration - 0.05); // Sustain
-      gain.gain.linearRampToValueAtTime(0, now + duration + 0.1); // Release
-      
-      // Delayed Vibrato
-      const lfo = context.createOscillator();
-      const lfoGain = context.createGain();
-      lfo.frequency.setValueAtTime(5.5, now); // 5.5Hz vibrato
-      lfoGain.gain.setValueAtTime(0, now);
-      lfoGain.gain.linearRampToValueAtTime(freq * 0.02, now + 0.2); // Depth fades in
-      
-      const stopTime = now + duration + 0.2;
-      
-      lfo.connect(lfoGain);
-      lfoGain.connect(osc.frequency);
-      
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(context.destination);
-      
-      lfo.start(now);
-      osc.start(now);
-      lfo.stop(stopTime);
-      osc.stop(stopTime);
-      
-      if (!overrideCtx) {
-        setTimeout(() => {
-          try { gain.disconnect(); filter.disconnect(); lfoGain.disconnect(); } catch(e){}
-        }, (stopTime - now) * 1000 + 100);
-      }
-
-    } else {
-      // Default / Synth (Fat analog style)
-      const osc1 = context.createOscillator();
-      const osc2 = context.createOscillator();
-      const gain = context.createGain();
-      const filter = context.createBiquadFilter();
-      
-      osc1.type = 'square';
-      osc1.frequency.setValueAtTime(freq, now);
-      
-      osc2.type = 'sawtooth';
-      osc2.frequency.setValueAtTime(freq * 0.995, now); // Detune
-      
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(freq * 8, now); // Open filter
-      filter.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.2); // Envelope
-      filter.Q.setValueAtTime(2, now); // Resonance
-      
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.25, now + 0.01); // Quick attack
-      gain.gain.setValueAtTime(0.15, now + 0.1); // Decay to sustain
-      gain.gain.linearRampToValueAtTime(0, now + duration); // Release
-      
-      const stopTime = now + duration + 0.1;
-      
-      osc1.connect(filter);
-      osc2.connect(filter);
-      filter.connect(gain);
-      gain.connect(context.destination);
-      
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(stopTime);
-      osc2.stop(stopTime);
-      
-      if (!overrideCtx) {
-        setTimeout(() => {
-          try { gain.disconnect(); filter.disconnect(); } catch(e){}
+          try { gain.disconnect(); filter.disconnect(); } catch { /* ignore */ }
         }, (stopTime - now) * 1000 + 100);
       }
     }

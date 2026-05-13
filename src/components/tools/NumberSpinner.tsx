@@ -127,6 +127,14 @@ export const NumberSpinner = () => {
     return values.length > 0 ? Math.max(...values) : 0;
   }, [frequencies]);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     setOnReset(() => resetStats);
     setHelpContent(<HelpContent />);
@@ -134,16 +142,88 @@ export const NumberSpinner = () => {
   }, [clearHeader, setOnReset, resetStats, setHelpContent]);
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="flex flex-col lg:flex-row gap-8 w-full h-full relative z-10">
-        
-        {/* Parameters Sidebar */}
-        <div className="w-full lg:w-96 flex flex-col gap-6 shrink-0 h-full italic">
-          <div className="bg-white p-8 rounded-[3rem] border-4 border-slate-50  flex flex-col gap-8">
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Min</label>
-                  <div className="bg-slate-50 p-4 rounded-2xl border-4 border-white focus-within:border-indigo-100 transition-all ">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full w-full italic overflow-y-auto lg:overflow-hidden px-0 lg:px-0 py-4 lg:py-0 custom-scrollbar">
+      <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1000 : 800} fluid={true} className="p-0">
+        <div className="flex flex-col w-full h-full relative">
+          
+          {/* Main Spinner Stage */}
+          <div className="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white border-4 border-slate-50 rounded-[4rem] m-4">
+            <div className="tool-grid-bg opacity-30 pointer-events-none" />
+            
+            <div className="relative w-full max-w-[550px] aspect-square flex items-center justify-center z-10 p-8">
+                {/* Pointer */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M30 60L0 0H60L30 60Z" fill="#1e293b" />
+                    <circle cx="30" cy="15" r="6" fill="#818cf8" className="animate-pulse" />
+                  </svg>
+                </div>
+
+                {/* Wheel Container */}
+                <motion.div
+                  animate={{ rotate: rotation }}
+                  transition={isSpinning ? { duration: 4, ease: [0.15, 0.85, 0.15, 1] } : { duration: 0.5 }}
+                  onAnimationComplete={() => {
+                    if (isSpinning && targetNumber !== null) {
+                      setResult(targetNumber);
+                      setHistory((prev: any[]) => [{ value: targetNumber, time: new Date().toISOString() }, ...prev]);
+                      setIsSpinning(false);
+                      audioEngine.playSuccess(settings.soundTheme);
+                    }
+                  }}
+                  className="w-full h-full rounded-full border-[16px] border-white  relative overflow-hidden bg-white cursor-pointer group/wheel"
+                  onClick={spin}
+                  style={{
+                    background: `conic-gradient(${
+                      numbers.map((_, i) =>
+                        `${COLORS[i % COLORS.length]} ${i * segmentAngle}deg ${(i + 1) * segmentAngle}deg`
+                      ).join(', ')
+                    })`
+                  }}
+                >
+                  {/* Glass Shimmer Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/10 pointer-events-none z-10" />
+                  <div className="absolute inset-0 rounded-full shadow-[inset_0_0_100px_rgba(0,0,0,0.15)] pointer-events-none z-10" />
+
+                  {/* Numbers */}
+                  {numSegments <= 40 && numbers.map((num, i) => {
+                    const rotationAngle = (i * segmentAngle) + (segmentAngle / 2);
+                    return (
+                      <div
+                        key={i}
+                        className="absolute inset-0 flex items-start justify-center pt-12"
+                        style={{ transform: `rotate(${rotationAngle}deg)` }}
+                      >
+                        <span 
+                          className="text-white font-black text-4xl select-none" 
+                          style={{ transform: 'rotate(0deg)', writingMode: 'vertical-rl', textOrientation: 'upright' }}
+                        >
+                           {num}
+                        </span>
+                      </div>
+                    );
+                  })}
+
+                  {/* Center Hub */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white rounded-full z-20 border-[14px] border-slate-50 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-indigo-500 rounded-full border-4 border-white/30 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-white/40 rounded-full animate-pulse" />
+                    </div>
+                  </div>
+                </motion.div>
+            </div>
+          </div>
+
+          {/* Selector Tray - Hovering on laptop, at bottom on mobile */}
+          <div className={`${isMobile ? 'relative w-full px-6 py-2' : 'absolute bottom-10 left-10 z-20'} flex justify-start items-end`}>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                <FormattedMessage id="shared.config" defaultMessage="Config" />
+              </label>
+              <div className="flex gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Min</label>
+                  <div className="bg-slate-50 p-2 rounded-2xl border-4 border-white focus-within:border-indigo-100 transition-all ">
                     <input
                       type="number"
                       value={min}
@@ -151,14 +231,14 @@ export const NumberSpinner = () => {
                         setMin(Math.max(0, Number(e.target.value)));
                         resetStats();
                       }}
-                      className="w-full bg-transparent border-none outline-none text-2xl font-black text-slate-800 tabular-nums"
+                      className="w-16 bg-transparent border-none outline-none text-lg font-black text-slate-800 tabular-nums"
                       disabled={isSpinning}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Max</label>
-                  <div className="bg-slate-50 p-4 rounded-2xl border-4 border-white focus-within:border-indigo-100 transition-all ">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Max</label>
+                  <div className="bg-slate-50 p-2 rounded-2xl border-4 border-white focus-within:border-indigo-100 transition-all ">
                     <input
                       type="number"
                       value={max}
@@ -166,145 +246,84 @@ export const NumberSpinner = () => {
                         setMax(Math.min(100, Math.max(min + 1, Number(e.target.value))));
                         resetStats();
                       }}
-                      className="w-full bg-transparent border-none outline-none text-2xl font-black text-slate-800 tabular-nums"
+                      className="w-16 bg-transparent border-none outline-none text-lg font-black text-slate-800 tabular-nums"
                       disabled={isSpinning}
                     />
                   </div>
                 </div>
-             </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </ToolPanel>
 
+      {/* Side Panel */}
+      <div className="w-full lg:w-[400px] shrink-0 flex flex-col gap-4 pb-8 lg:pb-0 lg:h-full">
+        
+        {/* Statistics Panel */}
+        {!isMobile && (
           <div className="bg-slate-50/80 backdrop-blur-xl rounded-[3rem] border-4 border-white flex flex-col overflow-hidden shrink-0 italic">
-            <div className="bg-white/80 backdrop-blur-sm px-8 py-6 flex justify-between items-center shrink-0 border-b-4 border-white">
+            <div className="bg-white/80 backdrop-blur-sm px-8 py-3 flex justify-between items-center shrink-0 border-b-4 border-white">
               <div className="flex items-center gap-2">
-                <BarChart3 className="text-indigo-400" size={16} />
-                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 mb-0 leading-none">
+                <BarChart3 className="text-indigo-400" size={14} />
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 mb-0 leading-none">
                   <FormattedMessage id="numberSpinner.analytics.title" defaultMessage="Statistics" />
                 </h4>
               </div>
             </div>
-            <div className="p-8">
-              <div className="h-40 w-full flex items-end justify-between gap-1 relative">
+            <div className="px-8 py-4">
+              <div className="h-24 w-full flex items-end justify-between gap-1 relative">
                 {numbers.map((num, i) => {
                   const freq = frequencies[num] || 0;
                   const height = maxFrequency > 0 ? (freq / maxFrequency) * 100 : 0;
                   return (
-                    <div key={num} className="flex-1 flex flex-col items-center gap-2 group/bar h-full justify-end relative z-10">
+                    <div key={num} className="flex-1 flex flex-col items-center gap-1 group/bar h-full justify-end relative z-10">
                       <div className="w-full relative flex flex-col justify-end h-full">
                         <motion.div 
                           initial={{ height: 0 }}
                           animate={{ height: `${height}%` }}
-                          className="w-full rounded-t-lg relative group-hover/bar:brightness-110 transition-all"
+                          className="w-full rounded-t-md relative group-hover/bar:brightness-110 transition-all"
                           style={{ backgroundColor: COLORS[i % COLORS.length] }}
                         >
                           {freq > 0 && (
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-slate-400 tabular-nums">
+                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-black text-slate-400 tabular-nums">
                               {freq}
                             </span>
                           )}
                         </motion.div>
                       </div>
-                      <span className="text-[9px] font-black text-slate-400 tabular-nums group-hover/bar:text-slate-900 transition-colors">{num}</span>
+                      <span className="text-[8px] font-black text-slate-400 tabular-nums group-hover/bar:text-slate-900 transition-colors">{num}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
           </div>
+        )}
 
-          <HistoryPanel
-            title={intl.formatMessage({ id: 'numberSpinner.history.title', defaultMessage: 'History' })}
-            items={history}
-            onClear={resetStats}
-            onDownload={handleDownload}
-            emptyMessage={intl.formatMessage({ id: 'numberSpinner.history.empty', defaultMessage: 'No spins yet' })}
-            itemsPerPage={7}
-            renderItem={(h: any, i: number) => (
-              <motion.div 
-                key={`${h.time}-${i}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="p-4 bg-white rounded-2xl border-2 border-slate-50 flex justify-between items-center group hover:border-indigo-100 transition-all "
-              >
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Spin #{history.length - i}</span>
-                 <span className="text-2xl font-black text-slate-800 tabular-nums tracking-tighter leading-none group-hover:text-indigo-600 transition-colors">{h.value}</span>
-              </motion.div>
-            )}
-          />
-        </div>
-
-        {/* Main Spinner Stage */}
-        <div className="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white border-4 border-slate-50 rounded-[4rem] ">
-          <div className="tool-grid-bg opacity-30 pointer-events-none" />
-          
-
-
-
-          <div className="relative w-full max-w-[550px] aspect-square flex items-center justify-center z-10 p-8">
-              {/* Pointer */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 drop-shadow-xl">
-                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-lg">
-                  <path d="M30 60L0 0H60L30 60Z" fill="#1e293b" />
-                  <circle cx="30" cy="15" r="6" fill="#818cf8" className="animate-pulse" />
-                </svg>
-              </div>
-
-              {/* Wheel Container */}
-              <motion.div
-                animate={{ rotate: rotation }}
-                transition={isSpinning ? { duration: 4, ease: [0.15, 0.85, 0.15, 1] } : { duration: 0.5 }}
-                onAnimationComplete={() => {
-                  if (isSpinning && targetNumber !== null) {
-                    setResult(targetNumber);
-                    setHistory((prev: any[]) => [{ value: targetNumber, time: new Date().toISOString() }, ...prev]);
-                    setIsSpinning(false);
-                    audioEngine.playSuccess(settings.soundTheme);
-                  }
-                }}
-                className="w-full h-full rounded-full border-[16px] border-white  relative overflow-hidden bg-white cursor-pointer group/wheel"
-                onClick={spin}
-                style={{
-                  background: `conic-gradient(${
-                    numbers.map((_, i) =>
-                      `${COLORS[i % COLORS.length]} ${i * segmentAngle}deg ${(i + 1) * segmentAngle}deg`
-                    ).join(', ')
-                  })`
-                }}
-              >
-                {/* Glass Shimmer Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/10 pointer-events-none z-10" />
-                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_100px_rgba(0,0,0,0.15)] pointer-events-none z-10" />
-
-                {/* Numbers */}
-                {numSegments <= 40 && numbers.map((num, i) => {
-                  const rotationAngle = (i * segmentAngle) + (segmentAngle / 2);
-                  return (
-                    <div
-                      key={i}
-                      className="absolute inset-0 flex items-start justify-center pt-12"
-                      style={{ transform: `rotate(${rotationAngle}deg)` }}
-                    >
-                      <span 
-                        className="text-white font-black text-4xl select-none drop-shadow-lg" 
-                        style={{ transform: 'rotate(0deg)', writingMode: 'vertical-rl', textOrientation: 'upright' }}
-                      >
-                         {num}
-                      </span>
-                    </div>
-                  );
-                })}
-
-                {/* Center Hub */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 bg-white rounded-full z-20 border-[14px] border-slate-50 flex items-center justify-center shadow-xl">
-                  <div className="w-12 h-12 bg-indigo-500 rounded-full shadow-[0_0_30px_rgba(79,70,229,0.4)] border-4 border-white/30 flex items-center justify-center">
-                    <div className="w-4 h-4 bg-white/40 rounded-full animate-pulse" />
-                  </div>
-                </div>
-              </motion.div>
-          </div>
-        </div>
+        {/* History Panel */}
+        <HistoryPanel
+          title={intl.formatMessage({ id: 'numberSpinner.history.title', defaultMessage: 'History' })}
+          items={history}
+          onClear={resetStats}
+          onDownload={handleDownload}
+          emptyMessage={intl.formatMessage({ id: 'numberSpinner.history.empty', defaultMessage: 'No spins yet' })}
+          itemsPerPage={isMobile ? 4 : 8}
+          listClassName="grid grid-cols-4 gap-4"
+          className="flex-1"
+          renderItem={(h: any, i: number) => (
+            <motion.div 
+              key={`${h.time}-${i}`}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="h-16 lg:h-16 rounded-2xl bg-white border-4 border-slate-100 flex items-center justify-center text-xl font-black text-indigo-500 hover:scale-105 transition-transform"
+            >
+               {h.value}
+            </motion.div>
+          )}
+        />
       </div>
-    </ToolPanel>
+    </div>
   );
 };
 

@@ -52,7 +52,7 @@ export const DiceRoller = () => {
   const reset = useCallback(() => {
     setActiveDice([]);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setActiveDice]);
 
   // Persistence handled by useLocalStorage
 
@@ -125,18 +125,39 @@ export const DiceRoller = () => {
     return () => clearTimeout(timeoutId);
   }, [isRolling, activeDice]);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="flex gap-8 h-full w-full italic">
-      <ToolPanel baseWidth={1000} baseHeight={800} fluid={true} className="p-0">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full w-full italic overflow-y-auto lg:overflow-hidden px-0 lg:px-0 py-4 lg:py-0 custom-scrollbar">
+      <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1000 : 800} fluid={true} className="p-0">
         <div className="flex flex-col w-full h-full relative">
           
           {/* Main Stage */}
           <div 
-            className="flex-1 flex items-center justify-center relative overflow-hidden p-12 cursor-pointer group"
+            className="flex-1 flex items-center justify-center relative overflow-hidden p-6 lg:p-12 cursor-pointer group"
             onClick={rollDice}
           >
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
                  style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '64px 64px' }} />
+            
+            {/* Total Result Overlay */}
+            <div className="absolute top-6 lg:top-10 right-6 lg:right-10 z-20 flex flex-col items-end bg-white/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/50">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total</span>
+              <motion.span 
+                key={totalValue}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-4xl lg:text-5xl font-black text-slate-900 leading-none tabular-nums"
+              >
+                {totalValue}
+              </motion.span>
+            </div>
             
             <div className="flex flex-wrap justify-center items-center gap-10 relative z-10 w-full max-w-4xl">
               <AnimatePresence>
@@ -147,8 +168,8 @@ export const DiceRoller = () => {
                     exit={{ opacity: 0, scale: 0.8 }}
                     className="flex flex-col items-center gap-6 text-slate-200"
                   >
-                    <Dice5 size={160} strokeWidth={1} />
-                    <span className="text-[12px] font-black uppercase tracking-[0.8em]">Click to add dice</span>
+                    <Dice5 className="w-32 h-32 lg:w-40 lg:h-40" strokeWidth={1} />
+                    <span className="text-[10px] lg:text-[12px] font-black uppercase tracking-[0.8em]">Click to add dice</span>
                   </motion.div>
                 ) : (
                   activeDice.map((die, index) => (
@@ -198,7 +219,7 @@ export const DiceRoller = () => {
           </div>
 
           {/* Selector Tray - Floating at bottom */}
-          <div className="w-full p-8 flex justify-center gap-6">
+          <div className="w-full p-2 lg:p-8 flex flex-wrap justify-center gap-2 lg:gap-6">
             {DICE_TYPES.map((type) => (
               <button
                 key={type.sides}
@@ -206,17 +227,17 @@ export const DiceRoller = () => {
                   e.stopPropagation();
                   addDie(type.sides);
                 }}
-                className="group relative flex flex-col items-center justify-center w-28 h-32 rounded-[2.5rem] bg-white border-4 border-transparent hover:border-indigo-100 hover:scale-105 transition-all active:scale-95 shadow-sm"
+                className="group relative flex flex-col items-center justify-center w-24 h-28 lg:w-32 lg:h-36 rounded-2xl lg:rounded-[2.5rem] bg-white border-4 border-transparent hover:border-indigo-100 hover:scale-105 transition-all active:scale-95 shadow-sm"
               >
                 <DieSVG 
                   sides={type.sides} 
                   value={type.sides} 
                   isRolling={false} 
-                  size={64} 
+                  size={isMobile ? 64 : 80} 
                   showValue={false}
-                  className="mb-3"
+                  className="mb-2 lg:mb-3"
                 />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <span className="text-[9px] lg:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   {type.label}
                 </span>
               </button>
@@ -226,48 +247,24 @@ export const DiceRoller = () => {
       </ToolPanel>
 
       {/* Side Panel */}
-      <div className="w-[380px] shrink-0 flex flex-col gap-6">
-        {/* Total Stats Card */}
-        <div className="bg-slate-50/80 backdrop-blur-xl rounded-[3rem] border-4 border-white flex flex-col overflow-hidden shrink-0 shadow-lg">
-          <div className="bg-white/80 backdrop-blur-sm px-8 py-6 flex justify-between items-center border-b-4 border-white">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="text-indigo-400" size={18} />
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 leading-none">
-                Stats
-              </h4>
-            </div>
-          </div>
-          <div className="p-10 flex flex-col items-center text-center">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Total Result</span>
-            <motion.span 
-              key={totalValue}
-              initial={{ scale: 0.8, opacity: 0.5 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-[10rem] font-black text-slate-900 leading-none tabular-nums tracking-tighter"
-            >
-              {totalValue}
-            </motion.span>
-            <div className="mt-8 flex gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <span>{activeDice.length} Dice active</span>
-            </div>
-          </div>
-        </div>
+      <div className="w-full lg:w-[380px] shrink-0 flex flex-col gap-6 pb-8 lg:pb-0">
 
         {/* History Panel */}
         <HistoryPanel
           title="Roll History"
+          className="min-h-[220px] lg:min-h-0"
           items={history}
           onClear={() => setHistory([])}
           emptyMessage="No rolls yet"
           icon={HistoryIcon}
-          itemsPerPage={12}
+          itemsPerPage={isMobile ? 4 : 12}
           listClassName="grid grid-cols-4 gap-4"
           renderItem={(h, i) => (
             <motion.div
               key={`${h}-${i}`}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="aspect-square rounded-2xl bg-white border-4 border-slate-100 flex items-center justify-center text-xl font-black text-indigo-500 shadow-sm hover:scale-105 transition-transform"
+              className="h-16 lg:h-20 rounded-2xl bg-white border-4 border-slate-100 flex items-center justify-center text-xl font-black text-indigo-500 shadow-sm hover:scale-105 transition-transform"
             >
               {h}
             </motion.div>

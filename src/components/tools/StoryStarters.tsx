@@ -124,14 +124,14 @@ export const StoryStarters = () => {
       setHistory(prev => [randomPrompt, ...prev].slice(0, 50));
       setIsGenerating(false);
     }, 600);
-  }, [yearLevel, settings.soundTheme]);
+  }, [yearLevel, settings.soundTheme, setPrompt, setHistory, setIsGenerating]);
 
   const resetTool = useCallback(() => {
     setPrompt(null);
     setHistory([]);
     setHasSelectedYear(false);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setPrompt, setHistory, setHasSelectedYear]);
 
   useEffect(() => {
     setOnReset(() => resetTool);
@@ -141,10 +141,10 @@ export const StoryStarters = () => {
   }, [clearHeader, setOnReset, resetTool, setHelpContent, setHasConfig]);
 
   return (
-    <div className="flex gap-8 h-full w-full italic">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full w-full italic">
       <ToolPanel baseWidth={1000} baseHeight={800}>
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
-          <div className="w-full max-w-4xl flex flex-col items-center relative z-10 px-12 text-center">
+          <div className="w-full max-w-4xl flex flex-col items-center relative z-10 px-6 md:px-12 text-center">
             <AnimatePresence mode="wait">
               {prompt ? (
                 <motion.div
@@ -159,7 +159,7 @@ export const StoryStarters = () => {
                     <Quote size={60} fill="currentColor" className="mx-auto text-indigo-100 relative z-10" />
                   </div>
                   
-                  <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1] tracking-tighter italic uppercase ">
+                  <h2 className="text-3xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter italic uppercase ">
                     {prompt}
                   </h2>
                   
@@ -182,7 +182,7 @@ export const StoryStarters = () => {
                   className="flex flex-col items-center gap-12"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
+                    <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
                       <FormattedMessage id="storystarters.label.select_year" defaultMessage="Select Year Level" />
                     </h3>
                   </div>
@@ -191,7 +191,7 @@ export const StoryStarters = () => {
                       <button
                         key={year}
                         onClick={() => { setYearLevel(year); setHasSelectedYear(true); audioEngine.playTick(settings.soundTheme); }}
-                        className={`h-24 rounded-3xl border-4 flex items-center justify-center text-3xl font-black transition-all bg-white border-slate-100 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 hover:scale-105 `}
+                        className={`h-16 md:h-24 rounded-2xl md:rounded-3xl border-4 flex items-center justify-center text-2xl md:text-3xl font-black transition-all bg-white border-slate-100 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 hover:scale-105 `}
                       >
                         {year}
                       </button>
@@ -206,7 +206,7 @@ export const StoryStarters = () => {
                   className="flex flex-col items-center gap-12"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
+                    <h3 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
                       <FormattedMessage id="storystarters.title" />
                     </h3>
                   </div>
@@ -220,7 +220,7 @@ export const StoryStarters = () => {
               <button
                 onClick={generatePrompt}
                 disabled={isGenerating}
-                className="group flex items-center gap-8 h-24 px-12 bg-orange-600 text-white rounded-[3rem] font-black text-2xl  hover:bg-slate-900 transition-all tracking-tighter italic uppercase border-8 border-white active:scale-95 disabled:opacity-50"
+                className="group flex items-center gap-4 md:gap-8 h-16 md:h-24 px-8 md:px-12 bg-orange-600 text-white rounded-[2rem] md:rounded-[3rem] font-black text-xl md:text-2xl  hover:bg-slate-900 transition-all tracking-tighter italic uppercase border-4 md:border-8 border-white active:scale-95 disabled:opacity-50"
               >
                 {isGenerating ? <RefreshCcw size={32} strokeWidth={3} className="animate-spin" /> : <Sparkles size={32} fill="currentColor" />}
                 {isGenerating ? <FormattedMessage id="storystarters.generating" /> : <FormattedMessage id="storystarters.generate" />}

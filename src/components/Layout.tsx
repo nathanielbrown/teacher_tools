@@ -328,7 +328,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
       <div className={`flex-1 flex flex-col overflow-hidden relative transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${isFullscreen ? 'lg:pl-0' : sidebarMode === 'mini' ? 'lg:pl-32' : sidebarMode === 'full' ? 'lg:pl-[22rem]' : 'lg:pl-0'
         }`}>
         {/* Floating Sidebar Toggle - Only when hidden */}
-        {sidebarMode === 'hidden' && !isFullscreen && (
+        {sidebarMode === 'hidden' && !isFullscreen && !isMobile && (
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}

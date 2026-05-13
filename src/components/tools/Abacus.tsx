@@ -133,14 +133,14 @@ export const Abacus = () => {
   }, 0);
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="w-full max-w-6xl flex flex-col items-center gap-8 relative z-10">
+    <ToolPanel className="italic" baseWidth={1200} baseHeight={750} alignTop={false}>
+      <div className="w-full max-w-[95%] lg:max-w-3xl flex flex-col items-center gap-0 relative z-10">
         
         {/* Place Value Labels Row */}
-        <div className="w-full grid grid-cols-10 px-4">
+        <div className="w-full grid grid-cols-10 px-[18px] lg:px-[24px] h-64 md:h-40">
           {COLUMN_CONFIG.map((conf, idx) => (
-            <div key={idx} className="flex flex-col items-center">
-              <span className="text-[10px] lg:text-[12px] font-black text-slate-400 text-center uppercase tracking-tighter">
+            <div key={idx} className="relative flex flex-col items-center justify-end h-full pb-1">
+              <span className="absolute bottom-0 left-1/2 transform -rotate-90 transition-transform origin-left whitespace-nowrap text-[32px] md:text-[20px] font-black text-slate-400 uppercase tracking-tighter">
                 {conf.label}
               </span>
             </div>
@@ -148,7 +148,7 @@ export const Abacus = () => {
         </div>
 
         {/* The Abacus Frame */}
-        <div className="w-full aspect-[2/1] relative bg-[#fcf6eb] rounded-[3rem] p-6 lg:p-10  border-[20px] border-[#dcb07a] overflow-hidden group/abacus">
+        <div className="w-full aspect-[16/4] relative bg-[#fcf6eb] rounded-[3rem] p-4 lg:p-6 border-[10px] lg:border-[14px] border-[#dcb07a] overflow-hidden group/abacus">
           <div className="absolute inset-0 pointer-events-none opacity-[0.05] mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')]" />
           
           <div className="absolute inset-0 flex flex-col">
@@ -230,7 +230,7 @@ export const Abacus = () => {
         </div>
 
         {/* Console / Value Readout */}
-        <div className="w-full grid grid-cols-10 px-4">
+        <div className="w-full grid grid-cols-10 px-[18px] lg:px-[24px] pt-1">
           {columnStates.map((state, idx) => {
             const count = state.upper * 5 + state.lower;
             return (
@@ -240,7 +240,7 @@ export const Abacus = () => {
                     scale: count > 0 ? 1.2 : 1,
                     color: count > 0 ? COLUMN_CONFIG[idx].color : '#e2e8f0'
                   }}
-                  className="text-3xl lg:text-4xl font-black tabular-nums italic"
+                  className="text-4xl md:text-5xl font-black tabular-nums italic"
                 >
                   {count}
                 </motion.div>
@@ -250,14 +250,14 @@ export const Abacus = () => {
         </div>
 
         {/* Total Aggregator */}
-         <div className="mt-4">
-            <div className="px-16 py-6 bg-white rounded-[3rem]  border-4 border-slate-100 relative overflow-hidden group">
+         <div className="mt-1">
+            <div className="px-6 py-1.5 bg-white rounded-2xl border-2 lg:border-4 border-slate-100 relative overflow-hidden group">
                <div className="tool-grid-bg opacity-10 pointer-events-none" />
                <div className="flex flex-col items-center relative z-10">
-                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.5em] mb-2">
+                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.5em] mb-1">
                     <FormattedMessage id="abacus.total" defaultMessage="Total" />
                   </span>
-                  <span className="text-6xl font-black text-slate-900 tabular-nums tracking-tighter leading-none italic">
+                  <span className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tabular-nums tracking-tighter leading-none italic">
                      {totalValue.toLocaleString()}
                   </span>
                </div>

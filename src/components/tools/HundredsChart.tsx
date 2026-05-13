@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Hash, Palette, Zap, Eraser, EyeOff, Volume2, VolumeX, MessageCircle, Settings2
+  Hash, Palette, Zap, Eraser, EyeOff, Volume2, VolumeX, MessageCircle, Settings2,
+  Play, Square
 } from 'lucide-react';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -147,7 +148,7 @@ export const HundredsChart = () => {
   const [highlighted, setHighlighted] = useLocalStorage<Record<number, string>>('hundredschart_highlighted', {});
   const [activeColor, setActiveColor] = useLocalStorage<string | null>('hundredschart_color', colors[2].value);
   const [animSpeed, setAnimSpeed] = useLocalStorage('hundredschart_speed', 2000);
-  const [animState, setAnimState] = useState({ isRunning: false, multiple: 1, current: 1 });
+  const [animState, setAnimState] = useState({ isRunning: false, multiple: 2, current: 1 });
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [soundMode, setSoundMode] = useLocalStorage<'speak' | 'sound' | 'mute'>('hundreds_chart_sound_mode', 'sound');
@@ -231,7 +232,7 @@ export const HundredsChart = () => {
 
   useEffect(() => {
     setHasConfig(true);
-    setIsConfigOpen(true);
+    if (window.innerWidth >= 1024) setIsConfigOpen(true);
     setOnReset(() => clearAll);
     setHelpContent(<HelpContent />);
     setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
@@ -289,13 +290,16 @@ export const HundredsChart = () => {
 
   };
 
-  const highlightMultiples = (multiple: number) => {
+
+
+  const handlePlay = () => {
     if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme);
-    if (multiple === 0) {
-      setAnimState({ isRunning: false, multiple: 1, current: 1 });
-      return;
-    }
-    setAnimState({ isRunning: true, multiple, current: multiple });
+    setAnimState(prev => ({ ...prev, isRunning: true, current: prev.multiple }));
+  };
+
+  const handleStop = () => {
+    if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme);
+    setAnimState(prev => ({ ...prev, isRunning: false }));
   };
 
   useEffect(() => {
@@ -405,16 +409,16 @@ export const HundredsChart = () => {
       <AnimatePresence>
         {isConfigOpen && (
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+            className="fixed inset-0 z-[100] p-4 lg:p-0 lg:static lg:w-[320px] flex flex-col h-full gap-8 italic overflow-hidden shrink-0 bg-slate-900/10 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none"
           >
             <SettingsPanel
               isOpen={isConfigOpen}
               onClose={() => setIsConfigOpen(false)}
-              className="shrink-0 lg:h-fit"
+              className="w-full h-full lg:h-fit"
               compact
               title={intl.formatMessage({ id: 'hundredschart.settings.title', defaultMessage: 'Config' })}
             >
@@ -508,20 +512,14 @@ export const HundredsChart = () => {
                       <FormattedMessage id="hundredschart.sidebar.highlight" defaultMessage="Patterns" />
                     </label>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[0, 1, 2, 3, 5, 10].map(m => (
+                  <div className="grid grid-cols-5 gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(m => (
                       <button
                         key={m}
-                        onClick={() => highlightMultiples(m)}
-                        className="py-3 bg-white border-2 border-slate-100 rounded-xl text-[8px] font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95 uppercase tracking-widest"
+                        onClick={() => { setAnimState(prev => ({ ...prev, multiple: m })); if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme); }}
+                        className={`aspect-square flex items-center justify-center rounded-xl border-2 transition-all font-black text-xs ${animState.multiple === m ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'}`}
                       >
-                        {m === 0 ? (
-                          <FormattedMessage id="hundredschart.sidebar.stop" defaultMessage="Stop" />
-                        ) : m === 1 ? (
-                          <FormattedMessage id="hundredschart.sidebar.all" defaultMessage="All" />
-                        ) : (
-                          <FormattedMessage id="hundredschart.sidebar.multiples" defaultMessage="Multiples of {m}" values={{ m }} />
-                        )}
+                        {m}
                       </button>
                     ))}
                   </div>
@@ -554,27 +552,51 @@ export const HundredsChart = () => {
       </AnimatePresence>
 
       <ToolPanel className="flex-1 italic" baseWidth={1100} baseHeight={800}>
-        <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden gap-8">
-          <div className="w-full max-w-2xl aspect-square relative z-10 p-4 bg-white rounded-3xl border-4 border-slate-50 overflow-hidden">
-            <div className="grid grid-cols-10 h-full bg-white rounded-none overflow-hidden border-none ">
-              {rows.flat().map(num => (
-                <div key={num} className="aspect-square">
-                  <ChartCell
-                    num={num}
-                    isHidden={hiddenNumbers.has(num)}
-                    highlightColor={highlighted[num] || null}
-                    onClick={handleCellClick}
-                  />
-                </div>
-              ))}
+        <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden gap-12">
+          
+          <div className="flex items-center gap-12 w-full justify-center">
+            {/* Play Button */}
+            <button
+              onClick={handlePlay}
+              disabled={animState.isRunning}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-4 shadow-xl active:scale-90 ${animState.isRunning ? 'bg-slate-50 border-white text-slate-200' : 'bg-white border-white text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700'}`}
+              title="Play Pattern"
+            >
+              <Play size={40} fill="currentColor" />
+            </button>
+
+            {/* Chart */}
+            <div className="w-full max-w-xl aspect-square relative z-10 p-4 bg-white rounded-3xl border-4 border-slate-50 shadow-2xl overflow-hidden">
+              <div className="grid grid-cols-10 h-full bg-white rounded-none overflow-hidden border-none ">
+                {rows.flat().map(num => (
+                  <div key={num} className="aspect-square">
+                    <ChartCell
+                      num={num}
+                      isHidden={hiddenNumbers.has(num)}
+                      highlightColor={highlighted[num] || null}
+                      onClick={handleCellClick}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* Stop Button */}
+            <button
+              onClick={handleStop}
+              disabled={!animState.isRunning}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-4 shadow-xl active:scale-90 ${!animState.isRunning ? 'bg-slate-50 border-white text-slate-200' : 'bg-white border-white text-rose-600 hover:bg-rose-50 hover:text-rose-700'}`}
+              title="Stop Pattern"
+            >
+              <Square size={40} fill="currentColor" />
+            </button>
           </div>
 
           <button
             onClick={clearAll}
-            className="flex items-center gap-2 px-8 py-3 bg-white border-2 border-slate-100 rounded-2xl text-xs font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95 uppercase tracking-widest"
+            className="flex items-center gap-2 px-12 py-4 bg-white border-2 border-slate-100 rounded-3xl text-sm font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all shadow-lg active:scale-95 uppercase tracking-[0.2em]"
           >
-            <Eraser size={14} />
+            <Eraser size={20} />
             <FormattedMessage id="hundredschart.clearall" defaultMessage="Clear All" />
           </button>
         </div>

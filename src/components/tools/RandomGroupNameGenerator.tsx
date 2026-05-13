@@ -26,34 +26,15 @@ const NOUNS = [
 // 3. Text (Help and Info)
 const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
-    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
-      <FormattedMessage id="groupnamegenerator.help.title" />
-    </h3>
-    <div className="space-y-3">
-      <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="groupnamegenerator.help.step1" defaultMessage="Click the button to make team names." />
-        </p>
-      </div>
-      <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="groupnamegenerator.help.step2" defaultMessage="Each name is a mix of two fun words." />
-        </p>
-      </div>
-      <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="groupnamegenerator.help.step3" defaultMessage="Use these names for your groups." />
-        </p>
-      </div>
-      <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="groupnamegenerator.help.step4" defaultMessage="Click the button again for new names." />
-        </p>
-      </div>
+    <div className="space-y-3 italic">
+      {[1, 2, 3, 4].map(step => (
+        <div key={step} className="flex gap-3 text-left">
+          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">{step}</div>
+          <p className="text-sm text-slate-600 font-medium leading-tight">
+            <FormattedMessage id={`groupnamegenerator.help.step${step}`} />
+          </p>
+        </div>
+      ))}
     </div>
   </div>
 );
@@ -71,7 +52,7 @@ export const RandomGroupNameGenerator = () => {
 
     setTimeout(() => {
       const newGroups = [];
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         const randomAdj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
         const randomNoun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
         newGroups.push(`${randomAdj} ${randomNoun}`);
@@ -88,31 +69,31 @@ export const RandomGroupNameGenerator = () => {
   }, [clearHeader, setHelpContent]);
 
   return (
-    <ToolPanel baseWidth={800} baseHeight={800} className="italic">
-      <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="w-full max-w-2xl flex flex-col items-center relative z-10 px-12 h-full py-12">
+    <ToolPanel baseWidth={1000} baseHeight={800} className="italic">
+      <div className="w-full h-full flex flex-col items-center justify-start relative overflow-hidden">
+        <div className="w-full max-w-4xl flex flex-col items-center relative z-10 px-3 lg:px-12 h-full py-2 lg:py-4">
           
-          <div className="w-full flex-1 flex flex-col justify-center italic min-h-[320px]">
+          <div className="w-full flex-1 flex flex-col justify-start italic">
             <AnimatePresence mode="wait">
               {groups.length > 0 ? (
-                <div className="space-y-2">
-                  {groups.map((name, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-4 py-2 px-6 bg-white rounded-[1.5rem] border-4 border-slate-50  group hover:border-indigo-100 transition-all"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-black text-base shrink-0">
-                        {index + 1}
-                      </div>
-                      <span className="text-xl font-black text-slate-800 tracking-tight">
-                        {name}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 w-full">
+                    {groups.map((name, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`flex items-center gap-4 py-3 lg:py-4 px-6 bg-white rounded-[2rem] border-4 border-slate-50 hover:border-indigo-100 transition-all w-full ${index === groups.length - 1 && groups.length % 2 !== 0 ? 'md:col-span-2' : ''}`}
+                      >
+                        <div className="w-16 h-16 lg:w-10 lg:h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-4xl lg:text-lg shrink-0">
+                          {index + 1}
+                        </div>
+                        <span className="text-5xl lg:text-2xl font-black text-slate-800 tracking-tight">
+                          {name}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-center py-12 opacity-30 italic">
                   {isGenerating ? (
@@ -131,19 +112,16 @@ export const RandomGroupNameGenerator = () => {
             </AnimatePresence>
           </div>
 
-          <div className="w-full shrink-0 mt-6">
+          <div className="w-full shrink-0 mt-4">
             <button
               onClick={generateGroups}
               disabled={isGenerating}
-              className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-6 group italic border-4 border-white"
+              className="w-full py-6 lg:py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-4xl lg:text-xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-6 group italic border-4 border-white"
             >
               {isGenerating ? (
                 <RefreshCw size={32} className="animate-spin" />
               ) : (
-                <>
-                  <Sparkles size={32} className="group-hover:rotate-12 transition-transform" />
-                  <FormattedMessage id="groupnamegenerator.generate" />
-                </>
+                <FormattedMessage id="groupnamegenerator.generate" />
               )}
             </button>
           </div>

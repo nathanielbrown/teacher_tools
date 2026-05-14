@@ -79,6 +79,15 @@ export const RevealWord = () => {
   const [revealSpeed, setRevealSpeed] = useLocalStorage<number>('reveal_word_speed', 2000);
   const [isPanelVisible, setIsPanelVisible] = useLocalStorage<boolean>('reveal_word_panel_visible', true);
   const [newlyCreatedIds, setNewlyCreatedIds] = useState<string[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check for mobile view
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Sync session lists with stored lists
   useEffect(() => {
@@ -274,13 +283,29 @@ export const RevealWord = () => {
               onManageLists={handleManageLists}
               manageListsLabel={<FormattedMessage id="wordpanel.link.addRemove" defaultMessage="Add/Remove Lists" />}
               className="h-full min-h-0"
-            />
+            >
+              {isMobile && (
+                <button
+                  onClick={() => {
+                    setIsPanelVisible(false);
+                    audioEngine.playTick(settings.soundTheme);
+                  }}
+                  className="w-full py-6 bg-indigo-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
+                >
+                  <Play size={20} strokeWidth={3} fill="currentColor" />
+                  <FormattedMessage id="revealword.play" defaultMessage="Play Game" />
+                </button>
+              )}
+            </WordPanel>
           </div>
         )}
       </AnimatePresence>
 
-      <ToolPanel baseWidth={isPanelVisible ? 1200 : 1600} baseHeight={800}>
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 gap-8 relative overflow-hidden group">
+      <ToolPanel 
+        baseWidth={isMobile ? (isPanelVisible ? 800 : 600) : (isPanelVisible ? 1200 : 1600)} 
+        baseHeight={isMobile ? 1000 : 800}
+      >
+        <div className={`w-full h-full flex flex-col items-center justify-center ${isMobile ? 'p-4 pb-8' : 'p-8'} gap-8 relative overflow-hidden group`}>
           <div className="flex-1 flex flex-col items-center justify-center w-full">
             <AnimatePresence mode="wait">
               <motion.div
@@ -299,7 +324,7 @@ export const RevealWord = () => {
                           scale: isRevealed ? [1, 1.1, 1] : 1,
                           rotateY: isRevealed ? 0 : 180,
                         }}
-                        className={`w-28 h-40 md:w-40 md:h-52 rounded-[3rem] border-8 flex items-center justify-center text-7xl md:text-9xl font-black not-italic relative transition-colors ${isRevealed ? 'bg-indigo-600 border-white text-white' : 'bg-slate-200 border-slate-100 text-slate-400'}`}
+                        className={`w-20 h-28 md:w-28 md:h-40 lg:w-36 lg:h-48 rounded-[2rem] md:rounded-[3rem] border-4 md:border-8 flex items-center justify-center text-5xl md:text-7xl lg:text-8xl font-black not-italic relative transition-colors ${isRevealed ? 'bg-indigo-600 border-white text-white' : 'bg-slate-200 border-slate-100 text-slate-400'}`}
                       >
                         {isRevealed ? letter.toUpperCase() : '?'}
                       </motion.div>
@@ -311,23 +336,23 @@ export const RevealWord = () => {
           </div>
 
           {/* Controls Section */}
-          <div className="w-full max-w-5xl bg-white/40 backdrop-blur-md p-10 rounded-[3rem] border-4 border-white flex flex-col gap-8 shrink-0">
-            <div className="flex items-center justify-between gap-16">
+          <div className={`w-full ${isMobile ? 'max-w-none' : 'max-w-5xl'} bg-white/40 backdrop-blur-md p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border-4 border-white flex flex-col gap-6 md:gap-8 shrink-0`}>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-16">
               <div className="flex items-baseline gap-3 shrink-0">
-                <span className="text-8xl font-black text-indigo-600 italic tracking-tighter leading-none tabular-nums">
+                <span className="text-8xl md:text-9xl font-black text-indigo-600 italic tracking-tighter leading-none tabular-nums">
                   {revealedIndices.length}
                 </span>
-                <span className="text-3xl font-black text-slate-300 uppercase">/ {currentWord.length || 0}</span>
+                <span className="text-3xl md:text-3xl font-black text-slate-300 uppercase">/ {currentWord.length || 0}</span>
               </div>
 
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 w-full space-y-4 md:space-y-3">
                 <div className="flex items-center justify-between px-2">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                  <span className="text-sm md:text-sm font-black text-indigo-400 uppercase tracking-widest">
                     <FormattedMessage id="revealword.speed" defaultMessage="Speed" />
                   </span>
-                  <span className="text-xs font-black text-slate-400 tabular-nums">{(revealSpeed / 1000).toFixed(1)}s</span>
+                  <span className="text-base md:text-base font-black text-slate-400 tabular-nums">{(revealSpeed / 1000).toFixed(1)}s</span>
                 </div>
-                <div className="h-4 bg-slate-100 rounded-full p-1 border border-slate-200 relative">
+                <div className="h-6 md:h-6 bg-slate-100 rounded-full p-1 border border-slate-200 relative">
                   <input 
                     type="range" min="500" max="5000" step="500"
                     value={revealSpeed}
@@ -342,34 +367,34 @@ export const RevealWord = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 h-24">
+            <div className="grid grid-cols-3 gap-4 md:gap-4 h-28 md:h-32">
               <button
                 onClick={revealLetter}
                 disabled={revealedIndices.length === currentWord.length}
-                className="bg-white border-4 border-slate-50 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-indigo-100 transition-all active:scale-95 disabled:opacity-50"
+                className="bg-white border-4 border-slate-50 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center gap-2 hover:border-indigo-100 transition-all active:scale-95 disabled:opacity-50"
               >
-                <Eye size={20} strokeWidth={3} className="text-indigo-600" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">
+                <Eye size={32} strokeWidth={3} className="text-indigo-600" />
+                <span className="text-sm md:text-sm font-black uppercase tracking-widest text-slate-900">
                   <FormattedMessage id="revealword.action.reveal" defaultMessage="Reveal" />
                 </span>
               </button>
 
               <button
                 onClick={() => setIsAutoRevealing(!isAutoRevealing)}
-                className={`rounded-2xl border-4 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${isAutoRevealing ? 'bg-amber-500 border-amber-400 text-white' : 'bg-indigo-600 border-indigo-400 text-white hover:bg-indigo-700'}`}
+                className={`rounded-2xl md:rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${isAutoRevealing ? 'bg-amber-500 border-amber-400 text-white' : 'bg-indigo-600 border-indigo-400 text-white hover:bg-indigo-700'}`}
               >
-                {isAutoRevealing ? <Pause size={20} strokeWidth={3} /> : <Play size={20} strokeWidth={3} className="ml-1" />}
-                <span className="text-[10px] font-black uppercase tracking-widest">
+                {isAutoRevealing ? <Pause size={32} strokeWidth={3} /> : <Play size={32} strokeWidth={3} className="ml-1" />}
+                <span className="text-sm md:text-sm font-black uppercase tracking-widest">
                   {isAutoRevealing ? <FormattedMessage id="revealword.action.stop" defaultMessage="Stop" /> : <FormattedMessage id="revealword.action.auto" defaultMessage="Auto" />}
                 </span>
               </button>
 
               <button
                 onClick={startNextWord}
-                className="bg-white border-4 border-slate-50 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-indigo-100 transition-all active:scale-95"
+                className="bg-white border-4 border-slate-50 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center gap-2 hover:border-indigo-100 transition-all active:scale-95"
               >
-                <SkipForward size={20} strokeWidth={3} className="text-slate-400" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-800">
+                <SkipForward size={32} strokeWidth={3} className="text-slate-400" />
+                <span className="text-sm md:text-sm font-black uppercase tracking-widest text-slate-800">
                   <FormattedMessage id="revealword.action.next" defaultMessage="Next Word" />
                 </span>
               </button>

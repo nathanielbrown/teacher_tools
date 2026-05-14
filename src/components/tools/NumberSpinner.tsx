@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Loader, Trash2, Sliders, Target, Database, BarChart3 } from 'lucide-react';
+import { Play, Loader, Trash2, Sliders, Target, Database, BarChart3, Plus, Minus } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { ToolPanel } from '../shared/ToolPanel';
@@ -143,14 +143,65 @@ export const NumberSpinner = () => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full w-full italic overflow-y-auto lg:overflow-hidden px-0 lg:px-0 py-4 lg:py-0 custom-scrollbar">
-      <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1000 : 800} fluid={true} className="p-0">
-        <div className="flex flex-col w-full h-full relative">
+      <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1000 : 800} fluid={true} className="p-0" alignTop={isMobile}>
+          {/* Selector Tray - Hovering on laptop, at bottom on mobile */}
+          {isMobile && (
+            <div className="relative w-full px-6 py-2 flex justify-start items-end z-20">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <FormattedMessage id="shared.config" defaultMessage="Config" />
+                </label>
+                <div className="flex gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Min</label>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => { setMin(Math.max(0, min - 1)); resetStats(); }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || min <= 0}
+                      >
+                        <Minus size={20} strokeWidth={4} />
+                      </button>
+                      <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{min}</span>
+                      <button 
+                        onClick={() => { if (min < max - 1) { setMin(min + 1); resetStats(); } }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || min >= max - 1}
+                      >
+                        <Plus size={20} strokeWidth={4} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Max</label>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => { if (max > min + 1) { setMax(max - 1); resetStats(); } }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || max <= min + 1}
+                      >
+                        <Minus size={20} strokeWidth={4} />
+                      </button>
+                      <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{max}</span>
+                      <button 
+                        onClick={() => { if (max < 100) { setMax(max + 1); resetStats(); } }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || max >= 100}
+                      >
+                        <Plus size={20} strokeWidth={4} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Main Spinner Stage */}
           <div className="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white border-4 border-slate-50 rounded-[4rem] m-4">
             <div className="tool-grid-bg opacity-30 pointer-events-none" />
             
-            <div className="relative w-full max-w-[550px] aspect-square flex items-center justify-center z-10 p-8">
+            <div className="relative w-full max-w-[550px] lg:max-w-[700px] aspect-square flex items-center justify-center z-10 p-8">
                 {/* Pointer */}
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
                   <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -214,47 +265,58 @@ export const NumberSpinner = () => {
             </div>
           </div>
 
-          {/* Selector Tray - Hovering on laptop, at bottom on mobile */}
-          <div className={`${isMobile ? 'relative w-full px-6 py-2' : 'absolute bottom-10 left-10 z-20'} flex justify-start items-end`}>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                <FormattedMessage id="shared.config" defaultMessage="Config" />
-              </label>
-              <div className="flex gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Min</label>
-                  <div className="bg-slate-50 p-2 rounded-2xl border-4 border-white focus-within:border-indigo-100 transition-all ">
-                    <input
-                      type="number"
-                      value={min}
-                      onChange={e => {
-                        setMin(Math.max(0, Number(e.target.value)));
-                        resetStats();
-                      }}
-                      className="w-16 bg-transparent border-none outline-none text-lg font-black text-slate-800 tabular-nums"
-                      disabled={isSpinning}
-                    />
+          {/* Selector Tray - Hovering on laptop */}
+          {!isMobile && (
+            <div className="absolute bottom-10 left-10 z-20 flex justify-start items-end">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <FormattedMessage id="shared.config" defaultMessage="Config" />
+                </label>
+                <div className="flex gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Min</label>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => { setMin(Math.max(0, min - 1)); resetStats(); }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || min <= 0}
+                      >
+                        <Minus size={20} strokeWidth={4} />
+                      </button>
+                      <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{min}</span>
+                      <button 
+                        onClick={() => { if (min < max - 1) { setMin(min + 1); resetStats(); } }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || min >= max - 1}
+                      >
+                        <Plus size={20} strokeWidth={4} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Max</label>
-                  <div className="bg-slate-50 p-2 rounded-2xl border-4 border-white focus-within:border-indigo-100 transition-all ">
-                    <input
-                      type="number"
-                      value={max}
-                      onChange={e => {
-                        setMax(Math.min(100, Math.max(min + 1, Number(e.target.value))));
-                        resetStats();
-                      }}
-                      className="w-16 bg-transparent border-none outline-none text-lg font-black text-slate-800 tabular-nums"
-                      disabled={isSpinning}
-                    />
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-black text-slate-300 uppercase tracking-widest ml-1">Max</label>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => { if (max > min + 1) { setMax(max - 1); resetStats(); } }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || max <= min + 1}
+                      >
+                        <Minus size={20} strokeWidth={4} />
+                      </button>
+                      <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{max}</span>
+                      <button 
+                        onClick={() => { if (max < 100) { setMax(max + 1); resetStats(); } }}
+                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        disabled={isSpinning || max >= 100}
+                      >
+                        <Plus size={20} strokeWidth={4} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          )}
       </ToolPanel>
 
       {/* Side Panel */}
@@ -310,13 +372,14 @@ export const NumberSpinner = () => {
           emptyMessage={intl.formatMessage({ id: 'numberSpinner.history.empty', defaultMessage: 'No spins yet' })}
           itemsPerPage={isMobile ? 4 : 8}
           listClassName="grid grid-cols-4 gap-4"
-          className="flex-1"
+          className="flex-1 h-[240px] lg:h-auto shrink-0"
+          reservePaginationSpace={isMobile}
           renderItem={(h: any, i: number) => (
             <motion.div 
               key={`${h.time}-${i}`}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="h-16 lg:h-16 rounded-2xl bg-white border-4 border-slate-100 flex items-center justify-center text-xl font-black text-indigo-500 hover:scale-105 transition-transform"
+              className="h-12 lg:h-12 rounded-xl bg-white border-2 border-slate-100 flex items-center justify-center text-lg font-black text-indigo-500 hover:scale-105 transition-transform"
             >
                {h.value}
             </motion.div>

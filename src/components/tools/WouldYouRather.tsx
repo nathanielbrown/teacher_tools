@@ -63,11 +63,18 @@ export const WouldYouRather = () => {
   const { setHeaderActions, setHelpContent, setOnReset, clearHeader } = useHeader();
   const { settings } = useSettings();
   
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [view, setView] = useState<'selection' | 'game'>('selection');
   const [yearLevel, setYearLevel] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useLocalStorage<any[]>('would_you_rather_history', []);
   const [questions, setQuestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const resetGame = useCallback(() => {
     setView('selection');
@@ -81,7 +88,7 @@ export const WouldYouRather = () => {
     });
     setHelpContent(<HelpContent />);
     return () => clearHeader();
-  }, [clearHeader, setOnReset, resetGame, setHelpContent, setHistory]);
+  }, [clearHeader, setOnReset, resetGame, setHelpContent]);
 
   const handleSelect = (choiceIndex: number) => {
     const currentPair = questions[currentIndex];
@@ -145,16 +152,16 @@ export const WouldYouRather = () => {
   const currentPair = questions[currentIndex];
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="flex flex-col lg:flex-row gap-8 h-full w-full overflow-hidden relative z-10">
+    <ToolPanel className="italic" baseWidth={isMobile ? 600 : 1200} baseHeight={800} fluid={!isMobile}>
+      <div className={`flex ${isMobile ? 'flex-col-reverse' : 'flex-col lg:flex-row'} gap-8 h-full w-full overflow-hidden relative z-10`}>
 
       <AnimatePresence>
         {view === 'game' && (
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            className="w-full lg:flex-[1] flex flex-col h-full gap-8 italic overflow-hidden shrink-0"
+            initial={isMobile ? { opacity: 0, y: 40 } : { opacity: 0, x: -40 }}
+            animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+            exit={isMobile ? { opacity: 0, y: 40 } : { opacity: 0, x: -40 }}
+            className={`w-full ${isMobile ? 'h-auto max-h-[250px]' : 'lg:flex-[1] h-full'} flex flex-col italic overflow-hidden shrink-0`}
           >
             <HistoryPanel 
               items={history.map(h => ({ 
@@ -163,6 +170,8 @@ export const WouldYouRather = () => {
               }))}
               onClear={() => setHistory([])}
               onDownload={exportHistory}
+              itemsPerPage={isMobile ? 1 : 7}
+              reservePaginationSpace={true}
               title={intl.formatMessage({ id: 'wyr.history.title', defaultMessage: 'History' })}
               emptyMessage={intl.formatMessage({ id: 'wyr.history.empty', defaultMessage: 'No choices yet...' })}
             />
@@ -180,7 +189,7 @@ export const WouldYouRather = () => {
             className="flex-1 flex flex-col items-center justify-center gap-12 relative z-10 w-full"
           >
             <div className="text-center space-y-4">
-              <h2 className="text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">
+              <h2 className="text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none italic drop-shadow-sm">
                 <FormattedMessage id="wyr.title" defaultMessage="Would You Rather" />
               </h2>
             </div>
@@ -192,7 +201,6 @@ export const WouldYouRather = () => {
                   onClick={() => startLevel(level.id)}
                   className={`group relative p-10 rounded-[3rem] bg-gradient-to-br ${level.color} text-white hover:scale-105 transition-all active:scale-95 flex flex-col items-center gap-6 text-center border-4 border-white/20`}
                 >
-                  <span className="text-6xl group-hover:animate-bounce transition-all">{level.emoji}</span>
                   <span className="text-xl font-black tracking-tight uppercase">
                     <FormattedMessage id={`wyr.level.${level.id}`} defaultMessage={level.label} />
                   </span>
@@ -217,12 +225,9 @@ export const WouldYouRather = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.9, x: -50 }}
                     onClick={() => handleSelect(0)}
-                    className="group relative p-12 bg-slate-50 border-8 border-white rounded-[5rem] hover:border-indigo-600 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95"
+                    className={`group relative ${isMobile ? 'p-6' : 'p-12'} bg-slate-50 border-8 border-white rounded-[5rem] hover:border-indigo-600 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95`}
                   >
-                    <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                      <Sparkles size={64} strokeWidth={1.5} fill="currentColor" className="opacity-20" />
-                    </div>
-                    <p className="text-4xl font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors uppercase italic tracking-tighter">
+                    <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors uppercase italic tracking-tighter`}>
                       {currentPair ? currentPair[0] : ""}
                     </p>
                     <div className="absolute bottom-12 right-12 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
@@ -236,12 +241,9 @@ export const WouldYouRather = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.9, x: 50 }}
                     onClick={() => handleSelect(1)}
-                    className="group relative p-12 bg-slate-50 border-8 border-white rounded-[5rem] hover:border-rose-500 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95"
+                    className={`group relative ${isMobile ? 'p-6' : 'p-12'} bg-slate-50 border-8 border-white rounded-[5rem] hover:border-rose-500 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95`}
                   >
-                    <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all">
-                      <Sparkles size={64} strokeWidth={1.5} fill="currentColor" className="opacity-20" />
-                    </div>
-                    <p className="text-4xl font-black text-slate-800 leading-tight group-hover:text-rose-600 transition-colors uppercase italic tracking-tighter">
+                    <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-rose-600 transition-colors uppercase italic tracking-tighter`}>
                       {currentPair ? currentPair[1] : ""}
                     </p>
                     <div className="absolute bottom-12 right-12 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">

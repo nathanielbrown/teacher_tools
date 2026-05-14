@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Sparkles, 
-  Quote, 
-  RefreshCcw, 
-  BookOpen, 
   Star, 
-  History
+  History,
+  ChevronLeft,
+  ChevronRight,
+  Quote,
+  RefreshCcw,
+  Sparkles
 } from 'lucide-react';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -111,6 +112,15 @@ export const StoryStarters = () => {
   const [prompt, setPrompt] = useLocalStorage<string | null>('story_starters_prompt', null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [history, setHistory] = useLocalStorage<string[]>('story_starters_history', []);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const generatePrompt = useCallback(() => {
     setIsGenerating(true);
@@ -122,6 +132,7 @@ export const StoryStarters = () => {
       const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
       setPrompt(randomPrompt);
       setHistory(prev => [randomPrompt, ...prev].slice(0, 50));
+      setHistoryIndex(0);
       setIsGenerating(false);
     }, 600);
   }, [yearLevel, settings.soundTheme, setPrompt, setHistory, setIsGenerating]);
@@ -129,6 +140,7 @@ export const StoryStarters = () => {
   const resetTool = useCallback(() => {
     setPrompt(null);
     setHistory([]);
+    setHistoryIndex(0);
     setHasSelectedYear(false);
     audioEngine.playTick(settings.soundTheme);
   }, [settings.soundTheme, setPrompt, setHistory, setHasSelectedYear]);
@@ -142,9 +154,13 @@ export const StoryStarters = () => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full w-full italic">
-      <ToolPanel baseWidth={1000} baseHeight={800}>
-        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
-          <div className="w-full max-w-4xl flex flex-col items-center relative z-10 px-6 md:px-12 text-center">
+      <ToolPanel 
+        baseWidth={isMobile ? 400 : 1000} 
+        baseHeight={800}
+        fluid={isMobile}
+      >
+        <div className="w-full h-full flex flex-col items-center py-6 md:py-12 relative overflow-hidden">
+          <div className="flex-1 w-full max-w-4xl flex flex-col items-center justify-center relative z-10 px-6 md:px-12 text-center">
             <AnimatePresence mode="wait">
               {prompt ? (
                 <motion.div
@@ -152,14 +168,11 @@ export const StoryStarters = () => {
                   initial={{ opacity: 0, scale: 0.95, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 1.05, y: -30 }}
-                  className="space-y-12"
+                  className="space-y-6 md:space-y-12"
                 >
-                  <div className="relative inline-block">
-                    <div className="absolute inset-0 bg-indigo-500 blur-[60px] opacity-20" />
-                    <Quote size={60} fill="currentColor" className="mx-auto text-indigo-100 relative z-10" />
-                  </div>
+
                   
-                  <h2 className="text-3xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter italic uppercase ">
+                  <h2 className="text-2xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter italic uppercase ">
                     {prompt}
                   </h2>
                   
@@ -182,7 +195,7 @@ export const StoryStarters = () => {
                   className="flex flex-col items-center gap-12"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
+                    <h3 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
                       <FormattedMessage id="storystarters.label.select_year" defaultMessage="Select Year Level" />
                     </h3>
                   </div>
@@ -206,27 +219,26 @@ export const StoryStarters = () => {
                   className="flex flex-col items-center gap-12"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
+                    <h3 className="text-3xl md:text-6xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
                       <FormattedMessage id="storystarters.title" />
                     </h3>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
+            {hasSelectedYear && (
+              <div className="relative z-30 mt-auto md:mt-8">
+                <button
+                  onClick={generatePrompt}
+                  disabled={isGenerating}
+                  className="group flex items-center gap-4 md:gap-8 h-16 md:h-24 px-8 md:px-12 bg-orange-600 text-white rounded-[2rem] md:rounded-[3rem] font-black text-lg md:text-2xl  hover:bg-slate-900 transition-all tracking-tighter italic uppercase border-4 md:border-8 border-white active:scale-95 disabled:opacity-50"
+                >
+                  {isGenerating && <RefreshCcw size={32} strokeWidth={3} className="animate-spin" />}
+                  {isGenerating ? <FormattedMessage id="storystarters.generating" /> : <FormattedMessage id="storystarters.generate" />}
+                </button>
+              </div>
+            )}
           </div>
-
-          {hasSelectedYear && (
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30">
-              <button
-                onClick={generatePrompt}
-                disabled={isGenerating}
-                className="group flex items-center gap-4 md:gap-8 h-16 md:h-24 px-8 md:px-12 bg-orange-600 text-white rounded-[2rem] md:rounded-[3rem] font-black text-xl md:text-2xl  hover:bg-slate-900 transition-all tracking-tighter italic uppercase border-4 md:border-8 border-white active:scale-95 disabled:opacity-50"
-              >
-                {isGenerating ? <RefreshCcw size={32} strokeWidth={3} className="animate-spin" /> : <Sparkles size={32} fill="currentColor" />}
-                {isGenerating ? <FormattedMessage id="storystarters.generating" /> : <FormattedMessage id="storystarters.generate" />}
-              </button>
-            </div>
-          )}
         </div>
       </ToolPanel>
 
@@ -264,6 +276,62 @@ export const StoryStarters = () => {
           </div>
         </SettingsPanel>
 
+      {isMobile ? (
+        <AnimatePresence mode="wait">
+          {history.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="w-full bg-white rounded-[3rem] border-4 border-white p-8 space-y-6 relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <History size={20} strokeWidth={3} />
+                  </div>
+                  <h4 className="text-sm font-black text-slate-900 uppercase tracking-tighter italic">
+                    <FormattedMessage id="storystarters.history.title" />
+                  </h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { setHistoryIndex(prev => Math.min(history.length - 1, prev + 1)); audioEngine.playTick(settings.soundTheme); }}
+                    disabled={historyIndex >= history.length - 1}
+                    className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 disabled:opacity-30 active:scale-90 transition-all"
+                  >
+                    <ChevronLeft size={24} strokeWidth={3} />
+                  </button>
+                  <span className="text-[10px] font-black text-slate-400 tabular-nums">
+                    {historyIndex + 1} / {history.length}
+                  </span>
+                  <button
+                    onClick={() => { setHistoryIndex(prev => Math.max(0, prev - 1)); audioEngine.playTick(settings.soundTheme); }}
+                    disabled={historyIndex <= 0}
+                    className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 disabled:opacity-30 active:scale-90 transition-all"
+                  >
+                    <ChevronRight size={24} strokeWidth={3} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative p-6 bg-slate-50 rounded-[2rem] border-4 border-white min-h-[120px] flex items-center justify-center text-center">
+                 <AnimatePresence mode="wait">
+                   <motion.p 
+                     key={historyIndex}
+                     initial={{ opacity: 0, scale: 0.9 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 1.1 }}
+                     className="text-lg font-black text-slate-800 italic leading-tight"
+                   >
+                     "{history[historyIndex]}"
+                   </motion.p>
+                 </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
         <HistoryPanel
           title={intl.formatMessage({ id: 'storystarters.history.title' })}
           items={history}
@@ -290,6 +358,7 @@ export const StoryStarters = () => {
             </motion.div>
           )}
         />
+      )}
       </div>
     </div>
   );

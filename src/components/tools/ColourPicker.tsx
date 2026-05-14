@@ -122,6 +122,14 @@ export const ColourPicker = () => {
   const [copiedType, setCopiedType] = useState<'hex' | 'rgb' | 'name' | null>(null);
   const animationRef = useRef<number | null>(null);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const selectColor = useCallback((color: typeof HTML_COLORS[0]) => {
     setSelectedColor(color);
     audioEngine.playTick(settings.soundTheme);
@@ -180,21 +188,26 @@ export const ColourPicker = () => {
   const contrastColor = getContrastColor(selectedColor.hex);
 
   return (
-    <ToolPanel baseWidth={1200} baseHeight={800} className="italic">
-      <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden p-12">
+    <ToolPanel 
+      baseWidth={isMobile ? 400 : 1200} 
+      baseHeight={isMobile ? 750 : 800} 
+      fluid={isMobile}
+      className="italic"
+    >
+      <div className={`w-full h-full flex flex-col items-center justify-center relative overflow-hidden ${isMobile ? 'p-3' : 'p-12'}`}>
         <div className="tool-grid-bg opacity-30 pointer-events-none" />
 
-        <div className="w-full max-w-5xl flex flex-col items-center gap-8 relative z-10">
+        <div className={`w-full max-w-5xl flex flex-col items-center ${isMobile ? 'gap-4' : 'gap-8'} relative z-10`}>
           {/* Top: Grid of Colors */}
-          <div className="w-full bg-white/50 backdrop-blur-md p-8 rounded-[3rem] border-4 border-white ">
-            <div className="grid grid-cols-10 gap-3 w-full">
+          <div className={`w-full bg-white/50 backdrop-blur-md ${isMobile ? 'p-1' : 'p-8'} rounded-[1.5rem] md:rounded-[3rem] border-2 md:border-4 border-white `}>
+            <div className={`grid grid-cols-10 ${isMobile ? 'gap-1' : 'gap-3'} w-full`}>
               {colors.map((color, index) => (
                 <motion.button
                   key={`${color.name}-${index}`}
                   whileHover={{ scale: 1.2, zIndex: 10 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => selectColor(color)}
-                  className={`aspect-square rounded-xl border-4 transition-all ${
+                  className={`aspect-square rounded-lg md:rounded-xl border-2 md:border-4 transition-all ${
                     selectedColor.hex === color.hex ? 'border-indigo-600 scale-125 z-20 ' : 
                     highlightedIndex === index ? 'border-indigo-400 scale-125 z-20  animate-pulse' : 'border-white '
                   }`}
@@ -205,83 +218,122 @@ export const ColourPicker = () => {
           </div>
 
           {/* Bottom: Controls and Values */}
-          <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
+          <div className={`w-full grid grid-cols-1 lg:grid-cols-4 ${isMobile ? 'gap-2' : 'gap-6'} items-stretch`}>
             {/* Pick Random Button */}
             <button
               onClick={startPicking}
               disabled={isPicking}
-              className="group relative flex flex-col items-center justify-center gap-2 py-8 bg-indigo-600 text-white rounded-[2.5rem] font-black hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 border-8 border-white italic overflow-hidden"
+              className={`group relative flex ${isMobile ? 'flex-row' : 'flex-col'} items-center justify-center ${isMobile ? 'gap-4 py-3' : 'gap-2 py-8'} bg-indigo-600 text-white rounded-[1.5rem] md:rounded-[2.5rem] font-black hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 border-4 md:border-8 border-white italic overflow-hidden`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-              <RefreshCw size={32} className={isPicking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
-              <span className="text-xl uppercase tracking-widest">
+              <RefreshCw size={isMobile ? 24 : 32} className={isPicking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
+              <span className={`${isMobile ? 'text-lg' : 'text-xl'} uppercase tracking-widest`}>
                 <FormattedMessage id={isPicking ? "colourpicker.generating" : "colourpicker.generate"} />
               </span>
             </button>
 
             {/* Name Display */}
             <div 
-              className="rounded-[2.5rem] p-8 border-8 border-white flex flex-col items-center justify-center gap-2 transition-colors duration-500 relative overflow-hidden"
+              className={`rounded-[1.5rem] md:rounded-[2.5rem] ${isMobile ? 'p-2 border-4' : 'p-8 border-8'} border-white flex ${isMobile ? 'flex-row' : 'flex-col'} items-center justify-center ${isMobile ? 'gap-4' : 'gap-2'} transition-colors duration-500 relative overflow-hidden`}
               style={{ backgroundColor: selectedColor.hex }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-              <div className="w-full flex items-center justify-between gap-2 relative z-10 px-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: contrastColor, opacity: 0.6 }}>
-                  NAME
-                </span>
+              <div className={`flex items-center ${isMobile ? 'gap-4' : 'flex-col gap-1'} relative z-10 w-full px-2`}>
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: contrastColor, opacity: 0.6 }}>
+                    NAME
+                  </span>
+                  {!isMobile && (
+                    <button 
+                      onClick={() => copyToClipboard(selectedColor.name, 'name')}
+                      className="p-2 bg-white/20 hover:bg-white/40 rounded-lg transition-all active:scale-90"
+                      style={{ color: contrastColor }}
+                    >
+                      {copiedType === 'name' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    </button>
+                  )}
+                </div>
+                <span className={`font-black truncate w-full ${isMobile ? 'text-xl text-left' : 'text-2xl text-center'}`} style={{ color: contrastColor }}>{selectedColor.name}</span>
+              </div>
+              {isMobile && (
                 <button 
                   onClick={() => copyToClipboard(selectedColor.name, 'name')}
-                  className="p-2 bg-white/20 hover:bg-white/40 rounded-lg transition-all active:scale-90"
+                  className="p-3 bg-white/20 hover:bg-white/40 rounded-xl transition-all active:scale-90 relative z-20"
                   style={{ color: contrastColor }}
                 >
-                  {copiedType === 'name' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  {copiedType === 'name' ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
                 </button>
-              </div>
-              <span className="text-2xl font-black truncate w-full text-center" style={{ color: contrastColor }}>{selectedColor.name}</span>
+              )}
             </div>
 
             {/* HEX Display */}
             <div 
-              className="rounded-[2.5rem] p-8 border-8 border-white flex flex-col items-center justify-center gap-2 transition-colors duration-500 relative overflow-hidden"
+              className={`rounded-[1.5rem] md:rounded-[2.5rem] ${isMobile ? 'p-2 border-4' : 'p-8 border-8'} border-white flex ${isMobile ? 'flex-row' : 'flex-col'} items-center justify-center ${isMobile ? 'gap-4' : 'gap-2'} transition-colors duration-500 relative overflow-hidden`}
               style={{ backgroundColor: selectedColor.hex }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-              <div className="w-full flex items-center justify-between gap-2 relative z-10 px-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: contrastColor, opacity: 0.6 }}>
-                  HEX
-                </span>
+              <div className={`flex items-center ${isMobile ? 'gap-4' : 'flex-col gap-1'} relative z-10 w-full px-2`}>
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: contrastColor, opacity: 0.6 }}>
+                    HEX
+                  </span>
+                  {!isMobile && (
+                    <button 
+                      onClick={() => copyToClipboard(selectedColor.hex, 'hex')}
+                      className="p-2 bg-white/20 hover:bg-white/40 rounded-lg transition-all active:scale-90"
+                      style={{ color: contrastColor }}
+                    >
+                      {copiedType === 'hex' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    </button>
+                  )}
+                </div>
+                <span className={`font-black tabular-nums w-full ${isMobile ? 'text-xl text-left' : 'text-2xl text-center'}`} style={{ color: contrastColor }}>{selectedColor.hex}</span>
+              </div>
+              {isMobile && (
                 <button 
                   onClick={() => copyToClipboard(selectedColor.hex, 'hex')}
-                  className="p-2 bg-white/20 hover:bg-white/40 rounded-lg transition-all active:scale-90"
+                  className="p-3 bg-white/20 hover:bg-white/40 rounded-xl transition-all active:scale-90 relative z-20"
                   style={{ color: contrastColor }}
                 >
-                  {copiedType === 'hex' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  {copiedType === 'hex' ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
                 </button>
-              </div>
-              <span className="text-2xl font-black tabular-nums w-full text-center" style={{ color: contrastColor }}>{selectedColor.hex}</span>
+              )}
             </div>
 
             {/* RGB Display */}
             <div 
-              className="rounded-[2.5rem] p-8 border-8 border-white flex flex-col items-center justify-center gap-2 transition-colors duration-500 relative overflow-hidden"
+              className={`rounded-[1.5rem] md:rounded-[2.5rem] ${isMobile ? 'p-2 border-4' : 'p-8 border-8'} border-white flex ${isMobile ? 'flex-row' : 'flex-col'} items-center justify-center ${isMobile ? 'gap-4' : 'gap-2'} transition-colors duration-500 relative overflow-hidden`}
               style={{ backgroundColor: selectedColor.hex }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-              <div className="w-full flex items-center justify-between gap-2 relative z-10 px-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: contrastColor, opacity: 0.6 }}>
-                  RGB
+              <div className={`flex items-center ${isMobile ? 'gap-4' : 'flex-col gap-1'} relative z-10 w-full px-2`}>
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: contrastColor, opacity: 0.6 }}>
+                    RGB
+                  </span>
+                  {!isMobile && (
+                    <button 
+                      onClick={() => copyToClipboard(rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : '', 'rgb')}
+                      className="p-2 bg-white/20 hover:bg-white/40 rounded-lg transition-all active:scale-90"
+                      style={{ color: contrastColor }}
+                    >
+                      {copiedType === 'rgb' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    </button>
+                  )}
+                </div>
+                <span className={`font-black tabular-nums w-full ${isMobile ? 'text-xl text-left' : 'text-2xl text-center'}`} style={{ color: contrastColor }}>
+                  {rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : '---'}
                 </span>
+              </div>
+              {isMobile && (
                 <button 
                   onClick={() => copyToClipboard(rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : '', 'rgb')}
-                  className="p-2 bg-white/20 hover:bg-white/40 rounded-lg transition-all active:scale-90"
+                  className="p-3 bg-white/20 hover:bg-white/40 rounded-xl transition-all active:scale-90 relative z-20"
                   style={{ color: contrastColor }}
                 >
-                  {copiedType === 'rgb' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  {copiedType === 'rgb' ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
                 </button>
-              </div>
-              <span className="text-2xl font-black tabular-nums w-full text-center" style={{ color: contrastColor }}>
-                {rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : '---'}
-              </span>
+              )}
             </div>
           </div>
         </div>

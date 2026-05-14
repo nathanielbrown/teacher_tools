@@ -742,5 +742,6 @@
   "numberSpinner.analytics.title": "Statistics",
   "numberSpinner.history.title": "History",
   "numberSpinner.history.empty": "No spins yet",
-  "classpanel.link.manage_short": "Add/Remove Classes"
+  "classpanel.link.manage_short": "Add/Remove Classes",
+  "shared.button.play": "Play Game"
 }

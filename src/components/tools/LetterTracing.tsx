@@ -19,9 +19,9 @@ import { useIntl, FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
 
 // 1. Constants
-const CANVAS_SIZE = 500;
-const FONT_SIZE = 400;
-const BRUSH_SIZE = 24;
+const CANVAS_SIZE = 800;
+const FONT_SIZE = 700;
+const BRUSH_SIZE = 40;
 const CHAR_SETS = {
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   lower: 'abcdefghijklmnopqrstuvwxyz',
@@ -89,6 +89,13 @@ export const LetterTracing = () => {
   const [score, setScore] = useState<{ accuracy: number; msg: string } | null>(null);
   const [mastery, setMastery] = useLocalStorage<Record<string, number>>('letter_tracing_mastery', {});
   const [isFontLoaded, setIsFontLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const baseCanvasRef = useRef<HTMLCanvasElement>(null);
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -249,7 +256,7 @@ export const LetterTracing = () => {
     renderPathToContext(ctx, userPath.current, BRUSH_SIZE);
     const userStandardData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
 
-    renderPathToContext(ctx, userPath.current, 60); 
+    renderPathToContext(ctx, userPath.current, 100); 
     const userDilatedData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
 
     let userPixelsTotal = 0;
@@ -289,7 +296,7 @@ export const LetterTracing = () => {
     audioEngine.playTick(settings.soundTheme);
     setScore({ accuracy: finalAccuracy, msg: intl.formatMessage({ id: msgId }) });
     setMastery((prev: any) => ({ ...prev, [currentLetter]: Math.max(prev[currentLetter] || 0, finalAccuracy) }));
-  }, [currentLetter, settings.soundTheme, intl]);
+  }, [currentLetter, settings.soundTheme, intl, setMastery]);
 
   const nextLetter = () => {
     const set = CHAR_SETS[charSet];
@@ -317,9 +324,9 @@ export const LetterTracing = () => {
   }, [clearHeader, setOnReset, clearDrawing, setHelpContent]);
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full overflow-hidden">
-      <div className="flex-[7] min-h-0">
-        <ToolPanel baseWidth={1000} baseHeight={700}>
+    <div className={`flex flex-col lg:flex-row gap-4 h-full w-full overflow-hidden transition-all duration-500 ease-in-out ${isMobile ? '-mx-2 w-[calc(100%+1rem)]' : ''}`}>
+      <div className="flex-[5] lg:flex-[3] min-h-0 h-full">
+        <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1200 : 700}>
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
@@ -337,7 +344,7 @@ export const LetterTracing = () => {
              </div>
           </div>
 
-          <div className="relative w-[420px] h-[420px] rounded-[4rem] border-[16px] border-white bg-white group">
+          <div className="relative w-[360px] h-[360px] lg:w-[600px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] border-[12px] lg:border-[16px] border-white bg-white group shadow-xl">
             <canvas ref={baseCanvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="absolute top-0 left-0 w-full h-full rounded-[4rem] pointer-events-none" />
             <canvas
               ref={drawCanvasRef}
@@ -352,11 +359,13 @@ export const LetterTracing = () => {
             />
             <canvas ref={hiddenCanvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="hidden" />
             
-            <button onClick={prevLetter} className="absolute -left-20 top-1/2 -translate-y-1/2 p-4 bg-white border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-indigo-600 hover:border-indigo-50 transition-all active:scale-90">
-              <ChevronLeft size={32} strokeWidth={3} />
+            <button onClick={prevLetter} className="absolute -left-14 lg:-left-20 top-1/2 -translate-y-1/2 p-3 lg:p-4 bg-white border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-indigo-600 hover:border-indigo-50 transition-all active:scale-90">
+              <ChevronLeft size={24} className="lg:hidden" strokeWidth={3} />
+              <ChevronLeft size={32} className="hidden lg:block" strokeWidth={3} />
             </button>
-            <button onClick={nextLetter} className="absolute -right-20 top-1/2 -translate-y-1/2 p-4 bg-white border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-indigo-600 hover:border-indigo-50 transition-all active:scale-90">
-              <ChevronRight size={32} strokeWidth={3} />
+            <button onClick={nextLetter} className="absolute -right-14 lg:-right-20 top-1/2 -translate-y-1/2 p-3 lg:p-4 bg-white border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-indigo-600 hover:border-indigo-50 transition-all active:scale-90">
+              <ChevronRight size={24} className="lg:hidden" strokeWidth={3} />
+              <ChevronRight size={32} className="hidden lg:block" strokeWidth={3} />
             </button>
 
             <AnimatePresence>
@@ -382,7 +391,7 @@ export const LetterTracing = () => {
             </AnimatePresence>
           </div>
 
-          <div className="absolute bottom-10 right-12 flex flex-col gap-4">
+          <div className="absolute bottom-6 lg:bottom-10 right-8 lg:right-12 flex flex-col gap-3 lg:gap-4">
             <button
               onClick={checkScore}
               className="flex items-center gap-2 px-10 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all "
@@ -400,29 +409,32 @@ export const LetterTracing = () => {
         </ToolPanel>
       </div>
 
-      <div className="flex-[3] min-h-0 flex gap-8">
-        <div className="flex-1 bg-white p-3 rounded-[2rem] border-4 border-slate-50 flex flex-col gap-2 relative overflow-hidden">
-          <div className="flex items-center gap-2 border-b-4 border-slate-50 pb-2">
-             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Award size={20} strokeWidth={3} />
+      <div className="flex-[5] lg:w-96 min-h-0 flex flex-col gap-4 lg:gap-8">
+        <div className="flex-1 bg-white p-4 lg:p-6 rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 flex flex-col gap-4 relative overflow-hidden">
+          <div className="flex items-center justify-between border-b-4 border-slate-50 pb-4">
+             <div className="flex items-center gap-3">
+               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                  <Award size={20} strokeWidth={3} />
+               </div>
+               <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">
+                 <FormattedMessage id="lettertracing.label.mastery" />
+               </h4>
              </div>
-             <h4 className="font-black text-slate-900 uppercase tracking-widest text-[10px]">
-               <FormattedMessage id="lettertracing.label.mastery" />
-             </h4>
           </div>
+
           <div className="flex-1 overflow-y-auto no-scrollbar">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4 lg:gap-6">
               {[
-                { label: 'ABC', set: CHAR_SETS.upper, rows: 2 },
-                { label: 'abc', set: CHAR_SETS.lower, rows: 2 },
-                { label: '123', set: CHAR_SETS.numbers, rows: 1 }
+                { label: 'ABC', set: CHAR_SETS.upper, id: 0 },
+                { label: 'abc', set: CHAR_SETS.lower, id: 1 },
+                { label: '123', set: CHAR_SETS.numbers, id: 2 }
               ].map((group) => (
-                <div key={group.label} className="flex gap-4 items-center">
-                  <div className="w-10 shrink-0 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{group.label}</span>
-                    <div className="w-full h-px bg-slate-50" />
+                <div key={group.label} className="flex flex-col lg:flex-row gap-2 lg:gap-4 items-start lg:items-center">
+                  <div className="w-12 shrink-0 flex flex-row lg:flex-col items-center gap-2 lg:gap-1">
+                    <span className="text-[10px] font-black text-slate-300 tracking-widest">{group.label}</span>
+                    <div className="flex-1 lg:w-full h-px bg-slate-100" />
                   </div>
-                  <div className="flex flex-wrap gap-1.5 flex-1">
+                  <div className="grid grid-cols-13 md:grid-cols-10 gap-1 md:gap-2 flex-1 w-full">
                     {group.set.split('').map(char => {
                       const charScore = mastery[char] || 0;
                       return (
@@ -432,9 +444,10 @@ export const LetterTracing = () => {
                             const setKey = group.label === 'ABC' ? 'upper' : group.label === 'abc' ? 'lower' : 'numbers';
                             setCharSet(setKey as any);
                             setCurrentLetter(char);
+                            audioEngine.playTick(settings.soundTheme);
                           }}
-                          className={`w-9 h-9 rounded-lg font-black text-base transition-all border-2 flex items-center justify-center relative overflow-hidden ${
-                            currentLetter === char ? 'border-indigo-600 bg-white text-indigo-600' : 'border-slate-50 bg-slate-50 text-slate-300 hover:border-indigo-100'
+                          className={`w-full aspect-square rounded-xl lg:rounded-lg font-black text-xs md:text-sm transition-all border-2 flex items-center justify-center relative overflow-hidden ${
+                            currentLetter === char ? 'border-indigo-600 bg-white text-indigo-600 scale-110 z-10 shadow-md' : 'border-slate-50 bg-slate-50 text-slate-300 hover:border-indigo-100'
                           }`}
                         >
                           <div 

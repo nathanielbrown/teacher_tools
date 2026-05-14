@@ -1,7 +1,7 @@
 {
   "name": "teacher-tools",
   "private": true,
-  "version": "1018",
+  "version": "1026",
   "type": "module",
   "homepage": "https://beta.classrex.com",
   "scripts": {
@@ -26,6 +26,7 @@
     "clsx": "^2.1.1",
     "expr-eval": "^2.0.2",
     "framer-motion": "^12.38.0",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^1.8.0",
     "matter-js": "^0.20.0",
     "midi-writer-js": "^3.2.1",

@@ -137,6 +137,29 @@ export const ImageReveal = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const revealTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [flashAdd, setFlashAdd] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const triggerFlash = useCallback(() => {
+    setFlashAdd(true);
+    audioEngine.playTick(settings.soundTheme);
+    setTimeout(() => setFlashAdd(false), 2000);
+  }, [settings.soundTheme]);
+
+  const handleEmptyClick = () => {
+    if (images.length === 0) {
+      setIsConfigOpen(true);
+      triggerFlash();
+    }
+  };
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const newImages = files.map(file => URL.createObjectURL(file));
@@ -156,7 +179,7 @@ export const ImageReveal = () => {
 
   useEffect(() => {
     setHasConfig(true);
-    setIsConfigOpen(true);
+    setIsConfigOpen(!isMobile);
     setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
     setOnReset(() => resetReveal);
     setHelpContent(<HelpContent />);
@@ -164,28 +187,46 @@ export const ImageReveal = () => {
       clearHeader();
       setOnConfigToggle(null);
     };
-  }, [clearHeader, setOnReset, resetReveal, setHelpContent, setHasConfig, setIsConfigOpen, setOnConfigToggle]);
+  }, [clearHeader, setOnReset, resetReveal, setHelpContent, setHasConfig, setIsConfigOpen, setOnConfigToggle, isMobile]);
 
   useEffect(() => {
+    const handleModeChange = (newMode: 'reveal' | 'lightsOut') => {
+      setMode(newMode);
+      resetReveal();
+    };
+
     setHeaderActions(
       <div className="flex items-center gap-2 italic">
-        <div className="bg-white p-1 rounded-xl flex items-center gap-1 border-2 border-slate-50 ">
-          <button
-            onClick={() => { setMode('reveal'); resetReveal(); }}
-            className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'reveal' ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-slate-500'}`}
-          >
-            <FormattedMessage id="imagereveal.mode.reveal" defaultMessage="Reveal" />
-          </button>
-          <button
-            onClick={() => { setMode('lightsOut'); resetReveal(); }}
-            className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'lightsOut' ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-slate-500'}`}
-          >
-            <FormattedMessage id="imagereveal.mode.flashlight" defaultMessage="Flashlight" />
-          </button>
-        </div>
+        {isMobile ? (
+          <div className="bg-white px-3 py-1.5 rounded-xl border-2 border-slate-50 shadow-sm flex items-center gap-2">
+            <select
+              value={mode}
+              onChange={(e) => handleModeChange(e.target.value as any)}
+              className="bg-transparent text-[10px] font-black uppercase tracking-widest text-indigo-600 outline-none cursor-pointer pr-4"
+            >
+              <option value="reveal">{intl.formatMessage({ id: 'imagereveal.mode.reveal', defaultMessage: 'Reveal' })}</option>
+              <option value="lightsOut">{intl.formatMessage({ id: 'imagereveal.mode.flashlight', defaultMessage: 'Flashlight' })}</option>
+            </select>
+          </div>
+        ) : (
+          <div className="bg-white p-1 rounded-xl flex items-center gap-1 border-2 border-slate-50 shadow-sm">
+            <button
+              onClick={() => handleModeChange('reveal')}
+              className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'reveal' ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-slate-500'}`}
+            >
+              <FormattedMessage id="imagereveal.mode.reveal" defaultMessage="Reveal" />
+            </button>
+            <button
+              onClick={() => handleModeChange('lightsOut')}
+              className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'lightsOut' ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-slate-500'}`}
+            >
+              <FormattedMessage id="imagereveal.mode.flashlight" defaultMessage="Flashlight" />
+            </button>
+          </div>
+        )}
       </div>
     );
-  }, [mode, resetReveal, setHeaderActions]);
+  }, [mode, resetReveal, setHeaderActions, isMobile, intl]);
 
   useEffect(() => {
     if (isRevealing && mode === 'reveal') {
@@ -236,11 +277,21 @@ export const ImageReveal = () => {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (mode !== 'lightsOut' || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    let clientX, clientY;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
     setMousePos({ x, y });
   };
 
@@ -259,28 +310,29 @@ export const ImageReveal = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+            className="fixed inset-0 z-[100] p-4 bg-slate-100/60 backdrop-blur-xl lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none lg:w-[260px] lg:h-full flex flex-col gap-8 italic overflow-hidden shrink-0"
           >
             <SettingsPanel
               isOpen={isConfigOpen}
               onClose={() => setIsConfigOpen(false)}
-              className="shrink-0 lg:h-fit"
+              className="shrink-0 lg:h-full"
               compact
               title={intl.formatMessage({ id: 'imagereveal.config.title', defaultMessage: 'Settings' })}
             >
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
+              <div className="space-y-5">
+                {/* Reveal Effect Selection */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 ml-2">
                     <FormattedMessage id="imagereveal.config.effect" defaultMessage="Reveal Effect" />
                   </label>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-2">
                     {REVEAL_EFFECTS.map(effect => (
                       <button
                         key={effect.id}
-                        onClick={() => { setRevealEffect(effect.id); resetReveal(); }}
-                        className={`p-4 rounded-2xl border-4 transition-all text-left flex items-center gap-6 ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                        onClick={() => { setRevealEffect(effect.id); resetReveal(); if (isMobile) setIsConfigOpen(false); }}
+                        className={`p-3 rounded-2xl border-4 transition-all text-left flex items-center gap-4 ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'}`}
                       >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${revealEffect === effect.id ? 'bg-white/10 text-white' : 'bg-white text-slate-200'}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${revealEffect === effect.id ? 'bg-white/10 text-white' : 'bg-slate-50 text-slate-300'}`}>
                           <effect.icon size={20} />
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest">
@@ -291,11 +343,12 @@ export const ImageReveal = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
+                {/* Reveal Speed Selection */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 ml-2">
                     <FormattedMessage id="imagereveal.config.speed" defaultMessage="Reveal Speed" />
                   </label>
-                  <div className="space-y-3 p-4 bg-slate-50 rounded-2xl border-4 border-white">
+                  <div className="space-y-2 p-3 bg-white rounded-2xl border-4 border-slate-50">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Speed</span>
                       <span className="text-xl font-black text-indigo-600 tabular-nums italic leading-none">{revealSpeed}x</span>
@@ -303,33 +356,38 @@ export const ImageReveal = () => {
                     <input 
                       type="range" min="0.5" max="3" step="0.5" value={revealSpeed}
                       onChange={(e) => setRevealSpeed(parseFloat(e.target.value))}
-                      className="w-full h-2 bg-white rounded-full appearance-none cursor-pointer accent-indigo-600"
+                      className="w-full h-2 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-2">
+                {/* Manage Images */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 ml-2">
                     <FormattedMessage id="imagereveal.config.images" defaultMessage="Manage Images" />
                   </label>
                   
-                  <div className="grid grid-cols-1 gap-3">
-                    <label className="flex items-center gap-4 p-4 rounded-2xl border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50 transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group">
+                  <div className="grid grid-cols-1 gap-2">
+                    <motion.label 
+                      animate={flashAdd ? { scale: [1, 1.1, 1], backgroundColor: ['#f8fafc', '#e0e7ff', '#f8fafc'], borderColor: ['#f1f5f9', '#6366f1', '#f1f5f9'] } : {}}
+                      transition={{ duration: 0.5, repeat: flashAdd ? 3 : 0 }}
+                      className="flex items-center gap-3 p-3 rounded-2xl border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50 transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group"
+                    >
                       <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50">
+                      <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50 group-hover:border-indigo-200">
                         <Upload size={20} strokeWidth={3} />
                       </div>
                       <span className="text-[10px] font-black uppercase tracking-widest">
                         <FormattedMessage id="imagereveal.action.add" defaultMessage="Add New Image" />
                       </span>
-                    </label>
+                    </motion.label>
 
                     <AnimatePresence mode="popLayout">
                       {images.map((img, idx) => (
                         <motion.div 
                           layout
                           key={img}
-                          onClick={() => { setCurrentIndex(idx); resetReveal(); }}
+                          onClick={() => { setCurrentIndex(idx); resetReveal(); if (isMobile) setIsConfigOpen(false); }}
                           className={`relative flex items-center gap-4 p-3 rounded-2xl border-4 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-indigo-50' : 'border-slate-50 bg-white hover:border-indigo-100'}`}
                         >
                           <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border-2 border-white">
@@ -355,12 +413,20 @@ export const ImageReveal = () => {
         )}
       </AnimatePresence>
 
-      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={1100} baseHeight={800}>
-        <div className="w-full h-full flex flex-col gap-6 relative z-10 overflow-hidden">
-          <div className="flex-1 relative bg-white rounded-[3rem] border-4 border-slate-50  overflow-hidden flex flex-col">
+      <ToolPanel 
+        className="flex-1 font-['Outfit'] select-none" 
+        baseWidth={isMobile ? 800 : 1000} 
+        baseHeight={isMobile ? 1000 : 800}
+        fluid={false}
+      >
+        <div className="w-full h-full flex flex-col gap-4 lg:gap-6 relative z-10 overflow-hidden">
+          {/* Main Display Area */}
+          <div className="flex-1 relative bg-white rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 overflow-hidden flex flex-col shadow-sm">
             <div 
               ref={containerRef}
               onMouseMove={handleMouseMove}
+              onTouchMove={handleMouseMove}
+              onClick={handleEmptyClick}
               className="flex-1 relative cursor-crosshair group overflow-hidden"
             >
               {images.length > 0 ? (
@@ -369,7 +435,7 @@ export const ImageReveal = () => {
                     layoutId="active-img"
                     src={images[currentIndex]} 
                     alt="Mystery" 
-                    className="w-full h-full object-contain select-none p-12 cursor-pointer"
+                    className="w-full h-full object-contain select-none p-6 lg:p-12 cursor-pointer"
                     onClick={() => { if (mode === 'reveal') toggleReveal(); }}
                   />
                   
@@ -381,7 +447,7 @@ export const ImageReveal = () => {
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-10 pointer-events-none"
                         style={{
-                          background: `radial-gradient(circle 220px at ${mousePos.x}% ${mousePos.y}%, transparent 0%, rgba(15, 23, 42, 0.99) 100%)`
+                          background: `radial-gradient(circle ${isMobile ? '160px' : '220px'} at ${mousePos.x}% ${mousePos.y}%, transparent 0%, rgba(15, 23, 42, 0.99) 100%)`
                         }}
                       />
                     ) : (
@@ -417,49 +483,96 @@ export const ImageReveal = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
+
+                  {/* Desktop Only Navigation Arrows */}
+                  {!isMobile && images.length > 1 && (
+                    <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-10 pointer-events-none z-30">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setCurrentIndex(prev => (prev - 1 + images.length) % images.length); resetReveal(); }}
+                        className="p-4 bg-white/80 backdrop-blur-md rounded-2xl text-slate-900 hover:bg-indigo-600 hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white shadow-lg"
+                      >
+                        <ChevronLeft size={32} strokeWidth={3} />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setCurrentIndex(prev => (prev + 1) % images.length); resetReveal(); }}
+                        className="p-4 bg-white/80 backdrop-blur-md rounded-2xl text-slate-900 hover:bg-indigo-600 hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white shadow-lg"
+                      >
+                        <ChevronRight size={32} strokeWidth={3} />
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-200 gap-8">
-                  <div className="w-40 h-40 bg-white rounded-[2.5rem]  border-4 border-slate-50 flex items-center justify-center rotate-6">
+                  <div className="w-40 h-40 bg-white rounded-[2.5rem] border-4 border-slate-50 flex items-center justify-center rotate-6 shadow-sm">
                     <ImageIcon size={80} strokeWidth={1} className="text-slate-100" />
                   </div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Add images to start</span>
                 </div>
               )}
 
-              {images.length > 1 && (
-                <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-10 pointer-events-none z-30">
-                  <button 
-                    onClick={() => { setCurrentIndex(prev => (prev - 1 + images.length) % images.length); resetReveal(); }}
-                    className="p-4 bg-white/80 backdrop-blur-md  rounded-2xl text-slate-900 hover:bg-indigo-600 hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white"
-                  >
-                    <ChevronLeft size={32} strokeWidth={3} />
-                  </button>
-                  <button 
-                    onClick={() => { setCurrentIndex(prev => (prev + 1) % images.length); resetReveal(); }}
-                    className="p-4 bg-white/80 backdrop-blur-md  rounded-2xl text-slate-900 hover:bg-indigo-600 hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white"
-                  >
-                    <ChevronRight size={32} strokeWidth={3} />
-                  </button>
+              {/* Progress Bar Container */}
+              {mode === 'reveal' && images.length > 0 && (
+                <div className="absolute bottom-0 left-0 right-0 h-3 bg-slate-50 overflow-hidden z-20">
+                  <motion.div 
+                    className="h-full bg-indigo-600"
+                    animate={{ width: `${progress}%` }}
+                    transition={{ ease: "linear", duration: 0.1 }}
+                  />
                 </div>
               )}
             </div>
-
-            {mode === 'reveal' && images.length > 0 && (
-              <div className="h-4 bg-slate-50 overflow-hidden shrink-0 border-t-4 border-slate-50">
-                <motion.div 
-                  className="h-full bg-indigo-600"
-                  animate={{ width: `${progress}%` }}
-                  transition={{ ease: "linear", duration: 0.1 }}
-                />
-              </div>
-            )}
           </div>
 
+          {/* Bottom Control Bar */}
+          <div className="flex items-center gap-4 px-2 lg:px-0">
+            {images.length > 1 && isMobile && (
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => { setCurrentIndex(prev => (prev - 1 + images.length) % images.length); resetReveal(); }}
+                  className="w-16 h-16 lg:w-20 lg:h-20 bg-white border-4 border-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all active:scale-95"
+                >
+                  <ChevronLeft size={32} strokeWidth={3} />
+                </button>
+                <button 
+                  onClick={() => { setCurrentIndex(prev => (prev + 1) % images.length); resetReveal(); }}
+                  className="w-16 h-16 lg:w-20 lg:h-20 bg-white border-4 border-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all active:scale-95"
+                >
+                  <ChevronRight size={32} strokeWidth={3} />
+                </button>
+              </div>
+            )}
+
+            <div className="flex-1 flex gap-4">
+              <button
+                onClick={toggleReveal}
+                disabled={images.length === 0 || mode !== 'reveal'}
+                className={`flex-1 h-16 lg:h-24 rounded-[2rem] flex items-center justify-center gap-4 text-lg lg:text-2xl font-black uppercase tracking-widest transition-all active:scale-[0.98] ${
+                  isRevealing 
+                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' 
+                    : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                } disabled:opacity-30 disabled:shadow-none`}
+              >
+                {isRevealing ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" />}
+                <span className="hidden sm:inline">
+                  {isRevealing ? <FormattedMessage id="imagereveal.action.pause" defaultMessage="Pause" /> : <FormattedMessage id="imagereveal.action.play" defaultMessage="Play" />}
+                </span>
+              </button>
+
+              <button
+                onClick={resetReveal}
+                disabled={images.length === 0 || (progress === 0 && !isRevealing)}
+                className="w-16 h-16 lg:w-24 lg:h-24 bg-white border-4 border-slate-50 rounded-[2rem] flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-100 transition-all active:scale-95 disabled:opacity-30"
+              >
+                <RotateCcw size={isMobile ? 28 : 36} strokeWidth={3} />
+              </button>
+            </div>
+          </div>
         </div>
       </ToolPanel>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[120px] opacity-30 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-rose-50 rounded-full blur-[120px] opacity-30 -z-10 pointer-events-none" />
     </div>
   );
 };

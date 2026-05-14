@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -6,7 +6,8 @@ import {
   Sparkles, 
   Volume2,
   Trophy,
-  Grid3X3
+  Grid3X3,
+  Play
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { audioEngine } from '../../utils/audio';
@@ -208,7 +209,16 @@ export const Crossword = () => {
   const [puzzle, setPuzzle] = useState<any>(null);
   const [userGrid, setUserGrid] = useState<string[][]>([]);
   const [selectedCell, setSelectedCell] = useState<{ r: number, c: number } | null>(null);
+  const [direction, setDirection] = useState<'across' | 'down'>('across');
   const [isPanelVisible, setIsPanelVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const startPuzzle = () => {
     const list = lists.find(l => l.id === selectedListId);
@@ -232,7 +242,38 @@ export const Crossword = () => {
 
   const handleCellClick = (r: number, c: number) => {
     if (puzzle.grid[r][c] === '') return;
-    setSelectedCell({ r, c });
+    if (selectedCell?.r === r && selectedCell?.c === c) {
+      setDirection(prev => prev === 'across' ? 'down' : 'across');
+    } else {
+      setSelectedCell({ r, c });
+      // Determine logical direction based on word presence
+      const hasAcross = puzzle.placed.some((p: any) => p.r === r && c >= p.c && c < p.c + p.word.length && p.dir === 'across');
+      const hasDown = puzzle.placed.some((p: any) => p.c === c && r >= p.r && r < p.r + p.word.length && p.dir === 'down');
+      
+      if (hasAcross && !hasDown) setDirection('across');
+      else if (hasDown && !hasAcross) setDirection('down');
+    }
+    inputRef.current?.focus();
+  };
+
+  const advanceCell = (r: number, c: number) => {
+    const nextR = direction === 'down' ? r + 1 : r;
+    const nextC = direction === 'across' ? c + 1 : c;
+    
+    if (nextR < puzzle.rows && nextC < puzzle.cols && puzzle.grid[nextR][nextC] !== '') {
+      setSelectedCell({ r: nextR, c: nextC });
+    }
+  };
+
+  const goBackCell = (r: number, c: number) => {
+    const prevR = direction === 'down' ? r - 1 : r;
+    const prevC = direction === 'across' ? c - 1 : c;
+    
+    if (prevR >= 0 && prevC >= 0 && puzzle.grid[prevR][prevC] !== '') {
+      setSelectedCell({ r: prevR, c: prevC });
+      return { r: prevR, c: prevC };
+    }
+    return null;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -240,19 +281,31 @@ export const Crossword = () => {
 
     if (e.key === 'Backspace') {
       const nextGrid = [...userGrid];
-      nextGrid[selectedCell.r][selectedCell.c] = '';
-      setUserGrid(nextGrid);
+      if (nextGrid[selectedCell.r][selectedCell.c] === '') {
+        const prev = goBackCell(selectedCell.r, selectedCell.c);
+        if (prev) {
+          nextGrid[prev.r][prev.c] = '';
+          setUserGrid(nextGrid);
+        }
+      } else {
+        nextGrid[selectedCell.r][selectedCell.c] = '';
+        setUserGrid(nextGrid);
+      }
       return;
     }
+
+    if (e.key === 'ArrowRight') setSelectedCell(p => p ? ({ ...p, c: Math.min(puzzle.cols - 1, p.c + 1) }) : p);
+    if (e.key === 'ArrowLeft') setSelectedCell(p => p ? ({ ...p, c: Math.max(0, p.c - 1) }) : p);
+    if (e.key === 'ArrowDown') setSelectedCell(p => p ? ({ ...p, r: Math.min(puzzle.rows - 1, p.r + 1) }) : p);
+    if (e.key === 'ArrowUp') setSelectedCell(p => p ? ({ ...p, r: Math.max(0, p.r - 1) }) : p);
 
     if (e.key.length === 1 && e.key.match(/[a-z]/i)) {
       const char = e.key.toUpperCase();
       const nextGrid = [...userGrid];
       nextGrid[selectedCell.r][selectedCell.c] = char;
       setUserGrid(nextGrid);
-      
-      // Basic auto-advance
-      // (Implementation omitted for brevity, would find next cell in direction)
+      advanceCell(selectedCell.r, selectedCell.c);
+      audioEngine.playTick(settings.soundTheme);
     }
   };
 
@@ -317,7 +370,16 @@ export const Crossword = () => {
   }, [clearHeader, setOnReset, resetPuzzle, setHelpContent]);
 
   return (
-    <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden transition-all duration-500 ease-in-out gap-8" onKeyDown={handleKeyDown} tabIndex={0}>
+    <div className={`flex flex-col lg:flex-row h-full w-full overflow-hidden transition-all duration-500 ease-in-out ${isMobile ? '-mx-2 w-[calc(100%+1rem)] gap-4' : 'gap-8'}`} onKeyDown={handleKeyDown} tabIndex={0}>
+      <input
+        ref={inputRef}
+        type="text"
+        className="fixed opacity-0 pointer-events-none"
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="characters"
+      />
       <AnimatePresence>
         {isPanelVisible && (
           <div className="flex flex-col gap-6 w-full lg:w-[400px] shrink-0 h-full overflow-hidden">
@@ -334,12 +396,25 @@ export const Crossword = () => {
               onManageLists={handleManageLists}
               manageListsLabel={<FormattedMessage id="wordpanel.link.addRemove" defaultMessage="Add/Remove Lists" />}
               className="h-full min-h-0"
-            />
+            >
+              {isMobile && (
+                <button
+                  onClick={startPuzzle}
+                  className="w-full py-6 bg-indigo-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
+                >
+                  <Play size={20} strokeWidth={3} fill="currentColor" />
+                  <FormattedMessage id="shared.button.play" />
+                </button>
+              )}
+            </WordPanel>
           </div>
         )}
       </AnimatePresence>
 
-      <ToolPanel baseWidth={isPanelVisible ? 1200 : 1600} baseHeight={800}>
+      <ToolPanel 
+        baseWidth={isPanelVisible ? 1200 : (isMobile ? 1000 : 1600)} 
+        baseHeight={isMobile ? 1200 : 800}
+      >
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
@@ -354,14 +429,14 @@ export const Crossword = () => {
                       <FormattedMessage id="crossword.title" />
                     </h2>
                  </div>
-                 <button onClick={startPuzzle} className="px-12 py-6 bg-slate-900 text-white font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all">
+                  <button onClick={startPuzzle} className="px-12 py-6 bg-slate-900 text-white font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all rounded-[2rem] active:scale-95">
                     <FormattedMessage id="crossword.label.make" />
                  </button>
               </motion.div>
-            ) : status === 'playing' ? (
-              <div className="flex-1 w-full flex">
+            ) : (status === 'playing' && puzzle) ? (
+              <div className={`flex-1 w-full flex ${isMobile ? 'flex-col' : ''} overflow-hidden`}>
                   <div 
-                    className="flex-1 bg-slate-900 overflow-hidden relative grid"
+                    className="flex-1 bg-slate-900 overflow-hidden relative grid min-h-0"
                     style={{ 
                       gridTemplateColumns: `repeat(${puzzle.cols}, 1fr)`,
                       gridTemplateRows: `repeat(${puzzle.rows}, 1fr)`
@@ -376,10 +451,10 @@ export const Crossword = () => {
                          <div
                            key={`${r}-${c}`}
                            onClick={() => handleCellClick(r, c)}
-                           className={`relative flex items-center justify-center text-2xl font-black ${
-                           puzzle.grid[r][c] === '' ? 'bg-slate-900' : 
-                           selectedCell?.r === r && selectedCell?.c === c ? 'bg-slate-100 ring-4 ring-inset ring-slate-900 z-10' : 'bg-white text-slate-900 border border-slate-900'
-                         }`}
+                            className={`relative flex items-center justify-center text-2xl font-black transition-all cursor-pointer ${
+                            puzzle.grid[r][c] === '' ? 'bg-slate-900' : 
+                            selectedCell?.r === r && selectedCell?.c === c ? 'bg-indigo-50 ring-4 ring-inset ring-indigo-600 z-10' : 'bg-white text-slate-900 border border-slate-900'
+                          }`}
                          >
                            {number && (
                              <span className="absolute top-1 left-1 text-[10px] text-slate-400 font-bold leading-none select-none">
@@ -392,37 +467,37 @@ export const Crossword = () => {
                     }))}
                   </div>
 
-                  <div className="w-[320px] flex flex-col border-l-4 border-slate-900 bg-white">
-                    <div className="flex-1 p-8 overflow-y-auto no-scrollbar space-y-8">
+                  <div className={`${isMobile ? 'w-full h-1/2' : 'w-[320px] h-full'} flex flex-col border-t-4 lg:border-t-0 lg:border-l-4 border-slate-900 bg-white overflow-hidden`}>
+                    <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} overflow-y-auto no-scrollbar space-y-8`}>
                        <section>
-                          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                          <h4 className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-4 lg:mb-6 flex items-center gap-2">
                              <BookOpen size={14} /> <FormattedMessage id="crossword.label.across" />
                           </h4>
-                          <div className="space-y-3">
+                          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                              {puzzle.placed.filter((p: any) => p.dir === 'across').sort((a: any, b: any) => a.number - b.number).map((p: any, i: number) => (
-                                <button key={i} onClick={() => speak(p.word)} className="w-full p-4 bg-slate-50 hover:bg-slate-100 text-left font-black text-slate-600 transition-all flex items-center justify-between group">
-                                   <span>{p.number}. ???</span>
-                                   <Volume2 size={16} className="text-slate-300 group-hover:text-slate-600" />
+                                <button key={i} onClick={() => { handleCellClick(p.r, p.c); setDirection('across'); speak(p.word); }} className="w-full p-3 lg:p-4 bg-slate-50 hover:bg-slate-100 text-left font-black text-slate-600 transition-all flex items-center justify-between group rounded-xl">
+                                   <span className="text-xs lg:text-sm">{p.number}. ???</span>
+                                   <Volume2 size={14} className="text-slate-300 group-hover:text-slate-600" />
                                 </button>
                              ))}
                           </div>
                        </section>
-
+ 
                        <section>
-                          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                          <h4 className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-4 lg:mb-6 flex items-center gap-2">
                              <Grid3X3 size={14} /> <FormattedMessage id="crossword.label.down" />
                           </h4>
-                          <div className="space-y-3">
+                          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                              {puzzle.placed.filter((p: any) => p.dir === 'down').sort((a: any, b: any) => a.number - b.number).map((p: any, i: number) => (
-                                <button key={i} onClick={() => speak(p.word)} className="w-full p-4 bg-slate-50 hover:bg-slate-100 text-left font-black text-slate-600 transition-all flex items-center justify-between group">
-                                   <span>{p.number}. ???</span>
-                                   <Volume2 size={16} className="text-slate-300 group-hover:text-slate-600" />
+                                <button key={i} onClick={() => { handleCellClick(p.r, p.c); setDirection('down'); speak(p.word); }} className="w-full p-3 lg:p-4 bg-slate-50 hover:bg-slate-100 text-left font-black text-slate-600 transition-all flex items-center justify-between group rounded-xl">
+                                   <span className="text-xs lg:text-sm">{p.number}. ???</span>
+                                   <Volume2 size={14} className="text-slate-300 group-hover:text-slate-600" />
                                 </button>
                              ))}
                           </div>
                        </section>
                     </div>
-                    <button onClick={checkSolution} className="w-full py-8 bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all">
+                    <button onClick={checkSolution} className="w-full py-6 lg:py-8 bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:bg-indigo-600">
                        <FormattedMessage id="crossword.label.check" />
                     </button>
                   </div>

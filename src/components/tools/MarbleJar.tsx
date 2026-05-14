@@ -24,15 +24,15 @@ import { FormattedMessage } from 'react-intl';
 
 // 1. Constants
 const MARBLE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#06b6d4'];
-const MARBLE_RADIUS = 20;
+const getMarbleRadius = (isMobile: boolean) => isMobile ? 12 : 20;
 const DEBUG_PHYSICS = false;
 const PANEL_WIDTH = 1200;
 const PANEL_HEIGHT = 800;
 
-const JAR_STYLES = [
-  { id: 'jar-small', nameId: 'marblejar.settings.style.jar-small', width: 190, height: 260, wallAngle: 0 },
-  { id: 'jar-big', nameId: 'marblejar.settings.style.jar-big', width: 270, height: 320, wallAngle: 0 },
-  { id: 'basin', nameId: 'marblejar.settings.style.basin', width: 650, height: 100, wallAngle: Math.PI / 10 },
+const getJarStyles = (isMobile: boolean) => [
+  { id: 'jar-small', nameId: 'marblejar.settings.style.jar-small', width: isMobile ? 100 : 190, height: isMobile ? 150 : 260, wallAngle: 0 },
+  { id: 'jar-big', nameId: 'marblejar.settings.style.jar-big', width: isMobile ? 140 : 270, height: isMobile ? 180 : 320, wallAngle: 0 },
+  { id: 'basin', nameId: 'marblejar.settings.style.basin', width: isMobile ? 260 : 650, height: isMobile ? 60 : 100, wallAngle: Math.PI / 10 },
 ];
 
 // 3. Text (Help and Info)
@@ -97,11 +97,21 @@ export const MarbleJar = () => {
   const [target, setTarget] = useLocalStorage<number>('marble_jar_target', 10);
   const [jarStyleId, setJarStyleId] = useLocalStorage<string>('marble_jar_style', 'jar-big');
 
-  const currentJarStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[1];
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+  const currentPanelWidth = isMobile ? 400 : 1200;
+  const currentPanelHeight = 800;
+
+  const currentJarStyle = getJarStyles(isMobile).find(s => s.id === jarStyleId) || getJarStyles(isMobile)[1];
   const { width: JAR_WIDTH, height: JAR_HEIGHT } = currentJarStyle;
 
   const [isRewarding, setIsRewarding] = useState(false);
   const [hoverX, setHoverX] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
@@ -121,7 +131,7 @@ export const MarbleJar = () => {
     }());
   }, [settings.soundTheme]);
 
-  const addMarble = useCallback((xPos = PANEL_WIDTH / 2) => {
+  const addMarble = useCallback((xPos = currentPanelWidth / 2) => {
     if (isRewarding) return;
     audioEngine.playTick(settings.soundTheme);
 
@@ -131,7 +141,7 @@ export const MarbleJar = () => {
       const newMarble = Matter.Bodies.circle(
         xPos + (Math.random() * 10 - 5),
         -50,
-        MARBLE_RADIUS,
+        getMarbleRadius(isMobile),
         {
           restitution: 0.7,
           friction: 0.02,
@@ -178,11 +188,11 @@ export const MarbleJar = () => {
       const wallOptions = { isStatic: true, friction: 0.1, restitution: 0.5 };
       const wallThickness = 40;
 
-      const currentStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[0];
+      const currentStyle = getJarStyles(isMobile).find(s => s.id === jarStyleId) || getJarStyles(isMobile)[0];
       const wallAngle = currentStyle.wallAngle || 0;
 
-      const centerX = PANEL_WIDTH / 2;
-      const centerY = PANEL_HEIGHT / 2;
+      const centerX = currentPanelWidth / 2;
+      const centerY = currentPanelHeight / 2;
       const jarBottom = centerY + JAR_HEIGHT / 2;
       const jarTop = centerY - JAR_HEIGHT / 2;
 
@@ -243,11 +253,11 @@ export const MarbleJar = () => {
     const wallOptions = { isStatic: true, friction: 0.1, restitution: 0.5 };
     const wallThickness = 40;
 
-    const currentStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[0];
+    const currentStyle = getJarStyles(isMobile).find(s => s.id === jarStyleId) || getJarStyles(isMobile)[0];
     const wallAngle = currentStyle.wallAngle || 0;
 
-    const centerX = PANEL_WIDTH / 2;
-    const centerY = PANEL_HEIGHT / 2;
+    const centerX = currentPanelWidth / 2;
+    const centerY = currentPanelHeight / 2;
     const jarBottom = centerY + JAR_HEIGHT / 2;
 
     const ground = Matter.Bodies.rectangle(centerX, jarBottom + wallThickness / 2 - 10, JAR_WIDTH, wallThickness, wallOptions);
@@ -308,8 +318,8 @@ export const MarbleJar = () => {
         element: panelRef.current!,
         engine: engine,
         options: {
-          width: PANEL_WIDTH,
-          height: PANEL_HEIGHT,
+          width: currentPanelWidth,
+          height: currentPanelHeight,
           wireframes: true,
           background: 'transparent'
         }
@@ -324,12 +334,12 @@ export const MarbleJar = () => {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+      ctx.clearRect(0, 0, currentPanelWidth, currentPanelHeight);
 
       // Destroy marbles that fall out
       const toRemove: Matter.Body[] = [];
       marbleBodiesRef.current.forEach(body => {
-        if (body.position.y > PANEL_HEIGHT + MARBLE_RADIUS * 2) {
+        if (body.position.y > currentPanelHeight + getMarbleRadius(isMobile) * 2) {
           toRemove.push(body);
         }
       });
@@ -385,7 +395,7 @@ export const MarbleJar = () => {
       cancelAnimationFrame(animationFrameId);
       marbleBodiesRef.current = [];
     };
-  }, [JAR_WIDTH, JAR_HEIGHT, jarStyleId]);
+  }, [JAR_WIDTH, JAR_HEIGHT, jarStyleId, currentPanelWidth, currentPanelHeight]);
 
   useEffect(() => {
     // Persistence handled by useLocalStorage
@@ -396,9 +406,9 @@ export const MarbleJar = () => {
     while (marbleBodiesRef.current.length < marbleCount) {
       const color = MARBLE_COLORS[marbleBodiesRef.current.length % MARBLE_COLORS.length];
       const newMarble = Matter.Bodies.circle(
-        PANEL_WIDTH / 2 + (Math.random() * 40 - 20),
-        PANEL_HEIGHT / 2 + (Math.random() * 40 - 20),
-        MARBLE_RADIUS,
+        currentPanelWidth / 2 + (Math.random() * 40 - 20),
+        currentPanelHeight / 2 + (Math.random() * 40 - 20),
+        getMarbleRadius(isMobile),
         {
           restitution: 0.7,
           friction: 0.02,
@@ -426,7 +436,7 @@ export const MarbleJar = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!panelRef.current) return;
     const rect = panelRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (PANEL_WIDTH / rect.width);
+    const x = (e.clientX - rect.left) * (currentPanelWidth / rect.width);
     setHoverX(x);
   };
 
@@ -437,14 +447,19 @@ export const MarbleJar = () => {
   const handlePanelClick = (e: React.MouseEvent) => {
     if (!panelRef.current) return;
     const rect = panelRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (PANEL_WIDTH / rect.width);
-    const y = (e.clientY - rect.top) * (PANEL_HEIGHT / rect.height);
+    const x = (e.clientX - rect.left) * (currentPanelWidth / rect.width);
+    const y = (e.clientY - rect.top) * (currentPanelHeight / rect.height);
     removeMarbleAtPoint(x, y);
   };
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden">
-      <ToolPanel className="flex-1" baseWidth={PANEL_WIDTH} baseHeight={PANEL_HEIGHT} fluid={false}>
+      <ToolPanel 
+        className={isConfigOpen && isMobile ? 'hidden' : 'flex-1'} 
+        baseWidth={currentPanelWidth} 
+        baseHeight={currentPanelHeight} 
+        fluid={isMobile}
+      >
         <div
           ref={panelRef}
           onClick={handlePanelClick}
@@ -455,7 +470,7 @@ export const MarbleJar = () => {
           {/* Container Visual Centered */}
           <div className="relative z-10 flex items-center justify-center">
             {(() => {
-              const currentStyle = JAR_STYLES.find(s => s.id === jarStyleId) || JAR_STYLES[0];
+              const currentStyle = getJarStyles(isMobile).find(s => s.id === jarStyleId) || getJarStyles(isMobile)[0];
               const wallAngle = currentStyle.wallAngle || 0;
               const isJar = wallAngle === 0;
               const wallThickness = 40;
@@ -486,13 +501,13 @@ export const MarbleJar = () => {
 
           <canvas
             ref={canvasRef}
-            width={PANEL_WIDTH}
-            height={PANEL_HEIGHT}
+            width={currentPanelWidth}
+            height={currentPanelHeight}
             className="w-full h-full absolute inset-0 z-20 pointer-events-none"
           />
 
           {/* Status Display inside ToolPanel */}
-          <div className="absolute bottom-10 left-0 right-0 flex items-center justify-center gap-16 pointer-events-none z-30 italic">
+          <div className="absolute bottom-10 left-0 right-0 flex items-center justify-center gap-8 md:gap-16 pointer-events-none z-30 italic">
             <div className="flex flex-col items-center">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
                 <FormattedMessage id="marblejar.status.marbles" defaultMessage="Marbles" />
@@ -501,7 +516,7 @@ export const MarbleJar = () => {
                 key={marbleCount}
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-8xl font-black text-slate-900 italic tracking-tighter leading-none tabular-nums"
+                className="text-6xl md:text-8xl font-black text-slate-900 italic tracking-tighter leading-none tabular-nums"
               >
                 {marbleCount}
               </motion.span>
@@ -513,7 +528,7 @@ export const MarbleJar = () => {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
                 <FormattedMessage id="marblejar.status.goal" defaultMessage="Goal" />
               </span>
-              <span className="text-8xl font-black text-indigo-600 italic tracking-tighter leading-none tabular-nums">
+              <span className="text-6xl md:text-8xl font-black text-indigo-600 italic tracking-tighter leading-none tabular-nums">
                 {target}
               </span>
             </div>
@@ -556,7 +571,11 @@ export const MarbleJar = () => {
       </ToolPanel>
 
       {/* Sidebar with Settings and Status */}
-      <div className={`transition-all duration-500 shrink-0 ${isConfigOpen ? 'w-full lg:w-[400px]' : 'w-0 opacity-0 pointer-events-none'}`}>
+      <div className={`transition-all duration-500 shrink-0 ${
+        isConfigOpen 
+          ? (isMobile ? 'fixed inset-0 z-[60] bg-white' : 'w-full lg:w-[400px]') 
+          : 'w-0 opacity-0 pointer-events-none'
+      }`}>
         {/* Settings Panel */}
         <SettingsPanel
           isOpen={isConfigOpen}
@@ -592,7 +611,7 @@ export const MarbleJar = () => {
                 <FormattedMessage id="marblejar.settings.style" defaultMessage="Jar Style" />
               </label>
               <div className="grid grid-cols-1 gap-2">
-                {JAR_STYLES.map(style => (
+                {getJarStyles(isMobile).map(style => (
                   <button
                     key={style.id}
                     onClick={() => { setJarStyleId(style.id); audioEngine.playTick(settings.soundTheme); }}

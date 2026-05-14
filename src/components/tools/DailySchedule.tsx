@@ -318,14 +318,14 @@ export const DailySchedule = () => {
                 className="w-full relative bg-white/30 backdrop-blur-lg border-4 border-white rounded-2xl "
               >
                 {/* Table Header */}
-                <div className="grid grid-cols-[auto_60px_1fr_48px] sm:grid-cols-[280px_80px_1fr_64px] gap-2 sm:gap-4 px-4 sm:px-6 py-2 bg-black/5 border-b border-black/5 shrink-0 rounded-t-xl">
-                  <div className="text-[11px] sm:text-xs font-black text-black uppercase tracking-[0.2em]">
+                <div className="grid grid-cols-[130px_60px_1fr_48px] sm:grid-cols-[280px_80px_1fr_64px] gap-2 sm:gap-4 px-3 sm:px-6 py-2 bg-black/5 border-b border-black/5 shrink-0 rounded-t-xl">
+                  <div className="text-[11px] sm:text-xs font-black text-black uppercase tracking-[0.2em] flex items-center">
                     <FormattedMessage id="dailyschedule.table.time" defaultMessage="Time Interval" />
                   </div>
                   <div className="text-[11px] sm:text-xs font-black text-black uppercase tracking-[0.2em] text-center">
                     <FormattedMessage id="dailyschedule.table.icon" defaultMessage="Icon" />
                   </div>
-                  <div className="text-[11px] sm:text-xs font-black text-black uppercase tracking-[0.2em]">
+                  <div className="text-[11px] sm:text-xs font-black text-black uppercase tracking-[0.2em] flex items-center">
                     <FormattedMessage id="dailyschedule.table.activity" defaultMessage="Activity Name" />
                   </div>
                   <div className="text-[11px] sm:text-xs font-black text-black uppercase tracking-[0.2em] text-right"></div>
@@ -350,7 +350,7 @@ export const DailySchedule = () => {
                         <motion.div
                           layout
                           id={`schedule-item-${item.id}`}
-                          className={`group relative grid grid-cols-[auto_60px_1fr_48px] sm:grid-cols-[280px_80px_1fr_64px] items-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 transition-all ${status === 'current'
+                          className={`group relative grid grid-cols-[130px_60px_1fr_48px] sm:grid-cols-[280px_80px_1fr_64px] items-center gap-2 sm:gap-4 px-3 sm:px-6 py-1 sm:py-3 transition-all ${status === 'current'
                               ? 'bg-white/40 z-10'
                               : index % 2 !== 0 ? 'bg-black/[0.02]' : 'bg-transparent'
                             } hover:bg-white/10`}
@@ -369,19 +369,19 @@ export const DailySchedule = () => {
                           )}
 
                           {/* Time Controls */}
-                          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5 shrink-0">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0 sm:gap-1.5 shrink-0">
                             <input
                               type="time"
                               value={item.startTime}
                               onChange={(e) => updateItem(item.id, { startTime: e.target.value })}
-                              className="text-[11px] sm:text-sm font-bold text-black bg-white/20 px-1 sm:px-2 py-1 rounded-lg outline-none w-[75px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-white/40 transition-all tabular-nums"
+                              className="text-[11px] sm:text-sm font-bold text-black bg-white/20 px-1 sm:px-2 py-0 sm:py-1 rounded-lg outline-none w-[110px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-white/40 transition-all tabular-nums"
                             />
-                            <span className="text-[7px] sm:text-[8px] font-black text-black leading-none">TO</span>
+                            <span className="text-[7px] sm:text-[8px] font-black text-black leading-none my-0.5 sm:my-0 w-[80px] sm:w-auto text-center">TO</span>
                             <input
                               type="time"
                               value={item.endTime}
                               onChange={(e) => updateItem(item.id, { endTime: e.target.value })}
-                              className="text-[11px] sm:text-sm font-bold text-black bg-white/20 px-1 sm:px-2 py-1 rounded-lg outline-none w-[75px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-white/40 transition-all tabular-nums"
+                              className="text-[11px] sm:text-sm font-bold text-black bg-white/20 px-1 sm:px-2 py-0 sm:py-1 rounded-lg outline-none w-[110px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-white/40 transition-all tabular-nums"
                             />
                           </div>
 
@@ -442,7 +442,7 @@ export const DailySchedule = () => {
 
                         {/* Subtle Gap Filler / Add Between Row */}
                         {index < currentSchedule.length - 1 && currentSchedule[index].endTime < currentSchedule[index + 1].startTime && (
-                          <div className="relative h-6 flex items-center justify-center group/gap">
+                          <div className="relative h-4 sm:h-6 flex items-center justify-center group/gap">
                             <div className="absolute left-[200px] right-6 h-px bg-slate-50" />
                             <button
                               onClick={() => fillGap(index + 1)}

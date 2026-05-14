@@ -129,6 +129,13 @@ export const FindTheWord = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [foundPaths, setFoundPaths] = useState<any[]>([]); 
   const [isPanelVisible, setIsPanelVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -318,7 +325,7 @@ export const FindTheWord = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full w-full italic overflow-hidden transition-all duration-500 ease-in-out gap-8">
+    <div className={`flex flex-col lg:flex-row h-full w-full italic overflow-hidden transition-all duration-500 ease-in-out ${isMobile ? '-mx-2 w-[calc(100%+1rem)] gap-4' : 'gap-8'}`}>
       <AnimatePresence>
         {isPanelVisible && (
           <div className="flex flex-col gap-6 w-full lg:w-[400px] shrink-0 h-full overflow-hidden">
@@ -335,13 +342,26 @@ export const FindTheWord = () => {
               onManageLists={handleManageLists}
               manageListsLabel={<FormattedMessage id="wordpanel.link.addRemove" defaultMessage="Add/Remove Lists" />}
               className="h-full min-h-0"
-            />
+            >
+              {isMobile && (
+                <button
+                  onClick={startActivity}
+                  className="w-full py-6 bg-indigo-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
+                >
+                  <Play size={20} strokeWidth={3} fill="currentColor" />
+                  <FormattedMessage id="shared.button.play" />
+                </button>
+              )}
+            </WordPanel>
           </div>
         )}
       </AnimatePresence>
 
-      <ToolPanel baseWidth={isPanelVisible ? 1200 : 1600} baseHeight={800}>
-        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-white p-12">
+      <ToolPanel 
+        baseWidth={isMobile ? (status === 'playing' ? 600 : 800) : (isPanelVisible ? 1200 : 1600)} 
+        baseHeight={isMobile ? (status === 'playing' ? 1100 : 1000) : 800}
+      >
+        <div className={`w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-white ${isMobile ? 'p-4' : 'p-12'}`}>
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
           <AnimatePresence mode="wait">
@@ -360,13 +380,13 @@ export const FindTheWord = () => {
                  </button>
               </motion.div>
             ) : status === 'playing' ? (
-              <div className="flex-1 w-full flex gap-12">
+              <div className={`flex-1 w-full flex ${isMobile ? 'flex-col' : 'flex-row'} gap-6 lg:gap-12 overflow-hidden`}>
                  <div 
                     ref={containerRef}
                     onPointerDown={handleStart}
                     onPointerMove={handleMove}
                     onPointerUp={handleEnd}
-                    className="flex-1 aspect-square bg-slate-50 rounded-[3rem]  border-8 border-white grid touch-none select-none relative overflow-hidden"
+                    className="flex-1 aspect-square bg-slate-50 rounded-[2rem] lg:rounded-[3rem]  border-4 lg:border-8 border-white grid touch-none select-none relative overflow-hidden"
                     style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`, gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)` }}
                  >
                     {foundPaths.map((path, i) => (
@@ -374,31 +394,33 @@ export const FindTheWord = () => {
                     ))}
                     {selection && <div style={getLineStyles(selection.start, selection.end, false)} />}
                     {grid.map((row, r) => row.map((letter, c) => (
-                      <div key={`${r}-${c}`} className={`flex items-center justify-center font-black text-4xl text-slate-900 z-10 pointer-events-none transition-all ${isDragging ? 'opacity-40' : ''}`}>
+                      <div key={`${r}-${c}`} className={`flex items-center justify-center font-black text-2xl lg:text-4xl text-slate-900 z-10 pointer-events-none transition-all ${isDragging ? 'opacity-40' : ''}`}>
                         {letter}
                       </div>
                     )))}
                  </div>
-
-                 <div className="w-[300px] flex flex-col gap-6">
-                    <div className="flex-1 bg-white/80 backdrop-blur-md rounded-[3rem] p-8 border-4 border-slate-50  flex flex-col overflow-hidden">
-                       <div className="flex items-center justify-between mb-6 border-b-2 border-slate-50 pb-4">
-                          <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+ 
+                 <div className={`${isMobile ? 'w-full h-48' : 'w-[300px] h-full'} flex flex-col gap-4 lg:gap-6`}>
+                    <div className="flex-1 bg-white/80 backdrop-blur-md rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-8 border-4 border-slate-50  flex flex-col overflow-hidden">
+                       <div className="flex items-center justify-between mb-4 lg:mb-6 border-b-2 border-slate-50 pb-2 lg:pb-4">
+                          <h4 className="text-[8px] lg:text-[10px] font-black text-indigo-400 uppercase tracking-widest">
                             <FormattedMessage id="findtheword.label.bank" />
                           </h4>
-                          <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-black tabular-nums">{foundWords.length}/{targetWords.length}</span>
+                          <span className="px-2 lg:px-3 py-0.5 lg:py-1 bg-slate-900 text-white rounded-lg text-[8px] lg:text-[10px] font-black tabular-nums">{foundWords.length}/{targetWords.length}</span>
                        </div>
-                       <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
+                       <div className={`flex-1 overflow-y-auto no-scrollbar grid ${isMobile ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1'} gap-2`}>
                           {targetWords.map((word, i) => (
-                            <div key={i} className={`p-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-white text-slate-400 border-2 border-slate-50'}`}>
+                            <div key={i} className={`p-2 lg:p-4 rounded-xl font-black text-[10px] lg:text-sm uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-white text-slate-400 border-2 border-slate-50'}`}>
                               {word}
                             </div>
                           ))}
                        </div>
                     </div>
-                    <button onClick={resetTool} className="w-full py-6 bg-slate-100 text-slate-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all">
-                       <RotateCcw size={20} />
-                    </button>
+                    {!isMobile && (
+                      <button onClick={resetTool} className="w-full py-6 bg-slate-100 text-slate-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all">
+                         <RotateCcw size={20} />
+                      </button>
+                    )}
                  </div>
               </div>
             ) : (

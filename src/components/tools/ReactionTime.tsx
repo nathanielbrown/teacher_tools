@@ -5,7 +5,9 @@ import {
   Clock,
   AlertTriangle,
   Play,
-  Timer
+  Timer,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -69,6 +71,7 @@ export const ReactionTime = () => {
   const [startTime, setStartTime] = useState(0);
   const [lastResult, setLastResult] = useState<number | 'failed' | null>(null);
   const [history, setHistory] = useLocalStorage<{ attempt: number; ms: number | null; failed: boolean }[]>('reaction_time_history', []);
+  const [historyPage, setHistoryPage] = useState(0);
   const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -80,12 +83,20 @@ export const ReactionTime = () => {
 
   // Persistence handled by useLocalStorage
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const resetStats = useCallback(() => {
     setHistory([]);
     setStatus('idle');
     setLastResult(null);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setHistory]);
 
   useEffect(() => {
     setOnReset(() => resetStats);
@@ -110,7 +121,7 @@ export const ReactionTime = () => {
       handleStart();
     } else if (status === 'waiting') {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-      const newHistory = [...history, { attempt: history.length + 1, ms: null, failed: true }];
+      const newHistory = [{ attempt: history.length + 1, ms: null, failed: true }, ...history];
       setHistory(newHistory);
       setLastResult('failed');
       setStatus('result');
@@ -118,7 +129,7 @@ export const ReactionTime = () => {
     } else if (status === 'ready') {
       const endTime = Date.now();
       const reactionTime = endTime - startTime;
-      const newHistory = [...history, { attempt: history.length + 1, ms: reactionTime, failed: false }];
+      const newHistory = [{ attempt: history.length + 1, ms: reactionTime, failed: false }, ...history];
       setHistory(newHistory);
       setLastResult(reactionTime);
       setStatus('result');
@@ -133,29 +144,33 @@ export const ReactionTime = () => {
     ? Math.min(...validAttempts.map((h: any) => h.ms))
     : 0;
 
+  const ITEMS_PER_PAGE = isMobile ? 3 : 100;
+  const totalPages = Math.ceil(history.length / ITEMS_PER_PAGE);
+  const currentHistory = history.slice(historyPage * ITEMS_PER_PAGE, (historyPage + 1) * ITEMS_PER_PAGE);
+
   const getStatusConfig = () => {
     switch (status) {
       case 'idle': return { 
         bg: 'bg-indigo-600', 
-        icon: <Play size={120} />, 
+        icon: <Play size={isMobile ? 80 : 120} />, 
         text: intl.formatMessage({ id: 'reactionTime.status.idle.text', defaultMessage: 'Start Test' }), 
         subtext: intl.formatMessage({ id: 'reactionTime.status.idle.subtext', defaultMessage: 'Click when you are ready' }) 
       };
       case 'waiting': return { 
         bg: 'bg-rose-600', 
-        icon: <Clock size={120} />, 
+        icon: <Clock size={isMobile ? 80 : 120} />, 
         text: intl.formatMessage({ id: 'reactionTime.status.waiting.text', defaultMessage: 'Wait...' }), 
         subtext: intl.formatMessage({ id: 'reactionTime.status.waiting.subtext', defaultMessage: 'Wait for the color to change' }) 
       };
       case 'ready': return { 
         bg: 'bg-emerald-500', 
-        icon: <Zap size={120} className="animate-bounce" />, 
+        icon: <Zap size={isMobile ? 80 : 120} className="animate-bounce" />, 
         text: intl.formatMessage({ id: 'reactionTime.status.ready.text', defaultMessage: 'CLICK!' }), 
         subtext: intl.formatMessage({ id: 'reactionTime.status.ready.subtext', defaultMessage: 'NOW! NOW! NOW!' }) 
       };
       case 'result': return {
         bg: lastResult === 'failed' ? 'bg-amber-500' : 'bg-slate-900',
-        icon: lastResult === 'failed' ? <AlertTriangle size={120} /> : <Timer size={120} className="text-indigo-400" />,
+        icon: lastResult === 'failed' ? <AlertTriangle size={isMobile ? 80 : 120} /> : <Timer size={isMobile ? 80 : 120} className="text-indigo-400" />,
         text: lastResult === 'failed' 
           ? intl.formatMessage({ id: 'reactionTime.status.failed.text', defaultMessage: 'Too Early!' }) 
           : intl.formatMessage({ id: 'reactionTime.status.result.text', defaultMessage: '{ms}ms' }, { ms: lastResult }),
@@ -168,74 +183,105 @@ export const ReactionTime = () => {
   const config = getStatusConfig();
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-full w-full italic">
-      <ToolPanel className="flex-1" baseWidth={1000} baseHeight={800}>
+    <div className={`flex flex-col lg:flex-row gap-4 lg:gap-8 h-full w-full italic ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <ToolPanel 
+        className="flex-1" 
+        baseWidth={isMobile ? 400 : 1200} 
+        baseHeight={isMobile ? 600 : 800}
+        fluid={isMobile}
+        alignTop={isMobile}
+      >
         <div className="flex flex-col gap-8 h-full w-full">
-          {/* Interaction Stage */}
-          <div className="flex-1 flex flex-col">
-          <button
-            onClick={handleClick}
-            className={`flex-1 rounded-[4rem] border-8 border-white  transition-all duration-500 flex flex-col items-center justify-center text-white gap-12 relative overflow-hidden group ${config.bg}`}
-          >
-            <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <div className="flex-1 flex flex-col p-2 md:p-8">
+            <button
+              onClick={handleClick}
+              className={`flex-1 rounded-[3rem] md:rounded-[4rem] border-8 border-white transition-all duration-500 flex flex-col items-center justify-center text-white gap-8 md:gap-12 relative overflow-hidden group ${config.bg}`}
+            >
+              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={status}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 1.2, opacity: 0 }}
-                className="relative z-10"
-              >
-                {config.icon}
-              </motion.div>
-            </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={status}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 1.2, opacity: 0 }}
+                  className="relative z-10"
+                >
+                  {config.icon}
+                </motion.div>
+              </AnimatePresence>
 
-            <div className="text-center relative z-10 px-12">
-              <motion.h3
-                key={config.text}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="text-8xl font-black tracking-tighter uppercase mb-4 leading-none"
-              >
-                {config.text}
-              </motion.h3>
-              <p className="text-[14px] font-black text-white/40 uppercase tracking-[0.6em]">{config.subtext}</p>
-            </div>
-          </button>
+              <div className="text-center relative z-10 px-4 md:px-12">
+                <motion.h3
+                  key={config.text}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className={`${isMobile ? 'text-6xl' : 'text-[10rem]'} font-black tracking-tighter uppercase mb-4 leading-none`}
+                >
+                  {config.text}
+                </motion.h3>
+                <p className="text-[10px] md:text-[14px] font-black text-white/40 uppercase tracking-[0.4em] md:tracking-[0.6em]">{config.subtext}</p>
+              </div>
+            </button>
           </div>
         </div>
       </ToolPanel>
 
-      <div className="w-full lg:w-[320px] shrink-0 h-full overflow-hidden flex flex-col">
-        <HistoryPanel
-          title={intl.formatMessage({ id: 'reactionTime.history.title', defaultMessage: 'History' })}
-          items={history}
-          emptyMessage={intl.formatMessage({ id: 'reactionTime.history.empty', defaultMessage: 'No attempts yet' })}
-          renderItem={(item, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className={`flex justify-between items-center p-6 rounded-2xl border-4 transition-all ${item.failed ? 'bg-rose-50/40 border-rose-100/40 opacity-80' : 'bg-white/80 backdrop-blur-sm border-white'
-                }`}
-            >
-              <div className="flex flex-col">
-                <span className={`font-black text-xl tracking-tighter tabular-nums ${item.failed ? 'text-rose-500' : 'text-slate-800'}`}>
-                  {item.failed 
-                    ? <FormattedMessage id="reactionTime.history.miss" defaultMessage="MISS" /> 
-                    : intl.formatMessage({ id: 'reactionTime.history.ms', defaultMessage: '{ms}ms' }, { ms: item.ms })}
-                </span>
-              </div>
-              {!item.failed && item.ms === best && best > 0 && (
-                <div className="bg-emerald-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ">
-                  <FormattedMessage id="reactionTime.history.best" defaultMessage="BEST" />
-                </div>
-              )}
-            </motion.div>
+      <div className={`w-full lg:w-[350px] shrink-0 ${isMobile ? 'h-auto' : 'h-full'} overflow-hidden flex flex-col pb-4 md:pb-0`}>
+        <div className="flex items-center justify-between px-4 mb-2">
+          <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">
+            <FormattedMessage id="reactionTime.history.title" defaultMessage="History" />
+          </h4>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setHistoryPage(p => Math.max(0, p - 1))}
+                disabled={historyPage === 0}
+                className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-30"
+              >
+                <ChevronLeft size={16} strokeWidth={3} />
+              </button>
+              <span className="text-[10px] font-black text-indigo-600">{historyPage + 1}/{totalPages}</span>
+              <button
+                onClick={() => setHistoryPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={historyPage === totalPages - 1}
+                className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-30"
+              >
+                <ChevronRight size={16} strokeWidth={3} />
+              </button>
+            </div>
           )}
-        />
+        </div>
+        <div className={`flex ${isMobile ? 'flex-row overflow-x-auto gap-2 px-4' : 'flex-col gap-4 overflow-y-auto px-0'} no-scrollbar h-full`}>
+          {history.length === 0 ? (
+            <p className="text-xs font-black text-slate-300 uppercase tracking-widest text-center py-8 w-full">
+              <FormattedMessage id="reactionTime.history.empty" defaultMessage="No attempts yet" />
+            </p>
+          ) : (
+            currentHistory.map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className={`flex justify-between items-center p-4 rounded-2xl border-4 transition-all relative min-h-[80px] md:min-h-[90px] ${isMobile ? 'min-w-[120px] flex-col justify-center' : 'w-full'} ${item.failed ? 'bg-rose-50/40 border-rose-100/40 opacity-80' : 'bg-white/80 backdrop-blur-sm border-white shadow-sm'
+                  }`}
+              >
+                <div className="flex flex-col items-center">
+                  <span className={`font-black ${isMobile ? 'text-lg' : 'text-2xl'} tracking-tighter tabular-nums ${item.failed ? 'text-rose-500' : 'text-slate-800'}`}>
+                    {item.failed 
+                      ? <FormattedMessage id="reactionTime.history.miss" defaultMessage="MISS" /> 
+                      : intl.formatMessage({ id: 'reactionTime.history.ms', defaultMessage: '{ms}ms' }, { ms: item.ms })}
+                  </span>
+                </div>
+                {!item.failed && item.ms === best && best > 0 && (
+                  <div className={`bg-emerald-500 text-white rounded-lg font-black uppercase tracking-widest absolute ${isMobile ? 'bottom-2 left-1/2 -translate-x-1/2 text-[6px] px-1.5 py-0.5' : 'top-4 right-4 text-[10px] px-3 py-1'}`}>
+                    <FormattedMessage id="reactionTime.history.best" defaultMessage="BEST" />
+                  </div>
+                )}
+              </motion.div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

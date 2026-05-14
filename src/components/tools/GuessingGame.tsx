@@ -58,6 +58,25 @@ export const GuessingGame = () => {
   const { settings } = useSettings();
   const intl = useIntl();
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [status, setStatus] = useState('setup'); // setup, playing, finished
+  
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
+  
+  const [score, setScore] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  
+  const timerRef = useRef<any>(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const TOPICS = useMemo(() => ({
     animals: {
       id: 'animals',
@@ -112,18 +131,6 @@ export const GuessingGame = () => {
       ]
     }
   }), [intl]);
-
-  const [status, setStatus] = useState('setup'); // setup, playing, finished
-  
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
-  
-  const [score, setScore] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  
-  const timerRef = useRef<any>(null);
 
   const initGame = useCallback((key: string) => {
     const topic = (TOPICS as any)[key];
@@ -212,7 +219,7 @@ export const GuessingGame = () => {
   }, [clearHeader, setHelpContent]);
 
   return (
-    <ToolPanel baseWidth={900} baseHeight={700}>
+    <ToolPanel baseWidth={isMobile ? 600 : 1000} baseHeight={isMobile ? 800 : 650} fluid={!isMobile}>
       <AnimatePresence mode="wait">
         {status === 'setup' ? (
           <motion.div
@@ -220,31 +227,31 @@ export const GuessingGame = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="flex-1 flex flex-col gap-10 items-center justify-center py-10 w-full"
+            className={`flex-1 flex flex-col gap-6 items-center justify-center py-6 w-full ${isMobile ? 'px-4' : ''}`}
           >
-            <div className="text-center space-y-4">
-               <h2 className="text-5xl font-black text-slate-800 tracking-tighter uppercase leading-none">
+            <div className="text-center space-y-2">
+               <h2 className="text-5xl lg:text-6xl font-black text-slate-800 tracking-tighter uppercase leading-none italic drop-shadow-sm">
                  <FormattedMessage id="guessingGame.title" defaultMessage="Guessing Game" />
                </h2>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] italic">
                  <FormattedMessage id="guessingGame.subtitle" defaultMessage="Guess the emoji!" />
                </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+            <div className={`grid gap-6 w-full max-w-5xl ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
               {Object.entries(TOPICS).map(([key, topic]) => (
                 <button
                   key={key}
                   onClick={() => initGame(key)}
-                  className="group relative p-10 bg-white border-4 border-slate-50 rounded-[4rem] transition-all flex items-center justify-between   hover:border-indigo-100 active:scale-95 overflow-hidden"
+                  className={`group relative p-6 bg-white border-4 border-slate-50 rounded-[2.5rem] transition-all flex items-center justify-between   hover:border-indigo-100 active:scale-95 overflow-hidden ${isMobile ? 'h-32' : 'h-40'}`}
                 >
-                  <div className="flex items-center gap-8 relative z-10">
-                    <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-4xl not-italic group-hover:scale-110 transition-transform ${getColorClasses(topic.color)}`}>
+                  <div className="flex items-center gap-6 lg:gap-8 relative z-10">
+                    <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-[1.5rem] flex items-center justify-center text-3xl lg:text-4xl not-italic group-hover:scale-110 transition-transform ${getColorClasses(topic.color)}`}>
                       {topic.icon}
                     </div>
                     <div className="text-left">
-                      <div className="font-black text-3xl text-slate-800 uppercase tracking-tighter leading-none">{topic.name}</div>
-                      <div className="text-slate-400 font-black uppercase text-[10px] tracking-[0.4em] mt-3">
+                      <div className="font-black text-2xl lg:text-3xl text-slate-800 uppercase tracking-tighter leading-none italic">{topic.name}</div>
+                      <div className="text-slate-400 font-black uppercase text-[10px] tracking-[0.4em] mt-2 italic">
                         <FormattedMessage 
                           id="guessingGame.itemsCount" 
                           defaultMessage="{count} Items" 
@@ -256,7 +263,6 @@ export const GuessingGame = () => {
                   <div className="bg-slate-50 p-4 rounded-2xl text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all relative z-10">
                      <ChevronRight size={24} />
                   </div>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50/50 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-indigo-500/5 transition-all" />
                 </button>
               ))}
             </div>
@@ -266,35 +272,35 @@ export const GuessingGame = () => {
             key="playing"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 flex flex-col items-center justify-center gap-12 w-full max-w-4xl mx-auto"
+            className={`flex-1 flex flex-col items-center justify-center gap-4 w-full max-w-4xl mx-auto ${isMobile ? 'px-0' : 'py-2'}`}
           >
-            <div className="flex justify-between items-center w-full px-10 py-8 bg-white rounded-[3rem] border-4 border-slate-50 ">
+            <div className={`flex justify-between items-center w-full bg-white border-4 border-slate-50 ${isMobile ? 'rounded-none px-6 py-4' : 'rounded-[2.5rem] px-10 py-4'}`}>
                <div className="flex items-center gap-4">
-                  <span className="text-3xl font-black text-slate-800 tabular-nums leading-none">{currentQuestionIdx + 1} / {QUESTIONS_PER_GAME}</span>
+                  <span className="text-2xl lg:text-3xl font-black text-slate-800 tabular-nums leading-none italic">{currentQuestionIdx + 1} / {QUESTIONS_PER_GAME}</span>
                </div>
                
-               <div className="flex items-center gap-4 bg-slate-50 px-10 py-4 rounded-[1.5rem] border-4 border-white ">
+               <div className="flex items-center gap-4 bg-slate-50 px-6 lg:px-10 py-3 lg:py-4 rounded-[1.5rem] border-4 border-white ">
                   <Timer className={`w-6 h-6 ${timeLeft <= 3 ? 'text-rose-500 animate-pulse' : 'text-indigo-600'}`} />
-                  <span className={`text-3xl font-black tabular-nums leading-none ${timeLeft <= 3 ? 'text-rose-500' : 'text-slate-800'}`}>{timeLeft}s</span>
+                  <span className={`text-2xl lg:text-3xl font-black tabular-nums leading-none ${timeLeft <= 3 ? 'text-rose-500' : 'text-slate-800'}`}>{timeLeft}s</span>
                </div>
 
                <div className="flex items-center gap-4">
                   <Target size={24} className="text-emerald-400" />
-                  <span className="text-3xl font-black text-emerald-600 tabular-nums leading-none">{score}</span>
+                  <span className="text-2xl lg:text-3xl font-black text-emerald-600 tabular-nums leading-none italic">{score}</span>
                </div>
             </div>
 
-            <div className="w-full bg-slate-50 p-10 rounded-[3rem] border-4 border-white  flex flex-col items-center gap-10 relative overflow-hidden">
+            <div className={`w-full bg-slate-50 border-4 border-white flex flex-col items-center gap-6 relative overflow-hidden ${isMobile ? 'rounded-none p-6' : 'rounded-[2.5rem] p-6 lg:p-8'}`}>
               <motion.div 
                 key={currentQuestionIdx}
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-64 h-64 bg-white rounded-[3rem] border-4 border-slate-100 flex items-center justify-center relative"
+                className="w-48 h-48 lg:w-56 lg:h-56 bg-white rounded-[3rem] border-4 border-slate-100 flex items-center justify-center relative"
               >
-                <span className="text-[6rem] relative z-10 not-italic">{questions[currentQuestionIdx].correctItem.emoji}</span>
+                <span className="text-[5rem] lg:text-[6rem] relative z-10 not-italic">{questions[currentQuestionIdx].correctItem.emoji}</span>
               </motion.div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl relative z-10">
+              <div className={`grid gap-4 w-full max-w-3xl relative z-10 ${isMobile ? 'grid-cols-1' : 'sm:grid-cols-2'}`}>
                 {questions[currentQuestionIdx].options.map((option: any, idx: number) => {
                   const isSelected = selectedAnswer === option.name;
                   const isCorrectAnswer = option.name === questions[currentQuestionIdx].correctItem.name;
@@ -316,7 +322,7 @@ export const GuessingGame = () => {
                       key={idx}
                       onClick={() => handleAnswerSelect(option.name)}
                       disabled={isEvaluating}
-                      className={`py-6 px-8 rounded-[2rem] border-4 font-black text-2xl transition-all uppercase tracking-tighter ${buttonStyle} disabled:cursor-default`}
+                      className={`py-6 lg:py-8 px-8 rounded-[2rem] border-4 font-black text-3xl lg:text-4xl transition-all uppercase tracking-tighter italic ${buttonStyle} disabled:cursor-default`}
                     >
                       {option.name}
                     </button>
@@ -327,7 +333,7 @@ export const GuessingGame = () => {
 
             <button
               onClick={() => { setStatus('setup'); audioEngine.playTick(settings.soundTheme); }}
-              className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 italic"
             >
               <RotateCcw size={14} /> <FormattedMessage id="guessingGame.quit" defaultMessage="Quit Game" />
             </button>
@@ -337,41 +343,41 @@ export const GuessingGame = () => {
             key="finished"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 bg-slate-900 rounded-[5rem] flex flex-col items-center justify-center p-20 text-center text-white space-y-16  relative overflow-hidden w-full"
+            className={`flex-1 bg-slate-900 rounded-[5rem] flex flex-col items-center justify-center text-center text-white space-y-12  relative overflow-hidden w-full ${isMobile ? 'p-10' : 'p-20'}`}
           >
             <div className="tool-grid-bg-dark opacity-[0.05]" />
             <div className="relative">
                <div className="absolute -inset-10 bg-yellow-500/20 rounded-full blur-[100px] animate-pulse" />
                <div className="p-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-[3rem] -[0_40px_80px_-10px_rgba(234,179,8,0.4)] rotate-12 animate-bounce border-[8px] border-white/20 relative z-10">
-                 <Trophy size={80} className="text-white fill-white" strokeWidth={1} />
+                 <Trophy size={60} lg:size={80} className="text-white fill-white" strokeWidth={1} />
                </div>
             </div>
             
-            <div className="space-y-8 relative z-10">
-               <h3 className="text-6xl font-black uppercase tracking-tighter leading-none">
+            <div className="space-y-6 relative z-10">
+               <h3 className="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none italic">
                 {score === QUESTIONS_PER_GAME 
-                  ? <FormattedMessage id="guessingGame.perfect" defaultMessage="Perfect Score!" /> 
-                  : score >= QUESTIONS_PER_GAME * 0.7 
-                    ? <FormattedMessage id="guessingGame.great" defaultMessage="Great Job!" /> 
-                    : <FormattedMessage id="guessingGame.wellDone" defaultMessage="Well Done!" />
-                }
-              </h3>
+                   ? <FormattedMessage id="guessingGame.perfect" defaultMessage="Perfect Score!" /> 
+                   : score >= QUESTIONS_PER_GAME * 0.7 
+                     ? <FormattedMessage id="guessingGame.great" defaultMessage="Great Job!" /> 
+                     : <FormattedMessage id="guessingGame.wellDone" defaultMessage="Well Done!" />
+                 }
+               </h3>
                <div className="flex flex-col gap-3">
-                 <p className="text-4xl font-black text-white tracking-tighter">
+                 <p className="text-3xl lg:text-5xl font-black text-white tracking-tighter italic">
                    <FormattedMessage 
                      id="guessingGame.finalScore" 
                      defaultMessage="Your Score: {score} / {total}" 
                      values={{ score: <span className="text-indigo-400 tabular-nums">{score}</span>, total: QUESTIONS_PER_GAME }} 
                    />
                  </p>
-              </div>
+               </div>
             </div>
 
              <button
               onClick={() => setStatus('setup')}
-              className="px-24 py-10 bg-white text-slate-900 rounded-[4rem] font-black text-3xl hover:scale-105 active:scale-95 transition-all -[0_40px_80px_-15px_rgba(255,255,255,0.2)] flex items-center gap-8 uppercase tracking-[0.2em] relative z-10"
+              className="px-16 lg:px-24 py-8 lg:py-10 bg-white text-slate-900 rounded-[4rem] font-black text-2xl lg:text-3xl hover:scale-105 active:scale-95 transition-all -[0_40px_80px_-15px_rgba(255,255,255,0.2)] flex items-center gap-8 uppercase tracking-[0.2em] relative z-10 italic"
             >
-              <RotateCcw size={40} /> <FormattedMessage id="guessingGame.playAgain" defaultMessage="Play Again" />
+              <RotateCcw size={32} /> <FormattedMessage id="guessingGame.playAgain" defaultMessage="Play Again" />
             </button>
           </motion.div>
         )}

@@ -8,7 +8,7 @@ import {
   VolumeX,
   Play
 } from 'lucide-react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation, animate } from 'framer-motion';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
@@ -31,7 +31,7 @@ const MIDDLE_INDEX = 4;
 type Mode = 'wheel' | 'list';
 
 // 3. Components
-const WheelView = ({ names, spinning, winner, onFinish }: { names: string[], spinning: boolean, winner: string | null, onFinish: () => void }) => {
+const WheelView = ({ names, spinning, winner, onFinish, isMobile }: { names: string[], spinning: boolean, winner: string | null, onFinish: () => void, isMobile: boolean }) => {
   const { settings } = useSettings();
   const controls = useAnimation();
   const [rotation, setRotation] = useState(0);
@@ -42,41 +42,30 @@ const WheelView = ({ names, spinning, winner, onFinish }: { names: string[], spi
       const winnerIndex = names.indexOf(winner || '');
       const segmentAngle = 360 / names.length;
       const offset = (winnerIndex * segmentAngle) + (segmentAngle / 2);
-      const targetRotation = 3600 + (360 - offset);
       
-      const startTime = performance.now();
+      const startRotation = rotation;
+      const targetMod = (360 - offset) % 360;
+      let diff = targetMod - (startRotation % 360);
+      if (diff <= 0) diff += 360;
+      const targetRotation = startRotation + 3600 + diff;
+      
       const duration = 4000;
 
-      const animateTick = (time: number) => {
-        const elapsed = time - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        // Using same ease as framer-motion: [0.45, 0.05, 0.55, 0.95]
-        // Approx cubic-bezier easeInOutSine or similar
-        const ease = 1 - Math.cos((progress * Math.PI) / 2); // Simple ease out for sound
-        const currentRotate = targetRotation * ease;
-        const currentSegmentIndex = Math.floor((currentRotate % 360) / segmentAngle);
-        
-        if (currentSegmentIndex !== lastTickIndexRef.current) {
-          audioEngine.playTick(settings.soundTheme);
-          lastTickIndexRef.current = currentSegmentIndex;
+      animate(startRotation, targetRotation, {
+        duration: duration / 1000,
+        ease: [0.1, 0.9, 0.2, 1], // easeOut curve for immediate spin
+        onUpdate: (latest) => {
+          controls.set({ rotate: latest });
+          const currentSegmentIndex = Math.floor(((latest % 360) + 360) % 360 / segmentAngle);
+          if (currentSegmentIndex !== lastTickIndexRef.current) {
+            audioEngine.playTick(settings.soundTheme);
+            lastTickIndexRef.current = currentSegmentIndex;
+          }
+        },
+        onComplete: () => {
+          setRotation(targetRotation % 360);
+          onFinish();
         }
-
-        if (progress < 1) {
-          requestAnimationFrame(animateTick);
-        }
-      };
-      
-      requestAnimationFrame(animateTick);
-
-      controls.start({
-        rotate: targetRotation,
-        transition: { 
-          duration: duration / 1000, 
-          ease: [0.45, 0.05, 0.55, 0.95]
-        }
-      }).then(() => {
-        setRotation(targetRotation % 360);
-        onFinish();
       });
     } else if (!spinning) {
       controls.set({ rotate: rotation });
@@ -92,16 +81,16 @@ const WheelView = ({ names, spinning, winner, onFinish }: { names: string[], spi
   }
 
   return (
-    <div className="relative w-[700px] h-[700px] flex items-center justify-center max-w-[90vw] max-h-[70vh]">
+    <div className={`relative ${isMobile ? 'w-full aspect-square' : 'w-[900px] h-[900px]'} flex items-center justify-center max-w-[90vw] max-h-[88vh]`}>
       {/* Pointer */}
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-        <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[30px] border-t-slate-800" />
+      <div className={`absolute ${isMobile ? '-top-4' : '-top-6'} left-1/2 -translate-x-1/2 z-20`}>
+        <div className={`${isMobile ? 'border-l-[20px] border-r-[20px] border-t-[30px]' : 'border-l-[25px] border-r-[25px] border-t-[40px]'} w-0 h-0 border-l-transparent border-r-transparent border-t-slate-800`} />
       </div>
 
       <motion.div
         animate={controls}
-        className="w-full h-full rounded-full border-8 border-white bg-white overflow-hidden relative"
-        style={{ rotate: rotation }}
+        initial={{ rotate: rotation }}
+        className="w-full h-full rounded-full overflow-hidden relative"
       >
         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
           {names.map((name, i) => {
@@ -154,7 +143,7 @@ const WheelView = ({ names, spinning, winner, onFinish }: { names: string[], spi
   );
 };
 
-const ListView = ({ names, spinning, winner, onFinish }: { names: string[], spinning: boolean, winner: string | null, onFinish: () => void }) => {
+const ListView = ({ names, spinning, winner, onFinish, isMobile }: { names: string[], spinning: boolean, winner: string | null, onFinish: () => void, isMobile: boolean }) => {
   const { settings } = useSettings();
   const [displayNames, setDisplayNames] = useState<string[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -219,10 +208,10 @@ const ListView = ({ names, spinning, winner, onFinish }: { names: string[], spin
   return (
     <div className="relative flex flex-col items-center justify-center gap-2">
       {/* Triangles */}
-      <div className="absolute left-[-40px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[15px] border-t-transparent border-b-[15px] border-b-transparent border-l-[25px] border-l-slate-800 z-20" />
-      <div className="absolute right-[-40px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[15px] border-t-transparent border-b-[15px] border-b-transparent border-r-[25px] border-r-slate-800 z-20" />
+      <div className={`absolute ${isMobile ? 'left-[-20px] border-l-[15px] border-t-[10px] border-b-[10px]' : 'left-[-40px] border-l-[25px] border-t-[15px] border-b-[15px]'} top-1/2 -translate-y-1/2 w-0 h-0 border-t-transparent border-b-transparent border-l-slate-800 z-20`} />
+      <div className={`absolute ${isMobile ? 'right-[-20px] border-r-[15px] border-t-[10px] border-b-[10px]' : 'right-[-40px] border-r-[25px] border-t-[15px] border-b-[15px]'} top-1/2 -translate-y-1/2 w-0 h-0 border-t-transparent border-b-transparent border-r-slate-800 z-20`} />
 
-      <div className="bg-white rounded-[2rem] border-8 border-white overflow-hidden w-[400px]">
+      <div className={`bg-white rounded-[2rem] border-8 border-white overflow-hidden ${isMobile ? 'w-[280px]' : 'w-[400px]'}`}>
         {displayNames.map((name, i) => {
           const colorIndex = names.indexOf(name);
           const backgroundColor = colorIndex !== -1 ? COLORS[colorIndex % COLORS.length] : '#f1f5f9';
@@ -232,7 +221,7 @@ const ListView = ({ names, spinning, winner, onFinish }: { names: string[], spin
             <motion.div
               key={`${name}-${i}`}
               layout
-              className={`h-16 flex items-center justify-center font-black text-2xl tracking-wider transition-all duration-300 ${isMiddle ? 'scale-105 z-10 border-y-4 border-white' : 'opacity-60 scale-95'}`}
+              className={`${isMobile ? 'h-10 text-lg' : 'h-16 text-2xl'} flex items-center justify-center font-black tracking-wider transition-all duration-300 ${isMiddle ? 'scale-105 z-10 border-y-4 border-white' : 'opacity-60 scale-95'}`}
               style={{ 
                 backgroundColor,
                 color: 'white'
@@ -250,8 +239,15 @@ const ListView = ({ names, spinning, winner, onFinish }: { names: string[], spin
 // Main Component
 export const NamePicker = () => {
   const { settings } = useSettings();
-  const { setHeaderActions, setOnReset, clearHeader } = useHeader();
+  const { setOnReset, setOnConfigToggle, setHasConfig, clearHeader } = useHeader();
   
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [selectedClassId, setSelectedClassId] = useLocalStorage<string>('name_picker_class_id', 'blank');
   const [students, setStudents] = useState<string[]>([]);
   const [mode, setMode] = useLocalStorage<Mode>('name_picker_mode', 'wheel');
@@ -305,26 +301,12 @@ export const NamePicker = () => {
   }, []);
 
   useEffect(() => {
+    setHasConfig(true);
     setOnReset(() => reset);
+    setOnConfigToggle(() => () => setIsClassPanelOpen(prev => !prev));
     return () => clearHeader();
-  }, [clearHeader, setOnReset, reset]);
+  }, [clearHeader, setOnReset, setOnConfigToggle, setHasConfig, reset, setIsClassPanelOpen]);
 
-  useEffect(() => {
-    setHeaderActions(
-      <div className="flex items-center gap-4 italic">
-        <button
-          onClick={() => setIsClassPanelOpen(prev => !prev)}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 ${
-            isClassPanelOpen 
-              ? 'bg-indigo-600 text-white' 
-              : 'bg-white border-2 border-slate-100 text-slate-300 hover:border-indigo-100 hover:text-indigo-600'
-          }`}
-        >
-          <Users2 size={14} /> <FormattedMessage id="classpanel.title" defaultMessage="Class Manager" />
-        </button>
-      </div>
-    );
-  }, [setHeaderActions, isClassPanelOpen]);
 
   const handleManageClasses = () => {
     window.history.pushState({}, '', '/config/classes');
@@ -341,13 +323,49 @@ export const NamePicker = () => {
         students={students}
         onStudentsChange={(s) => { setStudents(s); setAvailableStudents(s); }}
         onManageClasses={handleManageClasses}
-      />
+      >
+        {isMobile && (
+          <button
+            onClick={() => { setIsClassPanelOpen(false); handlePick(); }}
+            className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl uppercase tracking-[0.1em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 mt-4 italic border-4 border-white"
+          >
+            <Play size={24} fill="currentColor" />
+            <FormattedMessage id="namepicker.spin" defaultMessage="Spin" />
+          </button>
+        )}
+      </ClassPanel>
 
-      <ToolPanel className="italic" baseWidth={1200} alignTop>
+      <ToolPanel 
+        className={`italic ${isMobile ? 'bg-transparent border-transparent shadow-none' : ''}`} 
+        baseWidth={isMobile ? 400 : 1200} 
+        baseHeight={900}
+        alignTop
+        fluid={isMobile}
+      >
         <div className="flex flex-col h-full w-full relative">
           
+          {/* Mode Selector */}
+          <div className={`${isMobile ? 'relative mb-4 flex justify-center w-full' : 'absolute right-4 top-1/2 -translate-y-1/2'} z-40`}>
+            <div className={`bg-white/80 backdrop-blur-xl p-2 rounded-[2.5rem] flex ${isMobile ? 'flex-row' : 'flex-col'} items-center gap-2 border-4 border-white shadow-lg`}>
+              <button
+                onClick={() => { setMode('wheel'); reset(); }}
+                className={`flex items-center gap-3 ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-[2rem] transition-all active:scale-95 ${mode === 'wheel' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-indigo-600'}`}
+              >
+                <CircleDot size={20} />
+                <span className="text-sm font-black uppercase tracking-widest">Wheel</span>
+              </button>
+              <button
+                onClick={() => { setMode('list'); reset(); }}
+                className={`flex items-center gap-3 ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-[2rem] transition-all active:scale-95 ${mode === 'list' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-indigo-600'}`}
+              >
+                <List size={20} />
+                <span className="text-sm font-black uppercase tracking-widest">List</span>
+              </button>
+            </div>
+          </div>
+
           {/* Main Stage */}
-          <div className="flex-1 relative flex flex-col items-center justify-center p-12">
+          <div className="flex-1 relative flex flex-col items-center justify-center p-6">
             <AnimatePresence mode="wait">
               {mode === 'wheel' ? (
                 <motion.div
@@ -358,7 +376,7 @@ export const NamePicker = () => {
                   className="relative cursor-pointer"
                   onClick={handlePick}
                 >
-                  <WheelView names={availableStudents} spinning={isSpinning} winner={winner} onFinish={handleFinish} />
+                  <WheelView names={availableStudents} spinning={isSpinning} winner={winner} onFinish={handleFinish} isMobile={isMobile} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -369,7 +387,7 @@ export const NamePicker = () => {
                   className="cursor-pointer"
                   onClick={handlePick}
                 >
-                  <ListView names={availableStudents} spinning={isSpinning} winner={winner} onFinish={handleFinish} />
+                  <ListView names={availableStudents} spinning={isSpinning} winner={winner} onFinish={handleFinish} isMobile={isMobile} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -406,41 +424,7 @@ export const NamePicker = () => {
               )}
             </AnimatePresence>
 
-            {/* Instruction */}
-            {!isSpinning && !showWinner && availableStudents.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-12 flex items-center gap-4 text-slate-400"
-              >
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center animate-bounce">
-                  <Play size={20} className="text-indigo-600 ml-1" />
-                </div>
-                <span className="font-black uppercase tracking-widest text-sm">
-                  <FormattedMessage id="namepicker.click_to_spin" defaultMessage="Click to pick a name!" />
-                </span>
-              </motion.div>
-            )}
-          </div>
 
-          {/* Mode Bottom Selector */}
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-40">
-            <div className="bg-white/80 backdrop-blur-xl p-2 rounded-[2.5rem] flex items-center gap-2 border-4 border-white shadow-lg">
-              <button
-                onClick={() => { setMode('wheel'); reset(); }}
-                className={`flex items-center gap-3 px-8 py-4 rounded-[2rem] transition-all active:scale-95 ${mode === 'wheel' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-indigo-600'}`}
-              >
-                <CircleDot size={20} />
-                <span className="text-sm font-black uppercase tracking-widest">Wheel</span>
-              </button>
-              <button
-                onClick={() => { setMode('list'); reset(); }}
-                className={`flex items-center gap-3 px-8 py-4 rounded-[2rem] transition-all active:scale-95 ${mode === 'list' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-indigo-600'}`}
-              >
-                <List size={20} />
-                <span className="text-sm font-black uppercase tracking-widest">List</span>
-              </button>
-            </div>
           </div>
         </div>
       </ToolPanel>

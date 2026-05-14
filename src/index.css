@@ -168,3 +168,11 @@ body {
   animation: pulse-soft 2s ease-in-out infinite;
 }
 
+
+.grid-cols-13 {
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+}
+
+.grid-cols-14 {
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+}

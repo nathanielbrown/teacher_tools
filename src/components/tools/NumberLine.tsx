@@ -100,6 +100,14 @@ export const NumberLine = () => {
   const [previewJump, setPreviewJump] = useState<{ start: number, end: number } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const resetAll = useCallback(() => {
     setPins([]);
     setJumps([]);
@@ -147,17 +155,20 @@ export const NumberLine = () => {
     audioEngine.playTick(settings.soundTheme);
   };
 
-  const getSvgPoint = (e: React.MouseEvent | MouseEvent) => {
+  const getSvgPoint = (x: number, y: number) => {
     const svg = svgRef.current;
     if (!svg) return { x: 0, y: 0 };
     const pt = svg.createSVGPoint();
-    pt.x = e.clientX;
-    pt.y = e.clientY;
+    pt.x = x;
+    pt.y = y;
     return pt.matrixTransform(svg.getScreenCTM()!.inverse());
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const pt = getSvgPoint(e);
+  const isPanningRef = useRef(false);
+
+  const handlePanStart = (_: any, info: any) => {
+    isPanningRef.current = true;
+    const pt = getSvgPoint(info.point.x, info.point.y);
     const val = getValueFromX(pt.x, range.start, range.end, step);
     const start = parseFloat(range.start as any) || 0;
     const end = parseFloat(range.end as any) || 0;
@@ -166,52 +177,73 @@ export const NumberLine = () => {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const pt = getSvgPoint(e);
+  const handlePan = (_: any, info: any) => {
+    if (!dragStart) return;
+    const pt = getSvgPoint(info.point.x, info.point.y);
     const val = getValueFromX(pt.x, range.start, range.end, step);
     const start = parseFloat(range.start as any) || 0;
     const end = parseFloat(range.end as any) || 0;
     
     if (val >= start && val <= end) {
-      if (dragStart) {
-        setPreviewJump({ start: dragStart.value, end: val });
-      }
+      setPreviewJump({ start: dragStart.value, end: val });
     } else {
       setPreviewJump(null);
     }
   };
 
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (!dragStart) return;
-    const pt = getSvgPoint(e);
-    const endVal = getValueFromX(pt.x, range.start, range.end, step);
+  const handleTap = (_: any, info: any) => {
+    // If we were just panning, don't drop a pin
+    if (isPanningRef.current) return;
+
+    const pt = getSvgPoint(info.point.x, info.point.y);
+    const val = getValueFromX(pt.x, range.start, range.end, step);
     const start = parseFloat(range.start as any) || 0;
     const end = parseFloat(range.end as any) || 0;
     
-    if (Math.abs(pt.x - dragStart.x) < 5) {
-      togglePin(dragStart.value);
-    } else if (endVal >= start && endVal <= end) {
-      addJump(dragStart.value, endVal);
+    if (val >= start && val <= end) {
+      togglePin(val);
+    }
+  };
+
+  const handlePanEnd = (_: any, info: any) => {
+    if (dragStart) {
+      const pt = getSvgPoint(info.point.x, info.point.y);
+      const endVal = getValueFromX(pt.x, range.start, range.end, step);
+      const start = parseFloat(range.start as any) || 0;
+      const end = parseFloat(range.end as any) || 0;
+      
+      if (endVal >= start && endVal <= end && Math.abs(pt.x - dragStart.x) >= 10) {
+        addJump(dragStart.value, endVal);
+      }
     }
     
     setDragStart(null);
     setPreviewJump(null);
+    // Use a small timeout to clear the panning flag so it doesn't trigger a tap
+    setTimeout(() => {
+      isPanningRef.current = false;
+    }, 100);
   };
 
   return (
-    <div className="flex gap-8 h-full w-full italic">
-      <ToolPanel baseWidth={1200} baseHeight={800}>
+    <div className="flex flex-col lg:flex-row gap-8 h-full w-full italic">
+      <ToolPanel 
+        baseWidth={isMobile ? 600 : 1200} 
+        baseHeight={800}
+        fluid={isMobile}
+        alignTop={isMobile}
+      >
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden group">
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
-          <div className="flex-1 flex flex-col justify-center min-h-0 p-8 w-full">
-            <svg 
+          <div className="flex-1 flex flex-col justify-center min-h-0 p-2 md:p-8 w-full">
+            <motion.svg 
               ref={svgRef}
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`} 
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={() => { setDragStart(null); setPreviewJump(null); }}
+              onTap={handleTap}
+              onPanStart={handlePanStart}
+              onPan={handlePan}
+              onPanEnd={handlePanEnd}
               className="w-full h-full cursor-crosshair touch-none select-none relative z-10"
               preserveAspectRatio="xMidYMid meet"
             >
@@ -226,7 +258,7 @@ export const NumberLine = () => {
 
               <line 
                 x1={PADDING} y1={LINE_Y} x2={WIDTH - PADDING} y2={LINE_Y} 
-                stroke="#1e293b" strokeWidth="6" strokeLinecap="round" 
+                stroke="#1e293b" strokeWidth={isMobile ? 10 : 6} strokeLinecap="round" 
               />
 
               {markers.map((val) => {
@@ -332,8 +364,7 @@ export const NumberLine = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -40, scale: 0.8 }}
                       className="cursor-pointer group/pin"
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={(e) => { e.stopPropagation(); togglePin(pin.value); }}
+                      onTap={(e) => { e.stopPropagation(); togglePin(pin.value); }}
                     >
                       <circle cx={x} cy={LINE_Y} r="12" fill={pin.color} stroke="white" strokeWidth="4" />
                       <line x1={x} y1={LINE_Y} x2={x} y2={LINE_Y - 120} stroke={pin.color} strokeWidth="8" strokeLinecap="round" />
@@ -345,7 +376,7 @@ export const NumberLine = () => {
                   );
                 })}
               </AnimatePresence>
-            </svg>
+            </motion.svg>
           </div>
 
           <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-white/80 border-2 border-slate-100 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">

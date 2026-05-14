@@ -77,12 +77,19 @@ export const ColourHunt = () => {
   const { setHelpContent, clearHeader } = useHeader();
   const { settings } = useSettings();
   
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [gameState, setGameState] = useState<'ready' | 'hunting' | 'finished'>('ready');
   const [targetColor, setTargetColor] = useState(HUNT_COLORS[0]);
   const [duration, setDuration] = useState(60);
   const [timer, setTimer] = useState(60);
   
   const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const startHunt = useCallback(() => {
     const randomColor = HUNT_COLORS[Math.floor(Math.random() * HUNT_COLORS.length)];
@@ -133,10 +140,10 @@ export const ColourHunt = () => {
   }, [clearHeader, setHelpContent]);
 
   return (
-    <ToolPanel className="italic" baseWidth={1000} baseHeight={800}>
-      <div className="w-full max-w-4xl flex flex-col items-center gap-12 relative z-10">
+    <ToolPanel className="italic" baseWidth={isMobile ? 600 : 1000} baseHeight={750} fluid={!isMobile}>
+      <div className={`w-full flex flex-col items-center gap-6 relative z-10 ${isMobile ? 'px-0' : 'max-w-4xl'}`}>
 
-        <div className="w-full relative flex flex-col gap-8">
+        <div className="w-full relative flex flex-col gap-6">
           <AnimatePresence mode="wait">
             {gameState === 'ready' ? (
               <motion.div
@@ -144,11 +151,8 @@ export const ColourHunt = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
-                className="bg-white rounded-[3.5rem] border-4 border-slate-50 p-12 lg:p-20 flex flex-col items-center text-center gap-10 "
+                className={`bg-white border-4 border-slate-50 flex flex-col items-center text-center gap-6 ${isMobile ? 'rounded-none p-12 w-full' : 'rounded-[3.5rem] p-12 lg:p-16'}`}
               >
-                <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center text-indigo-600  border-4 border-white">
-                  <Palette size={48} strokeWidth={3} />
-                </div>
                 <button
                   onClick={startHunt}
                   className="mt-4 flex items-center gap-6 px-12 py-8 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-widest text-2xl hover:bg-indigo-700 transition-all active:scale-95 "
@@ -157,19 +161,19 @@ export const ColourHunt = () => {
                 </button>
               </motion.div>
             ) : (
-              <div className="flex flex-col gap-10 w-full items-center">
+              <div className="flex flex-col gap-6 w-full items-center">
                 <motion.div
                   key="active"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="w-full rounded-[4rem] p-12 lg:p-20 flex flex-col items-center justify-center min-h-[400px]  relative overflow-hidden transition-colors duration-700 border-8 border-white/20"
+                  className={`w-full flex flex-col items-center justify-center min-h-[350px] relative overflow-hidden transition-colors duration-700 border-8 border-white/20 ${isMobile ? 'rounded-none p-8' : 'rounded-[4rem] p-12 lg:p-16'}`}
                   style={{ backgroundColor: targetColor.hex }}
                 >
                   <div className="relative z-10 flex flex-col items-center gap-10">
                     <motion.h2 
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      className="text-8xl lg:text-[12rem] font-black text-white uppercase tracking-tighter -[0_20px_40px_rgba(0,0,0,0.3)] text-center leading-none italic"
+                      className="text-8xl lg:text-[12rem] font-black text-white uppercase tracking-tighter text-center leading-none italic drop-shadow-2xl"
                     >
                       <FormattedMessage id={`colourHunt.color.${targetColor.name.toLowerCase()}`} defaultMessage={targetColor.name} />
                     </motion.h2>
@@ -231,7 +235,7 @@ export const ColourHunt = () => {
         </div>
 
         {gameState === 'ready' && (
-          <div className="w-full max-w-3xl bg-white rounded-[3rem] border-4 border-slate-50 p-8 flex flex-wrap items-center justify-center gap-8 ">
+          <div className={`w-full bg-white border-4 border-slate-50 p-8 flex flex-wrap items-center justify-center gap-8 ${isMobile ? 'rounded-none' : 'rounded-[3rem] max-w-3xl'}`}>
             <div className="flex items-center gap-3">
               {[30, 60, 120].map(s => (
                 <button

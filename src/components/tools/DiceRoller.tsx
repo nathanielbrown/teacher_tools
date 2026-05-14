@@ -258,6 +258,7 @@ export const DiceRoller = () => {
           emptyMessage="No rolls yet"
           icon={HistoryIcon}
           itemsPerPage={isMobile ? 4 : 12}
+          reservePaginationSpace={true}
           listClassName="grid grid-cols-4 gap-4"
           renderItem={(h, i) => (
             <motion.div

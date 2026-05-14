@@ -32,8 +32,10 @@ import {
   Crown,
   BrainCircuit,
   Volume2,
-  Download
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
+import * as htmlToImage from 'html-to-image';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ToolPanel } from '../shared/ToolPanel';
 import { SettingsPanel } from '../shared/SettingsPanel';
@@ -190,12 +192,14 @@ const HELP_INFO = (
   </div>
 );
 
-const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEloHistory, onBack }: any) => {
+const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEloHistory, onBack, isMobile }: any) => {
   const [selectedWinner, setSelectedWinner] = useState('');
   const [editingMatchId, setEditingMatchId] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [leaderboardPage, setLeaderboardPage] = useState(1);
   const { settings } = useSettings();
   const matchIdCounter = useRef(0);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (matchIdCounter.current === 0) matchIdCounter.current = Date.now();
@@ -275,178 +279,158 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
   };
 
   const sortedParticipants = [...participants].sort((a: string, b: string) => (eloRatings[b] || 1200) - (eloRatings[a] || 1200));
-  // History is stored newest-first; display oldest-first ascending
-  const orderedHistory = [...eloHistory].reverse();
-  const itemsPerPage = 12;
-  const totalPages = Math.ceil(orderedHistory.length / itemsPerPage);
-  const currentHistory = orderedHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const matchOffset = (currentPage - 1) * itemsPerPage;
+  
+  const leaderboardItemsPerPage = isMobile ? 6 : 15;
+  const totalLeaderboardPages = Math.ceil(sortedParticipants.length / leaderboardItemsPerPage);
+  const currentLeaderboardParticipants = sortedParticipants.slice((leaderboardPage - 1) * leaderboardItemsPerPage, leaderboardPage * leaderboardItemsPerPage);
 
-  const handleExport = () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const orderedHistory = [...eloHistory];
+  const historyItemsPerPage = isMobile ? 1 : 15;
+  const totalHistoryPages = Math.ceil(orderedHistory.length / historyItemsPerPage);
+  const currentHistory = orderedHistory.slice((historyPage - 1) * historyItemsPerPage, historyPage * historyItemsPerPage);
+  const matchOffset = (historyPage - 1) * historyItemsPerPage;
 
-    canvas.width = 1200;
-    canvas.height = 800;
+  const handleExportCSV = () => {
+    const headers = ['Rank', 'Name', 'Rating'];
+    const rows = sortedParticipants.map((p, i) => [i + 1, p, eloRatings[p] || 1200]);
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `leaderboard-${Date.now()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    audioEngine.playTick(settings.soundTheme);
+  };
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#4f46e5';
-    ctx.fillRect(0, 0, canvas.width, 100);
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '900 32px Outfit';
-    ctx.fillText('TOURNAMENT LEADERBOARD', 40, 65);
-
-    const sorted = [...participants].sort((a: string, b: string) => (eloRatings[b] || 1200) - (eloRatings[a] || 1200));
-    
-    ctx.fillStyle = '#1e293b';
-    ctx.font = '900 20px Outfit';
-    ctx.fillText('RANKINGS', 40, 150);
-
-    sorted.forEach((p, i) => {
-      const col = i % 3;
-      const row = Math.floor(i / 3);
-      const x = 40 + col * 380;
-      const y = 180 + row * 80;
-      const rating = eloRatings[p] || 1200;
-
-      ctx.fillStyle = '#f8fafc';
-      ctx.beginPath();
-      ctx.roundRect(x, y, 360, 65, 16);
-      ctx.fill();
-
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = '900 40px Outfit';
-      ctx.fillText((i + 1).toString(), x + 15, y + 48);
-
-      ctx.fillStyle = '#1e293b';
-      ctx.font = '900 24px Outfit';
-      ctx.fillText(rating, x + 70, y + 35);
-      
-      ctx.fillStyle = '#64748b';
-      ctx.font = '900 12px Outfit';
-      ctx.fillText(p.toUpperCase(), x + 70, y + 52);
-    });
-
-    const historyY = 180 + Math.ceil(sorted.length / 3) * 80 + 40;
-    if (historyY < canvas.height - 100) {
-      ctx.fillStyle = '#4f46e5';
-      ctx.font = '900 20px Outfit';
-      ctx.fillText('RECENT MATCHES', 40, historyY);
-
-      const ordered = [...eloHistory].slice(0, 5);
-      ordered.forEach((m, i) => {
-        const y = historyY + 30 + i * 45;
-        ctx.fillStyle = '#f1f5f9';
-        ctx.beginPath();
-        ctx.roundRect(40, y, 1120, 35, 12);
-        ctx.fill();
-
-        ctx.font = '900 12px Outfit';
-        ctx.fillStyle = '#10b981';
-        ctx.fillText(m.winner?.toUpperCase() || '?', 60, y + 22);
-        
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText('DEFEATED', 250, y + 22);
-        
-        ctx.fillStyle = '#f43f5e';
-        ctx.fillText(m.loser?.toUpperCase() || '?', 400, y + 22);
-
-        if (m.winnerNew) {
-          ctx.fillStyle = '#10b981';
-          ctx.fillText(`+${m.winnerNew - m.winnerOld} PTS`, 600, y + 22);
+  const handleExport = async () => {
+    if (!exportRef.current) return;
+    try {
+      // Ensure the capture is clean by temporarily removing any scrolling constraints
+      const el = exportRef.current;
+      const dataUrl = await htmlToImage.toPng(el, { 
+        backgroundColor: '#ffffff', 
+        pixelRatio: 2,
+        width: el.clientWidth,
+        height: el.clientHeight,
+        style: {
+          transform: 'none',
+          borderRadius: '0'
         }
       });
+      const link = document.createElement('a');
+      link.download = `leaderboard-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+      audioEngine.playTick(settings.soundTheme);
+    } catch (err) {
+      console.error('Export failed', err);
     }
-
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = '900 10px Outfit';
-    ctx.fillText(`GENERATED ON ${new Date().toLocaleDateString()} • CLASSREX TEACHER TOOLS`, 40, canvas.height - 30);
-
-    downloadCanvasAsPNG(canvas, `leaderboard-${Date.now()}.png`);
-    audioEngine.playTick(settings.soundTheme);
   };
 
   return (
     <div className="flex flex-col lg:flex-row-reverse gap-4 h-full min-h-0 italic">
       {/* Best Players Panel */}
-      <div className="flex-1 bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden">
+      <div ref={exportRef} className="flex-1 bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden">
         <div className="px-6 py-4 flex items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button 
               onClick={onBack}
-              className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white transition-all active:scale-90"
+              className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white transition-all active:scale-90"
             >
-              <ChevronLeft size={20} strokeWidth={3} />
+              <ChevronLeft size={16} strokeWidth={3} />
             </button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
                 <Trophy size={18} strokeWidth={3} />
               </div>
-              <h3 className="text-base font-black text-slate-800 uppercase tracking-tight leading-none">Leaderboard</h3>
+              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight leading-none">Leaderboard</h3>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button 
-              onClick={handleExport}
-              className="px-4 py-2 rounded-xl bg-white border-2 border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
-              title="Export as PNG"
+              onClick={handleExportCSV}
+              className="px-8 py-4 rounded-xl bg-indigo-600 border-2 border-indigo-600 text-white hover:bg-slate-900 hover:border-slate-900 transition-all flex items-center gap-3 text-xl font-black uppercase tracking-widest"
+              title="Export as CSV"
             >
-              <Download size={14} strokeWidth={3} />
-              Export
+              <FileSpreadsheet size={24} strokeWidth={3} />
+              Export CSV
             </button>
           </div>
         </div>
 
-        <div className="p-3 grid grid-cols-3 gap-2 overflow-y-auto no-scrollbar flex-1">
-          {sortedParticipants.map((p: string, _i: number) => {
+        <div className="p-2 lg:p-4 grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-3 overflow-y-auto no-scrollbar flex-1">
+          {currentLeaderboardParticipants.map((p: string) => {
             const isEditWinner = eloHistory.find((m: any) => m.id === editingMatchId)?.winner === p;
             const isEditLoser = eloHistory.find((m: any) => m.id === editingMatchId)?.loser === p;
-            // Pending selection: first pick = green (winner), second pick = red (loser)
             const isPendingWinner = !editingMatchId && selectedWinner === p;
             const rating = eloRatings[p] || 1200;
+            const rank = sortedParticipants.indexOf(p) + 1;
+
             return (
               <button 
                 key={p} 
                 onClick={() => handleStudentClick(p)} 
-                className={`flex items-center gap-2 px-2 py-2 rounded-xl border-2 transition-all duration-200 min-w-0 ${
+                className={`flex flex-col items-center justify-center p-3 lg:p-4 rounded-[1.25rem] lg:rounded-[1.5rem] border-2 lg:border-2 transition-all duration-200 relative ${
                   isEditWinner 
                     ? 'bg-emerald-500 border-emerald-400 text-white' 
                     : isEditLoser 
                       ? 'bg-rose-500 border-rose-400 text-white' 
                       : isPendingWinner
                         ? 'bg-emerald-500 border-emerald-400 text-white'
-                        : 'bg-slate-50 border-transparent hover:border-indigo-100 hover:bg-white'
+                        : 'bg-slate-50 border-white hover:border-indigo-100 hover:bg-white'
                 }`}
               >
-                <div className="flex flex-col min-w-0 flex-1 items-center text-center">
-                  <span className={`text-2xl font-black tabular-nums leading-none ${
-                    (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white' : 'text-slate-700'
-                  }`}>{rating}</span>
-                  <span className={`font-black text-xs uppercase tracking-tighter truncate w-full text-center leading-tight mt-1 ${
-                    (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white/80' : 'text-slate-500'
-                  }`}>{p}</span>
+                <div className={`absolute top-2 left-2 w-7 h-7 lg:w-6 lg:h-6 rounded-full flex items-center justify-center text-[10px] lg:text-[8px] font-black ${
+                  (isEditWinner || isEditLoser || isPendingWinner) ? 'bg-white/20 text-white' : 'bg-white text-slate-400 shadow-sm'
+                }`}>
+                  #{rank}
                 </div>
+                <span className={`text-3xl lg:text-2xl font-black tabular-nums leading-none mb-1 ${
+                  (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white' : 'text-slate-800'
+                }`}>{rating}</span>
+                <span className={`font-black text-base lg:text-[10px] uppercase tracking-widest truncate w-full text-center ${
+                  (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white/80' : 'text-slate-500'
+                }`}>{p}</span>
               </button>
             );
           })}
+        </div>
+
+        {/* Leaderboard Paging */}
+        <div className="px-4 py-2 bg-slate-50/50 border-t-2 border-slate-50 flex items-center justify-between shrink-0">
+          <button 
+            onClick={() => setLeaderboardPage(p => Math.max(1, p - 1))} 
+            disabled={leaderboardPage === 1} 
+            className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{leaderboardPage} / {Math.max(1, totalLeaderboardPages)}</span>
+          <button 
+            onClick={() => setLeaderboardPage(p => Math.min(Math.max(1, totalLeaderboardPages), p + 1))} 
+            disabled={leaderboardPage >= Math.max(1, totalLeaderboardPages)} 
+            className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
       </div>
 
       {/* Match History Panel */}
       <div className="w-full lg:w-[380px] bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden shrink-0">
-        <div className="px-6 py-4 flex items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="px-4 py-2 flex items-center justify-between border-b-2 border-slate-50 bg-slate-50/50 shrink-0">
+          <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
               <History size={16} strokeWidth={3} />
             </div>
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-600">History</h4>
+            <h4 className="text-sm font-black uppercase tracking-widest text-indigo-600">History</h4>
           </div>
-          <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{eloHistory.length} matches</span>
+          <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{eloHistory.length} matches</span>
         </div>
 
         <div className="px-3 py-2 flex-1 overflow-y-auto no-scrollbar relative z-10">
@@ -473,23 +457,23 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
                   }`}
                   onClick={() => { if (!isEditing) { setEditingMatchId(m.id); setSelectedWinner(''); } }}
                 >
-                  <span className="text-[8px] font-black text-slate-300 text-center">{matchNum}</span>
-                  <div className={`text-center px-1.5 py-1 rounded-lg text-[8px] font-black uppercase truncate ${
+                  <span className="text-sm lg:text-[7px] font-black text-slate-300 text-center">{matchNum}</span>
+                  <div className={`text-center px-2 py-1.5 lg:px-1 lg:py-0.5 rounded-lg text-sm lg:text-[7px] font-black uppercase truncate ${
                     m.winner ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-50 text-slate-300 animate-pulse'
                   }`}>{m.winner || '?'}</div>
-                  <Zap size={10} className="text-slate-200 shrink-0" />
-                  <div className={`text-center px-1.5 py-1 rounded-lg text-[8px] font-black uppercase truncate ${
+                  <Zap size={isMobile ? 18 : 8} className="text-slate-200 shrink-0" />
+                  <div className={`text-center px-2 py-1.5 lg:px-1 lg:py-0.5 rounded-lg text-sm lg:text-[7px] font-black uppercase truncate ${
                     m.loser ? 'bg-rose-100 text-rose-700' : 'bg-slate-50 text-slate-300 animate-pulse'
                   }`}>{m.loser || '?'}</div>
                   {isEditing ? (
                     <div className="flex gap-1">
-                      <button onClick={(e) => { e.stopPropagation(); deleteMatch(m.id); }} className="p-1 hover:bg-rose-50 rounded text-rose-400 transition-colors"><Trash2 size={12} /></button>
-                      <button onClick={(e) => { e.stopPropagation(); setEditingMatchId(null); }} className="p-1 hover:bg-slate-100 rounded text-slate-300 transition-colors"><X size={12} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); deleteMatch(m.id); }} className="p-1 lg:p-0.5 hover:bg-rose-50 rounded text-rose-400 transition-colors"><Trash2 size={isMobile ? 18 : 10} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); setEditingMatchId(null); }} className="p-1 lg:p-0.5 hover:bg-slate-100 rounded text-slate-300 transition-colors"><X size={isMobile ? 18 : 10} /></button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-end gap-0.5">
-                      {m.winnerNew !== undefined && <span className="text-[7px] font-black text-emerald-500">+{m.winnerNew - m.winnerOld}</span>}
-                      {m.loserNew !== undefined && <span className="text-[7px] font-black text-rose-400">{m.loserNew - m.loserOld}</span>}
+                      {m.winnerNew !== undefined && <span className="text-xs lg:text-[6px] font-black text-emerald-500">+{m.winnerNew - m.winnerOld}</span>}
+                      {m.loserNew !== undefined && <span className="text-xs lg:text-[6px] font-black text-rose-400">{m.loserNew - m.loserOld}</span>}
                     </div>
                   )}
                 </motion.div>
@@ -499,17 +483,17 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
         </div>
 
         {/* Paging - always visible when there are matches */}
-        <div className="px-4 py-3 bg-slate-50/50 border-t-4 border-slate-50 flex items-center justify-between shrink-0">
-          <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronLeft size={14} /></button>
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{currentPage} / {Math.max(1, totalPages)}</span>
-          <button onClick={() => setCurrentPage(p => Math.min(Math.max(1, totalPages), p + 1))} disabled={currentPage >= Math.max(1, totalPages)} className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronRight size={14} /></button>
+        <div className="px-3 py-2 bg-slate-50/50 border-t-2 border-slate-50 flex items-center justify-between shrink-0">
+          <button onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage === 1} className="p-1.5 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronLeft size={12} /></button>
+          <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{historyPage} / {Math.max(1, totalHistoryPages)}</span>
+          <button onClick={() => setHistoryPage(p => Math.min(Math.max(1, totalHistoryPages), p + 1))} disabled={historyPage >= Math.max(1, totalHistoryPages)} className="p-1.5 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronRight size={12} /></button>
         </div>
       </div>
     </div>
   );
 };
 
-const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack }: any) => {
+const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack, isMobile }: any) => {
   const { settings } = useSettings();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -520,77 +504,34 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
   const matchRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const matches = useMemo(() => tournament.matches || [], [tournament.matches]);
 
-  const handleExport = () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const handleExport = async () => {
+    if (!roundsRef.current) return;
+    try {
+      const el = roundsRef.current;
+      
+      // Calculate the actual content size to avoid the massive p-80 padding in the export
+      // We target the inner container to get a tighter crop
+      const contentEl = el.querySelector('.flex.gap-60');
+      const targetEl = (contentEl as HTMLElement) || el;
 
-    const roundWidth = 450;
-    const matchHeight = 180;
-    const padding = 150;
-    const canvasWidth = rounds.length * roundWidth + padding * 2;
-    const maxMatches = Math.max(...rounds.map(r => r.length));
-    const canvasHeight = Math.max(800, maxMatches * matchHeight + padding * 2);
-
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#4f46e5';
-    ctx.fillRect(0, 0, canvas.width, 120);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '900 40px Outfit';
-    ctx.fillText(tournament.name.toUpperCase(), padding, 75);
-    ctx.font = '900 14px Outfit';
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.fillText(`${tournament.type.toUpperCase()} ELIMINATION`, padding, 100);
-
-    rounds.forEach((roundMatches, roundIdx) => {
-      const x = padding + roundIdx * roundWidth;
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = '900 16px Outfit';
-      ctx.fillText(roundMatches[0]?.tournamentRoundText.toUpperCase() || '', x, 170);
-
-      roundMatches.forEach((m, mIdx) => {
-        const spacing = (canvasHeight - 300) / roundMatches.length;
-        const y = 250 + mIdx * spacing + spacing / 2 - 60;
-
-        ctx.fillStyle = '#f1f5f9';
-        ctx.beginPath();
-        ctx.roundRect(x, y, 350, 120, 32);
-        ctx.fill();
-
-        m.participants.forEach((p: any, pIdx: number) => {
-          const py = y + pIdx * 60;
-          if (p.isWinner) {
-            ctx.fillStyle = '#10b981';
-            ctx.beginPath();
-            ctx.roundRect(x, py, 350, 60, pIdx === 0 ? [32, 32, 0, 0] : [0, 0, 32, 32]);
-            ctx.fill();
-            ctx.fillStyle = '#ffffff';
-          } else {
-            ctx.fillStyle = '#1e293b';
-          }
-          
-          ctx.font = '900 20px Outfit';
-          ctx.fillText(p.name?.toUpperCase() || 'TBD', x + 40, py + 38);
-          
-          if (p.isWinner) {
-             ctx.font = '900 10px Outfit';
-             ctx.fillText('WINNER', x + 280, py + 38);
-          }
-        });
+      const dataUrl = await htmlToImage.toPng(targetEl, { 
+        backgroundColor: '#ffffff', 
+        pixelRatio: 2,
+        style: {
+          transform: 'none',
+          padding: '60px', // Controlled padding for the export
+          margin: '0'
+        }
       });
-    });
 
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = '900 12px Outfit';
-    ctx.fillText(`GENERATED BY CLASSREX TEACHER TOOLS • ${new Date().toLocaleDateString()}`, padding, canvas.height - 40);
-
-    downloadCanvasAsPNG(canvas, `tournament-${tournament.name.toLowerCase().replace(/\s+/g, '-')}.png`);
-    audioEngine.playTick(settings.soundTheme);
+      const link = document.createElement('a');
+      link.download = `tournament-${tournament.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+      link.href = dataUrl;
+      link.click();
+      audioEngine.playTick(settings.soundTheme);
+    } catch (err) {
+      console.error('Export failed', err);
+    }
   };
 
   const updatePositions = useCallback(() => {
@@ -867,18 +808,18 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
                   }`}
                 >
                   <div className="flex items-center gap-5 truncate relative z-10">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-black transition-colors ${
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-black transition-colors ${
                       isSelectedWinner ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'
                     }`}>{pIdx + 1}</div>
                     <div className="flex flex-col items-start truncate">
-                      <span className={`text-[8px] font-black uppercase tracking-[0.15em] ${isSelectedWinner ? 'text-white/70' : 'text-slate-400'}`}>Competitor</span>
-                      <span className={`text-base font-black uppercase truncate tracking-tight leading-none mt-0.5 ${isSelectedWinner ? 'text-white' : 'text-slate-700'}`}>{isBye ? 'BYE' : (p.name || 'TBD')}</span>
+                      <span className={`text-xs font-black uppercase tracking-[0.15em] ${isSelectedWinner ? 'text-white/70' : 'text-slate-400'}`}>Competitor</span>
+                      <span className={`text-xl font-black uppercase truncate tracking-tight leading-none mt-1 ${isSelectedWinner ? 'text-white' : 'text-slate-700'}`}>{isBye ? 'BYE' : (p.name || 'TBD')}</span>
                     </div>
                   </div>
                   {isSelectedWinner && (
                     <div className="flex flex-col items-end relative z-10 shrink-0">
-                       <Check size={20} strokeWidth={4} className="text-white mb-0.5" />
-                       <span className="text-[7px] font-black uppercase tracking-widest text-white/90">Winner</span>
+                       <Check size={24} strokeWidth={4} className="text-white mb-0.5" />
+                       <span className="text-xs font-black uppercase tracking-widest text-white/90">Winner</span>
                     </div>
                   )}
                 </button>
@@ -919,7 +860,7 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
               <button
                 key={`${btn.label}-${idx}`}
                 onClick={btn.onClick}
-                className={`px-4 py-2 rounded-xl text-[9px] font-black shadow-sm transition-all active:scale-95 uppercase tracking-widest shrink-0 ${btn.color}`}
+                className={`px-4 py-3 rounded-xl text-xs font-black shadow-sm transition-all active:scale-95 uppercase tracking-widest shrink-0 ${btn.color}`}
               >
                 {btn.label}
               </button>
@@ -930,7 +871,7 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
         <div className="flex-1 flex items-center justify-end gap-3">
           <button 
             onClick={handleExport}
-            className="px-6 py-3 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+            className="px-8 py-4 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest"
             title="Export as PNG"
           >
             <Download size={18} strokeWidth={3} />
@@ -1044,7 +985,14 @@ export const Tournaments = () => {
   const [step, setStep] = useState('setup');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [selectedClassId, setSelectedClassId] = useState('blank');
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const tournamentIdCounter = useRef(0);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => { if (tournamentIdCounter.current === 0) tournamentIdCounter.current = Date.now(); }, []);
 
@@ -1193,7 +1141,7 @@ export const Tournaments = () => {
         onClose={() => {}} // Satisfy required prop
       />
 
-      <ToolPanel alignTop fluid baseWidth={1200} baseHeight={800}>
+      <ToolPanel alignTop fluid baseWidth={isMobile ? 640 : 1200} baseHeight={800}>
         <div className="w-full flex flex-col relative z-10 h-full overflow-hidden">
           {!activeTournament ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-12 relative overflow-hidden group">
@@ -1207,7 +1155,7 @@ export const Tournaments = () => {
               </div>
               <button 
                 onClick={addTournament} 
-                className="h-20 px-16 bg-indigo-600 text-white rounded-[2.5rem] font-black text-lg uppercase tracking-[0.2em] hover:bg-slate-900 transition-all active:scale-95 border-8 border-white shadow-xl"
+                className="h-20 px-16 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xl lg:text-lg uppercase tracking-[0.2em] hover:bg-slate-900 transition-all active:scale-95 border-8 border-white shadow-xl"
               >
                 Start
               </button>
@@ -1221,12 +1169,12 @@ export const Tournaments = () => {
                     <Trophy size={28} strokeWidth={3} />
                   </div>
                   <div className="flex-1">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Name</span>
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 block">Tournament Name</span>
                     <input 
                       type="text" 
                       value={activeTournament?.name || ''}
                       onChange={(e) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, name: e.target.value } : t))}
-                      className="w-full text-2xl font-black text-slate-800 uppercase tracking-tight bg-transparent border-none outline-none focus:text-indigo-600 transition-colors placeholder:text-slate-200"
+                      className="w-full text-3xl font-black text-slate-800 uppercase tracking-tight bg-transparent border-none outline-none focus:text-indigo-600 transition-colors placeholder:text-slate-200"
                       placeholder="Enter Tournament Name..."
                     />
                   </div>
@@ -1253,7 +1201,7 @@ export const Tournaments = () => {
                             setTournaments((prev: any) => prev.map((curr: any) => curr.id === activeTournamentId ? { ...curr, type: t.id } : curr));
                             audioEngine.playTick(settings.soundTheme);
                           }}
-                          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                          className={`flex-1 flex items-center justify-center gap-3 px-6 py-6 rounded-2xl font-black text-xl lg:text-sm uppercase tracking-widest transition-all ${
                             (activeTournament?.type || 'elo') === t.id
                               ? 'bg-indigo-600 text-white shadow-lg scale-105'
                               : isDisabled
@@ -1261,7 +1209,7 @@ export const Tournaments = () => {
                                 : 'bg-white border-2 border-slate-100 text-slate-400 hover:border-indigo-100 hover:text-indigo-600'
                           }`}
                         >
-                          {t.icon} {t.label}
+                          {React.cloneElement(t.icon as React.ReactElement, { size: 20 })} {t.label}
                         </button>
                       );
                     })}
@@ -1276,18 +1224,18 @@ export const Tournaments = () => {
                     <Users size={24} strokeWidth={3} />
                   </div>
                   <div className="flex flex-col">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Players</h3>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Select participants</span>
+                    <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Players</h3>
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Select participants</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">
                   <button 
                     onClick={() => { setSelectedStudents(settings.classes.find(c => c.id === selectedClassId)?.students || []); audioEngine.playTick(settings.soundTheme); }} 
-                    className="px-6 py-3 bg-white border-2 border-slate-100 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all"
+                    className="px-8 py-4 bg-white border-2 border-slate-100 rounded-xl text-xs font-black text-slate-400 uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all"
                   >
                     All
                   </button>
-                  <div className="h-12 px-8 bg-white/60 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-2 border-white">
+                  <div className="h-14 px-8 bg-white/60 rounded-full flex items-center justify-center text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-2 border-white">
                     <span className="text-indigo-600 mr-2">{selectedStudents.length}</span> Selected
                   </div>
                 </div>
@@ -1318,20 +1266,19 @@ export const Tournaments = () => {
               </div>
 
               {/* Bottom Action */}
-              <div className="shrink-0 flex justify-center items-center gap-6 pb-4">
+              <div className="shrink-0 flex justify-center items-center gap-4 pb-2">
                 <button 
                   onClick={deleteTournament}
-                  className="h-20 px-10 bg-white border-8 border-white text-slate-400 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-sm hover:text-rose-500 transition-all active:scale-95 shadow-xl flex items-center gap-3"
+                  className="h-14 px-8 bg-white border-4 border-white text-slate-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:text-rose-500 transition-all active:scale-95 shadow-lg flex items-center gap-2"
                 >
-                  <Trash2 size={20} /> Delete
+                  <Trash2 size={16} /> Delete
                 </button>
-
                 <button 
                   onClick={initiateTournament} 
                   disabled={selectedStudents.length < 2} 
-                  className="h-20 px-20 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-lg hover:bg-slate-900 transition-all active:scale-95 border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                  className="h-14 px-14 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-slate-900 transition-all active:scale-95 border-4 border-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
-                  <Play size={24} fill="currentColor" className="inline mr-4" /> 
+                  <Play size={18} fill="currentColor" className="inline mr-3" /> 
                   {(activeTournament?.type === 'elo' && activeTournament?.eloHistory?.length > 0) || (activeTournament?.matches?.length > 0) ? 'Resume' : 'Start'}
                 </button>
               </div>
@@ -1339,18 +1286,28 @@ export const Tournaments = () => {
           ) : (
             <div className="flex-1 flex flex-col min-h-0 italic overflow-hidden">
               {activeTournament.type === 'elo' ? (
-                <EloManager participants={activeTournament.participants} eloRatings={activeTournament.eloRatings || {}} setEloRatings={(r: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloRatings: typeof r === 'function' ? r(t.eloRatings || {}) : r } : t))} eloHistory={activeTournament.eloHistory || []} setEloHistory={(h: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloHistory: typeof h === 'function' ? h(t.eloHistory || []) : h } : t))} 
-                onBack={() => {
-                  setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
-                  setStep('setup');
-                }}
+                <EloManager 
+                  participants={activeTournament.participants} 
+                  eloRatings={activeTournament.eloRatings || {}} 
+                  setEloRatings={(r: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloRatings: typeof r === 'function' ? r(t.eloRatings || {}) : r } : t))} 
+                  eloHistory={activeTournament.eloHistory || []} 
+                  setEloHistory={(h: any) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, eloHistory: typeof h === 'function' ? h(t.eloHistory || []) : h } : t))} 
+                  onBack={() => {
+                    setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
+                    setStep('setup');
+                  }}
+                  isMobile={isMobile}
                 />
               ) : (
-                <BracketManager tournament={activeTournament} setTournaments={setTournaments} activeTournamentId={activeTournamentId} 
-                onBack={() => {
-                  setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
-                  setStep('setup');
-                }}
+                <BracketManager 
+                  tournament={activeTournament} 
+                  setTournaments={setTournaments} 
+                  activeTournamentId={activeTournamentId} 
+                  onBack={() => {
+                    setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
+                    setStep('setup');
+                  }}
+                  isMobile={isMobile}
                 />
               )}
             </div>

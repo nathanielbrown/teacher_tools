@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ToolPanel } from '../shared/ToolPanel';
 import { FormattedMessage } from 'react-intl';
@@ -69,6 +69,14 @@ export const FractionWall = () => {
   const [selectedDenominators, setSelectedDenominators] = useLocalStorage<number[]>('fraction_wall_denominators', [1, 2, 4, 8]);
   const [highlightedValue, setHighlightedValue] = useLocalStorage<{ num: number; den: number } | null>('fraction_wall_highlight', null);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const clearAll = useCallback(() => {
     setSelectedDenominators([1, 2, 4, 8]);
     setHighlightedValue(null);
@@ -104,22 +112,28 @@ export const FractionWall = () => {
   };
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={650} alignTop={false}>
+    <ToolPanel 
+      className="italic" 
+      baseWidth={isMobile ? 400 : 1200} 
+      baseHeight={650} 
+      alignTop={false}
+      fluid={isMobile}
+    >
       <div className="w-full flex flex-col items-center gap-6 lg:gap-2 relative z-10">
         
         {/* The Wall */}
         <div className="w-full bg-slate-50 rounded-[2.5rem] p-4 lg:p-2 border-4 border-white relative overflow-hidden group">
            <div className="tool-grid-bg opacity-10 pointer-events-none" />
            <div className="flex flex-col gap-1 relative z-10">
-              {FRACTIONS.map((row, rowIdx) => (
+               {FRACTIONS.map((row, rowIdx) => (
                 selectedDenominators.includes(row.den) && (
-                  <div key={rowIdx} className="flex gap-2 lg:gap-1 h-16 lg:h-10 relative">
+                  <div key={rowIdx} className="flex gap-1 md:gap-1 h-12 md:h-10 relative">
                      {Array.from({ length: row.den }).map((_, colIdx) => {
                        const active = isHighlighted(row.den, colIdx);
                        return (
                          <motion.button
                            key={colIdx}
-                           onClick={() => setHighlightedValue({ num: colIdx, den: row.den })}
+                           onClick={() => { setHighlightedValue({ num: colIdx, den: row.den }); audioEngine.playTick(settings.soundTheme); }}
                            initial={false}
                            animate={{
                              backgroundColor: active ? row.color : '#f1f5f9',
@@ -127,12 +141,12 @@ export const FractionWall = () => {
                              scale: active ? 1.02 : 1,
                              zIndex: active ? 10 : 1
                            }}
-                           className={`flex-1 rounded-2xl flex items-center justify-center transition-all border-b-4 ${active ? 'border-white/20' : 'border-slate-200/50 hover:bg-slate-100'}`}
+                           className={`flex-1 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-b-2 md:border-b-4 ${active ? 'border-white/20' : 'border-slate-200/50 hover:bg-slate-100'}`}
                          >
                            <div className="flex flex-col items-center leading-none">
-                              <span className="text-2xl lg:text-sm font-black italic leading-none">1</span>
+                              <span className="text-xl md:text-sm font-black italic leading-none">1</span>
                               <div className="w-full h-0.5 bg-current my-0" />
-                              <span className="text-2xl lg:text-sm font-black italic leading-none">{row.den}</span>
+                              <span className="text-xl md:text-sm font-black italic leading-none">{row.den}</span>
                            </div>
                          </motion.button>
                        );
@@ -158,12 +172,12 @@ export const FractionWall = () => {
         </div>
 
         {/* Denominator Toggles */}
-        <div className="flex flex-wrap justify-center gap-2 p-4 bg-white/80 backdrop-blur-xl rounded-[3rem]  border border-white">
+        <div className="w-full flex md:flex-wrap md:justify-center gap-1 md:gap-3 p-2 md:p-6 bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] border border-white shadow-xl shadow-slate-200/50">
           {FRACTIONS.map(f => (
             <button
               key={f.den}
               onClick={() => toggleDenominator(f.den)}
-              className={`px-4 py-2 rounded-2xl border-2 font-black transition-all uppercase tracking-tighter text-xs lg:text-sm ${
+              className={`flex-1 min-w-0 h-10 md:h-auto md:px-4 md:py-2 rounded-lg md:rounded-2xl border-2 font-black transition-all uppercase tracking-tighter text-[10px] md:text-sm ${
                 selectedDenominators.includes(f.den)
               ? 'bg-indigo-600 border-indigo-600 text-white scale-105 shadow-lg shadow-indigo-200'
               : 'bg-white border-slate-100 text-slate-400 hover:bg-white hover:border-indigo-100 hover:text-indigo-600 '

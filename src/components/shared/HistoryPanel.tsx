@@ -28,6 +28,7 @@ interface HistoryPanelProps {
   listClassName?: string;
   className?: string;
   onClose?: () => void;
+  reservePaginationSpace?: boolean;
 }
 
 export const HistoryPanel = ({
@@ -42,7 +43,8 @@ export const HistoryPanel = ({
   icon: Icon = ListOrdered,
   listClassName = "space-y-2",
   className = "",
-  onClose
+  onClose,
+  reservePaginationSpace = false
 }: HistoryPanelProps) => {
   const intl = useIntl();
   const [currentPage, setCurrentPage] = useState(1);
@@ -109,8 +111,8 @@ export const HistoryPanel = ({
         <div className="flex-1">
           <AnimatePresence initial={false} mode="popLayout">
             {items.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center py-8 bg-slate-50/50 border-2 border-slate-100 border-dashed rounded-[3rem]">
-                <TimerReset size={32} strokeWidth={1} className="mb-3 text-slate-200" />
+              <div className="h-full min-h-[80px] lg:min-h-full flex flex-col items-center justify-center py-4 lg:py-8 bg-slate-50/50 border-2 border-slate-100 border-dashed rounded-[2rem] lg:rounded-[3rem]">
+                <TimerReset size={24} strokeWidth={1} className="mb-2 lg:mb-3 text-slate-200 lg:w-8 lg:h-8" />
                 <div className="text-[10px] font-black uppercase tracking-widest text-slate-300 text-center px-4 leading-relaxed">{emptyMessage}</div>
               </div>
             ) : (
@@ -122,8 +124,8 @@ export const HistoryPanel = ({
         </div>
 
         {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-100 shrink-0">
+        {(totalPages > 1 || reservePaginationSpace) && (
+          <div className={`flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-100 shrink-0 ${totalPages <= 1 ? 'invisible pointer-events-none' : 'visible'}`}>
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={safeCurrentPage === 1}
@@ -135,7 +137,7 @@ export const HistoryPanel = ({
               <FormattedMessage 
                 id="shared.history.page" 
                 defaultMessage="Page {current} of {total}" 
-                values={{ current: safeCurrentPage, total: totalPages }} 
+                values={{ current: safeCurrentPage, total: Math.max(1, totalPages) }} 
               />
             </span>
             <button

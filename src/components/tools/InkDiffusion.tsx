@@ -20,6 +20,7 @@ import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import ToolPanel from '../shared/ToolPanel';
+import SettingsPanel from '../shared/SettingsPanel';
 import { FormattedMessage } from 'react-intl';
 
 // 1. Constants
@@ -185,14 +186,22 @@ const Beaker = React.forwardRef(({ temperature, isPlaying, label }: { temperatur
 
 // 7. Component
 export const InkDiffusion = () => {
-  const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
+  const { setHeaderActions, setOnReset, clearHeader, setHelpContent, isConfigOpen, setIsConfigOpen, setHasConfig, setOnConfigToggle } = useHeader();
   const { settings } = useSettings();
+  
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const [tempA, setTempA] = useState(10);
   const [tempB, setTempB] = useState(90);
   const [selectedInk, setSelectedInk] = useState(INK_COLORS[0]);
   const [isPlaying, setIsPlaying] = useState(true);
   const beakerARef = useRef<any>(null);
   const beakerBRef = useRef<any>(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleBeakerClick = (e: React.MouseEvent) => {
     const beakers = document.querySelectorAll('.beaker-container');
@@ -222,10 +231,12 @@ export const InkDiffusion = () => {
   useEffect(() => {
     setOnReset(() => resetLab);
     setHelpContent(HELP_INFO);
+    setHasConfig(true);
+    setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
     return () => {
       clearHeader();
     };
-  }, [clearHeader, setOnReset, resetLab, setHelpContent]);
+  }, [clearHeader, setOnReset, resetLab, setHelpContent, setHasConfig, setOnConfigToggle, setIsConfigOpen]);
 
   useEffect(() => {
     setHeaderActions(
@@ -241,16 +252,22 @@ export const InkDiffusion = () => {
   }, [isPlaying, setHeaderActions, settings.soundTheme]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-full w-full italic">
-      <ToolPanel className="flex-1" baseWidth={1000} baseHeight={800}>
-        <div className="flex flex-col gap-12 h-full font-['Outfit'] select-none relative italic overflow-hidden">
+    <div className={`flex flex-col lg:flex-row gap-4 lg:gap-8 h-full w-full italic ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <ToolPanel 
+        className="flex-1" 
+        baseWidth={isMobile ? 400 : 1200} 
+        baseHeight={isMobile ? 800 : 800}
+        fluid={isMobile}
+        alignTop={isMobile}
+      >
+        <div className="flex flex-col gap-6 lg:gap-12 h-full font-['Outfit'] select-none relative italic overflow-hidden p-2 lg:p-0">
         
         {/* Observation Deck */}
         <div 
-          className="flex-1 relative overflow-hidden bg-slate-50/50 border-4 border-white rounded-[4.5rem] flex items-center justify-center cursor-crosshair group " 
+          className="flex-1 relative overflow-hidden bg-slate-50/50 border-4 border-white rounded-[3rem] lg:rounded-[4.5rem] flex items-center justify-center cursor-crosshair group " 
           onClick={handleBeakerClick}
         >
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-24 lg:gap-48 relative z-10 p-12 w-full h-full">
+          <div className={`flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-48 relative z-10 p-4 lg:p-12 w-full h-full ${isMobile ? 'scale-[0.65] sm:scale-[0.8]' : ''}`}>
               <Beaker 
                 ref={beakerARef}
                 temperature={tempA} 
@@ -265,86 +282,90 @@ export const InkDiffusion = () => {
               />
           </div>
 
-          <div className="absolute bottom-12 right-12 flex items-center gap-4 z-20 pointer-events-none opacity-20 italic">
-             <p className="text-[10px] font-black uppercase tracking-[0.4em]">Tap beakers to add ink</p>
-             <MousePointer2 size={24} />
+          <div className="absolute bottom-6 lg:bottom-12 right-6 lg:right-12 flex items-center gap-4 z-20 pointer-events-none opacity-20 italic">
+             <p className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.4em]">Tap beakers to add ink</p>
+             <MousePointer2 size={isMobile ? 16 : 24} />
           </div>
         </div>
         </div>
       </ToolPanel>
 
-      <div className="w-[320px] shrink-0 bg-white rounded-[3rem] border-4 border-slate-50 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar italic">
-        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight ml-2">Lab Controls</h3>
-        
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 border-b-4 border-slate-50 pb-3">
-             <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Thermometer size={16} strokeWidth={3} />
-             </div>
-             <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Temperature</h4>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="space-y-2 p-3 bg-slate-50 rounded-2xl border-2 border-white">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cold Beaker</span>
-                <span className="text-lg font-black text-indigo-600 tabular-nums italic leading-none">{tempA}°C</span>
+      <SettingsPanel
+        isOpen={isConfigOpen}
+        onClose={() => setIsConfigOpen(false)}
+        title="Lab Controls"
+      >
+        <div className="space-y-10">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 border-b-4 border-slate-50 pb-4">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <Thermometer size={20} strokeWidth={3} />
               </div>
-              <input 
-                type="range" min="0" max="50" value={tempA}
-                onChange={(e) => setTempA(parseInt(e.target.value))}
-                className="w-full h-2 bg-white rounded-full appearance-none cursor-pointer accent-indigo-600"
-              />
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] leading-none">Temperature</h4>
             </div>
-
-            <div className="space-y-2 p-3 bg-slate-50 rounded-2xl border-2 border-white">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hot Beaker</span>
-                <span className="text-lg font-black text-rose-600 tabular-nums italic leading-none">{tempB}°C</span>
+            
+            <div className="space-y-8">
+              <div className="space-y-4 p-6 bg-slate-50 rounded-[2.5rem] border-4 border-white shadow-sm">
+                <div className="flex justify-between items-center px-2">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Cold Beaker</span>
+                  <span className="text-3xl font-black text-indigo-600 tabular-nums italic leading-none">{tempA}°C</span>
+                </div>
+                <input 
+                  type="range" min="0" max="50" value={tempA}
+                  onChange={(e) => setTempA(parseInt(e.target.value))}
+                  className="w-full h-4 bg-white rounded-full appearance-none cursor-pointer accent-indigo-600 border-2 border-slate-100"
+                />
               </div>
-              <input 
-                type="range" min="51" max="100" value={tempB}
-                onChange={(e) => setTempB(parseInt(e.target.value))}
-                className="w-full h-2 bg-white rounded-full appearance-none cursor-pointer accent-rose-600"
-              />
+
+              <div className="space-y-4 p-6 bg-slate-50 rounded-[2.5rem] border-4 border-white shadow-sm">
+                <div className="flex justify-between items-center px-2">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Hot Beaker</span>
+                  <span className="text-3xl font-black text-rose-600 tabular-nums italic leading-none">{tempB}°C</span>
+                </div>
+                <input 
+                  type="range" min="51" max="100" value={tempB}
+                  onChange={(e) => setTempB(parseInt(e.target.value))}
+                  className="w-full h-4 bg-white rounded-full appearance-none cursor-pointer accent-rose-600 border-2 border-slate-100"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 border-b-4 border-slate-50 pb-3">
-             <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Palette size={16} strokeWidth={3} />
-             </div>
-             <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Ink Color</h4>
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 border-b-4 border-slate-50 pb-4">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <Palette size={20} strokeWidth={3} />
+              </div>
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] leading-none">Ink Color</h4>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              {INK_COLORS.map(ink => (
+                <button
+                  key={ink.id}
+                  onClick={() => { setSelectedInk(ink); audioEngine.playTick(settings.soundTheme); }}
+                  className={`p-6 rounded-[2.5rem] border-4 transition-all flex flex-col items-center gap-4 ${
+                    selectedInk.id === ink.id ? 'border-indigo-500 bg-white shadow-lg scale-[1.02]' : 'border-slate-50 bg-slate-50/50 hover:border-indigo-100'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-full border-4 border-white shadow-md" style={{ backgroundColor: ink.color }} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 text-center leading-tight">{ink.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          
-          <div className="grid grid-cols-2 gap-2">
-             {INK_COLORS.map(ink => (
-               <button
-                 key={ink.id}
-                 onClick={() => { setSelectedInk(ink); audioEngine.playTick(settings.soundTheme); }}
-                 className={`p-3 rounded-2xl border-4 transition-all flex flex-col items-center gap-2 ${
-                   selectedInk.id === ink.id ? 'border-indigo-500 bg-indigo-50 ' : 'border-slate-50 bg-white hover:border-indigo-100'
-                 }`}
-               >
-                  <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: ink.color }} />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-900 text-center leading-tight">{ink.name}</span>
-               </button>
-             ))}
-          </div>
-        </div>
 
-        <div className="mt-auto">
+          <div className="h-px bg-slate-50 w-full" />
+
           <button
             onClick={() => { resetLab(); }}
-            className="w-full py-4 bg-white border-4 border-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center gap-2"
+            className="w-full py-8 bg-white border-4 border-slate-50 text-slate-400 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center gap-4"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={20} strokeWidth={3} />
             Reset Lab
           </button>
         </div>
-      </div>
+      </SettingsPanel>
     </div>
   );
 };

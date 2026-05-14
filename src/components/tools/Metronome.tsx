@@ -61,6 +61,13 @@ export const Metronome = () => {
   const { settings } = useSettings();
   const intl = useIntl();
   
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   // State
   const [bpm, setBpm] = useLocalStorage('metronome_bpm', 120);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -151,11 +158,11 @@ export const Metronome = () => {
       <AnimatePresence>
         {isConfigOpen && (
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: isMobile ? 0 : -40, y: isMobile ? -20 : 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: isMobile ? 0 : -40, y: isMobile ? -20 : 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="hidden lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0"
+            className={`flex flex-col gap-8 italic overflow-hidden shrink-0 ${isMobile ? 'w-full order-first' : 'w-[320px] h-full'}`}
           >
             <SettingsPanel
               isOpen={isConfigOpen}
@@ -224,12 +231,17 @@ export const Metronome = () => {
         )}
       </AnimatePresence>
 
-      <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={1100} baseHeight={800}>
+      <ToolPanel 
+        className="flex-1 font-['Outfit'] select-none" 
+        baseWidth={isMobile ? 400 : 1100} 
+        baseHeight={800}
+        fluid={isMobile}
+      >
         <div className="w-full max-w-3xl flex flex-col items-center gap-10 relative z-10">
           
           {/* Header Area */}
-          <div className="text-center space-y-6">
-            <h1 className="text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+          <div className={`text-center ${isMobile ? 'space-y-2' : 'space-y-6'}`}>
+            <h1 className={`${isMobile ? 'text-5xl md:text-6xl' : 'text-6xl lg:text-7xl'} font-black text-slate-900 tracking-tighter uppercase leading-none`}>
               <FormattedMessage id="metronome.title" defaultMessage="Metronome" />
             </h1>
 
@@ -244,37 +256,37 @@ export const Metronome = () => {
                       ? (i === 0 ? '#ef4444' : '#6366f1') 
                       : '#e2e8f0'
                   }}
-                  className="flex-1 rounded-full border-2 border-white max-w-[40px]"
+                  className={`flex-1 rounded-full border-2 border-white ${isMobile ? 'max-w-[30px] h-4 md:max-w-[40px] md:h-6' : 'max-w-[40px] h-6'}`}
                 />
               ))}
             </div>
           </div>
 
           {/* Main BPM Display */}
-          <div className="w-full bg-white/40 backdrop-blur-md rounded-[4rem] border-4 border-white p-12 lg:p-16 flex flex-col items-center relative overflow-hidden">
+          <div className={`w-full bg-white/40 backdrop-blur-md rounded-[2.5rem] md:rounded-[4rem] border-4 border-white ${isMobile ? 'p-8' : 'p-12 lg:p-16'} flex flex-col items-center relative overflow-hidden`}>
             <div className="relative flex flex-col items-center">
               <div className="flex items-center gap-8 lg:gap-12">
                 <button 
                   onClick={() => setBpm(prev => Math.max(MIN_BPM, prev - 1))}
-                  className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border-2 border-slate-50"
+                  className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border-2 border-slate-50`}
                 >
-                  <Plus size={28} strokeWidth={3} className="rotate-45" />
+                  <Plus size={isMobile ? 24 : 28} strokeWidth={3} className="rotate-45" />
                 </button>
 
                 <div className="text-center">
-                  <div className="text-[10rem] md:text-[12rem] font-black text-slate-900 tabular-nums leading-none tracking-tighter">
+                  <div className={`${isMobile ? 'text-[8rem]' : 'text-[10rem] md:text-[12rem]'} font-black text-slate-900 tabular-nums leading-none tracking-tighter`}>
                     {bpm}
                   </div>
-                  <div className="text-sm font-black text-indigo-500 uppercase tracking-[0.8em] mt-4 ml-4">
+                  <div className={`${isMobile ? 'text-xs mt-2' : 'text-sm mt-4'} font-black text-indigo-500 uppercase tracking-[0.8em] ml-4`}>
                     <FormattedMessage id="metronome.bpm" defaultMessage="BPM" />
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setBpm(prev => Math.min(MAX_BPM, prev + 1))}
-                  className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border-2 border-slate-50"
+                  className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border-2 border-slate-50`}
                 >
-                  <Plus size={28} strokeWidth={3} />
+                  <Plus size={isMobile ? 24 : 28} strokeWidth={3} />
                 </button>
               </div>
             </div>

@@ -45,6 +45,14 @@ export const RandomGroupNameGenerator = () => {
   const [groups, setGroups] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const generateGroups = useCallback(() => {
     setIsGenerating(true);
     setGroups([]);
@@ -69,7 +77,12 @@ export const RandomGroupNameGenerator = () => {
   }, [clearHeader, setHelpContent]);
 
   return (
-    <ToolPanel baseWidth={1000} baseHeight={800} className="italic">
+    <ToolPanel 
+      baseWidth={isMobile ? 400 : 1000} 
+      baseHeight={800} 
+      fluid={isMobile}
+      className="italic"
+    >
       <div className="w-full h-full flex flex-col items-center justify-start relative overflow-hidden">
         <div className="w-full max-w-4xl flex flex-col items-center relative z-10 px-3 lg:px-12 h-full py-2 lg:py-4">
           
@@ -83,12 +96,12 @@ export const RandomGroupNameGenerator = () => {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`flex items-center gap-4 py-3 lg:py-4 px-6 bg-white rounded-[2rem] border-4 border-slate-50 hover:border-indigo-100 transition-all w-full ${index === groups.length - 1 && groups.length % 2 !== 0 ? 'md:col-span-2' : ''}`}
+                        className={`flex items-center gap-4 py-3 lg:py-4 px-4 md:px-6 bg-white rounded-[1.5rem] md:rounded-[2rem] border-4 border-slate-50 hover:border-indigo-100 transition-all w-full ${index === groups.length - 1 && groups.length % 2 !== 0 ? 'md:col-span-2' : ''}`}
                       >
-                        <div className="w-16 h-16 lg:w-10 lg:h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-4xl lg:text-lg shrink-0">
+                        <div className="w-10 h-10 lg:w-10 lg:h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-lg lg:text-lg shrink-0">
                           {index + 1}
                         </div>
-                        <span className="text-5xl lg:text-2xl font-black text-slate-800 tracking-tight">
+                        <span className="text-xl md:text-5xl lg:text-2xl font-black text-slate-800 tracking-tight">
                           {name}
                         </span>
                       </motion.div>
@@ -116,7 +129,7 @@ export const RandomGroupNameGenerator = () => {
             <button
               onClick={generateGroups}
               disabled={isGenerating}
-              className="w-full py-6 lg:py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-4xl lg:text-xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-6 group italic border-4 border-white"
+              className="w-full py-5 lg:py-5 bg-indigo-600 text-white rounded-[1.5rem] md:rounded-[2rem] font-black text-xl md:text-4xl lg:text-xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 md:gap-6 group italic border-4 border-white shadow-lg"
             >
               {isGenerating ? (
                 <RefreshCw size={32} className="animate-spin" />

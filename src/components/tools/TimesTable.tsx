@@ -126,7 +126,7 @@ export const TimesTable = () => {
     setSessionCount(1);
     setFeedback(null);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setCellStates, setSessionCount, setFeedback]);
 
   useEffect(() => {
     setOnReset(() => resetRegistry);
@@ -198,10 +198,10 @@ export const TimesTable = () => {
   const gridNumbers = Array.from({ length: 12 }, (_, i) => i + 1);
 
   return (
-    <ToolPanel className="flex-col gap-6 p-6 lg:p-10" baseWidth={1400} baseHeight={900}>
+    <ToolPanel className="flex-col gap-4 lg:gap-6 p-4 lg:p-10" baseWidth={1200} baseHeight={900}>
       <div className="w-full flex flex-col lg:flex-row gap-8 items-stretch justify-center">
         {/* Left Column: Question Area */}
-        <div className="flex-1 bg-white rounded-[3rem] border-4 border-slate-100 flex flex-col items-center justify-center p-12 relative overflow-hidden">
+        <div className="flex-1 bg-white rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-100 flex flex-col items-center justify-center p-6 lg:p-12 relative overflow-hidden">
           <div className="flex flex-col items-center mb-8 shrink-0">
              <h4 className="text-[14px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Question</h4>
           </div>
@@ -226,10 +226,10 @@ export const TimesTable = () => {
                   key={`${currentQuestion.a}-${currentQuestion.b}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-9xl font-black text-slate-900 tracking-tighter tabular-nums flex items-center justify-center gap-12"
+                  className="text-7xl lg:text-9xl font-black text-slate-900 tracking-tighter tabular-nums flex items-center justify-center gap-8 lg:gap-12"
                 >
                   <span>{currentQuestion.a}</span>
-                  <span className="text-slate-200 text-8xl">×</span>
+                  <span className="text-slate-200 text-6xl lg:text-8xl">×</span>
                   <span>{currentQuestion.b}</span>
                 </motion.div>
 
@@ -241,7 +241,7 @@ export const TimesTable = () => {
                       type="number"
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
-                      className="w-full text-center text-8xl font-black p-8 bg-slate-50 border-4 border-slate-100 rounded-[2.5rem] focus:border-indigo-400 focus:bg-white transition-all tabular-nums placeholder:text-slate-200 outline-none h-48 flex items-center justify-center leading-none appearance-none"
+                      className="w-full text-center text-6xl lg:text-8xl font-black p-4 lg:p-8 bg-slate-50 border-4 border-slate-100 rounded-[2.5rem] focus:border-indigo-400 focus:bg-white transition-all tabular-nums placeholder:text-slate-200 outline-none h-32 lg:h-48 flex items-center justify-center leading-none appearance-none"
                       placeholder="?"
                       autoFocus
                     />
@@ -277,27 +277,27 @@ export const TimesTable = () => {
         </div>
 
         {/* Right Column: Mastery Grid */}
-        <div className="w-full lg:w-[480px] bg-white rounded-[3rem] border-4 border-slate-100 flex flex-col p-8 justify-center items-center">
+        <div className="w-full lg:w-[500px] bg-white rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-100 flex flex-col p-6 lg:p-8 justify-center items-center">
           <div className="flex flex-col items-center mb-8 shrink-0">
             <h4 className="text-[14px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Mastery Table</h4>
           </div>
           <div className="overflow-y-auto no-scrollbar pb-6 flex flex-col items-center">
             <div className="inline-block">
               {/* Grid Header Labels */}
-              <div className="flex gap-1 items-center mb-1 pl-7">
+              <div className="flex gap-1.5 lg:gap-1 items-center mb-1 pl-[38px] lg:pl-7">
                 {gridNumbers.map(col => (
-                  <div key={col} className="w-7 h-5 flex items-center justify-center font-black text-slate-300 text-[10px]">
+                  <div key={col} className="w-9 h-5 lg:w-7 lg:h-5 flex items-center justify-center font-black text-slate-300 text-[12px] lg:text-[10px]">
                     {col}
                   </div>
                 ))}
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5 lg:space-y-1">
                 {gridNumbers.map(row => (
-                  <div key={row} className="flex gap-1 items-center">
+                  <div key={row} className="flex gap-1.5 lg:gap-1 items-center">
                     <button
                       onClick={() => toggleRow(row)}
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[10px] transition-all border-2 ${
+                      className={`w-8 h-8 lg:w-6 lg:h-6 rounded-lg flex items-center justify-center font-black text-[12px] lg:text-[10px] transition-all border-2 ${
                         selectedRows.includes(row) 
                           ? 'bg-indigo-600 text-white border-indigo-600'
                           : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'
@@ -310,7 +310,7 @@ export const TimesTable = () => {
                       return (
                         <div 
                           key={`${row}x${col}`} 
-                          className={`w-7 h-7 rounded-lg border-2 transition-colors duration-500 ${getCellColor(state)}`}
+                          className={`w-9 h-9 lg:w-7 lg:h-7 rounded-lg border-2 transition-colors duration-500 ${getCellColor(state)}`}
                         />
                       )
                     })}
@@ -331,7 +331,7 @@ export const TimesTable = () => {
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`w-4 h-4 rounded-md border-2 ${item.color}`} />
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
+                  <span className="text-[11px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
                 </div>
               ))}
             </div>

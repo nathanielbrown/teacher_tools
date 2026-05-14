@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { 
   ChevronUp, 
@@ -77,6 +77,14 @@ export const FractionTool = () => {
   const [numerator, setNumerator] = useLocalStorage('fractiontool_numerator', 2);
   const [denominator, setDenominator] = useLocalStorage('fractiontool_denominator', 4);
   const [activeColor, setActiveColor] = useLocalStorage('fractiontool_color', '#ef4444');
+
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const lineRef = useRef<HTMLDivElement>(null);
 
@@ -173,24 +181,29 @@ export const FractionTool = () => {
         )}
       </AnimatePresence>
 
-      <ToolPanel className="flex-1 italic" baseWidth={1200} baseHeight={800}>
+      <ToolPanel 
+        className="flex-1 italic" 
+        baseWidth={isMobile ? 400 : 1200} 
+        baseHeight={800}
+        fluid={isMobile}
+      >
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 w-full h-full relative z-10 p-4 lg:p-8 overflow-y-auto lg:overflow-hidden custom-scrollbar">
         
-        {/* Left: Fraction Readout Core */}
-        <div className="w-full lg:w-[400px] shrink-0 bg-white rounded-[3rem] lg:rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group py-12 lg:py-0">
-           <div className="flex flex-col items-center gap-6 lg:gap-4 bg-white p-6 lg:p-8 rounded-[3rem] lg:rounded-[5rem] border-4 border-white relative group/core">
-              <div className="flex items-center gap-6 lg:gap-8">
-                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={48} strokeWidth={4} /></button>
-                <span className="text-[10rem] lg:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
-                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={48} strokeWidth={4} /></button>
+         {/* Left: Fraction Readout Core */}
+        <div className="w-full lg:w-[400px] shrink-0 bg-white rounded-[2rem] lg:rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group py-2 md:py-12 lg:py-0">
+           <div className="flex flex-col items-center gap-2 lg:gap-4 bg-white p-2 md:p-6 lg:p-8 rounded-[2rem] lg:rounded-[5rem] border-4 border-white relative group/core">
+              <div className="flex items-center gap-2 md:gap-6 lg:gap-8">
+                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
+                <span className="text-[4rem] md:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
+                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
               </div>
               
-              <div className="w-full h-4 bg-slate-800 rounded-full" />
+              <div className="w-full h-1.5 md:h-4 bg-slate-800 rounded-full" />
               
-              <div className="flex items-center gap-6 lg:gap-8">
-                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={48} strokeWidth={4} /></button>
-                <span className="text-[10rem] lg:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
-                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={48} strokeWidth={4} /></button>
+              <div className="flex items-center gap-2 md:gap-6 lg:gap-8">
+                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
+                <span className="text-[4rem] md:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
+                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
               </div>
             </div>
         </div>
@@ -198,8 +211,8 @@ export const FractionTool = () => {
         {/* Right Column: Circle (Top) and Line (Bottom) */}
         <div className="flex-1 flex flex-col gap-8">
            {/* Rectangle Visualization Module (Top Right) */}
-           <div className="flex-1 bg-white rounded-[3rem] lg:rounded-[4rem] border-4 border-white flex items-center justify-center relative overflow-hidden p-8">
-              <div className="w-full max-w-[900px] h-48 lg:h-32 border-4 border-slate-100 rounded-[2rem] lg:rounded-[2rem] overflow-hidden flex bg-slate-50 relative group/rect">
+           <div className="flex-1 bg-white rounded-[2.5rem] md:rounded-[4rem] border-4 border-white flex items-center justify-center relative overflow-hidden p-4 md:p-8">
+              <div className="w-full max-w-[900px] h-24 md:h-32 border-4 border-slate-100 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden flex bg-slate-50 relative group/rect">
                  {Array.from({ length: denominator }).map((_, i) => {
                    const isActive = i < numerator;
                    return (
@@ -218,29 +231,29 @@ export const FractionTool = () => {
            </div>
 
            {/* Number Line Module (Bottom Right) */}
-           <div className="h-[240px] lg:h-[250px] bg-white p-6 lg:p-8 rounded-[3rem] lg:rounded-[4rem] border-4 border-white flex flex-col justify-end pb-8 lg:pb-12 relative overflow-hidden shrink-0 select-none">
-              <div className="px-8 pt-24 pb-8 relative z-10">
+           <div className="h-[140px] md:h-[250px] bg-white p-2 md:p-8 rounded-[1.5rem] md:rounded-[4rem] border-4 border-white flex flex-col justify-end pb-4 md:pb-12 relative overflow-hidden shrink-0 select-none">
+              <div className="px-4 md:px-8 pt-16 md:pt-24 pb-4 md:pb-8 relative z-10">
                  <div ref={lineRef} onClick={handleLineClick} className="h-4 bg-slate-50 rounded-full w-full relative cursor-pointer group ">
-                    <div className="absolute top-1/2 -translate-y-1/2 left-0 h-16 w-1 bg-slate-100">
-                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                          <span className="text-sm font-black text-slate-400">0</span>
+                    <div className="absolute top-1/2 -translate-y-1/2 left-0 h-8 md:h-16 w-1 bg-slate-100">
+                       <div className="absolute -top-10 md:-top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                          <span className="text-xs md:text-sm font-black text-slate-400">0</span>
                           <div className="w-4 h-0.5 bg-slate-200 my-0.5" />
-                          <span className="text-sm font-black text-slate-400">{denominator}</span>
+                          <span className="text-xs md:text-sm font-black text-slate-400">{denominator}</span>
                        </div>
                     </div>
-                    <div className="absolute top-1/2 -translate-y-1/2 right-0 h-16 w-1 bg-slate-100">
-                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                          <span className="text-sm font-black text-slate-400">{denominator}</span>
+                    <div className="absolute top-1/2 -translate-y-1/2 right-0 h-8 md:h-16 w-1 bg-slate-100">
+                       <div className="absolute -top-10 md:-top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                          <span className="text-xs md:text-sm font-black text-slate-400">{denominator}</span>
                           <div className="w-4 h-0.5 bg-slate-200 my-0.5" />
-                          <span className="text-sm font-black text-slate-400">{denominator}</span>
+                          <span className="text-xs md:text-sm font-black text-slate-400">{denominator}</span>
                        </div>
                     </div>
                     {denominator > 1 && Array.from({ length: denominator - 1 }).map((_, i) => (
-                      <div key={i} className="absolute top-1/2 -translate-y-1/2 w-0.5 h-8 bg-slate-100" style={{ left: `${((i + 1) / denominator) * 100}%` }}>
-                         <div className="absolute -top-20 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className={`text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{i + 1}</span>
-                            <div className={`w-6 h-1 bg-slate-200 my-0.5 ${denominator > 12 ? 'hidden sm:block' : ''}`} />
-                            <span className={`text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{denominator}</span>
+                      <div key={i} className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 md:h-8 bg-slate-100" style={{ left: `${((i + 1) / denominator) * 100}%` }}>
+                         <div className="absolute -top-12 md:-top-20 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                            <span className={`text-sm md:text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{i + 1}</span>
+                            <div className={`w-4 md:w-6 h-1 bg-slate-200 my-0.5 ${denominator > 12 ? 'hidden sm:block' : ''}`} />
+                            <span className={`text-sm md:text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{denominator}</span>
                          </div>
                       </div>
                     ))}
@@ -256,9 +269,9 @@ export const FractionTool = () => {
                           audioEngine.playTick(settings.soundTheme);
                         }
                       }}
-                      className="absolute top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl border-4 border-white flex items-center justify-center z-10 cursor-grab active:cursor-grabbing"
+                      className="absolute top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl border-4 border-white flex items-center justify-center z-10 cursor-grab active:cursor-grabbing"
                       style={{ 
-                        left: `calc(${(numerator / denominator) * 100}% - 1.5rem)`,
+                        left: `calc(${(numerator / denominator) * 100}% - ${isMobile ? '1rem' : '1.5rem'})`,
                         backgroundColor: activeColor
                       }}
                       transition={{ type: 'spring', damping: 25, stiffness: 600 }}

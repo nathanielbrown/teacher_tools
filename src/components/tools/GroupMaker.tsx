@@ -73,14 +73,21 @@ const getHelpInfo = () => (
 
 export const GroupMaker = () => {
   const { settings } = useSettings();
-  const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
+  const { setOnReset, clearHeader, setHelpContent, setOnConfigToggle } = useHeader();
   const [selectedClassId, setSelectedClassId] = useLocalStorage('group_maker_class_id', 'blank');
   const [editedStudents, setEditedStudents] = useLocalStorage<string[]>('group_maker_students', []);
   const [mode, setMode] = useLocalStorage<'groups' | 'students'>('group_maker_mode', 'groups');
   const [count, setCount] = useLocalStorage('group_maker_count', 4);
   const [groups, setGroups] = useLocalStorage<string[][]>('group_maker_groups', []);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isClassPanelOpen, setIsClassPanelOpen] = useState(true);
+  const [isClassPanelOpen, setIsClassPanelOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const prevClassIdRef = useRef(selectedClassId);
 
@@ -135,26 +142,11 @@ export const GroupMaker = () => {
 
   useEffect(() => {
     setOnReset(() => resetGroups);
+    setOnConfigToggle(() => () => setIsClassPanelOpen(prev => !prev));
     setHelpContent(getHelpInfo());
     return () => clearHeader();
-  }, [clearHeader, setOnReset, resetGroups, setHelpContent]);
+  }, [clearHeader, setOnReset, setOnConfigToggle, resetGroups, setHelpContent]);
 
-  useEffect(() => {
-    setHeaderActions(
-      <div className="flex items-center gap-4 italic">
-        <button
-          onClick={() => setIsClassPanelOpen(prev => !prev)}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 ${
-            isClassPanelOpen 
-              ? 'bg-indigo-600 text-white' 
-              : 'bg-white border-2 border-slate-100 text-slate-300 hover:border-indigo-100 hover:text-indigo-600'
-          }`}
-        >
-          <Users2 size={14} /> <FormattedMessage id="classpanel.title" defaultMessage="Class Manager" />
-        </button>
-      </div>
-    );
-  }, [setHeaderActions, isClassPanelOpen]);
 
   const handleManageClasses = () => {
     window.history.pushState({}, '', '/config/classes');
@@ -174,58 +166,77 @@ export const GroupMaker = () => {
         students={editedStudents}
         onStudentsChange={setEditedStudents}
         onManageClasses={handleManageClasses}
-      />
+      >
+        {isMobile && (
+          <div className="mt-4">
+            <button 
+              onClick={() => { makeGroups(); setIsClassPanelOpen(false); }}
+              className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg flex items-center justify-center gap-3 active:scale-95 border-4 border-indigo-400"
+            >
+              <Shuffle size={24} strokeWidth={3} />
+              <FormattedMessage id="groupmaker.generate" defaultMessage="Make Groups" />
+            </button>
+          </div>
+        )}
+      </ClassPanel>
 
-      <ToolPanel className="italic" baseWidth={1000} alignTop>
+      <ToolPanel 
+        className="italic" 
+        baseWidth={isMobile ? 400 : 1000} 
+        fluid={isMobile}
+        alignTop
+      >
         <div className="w-full flex flex-col gap-4 relative z-10 h-full overflow-hidden p-6">
           
           {/* Top Control Bar (Config) */}
-          <div className="h-[120px] flex items-center justify-center bg-white/60 backdrop-blur-md rounded-[3rem] border-4 border-white shrink-0 w-full">
-            <div className="flex items-center gap-8">
-              {/* Mode Toggle */}
-              <div className="bg-white/60 p-2 rounded-[2.5rem] flex items-center h-20 border-4 border-white shrink-0">
-                <button 
-                  onClick={() => { setMode('groups'); audioEngine.playTick(settings.soundTheme); }}
-                  className={`h-full px-8 rounded-2xl text-base font-black uppercase tracking-widest transition-all ${mode === 'groups' ? 'bg-indigo-600 text-white scale-105 z-10' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <FormattedMessage id="groupmaker.mode.groups" defaultMessage="Total Groups" />
-                </button>
-                <button 
-                  onClick={() => { setMode('students'); audioEngine.playTick(settings.soundTheme); }}
-                  className={`h-full px-10 rounded-2xl text-base font-black uppercase tracking-widest transition-all ${mode === 'students' ? 'bg-indigo-600 text-white scale-105 z-10' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <FormattedMessage id="groupmaker.mode.size" defaultMessage="Size Limit" />
-                </button>
-              </div>
+          <div className="h-auto md:h-[120px] p-4 md:p-0 flex items-center justify-center bg-white/60 backdrop-blur-md rounded-[2.5rem] md:rounded-[3rem] border-4 border-white shrink-0 w-full">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 w-full md:w-auto">
+              <div className="flex flex-row items-center gap-3 md:gap-8 w-full md:w-auto justify-between md:justify-start">
+                {/* Mode Toggle */}
+                <div className="flex-1 md:flex-none bg-white/60 p-2 rounded-[2rem] md:rounded-[2.5rem] flex items-center h-16 md:h-20 border-4 border-white shrink-0">
+                  <button 
+                    onClick={() => { setMode('groups'); audioEngine.playTick(settings.soundTheme); }}
+                    className={`w-1/2 md:w-auto h-full px-2 md:px-8 rounded-xl md:rounded-2xl text-[10px] md:text-base font-black uppercase tracking-widest transition-all ${mode === 'groups' ? 'bg-indigo-600 text-white scale-105 z-10' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <FormattedMessage id="groupmaker.mode.groups" defaultMessage="Total Groups" />
+                  </button>
+                  <button 
+                    onClick={() => { setMode('students'); audioEngine.playTick(settings.soundTheme); }}
+                    className={`w-1/2 md:w-auto h-full px-2 md:px-10 rounded-xl md:rounded-2xl text-[10px] md:text-base font-black uppercase tracking-widest transition-all ${mode === 'students' ? 'bg-indigo-600 text-white scale-105 z-10' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <FormattedMessage id="groupmaker.mode.size" defaultMessage="Size Limit" />
+                  </button>
+                </div>
 
-              {/* Count Input */}
-              <div className="relative h-20 shrink-0">
-                 <input 
-                  type="number"
-                  value={count}
-                  min={1}
-                  max={editedStudents.length || 100}
-                  onChange={(e) => { setCount(parseInt(e.target.value) || 1); audioEngine.playTick(settings.soundTheme); }}
-                  className="w-28 h-full bg-white/80 border-4 border-white focus:border-indigo-400 rounded-2xl text-center font-black text-4xl text-black outline-none transition-all italic"
-                />
+                {/* Count Input */}
+                <div className="relative h-16 md:h-20 w-24 md:w-auto shrink-0">
+                   <input 
+                    type="number"
+                    value={count}
+                    min={1}
+                    max={editedStudents.length || 100}
+                    onChange={(e) => { setCount(parseInt(e.target.value) || 1); audioEngine.playTick(settings.soundTheme); }}
+                    className="w-full md:w-28 h-full bg-white/80 border-4 border-white focus:border-indigo-400 rounded-[1.5rem] md:rounded-2xl text-center font-black text-3xl md:text-4xl text-black outline-none transition-all italic"
+                  />
+                </div>
               </div>
 
               {/* Generate and Clear Buttons */}
-              <div className="flex flex-col gap-2 shrink-0">
+              <div className="flex flex-col gap-2 shrink-0 w-full md:w-auto">
                 <button
                   onClick={makeGroups}
                   disabled={isGenerating || !editedStudents.length}
-                  className={`h-20 flex items-center gap-4 px-10 rounded-[2.5rem] font-black text-white transition-all active:scale-95 ${isGenerating ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                  className={`h-16 md:h-20 flex items-center justify-center gap-4 w-full md:w-auto px-6 md:px-10 rounded-[1.5rem] md:rounded-[2.5rem] font-black text-white transition-all active:scale-95 ${isGenerating ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
                 >
-                  {isGenerating ? <RotateCcw size={28} className="animate-spin" /> : <Shuffle size={28} strokeWidth={3} />}
-                  <span className="uppercase tracking-[0.2em] text-xl">
+                  {isGenerating ? <RotateCcw size={20} className="animate-spin md:w-7 md:h-7" /> : <Shuffle size={20} className="md:w-7 md:h-7" strokeWidth={3} />}
+                  <span className="uppercase tracking-[0.2em] text-xs md:text-xl">
                     <FormattedMessage id="groupmaker.generate" defaultMessage="Make Groups" />
                   </span>
                 </button>
                 {groups.length > 0 && (
                   <button
                     onClick={resetGroups}
-                    className="text-xs font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors flex items-center justify-center gap-1"
+                    className="text-[10px] md:text-xs font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors flex items-center justify-center gap-1 mt-1 md:mt-0"
                   >
                     <RotateCcw size={12} />
                     <FormattedMessage id="groupmaker.clear" defaultMessage="Clear Groups" />
@@ -236,7 +247,7 @@ export const GroupMaker = () => {
           </div>
 
           {/* Main Display Area (Expanded to floor) */}
-          <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+          <div className="flex-1 overflow-y-auto no-scrollbar pt-2 md:pt-4">
             <AnimatePresence mode="wait">
               {groups.length > 0 ? (
                 <motion.div 
@@ -244,7 +255,7 @@ export const GroupMaker = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-4"
+                  className="grid grid-cols-2 xl:grid-cols-3 gap-2 md:gap-6"
                 >
                   {groups.map((members, idx) => (
                     <motion.div
@@ -252,30 +263,30 @@ export const GroupMaker = () => {
                       initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="bg-white rounded-[3rem] border-4 border-white overflow-hidden flex flex-col h-fit transition-all group/card"
+                      className="bg-white rounded-[1.5rem] md:rounded-[3rem] border-4 border-white overflow-hidden flex flex-col h-fit transition-all group/card"
                     >
-                      <div className="px-8 py-6 flex items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0">
-                        <h3 className="font-black text-indigo-600 text-base tracking-widest">
+                      <div className="px-3 md:px-8 py-3 md:py-6 flex flex-col md:flex-row items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0 gap-1 md:gap-0">
+                        <h3 className="font-black text-indigo-600 text-xs md:text-base tracking-widest text-center md:text-left">
                           <FormattedMessage id="groupmaker.team" defaultMessage="Team {n}" values={{ n: idx + 1 }} />
                         </h3>
-                        <div className="bg-white px-4 py-2 rounded-full">
-                          <span className="text-sm font-black text-slate-400 tabular-nums">
+                        <div className="bg-white px-2 md:px-4 py-1 md:py-2 rounded-full flex items-center justify-center">
+                          <span className="text-[9px] md:text-sm font-black text-slate-400 tabular-nums whitespace-nowrap">
                             <FormattedMessage id="groupmaker.students_count" defaultMessage="{count} Students" values={{ count: members.length }} />
                           </span>
                         </div>
                       </div>
                       
-                      <div className="px-8 py-4 flex flex-col gap-1.5 text-left">
+                      <div className="px-3 md:px-8 py-3 md:py-4 flex flex-col gap-1.5 text-left">
                         {members.map((member, mIdx) => (
                           <motion.div 
                             key={mIdx}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.05 + mIdx * 0.02 }}
-                            className="flex items-center gap-3 group/item"
+                            className="flex items-start md:items-center gap-2 md:gap-3 group/item mt-0.5 md:mt-0"
                           >
-                            <div className="w-3 h-3 rounded-full bg-slate-100 border-2 border-white group-hover/item:bg-indigo-400 transition-colors" />
-                            <span className="text-xl font-black text-slate-900 group-hover/item:text-indigo-600 transition-colors break-words">{member}</span>
+                            <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-slate-100 border-2 border-white group-hover/item:bg-indigo-400 transition-colors shrink-0 mt-1 md:mt-0" />
+                            <span className="text-sm md:text-xl font-black text-slate-900 group-hover/item:text-indigo-600 transition-colors break-words leading-tight">{member}</span>
                           </motion.div>
                         ))}
                       </div>

@@ -67,6 +67,13 @@ export const Spelling = () => {
   const [feedback, setFeedback] = useState<any>(null); 
   
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const resetToSetup = useCallback(() => {
     setStatus('setup');
@@ -178,7 +185,7 @@ export const Spelling = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden transition-all duration-500 ease-in-out gap-8">
+    <div className={`flex flex-col lg:flex-row h-full w-full overflow-hidden transition-all duration-500 ease-in-out ${isMobile ? '-mx-2 w-[calc(100%+1rem)] gap-4' : 'gap-8'}`}>
       <AnimatePresence>
         {isPanelVisible && (
           <div className="flex flex-col gap-6 w-full lg:w-[400px] shrink-0 h-full overflow-hidden">
@@ -195,13 +202,26 @@ export const Spelling = () => {
               onManageLists={handleManageLists}
               manageListsLabel={<FormattedMessage id="wordpanel.link.addRemove" defaultMessage="Add/Remove Lists" />}
               className="h-full min-h-0"
-            />
+            >
+              {/* Mobile Play Button */}
+              <div className="lg:hidden">
+                <button
+                  onClick={startGame}
+                  className="w-full h-16 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-indigo-200"
+                >
+                  <Play size={20} fill="currentColor" /> <FormattedMessage id="spelling.setup.start" />
+                </button>
+              </div>
+            </WordPanel>
           </div>
         )}
       </AnimatePresence>
 
-      <ToolPanel baseWidth={isPanelVisible ? 1200 : 1600} baseHeight={800}>
-        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden group p-12">
+      <ToolPanel 
+        baseWidth={isMobile ? (status === 'playing' ? 600 : 800) : (isPanelVisible ? 1200 : 1600)} 
+        baseHeight={isMobile ? 1000 : 800}
+      >
+        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden group p-6 lg:p-12">
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
           <AnimatePresence mode="wait">
@@ -214,7 +234,7 @@ export const Spelling = () => {
                 className="flex flex-col items-center gap-12 z-10 w-full"
               >
                 <div className="text-center">
-                  <h1 className="text-7xl font-black text-slate-900 uppercase tracking-tighter">
+                  <h1 className="text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter">
                     <FormattedMessage id="spelling.setup.title" />
                   </h1>
                 </div>
@@ -223,7 +243,7 @@ export const Spelling = () => {
                   onClick={startGame}
                   className="w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-indigo-700 transition-all  flex items-center justify-center gap-6 border-4 border-white active:scale-95"
                 >
-                  <Play size={28} fill="currentColor" /> <FormattedMessage id="spelling.setup.start" />
+                  <Play size={28} fill="currentColor" /> <FormattedMessage id="shared.button.play" />
                 </button>
               </motion.div>
             )}
@@ -261,7 +281,7 @@ export const Spelling = () => {
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    className="w-full text-center text-6xl font-black p-10 bg-white border-[12px] border-slate-100 rounded-[3.5rem] focus:border-indigo-600 transition-all outline-none tabular-nums  uppercase tracking-tighter"
+                    className="w-full text-center text-5xl lg:text-6xl font-black p-10 bg-white border-[12px] border-slate-100 rounded-[3.5rem] focus:border-indigo-600 transition-all outline-none tabular-nums  uppercase tracking-tighter placeholder:text-4xl lg:placeholder:text-5xl"
                     placeholder={intl.formatMessage({ id: 'spelling.playing.placeholder' })}
                     autoComplete="off"
                     autoCorrect="off"

@@ -29,25 +29,25 @@ const HelpContent = () => (
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="higherorlower.help.step1" defaultMessage="Choose a range of numbers to play with." />
+          <FormattedMessage id="higherorlower.help.step1" defaultMessage="Pick numbers to play with." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="higherorlower.help.step2" defaultMessage="Type a number and click the arrow to guess." />
+          <FormattedMessage id="higherorlower.help.step2" defaultMessage="Type a number and click the arrow." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="higherorlower.help.step3" defaultMessage="The game will tell you if the secret number is higher or lower." />
+          <FormattedMessage id="higherorlower.help.step3" defaultMessage="I will tell you if it is higher or lower." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
-          <FormattedMessage id="higherorlower.help.step4" defaultMessage="Try to find the number in as few guesses as possible!" />
+          <FormattedMessage id="higherorlower.help.step4" defaultMessage="Can you find the secret number?" />
         </p>
       </div>
     </div>
@@ -131,9 +131,17 @@ export const HigherOrLower = () => {
     return () => clearHeader();
   }, [clearHeader, setOnReset, setHelpContent, resetGame]);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="flex gap-8 h-full w-full italic">
-      <ToolPanel baseWidth={1000} baseHeight={800}>
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full w-full italic overflow-y-auto lg:overflow-hidden px-0 lg:px-0 py-4 lg:py-0 custom-scrollbar">
+      <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1000 : 800} fluid={true}>
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-12 left-12 flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
@@ -208,7 +216,7 @@ export const HigherOrLower = () => {
                       </motion.div>
                     )}
                   </div>
-                  <h2 className="text-8xl font-black text-slate-900 uppercase tracking-tighter italic">
+                  <h2 className="text-6xl lg:text-8xl font-black text-slate-900 uppercase tracking-tighter italic">
                     <FormattedMessage id="higherorlower.guess.label" />
                   </h2>
                 </div>
@@ -221,7 +229,7 @@ export const HigherOrLower = () => {
                       max={difficulty}
                       value={guessInput}
                       onChange={(e) => setGuessInput(e.target.value)}
-                      className="w-full bg-slate-50 border-4 border-slate-100 rounded-[3rem] p-8 text-center text-8xl font-black text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder:text-slate-200 tabular-nums "
+                      className="w-full bg-slate-50 border-4 border-slate-100 rounded-[3rem] p-6 lg:p-8 text-center text-6xl lg:text-8xl font-black text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder:text-slate-200 tabular-nums "
                       placeholder="?"
                       autoFocus
                     />
@@ -275,7 +283,7 @@ export const HigherOrLower = () => {
         </div>
       </ToolPanel>
 
-      <div className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6">
+      <div className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6 pb-8 lg:pb-0">
         <SettingsPanel
           isOpen={isConfigOpen}
           onClose={() => setIsConfigOpen(false)}
@@ -298,33 +306,41 @@ export const HigherOrLower = () => {
           onClear={() => setLog([])}
           emptyMessage={intl.formatMessage({ id: 'higherorlower.history.empty' })}
           icon={Hash}
+          itemsPerPage={isMobile ? 3 : 8}
+          reservePaginationSpace={true}
+          listClassName={isMobile ? "grid grid-cols-3 gap-2" : "space-y-2"}
           renderItem={(entry, idx) => (
             <motion.div
               key={`${entry.guess}-${idx}`}
               layout
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={`p-5 rounded-[2rem] flex items-center justify-between border-4 transition-all ${
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`rounded-[1.5rem] lg:rounded-[2rem] flex items-center justify-between border-4 transition-all ${
+                isMobile ? 'flex-col p-2 gap-1 h-20 justify-center' : 'p-5'
+              } ${
                 entry.result === 'Correct' 
                   ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
                   : 'bg-white border-white '
               }`}
             >
-              <span className="text-3xl font-black text-slate-800 tabular-nums">{entry.guess}</span>
+              <span className={`${isMobile ? 'text-xl' : 'text-3xl'} font-black text-slate-800 tabular-nums`}>{entry.guess}</span>
               <div className="flex items-center">
                 {entry.result === 'Higher' && (
                   <div className="flex items-center gap-1 text-indigo-600 font-black text-[10px] uppercase tracking-widest">
-                    <ArrowUp size={16} /> <FormattedMessage id="higherorlower.result.higher" />
+                    <ArrowUp size={isMobile ? 14 : 16} /> 
+                    {!isMobile && <FormattedMessage id="higherorlower.result.higher" />}
                   </div>
                 )}
                 {entry.result === 'Lower' && (
                   <div className="flex items-center gap-1 text-rose-500 font-black text-[10px] uppercase tracking-widest">
-                    <ArrowDown size={16} /> <FormattedMessage id="higherorlower.result.lower" />
+                    <ArrowDown size={isMobile ? 14 : 16} /> 
+                    {!isMobile && <FormattedMessage id="higherorlower.result.lower" />}
                   </div>
                 )}
                 {entry.result === 'Correct' && (
                   <div className="flex items-center gap-1 text-emerald-600 font-black text-[10px] uppercase tracking-widest">
-                    <Check size={16} /> <FormattedMessage id="higherorlower.result.correct" />
+                    <Check size={isMobile ? 14 : 16} /> 
+                    {!isMobile && <FormattedMessage id="higherorlower.result.correct" />}
                   </div>
                 )}
               </div>

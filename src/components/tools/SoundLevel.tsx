@@ -82,6 +82,14 @@ export const SoundLevel = () => {
   const [threshold, setThreshold] = useState(60);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [permissionError, setPermissionError] = useState<string | null>(null);
+
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -222,21 +230,16 @@ export const SoundLevel = () => {
   const status = getStatus();
 
   useEffect(() => {
-    setHeaderActions(
-      isMonitoring ? (
-        <button 
-          onClick={() => { stopMonitoring(); audioEngine.playTick(settings.soundTheme); }}
-          className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95  italic"
-        >
-          <MicOff size={14} strokeWidth={3} /> <FormattedMessage id="soundlevel.status.stop" />
-        </button>
-      ) : null
-    );
-  }, [isMonitoring, stopMonitoring, settings.soundTheme, setHeaderActions]);
+    setHeaderActions(null);
+  }, [setHeaderActions]);
 
   return (
     <div className="flex gap-8 h-full w-full italic">
-      <ToolPanel baseWidth={800} baseHeight={800}>
+      <ToolPanel 
+        baseWidth={isMobile ? 400 : 800} 
+        baseHeight={800}
+        fluid={isMobile}
+      >
         <div className={`w-full h-full flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'cursor-grabbing' : ''}`}>
           
           <AnimatePresence>
@@ -250,7 +253,7 @@ export const SoundLevel = () => {
             )}
           </AnimatePresence>
 
-          <div className="relative w-full max-w-xl aspect-square flex items-center justify-center z-10">
+          <div className="relative w-full max-w-[320px] md:max-w-xl aspect-square flex items-center justify-center z-10">
             <svg className="absolute inset-0 w-full h-full gauge-svg " viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" fill="none" stroke="#f1f5f9" strokeWidth="8" />
               

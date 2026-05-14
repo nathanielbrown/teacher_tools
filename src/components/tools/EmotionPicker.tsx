@@ -85,6 +85,14 @@ export const EmotionPicker = () => {
   const { settings } = useSettings();
   const intl = useIntl();
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const resetTool = useCallback(() => {
     setSelectedEmotion(null);
     audioEngine.playTick(settings.soundTheme);
@@ -101,19 +109,22 @@ export const EmotionPicker = () => {
   }, [setHeaderActions]);
 
   return (
-    <ToolPanel baseWidth={1200} baseHeight={800}>
-      <div className="w-full max-w-5xl flex flex-col items-center gap-12 lg:gap-16 relative z-10">
+    <ToolPanel 
+      baseWidth={isMobile ? 400 : 1400} 
+      baseHeight={isMobile ? 900 : 900} 
+      fluid={isMobile}
+      alignTop
+    >
+      <div className="w-full flex flex-col items-center gap-12 lg:gap-16 relative z-10 px-4 md:px-10">
         
-        <div className="text-center space-y-4">
-          <div className="space-y-1">
-             <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-               <FormattedMessage id="emotion.title" defaultMessage="Emotion Picker" />
-             </h1>
-          </div>
+        <div className="text-center space-y-2 shrink-0">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+            <FormattedMessage id="emotion.title" defaultMessage="Emotion Picker" />
+          </h1>
         </div>
 
-        {/* Emotion Display */}
-        <div className="w-full bg-slate-50/50 backdrop-blur-xl rounded-[3.5rem] border-4 border-white p-10 lg:p-14  min-h-[600px] flex items-center justify-center relative overflow-hidden">
+        {/* Emotion Display Container - Stabilized Height */}
+        <div className="w-full bg-slate-50/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-white p-6 md:p-10 lg:p-14 min-h-[600px] md:min-h-[700px] flex items-center justify-center relative overflow-hidden">
            <div className="tool-grid-bg opacity-10 pointer-events-none" />
            
            <AnimatePresence mode="wait">
@@ -125,7 +136,7 @@ export const EmotionPicker = () => {
                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
                  className="w-full"
                >
-                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
+                 <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
                    {EMOTIONS.map((emotion, index) => (
                      <motion.button
                        key={emotion.label}
@@ -133,12 +144,12 @@ export const EmotionPicker = () => {
                        animate={{ opacity: 1, y: 0 }}
                        transition={{ delay: index * 0.02 }}
                        onClick={() => { setSelectedEmotion(emotion); audioEngine.playTick(settings.soundTheme); }}
-                       className="group aspect-square w-full bg-white border-4 border-slate-100 rounded-3xl hover:border-rose-200  transition-all active:scale-95 flex flex-col items-center justify-center gap-3 p-4 "
+                       className="group aspect-square w-full bg-white border-2 md:border-4 border-slate-100 rounded-2xl md:rounded-3xl hover:border-rose-200  transition-all active:scale-95 flex flex-col items-center justify-center gap-1 md:gap-3 p-2 md:p-4 "
                      >
-                       <span className="text-5xl md:text-6xl transition-transform group-hover:scale-110 duration-500">
+                       <span className="text-4xl md:text-6xl transition-transform group-hover:scale-110 duration-500">
                          {emotion.emoji}
                        </span>
-                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                       <span className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
                          {intl.formatMessage({ id: emotion.id, defaultMessage: emotion.label })}
                        </span>
                      </motion.button>
@@ -153,16 +164,16 @@ export const EmotionPicker = () => {
                  exit={{ opacity: 0, scale: 0.9 }}
                  className="flex flex-col items-center gap-12"
                >
-                 <motion.div 
-                   initial={{ rotate: -10 }}
-                   animate={{ rotate: 0 }}
-                   className="text-[15rem] md:text-[18rem] -[0_30px_60px_rgba(0,0,0,0.2)]"
+                 <motion.div
+                   initial={{ rotate: -10, scale: 0.5 }}
+                   animate={{ rotate: 0, scale: 1 }}
+                   className="text-[12rem] md:text-[15rem] drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
                  >
                     {selectedEmotion.emoji}
                  </motion.div>
                  
-                  <div className="text-center space-y-4">
-                     <h3 className="text-7xl md:text-8xl font-black text-slate-900 uppercase tracking-tighter leading-none">
+                  <div className="text-center space-y-2">
+                     <h3 className="text-6xl md:text-7xl font-black text-slate-900 uppercase tracking-tighter leading-none">
                        {intl.formatMessage({ id: selectedEmotion.id, defaultMessage: selectedEmotion.label })}
                      </h3>
                   </div>

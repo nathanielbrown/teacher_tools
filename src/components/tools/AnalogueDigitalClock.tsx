@@ -225,7 +225,7 @@ export const AnalogueDigitalClock = () => {
           <div className={`flex flex-col items-center w-full ${isMobile ? 'gap-4' : 'gap-6 md:gap-10'}`}>
             {/* 1. Analogue Clock */}
             <div className="w-[300px] md:w-[450px] aspect-square relative group/clock">
-              <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center border-8 border-slate-900 transition-transform duration-700 group-hover/clock:scale-[1.02]">
+              <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center border-8 border-indigo-100 transition-transform duration-700 group-hover/clock:scale-[1.02]">
                 <svg
                   ref={svgRef}
                   viewBox="0 0 100 100"
@@ -319,7 +319,7 @@ export const AnalogueDigitalClock = () => {
                     </g>
                   )}
 
-                  <circle cx="50" cy="50" r="2.5" fill="#000000" />
+                  <circle cx="50" cy="50" r="2.5" fill="#1e293b" />
                 </svg>
               </div>
             </div>
@@ -328,13 +328,13 @@ export const AnalogueDigitalClock = () => {
             <div className="flex bg-slate-100 p-1.5 md:p-2 rounded-2xl border-2 border-white backdrop-blur-md">
               <button 
                 onClick={() => { setIsEditing(false); setTime(new Date()); audioEngine.playTick(settings.soundTheme); }} 
-                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${!isEditing ? 'bg-slate-900 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${!isEditing ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 <FormattedMessage id="clock.controls.now" defaultMessage="Time Now" />
               </button>
               <button 
                 onClick={() => { setIsEditing(true); audioEngine.playTick(settings.soundTheme); }} 
-                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${isEditing ? 'bg-slate-900 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${isEditing ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 <FormattedMessage id="clock.controls.set" defaultMessage="Set Time" />
               </button>
@@ -361,7 +361,7 @@ export const AnalogueDigitalClock = () => {
                   )}
                 </AnimatePresence>
 
-                <div className="text-5xl md:text-6xl lg:text-8xl font-black tabular-nums tracking-tighter text-slate-900 italic">
+                <div className="text-5xl md:text-6xl lg:text-8xl font-black tabular-nums tracking-tighter text-slate-800 italic">
                   {(time.getHours() % 12 || 12).toString().padStart(2, '0')}
                 </div>
 
@@ -462,8 +462,8 @@ export const AnalogueDigitalClock = () => {
             </div>
 
             {/* 4. Word Clock */}
-            <div className="w-full text-center py-6 md:py-10 lg:py-14 bg-white rounded-[2rem] md:rounded-[2.5rem] border-4 border-slate-200">
-              <h2 className="text-xl md:text-3xl lg:text-5xl font-black text-slate-900 tracking-tight italic uppercase px-6 md:px-8 leading-tight">
+            <div className="w-full bg-white rounded-[2rem] md:rounded-[2.5rem] border-4 border-slate-200 flex items-center justify-center py-6 md:py-10 lg:py-14">
+              <h2 className="w-full text-xl md:text-3xl lg:text-5xl font-black text-slate-800 tracking-tight italic uppercase px-6 md:px-8 leading-tight min-h-[2.5em] flex items-center justify-center text-center">
                 {getTimeInWords(time, intl)}
               </h2>
             </div>

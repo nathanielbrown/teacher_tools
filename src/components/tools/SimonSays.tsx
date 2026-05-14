@@ -17,7 +17,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
 import { ToolPanel } from '../shared/ToolPanel';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 // 1. Constants
 const CATEGORIES = [
@@ -158,7 +158,9 @@ const HelpContent = () => (
 export const SimonSays = () => {
   const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
+  const intl = useIntl();
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [gameState, setGameState] = useState('menu'); // 'menu', 'playing'
   const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
   const [timerValue, setTimerValue] = useState(0); // 0 = Manual
@@ -169,6 +171,12 @@ export const SimonSays = () => {
   const timerRef = useRef<any>(null);
   const messageTimeoutRef = useRef<any>(null);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const generateCommand = useCallback(() => {
     if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current);
@@ -240,35 +248,44 @@ export const SimonSays = () => {
   useEffect(() => {
     if (gameState !== 'menu') {
       setHeaderActions(
-        <div className="flex items-center gap-4 italic">
-          <button 
-            onClick={resetGame}
-            className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-slate-50 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95 "
-            title="Return to Menu"
-          >
-            <RotateCcw size={16} /> <FormattedMessage id="simonsays.controls.menu" defaultMessage="Menu" />
-          </button>
-          
-          <div className="flex bg-white p-1 rounded-xl border-2 border-slate-50 ">
-            {TIMER_OPTIONS.map((opt) => (
-              <button
-                key={opt.label}
-                onClick={() => {
-                  setTimerValue(opt.value);
-                  setProgress(100);
-                }}
-                className={`px-3 py-1.5 rounded-lg font-black text-[10px] transition-all uppercase tracking-widest ${
-                  timerValue === opt.value 
-                    ? 'bg-indigo-600 text-white ' 
-                    : 'text-slate-400 hover:text-indigo-600'
-                }`}
-              >
-                {opt.value === 0 ? (
-                  <FormattedMessage id="simonsays.timer.manual" defaultMessage="Manual" />
-                ) : opt.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center gap-2 md:gap-4 italic">
+          {isMobile ? (
+            <select
+              value={timerValue}
+              onChange={(e) => {
+                setTimerValue(Number(e.target.value));
+                setProgress(100);
+              }}
+              className="px-4 py-2 bg-white border-2 border-slate-100 text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-indigo-600 transition-all"
+            >
+              {TIMER_OPTIONS.map((opt) => (
+                <option key={opt.label} value={opt.value}>
+                  {opt.value === 0 ? intl.formatMessage({ id: 'simonsays.timer.manual', defaultMessage: 'Manual' }) : opt.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="flex bg-white p-1 rounded-xl border-2 border-slate-50 ">
+              {TIMER_OPTIONS.map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => {
+                    setTimerValue(opt.value);
+                    setProgress(100);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg font-black text-[10px] transition-all uppercase tracking-widest ${
+                    timerValue === opt.value 
+                      ? 'bg-indigo-600 text-white ' 
+                      : 'text-slate-400 hover:text-indigo-600'
+                  }`}
+                >
+                  {opt.value === 0 ? (
+                    <FormattedMessage id="simonsays.timer.manual" defaultMessage="Manual" />
+                  ) : opt.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {timerValue > 0 && (
             <button
@@ -287,10 +304,10 @@ export const SimonSays = () => {
     } else {
       setHeaderActions(null);
     }
-  }, [gameState, timerValue, isPaused, setHeaderActions, resetGame]);
+  }, [gameState, timerValue, isPaused, setHeaderActions, resetGame, isMobile, intl]);
 
   return (
-    <ToolPanel className="font-['Outfit'] select-none">
+    <ToolPanel className="font-['Outfit'] select-none" baseWidth={isMobile ? 600 : 1200} baseHeight={800} fluid={!isMobile}>
       <AnimatePresence mode="wait">
         {gameState === 'menu' ? (
           <motion.div 
@@ -301,22 +318,21 @@ export const SimonSays = () => {
             className="flex-1 flex flex-col items-center justify-center space-y-12"
           >
             <div className="text-center space-y-4 italic">
-              <h1 className="text-6xl font-black text-slate-800 tracking-tighter uppercase leading-none">
+              <h1 className="text-6xl font-black text-slate-800 tracking-tighter uppercase leading-none drop-shadow-sm">
                 <FormattedMessage id="simonsays.title" defaultMessage="Simon Says" />
               </h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 w-full max-w-6xl">
+            <div className={`grid gap-6 w-full max-w-6xl ${isMobile ? 'grid-cols-1 px-4' : 'md:grid-cols-3 lg:grid-cols-5'}`}>
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => startGame(cat)}
-                  className={`group relative h-64 rounded-[2.5rem] overflow-hidden transition-all hover:scale-105 active:scale-95 `}
+                  className={`group relative ${isMobile ? 'h-28' : 'h-64'} rounded-[2.5rem] overflow-hidden transition-all hover:scale-105 active:scale-95 `}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-90`} />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white space-y-4 italic">
-                    <cat.icon size={64} strokeWidth={1.5} className="group-hover:scale-110 transition-transform" />
-                    <span className="text-2xl font-black tracking-tighter uppercase">
+                  <div className={`absolute inset-0 flex flex-col items-center justify-center ${isMobile ? 'p-2' : 'p-6'} text-white space-y-4 italic`}>
+                    <span className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} font-black tracking-tighter uppercase`}>
                       <FormattedMessage id={`simonsays.category.${cat.id}`} defaultMessage={cat.name} />
                     </span>
                   </div>
@@ -330,14 +346,14 @@ export const SimonSays = () => {
             key="playing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex-1 flex flex-col gap-8 relative h-full"
+            className="flex-1 flex flex-col gap-8 relative h-full w-full"
           >
-            <div className="flex-1 p-12 bg-white relative overflow-hidden rounded-[4rem] border-4 border-slate-50 ">
+            <div className={`flex-1 flex flex-col items-center justify-center bg-white relative overflow-hidden border-4 border-slate-50 ${isMobile ? 'rounded-none p-6' : 'rounded-[4rem] p-12'}`}>
                {/* Progress Bar (if auto-timer) */}
                {timerValue > 0 && (
                  <div className="absolute top-0 left-0 w-full h-3 bg-slate-50">
                     <motion.div 
-                       className="h-full bg-indigo-600 -[0_0_15px_rgba(79,70,229,0.4)]"
+                       className="h-full bg-indigo-600"
                        initial={{ width: '100%' }}
                        animate={{ width: `${progress}%` }}
                        transition={{ duration: 0.05, ease: 'linear' }}
@@ -380,25 +396,19 @@ export const SimonSays = () => {
                       )}
                     </div>
                       
-                    <h2 className="text-7xl md:text-9xl font-black text-slate-800 tracking-tighter leading-none uppercase">
+                    <h2 className="text-7xl md:text-9xl font-black text-slate-800 tracking-tighter leading-none uppercase drop-shadow-sm">
                       {currentCommand?.text}
                     </h2>
-
-                    <div className={`w-64 h-64 rounded-[5rem] bg-slate-50 flex items-center justify-center mx-auto  border-8 border-white transition-colors duration-500 ${
-                      (currentCommand?.isSimon || !isMessageVisible) ? 'text-blue-600' : 'text-rose-600'
-                    }`}>
-                       <selectedCategory.icon size={120} strokeWidth={1} />
-                    </div>
                  </motion.div>
                </AnimatePresence>
             </div>
 
             {/* Next Command Button - only if Manual */}
             {timerValue === 0 && (
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center pt-4 pb-4">
                 <button
                   onClick={generateCommand}
-                  className="group flex items-center gap-6 px-16 py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-4xl  hover:bg-indigo-700 active:scale-95 transition-all tracking-tighter italic uppercase"
+                  className="group flex items-center gap-6 px-16 py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-4xl  hover:bg-indigo-700 active:scale-95 transition-all tracking-tighter italic uppercase shadow-xl"
                 >
                   <FormattedMessage id="simonsays.next" defaultMessage="Next" />
                   <ChevronRight size={48} className="group-hover:translate-x-2 transition-transform" />

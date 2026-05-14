@@ -75,6 +75,14 @@ export const GroupScoreBoard = () => {
     { id: '2', name: 'Group 2', score: 0 },
   ]);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
 
@@ -140,13 +148,18 @@ export const GroupScoreBoard = () => {
   const maxScore = Math.max(...groups.map(g => g.score));
   
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="w-full flex flex-col items-center gap-12 relative z-10 h-full overflow-hidden">
+    <ToolPanel 
+      className="italic" 
+      baseWidth={isMobile ? 400 : 1200} 
+      baseHeight={800} 
+      fluid={isMobile}
+    >
+      <div className="w-full flex flex-col items-center gap-4 md:gap-12 relative z-10 h-full overflow-hidden">
         
         {/* Branding Header */}
-        <div className="text-center space-y-2 shrink-0 mb-4">
+        <div className="text-center space-y-2 shrink-0 mb-0 md:mb-4">
           <div className="space-y-1">
-             <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+             <h1 className="text-4xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                <FormattedMessage id="groupscoreboard.title" defaultMessage="Group Scores" />
              </h1>
           </div>
@@ -154,7 +167,7 @@ export const GroupScoreBoard = () => {
 
         {/* Board Area */}
         <div className="flex-1 w-full overflow-y-auto no-scrollbar pb-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-start px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8 items-start px-4">
             <AnimatePresence mode="popLayout">
               {groups.map((group) => {
                 const isLeader = group.score > 0 && group.score === maxScore;
@@ -166,7 +179,7 @@ export const GroupScoreBoard = () => {
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="bg-white rounded-[3.5rem] flex flex-col overflow-hidden border-4 border-white group/card relative transition-all"
+                    className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] flex flex-col overflow-hidden border-4 border-white group/card relative transition-all"
                   >
                     {/* Card Header */}
                     <div className="bg-slate-50/80 px-8 py-3 flex items-center justify-between border-b-4 border-white">
@@ -178,12 +191,12 @@ export const GroupScoreBoard = () => {
                             onChange={(e) => setEditName(e.target.value)}
                             onBlur={() => saveEdit(group.id)}
                             onKeyDown={(e) => handleKeyPress(e, group.id)}
-                            className="bg-white border-4 border-indigo-100 rounded-xl px-4 py-2 text-sm font-black outline-none w-full text-indigo-600 tracking-widest"
+                             className="bg-white border-2 md:border-4 border-indigo-100 rounded-xl px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm font-black outline-none w-full text-indigo-600 tracking-widest"
                           />
                         ) : (
                           <>
                             <span 
-                              className="text-slate-900 font-black text-sm tracking-widest truncate cursor-pointer hover:text-indigo-600 transition-colors"
+                               className="text-slate-900 font-black text-xs md:text-sm tracking-widest truncate cursor-pointer hover:text-indigo-600 transition-colors"
                               onClick={() => startEditing(group.id, group.name)}
                             >
                               {group.name}
@@ -209,37 +222,37 @@ export const GroupScoreBoard = () => {
                     </div>
 
                     {/* Score Area */}
-                    <div className="flex-1 flex flex-col items-center justify-center py-6 px-8 min-h-[120px] relative overflow-hidden bg-slate-50">
+                    <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-6 px-4 md:px-8 min-h-[80px] md:min-h-[120px] relative overflow-hidden bg-slate-50">
                       <div className="tool-grid-bg opacity-10 pointer-events-none" />
                       <AnimatePresence mode="wait">
                         <motion.span
                           key={group.score}
                           initial={{ scale: 1.5, opacity: 0, y: 10 }}
                           animate={{ scale: 1, opacity: 1, y: 0 }}
-                          className="text-8xl font-black text-slate-900 tabular-nums tracking-tighter leading-none relative z-10"
+                          className="text-6xl md:text-8xl font-black text-slate-900 tabular-nums tracking-tighter leading-none relative z-10"
                         >
                           {group.score}
                         </motion.span>
                       </AnimatePresence>
-                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mt-4 relative z-10">
+                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mt-2 md:mt-4 relative z-10">
                         <FormattedMessage id="groupscoreboard.points" defaultMessage="Points" />
                       </span>
                     </div>
 
                     {/* Score Controls */}
-                    <div className="flex gap-4 p-4 bg-white shrink-0">
+                    <div className="flex gap-2 md:gap-4 p-2 md:p-4 bg-white shrink-0">
                       <button
                         onClick={() => updateScore(group.id, -1)}
                         disabled={group.score === 0}
-                        className="flex-1 h-12 rounded-[1.5rem] flex justify-center items-center bg-slate-50 border-4 border-white text-rose-500 hover:bg-rose-500 hover:text-white disabled:opacity-20 transition-all active:scale-95"
+                        className="flex-1 h-14 md:h-12 rounded-[1rem] md:rounded-[1.5rem] flex justify-center items-center bg-slate-50 border-4 border-white text-rose-500 hover:bg-rose-500 hover:text-white disabled:opacity-20 transition-all active:scale-95"
                       >
-                        <Minus size={20} strokeWidth={4} />
+                        <Minus size={isMobile ? 24 : 20} strokeWidth={4} />
                       </button>
                       <button
                         onClick={() => updateScore(group.id, 1)}
-                        className="flex-1 h-12 rounded-[1.5rem] flex justify-center items-center bg-slate-50 border-4 border-white text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
+                        className="flex-1 h-14 md:h-12 rounded-[1rem] md:rounded-[1.5rem] flex justify-center items-center bg-slate-50 border-4 border-white text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
                       >
-                        <Plus size={20} strokeWidth={4} />
+                        <Plus size={isMobile ? 24 : 20} strokeWidth={4} />
                       </button>
                     </div>
                   </motion.div>
@@ -250,12 +263,12 @@ export const GroupScoreBoard = () => {
               <motion.button
                 layout
                 onClick={() => addGroup()}
-                className="bg-slate-50/50 rounded-[3.5rem] border-4 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-white transition-all flex flex-col items-center justify-center min-h-[240px] group/add"
+                className="bg-slate-50/50 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-white transition-all flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px] group/add"
               >
-                <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center border-4 border-slate-50 group-hover/add:scale-110 transition-transform group-hover/add:rotate-90">
-                  <Plus size={32} strokeWidth={3} className="text-slate-300 group-hover/add:text-indigo-600 transition-colors" />
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-[2rem] flex items-center justify-center border-4 border-slate-50 group-hover/add:scale-110 transition-transform group-hover/add:rotate-90">
+                  <Plus size={28} md:size={32} strokeWidth={3} className="text-slate-300 group-hover/add:text-indigo-600 transition-colors" />
                 </div>
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mt-6 group-hover/add:text-indigo-400">
+                <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mt-6 group-hover/add:text-indigo-400">
                   <FormattedMessage id="groupscoreboard.add_group" defaultMessage="Add Group" />
                 </span>
               </motion.button>

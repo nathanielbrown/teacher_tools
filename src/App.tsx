@@ -15,9 +15,27 @@ import { initSpeech } from './utils/speech';
 function App() {
   useEffect(() => {
     const cleanup = initSpeech();
-    return () => cleanup?.();
-  }, []);
 
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      (window as any).deferredPrompt = e;
+      window.dispatchEvent(new CustomEvent('pwa-installable', { detail: e }));
+    };
+
+    const handleAppInstalled = () => {
+      (window as any).deferredPrompt = null;
+      window.dispatchEvent(new CustomEvent('pwa-installed'));
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      cleanup?.();
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
   const [currentTool, setCurrentTool] = useState<string>(() => {
     const pathParts = window.location.pathname.split('/').filter(Boolean);
     const validTabsMap: Record<string, string> = { 'TeacherTools': 'Teacher Tools', 'StudentTools': 'Student Tools', 'ClassroomGames': 'Classroom Games' };
@@ -214,7 +232,7 @@ const MetadataManager = ({ currentTool, activeTab }: { currentTool: string, acti
       const tool = tools.find(t => t.id === currentTool);
       if (tool) {
         title = `${intl.formatMessage({ id: `tool.${tool.id}.name`, defaultMessage: tool.name })} | ClassRex`;
-        description = tool.description;
+        description = intl.formatMessage({ id: `tool.${tool.id}.description`, defaultMessage: tool.description });
         canonicalPath = tool.id;
       }
     }

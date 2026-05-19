@@ -20,7 +20,7 @@ import ToolPanel from '../shared/ToolPanel';
 
 // 1. Constants
 const CANVAS_SIZE = 800;
-const FONT_SIZE = 700;
+const FONT_SIZE = 600;
 const BRUSH_SIZE = 40;
 const CHAR_SETS = {
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -90,6 +90,7 @@ export const LetterTracing = () => {
   const [mastery, setMastery] = useLocalStorage<Record<string, number>>('letter_tracing_mastery', {});
   const [isFontLoaded, setIsFontLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [masteryPage, setMasteryPage] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -325,7 +326,7 @@ export const LetterTracing = () => {
 
   return (
     <div className={`flex flex-col lg:flex-row gap-4 h-full w-full overflow-hidden transition-all duration-500 ease-in-out ${isMobile ? '-mx-2 w-[calc(100%+1rem)]' : ''}`}>
-      <div className="flex-[5] lg:flex-[3] min-h-0 h-full">
+      <div className="flex-[5] lg:flex-1 min-h-0 h-full">
         <ToolPanel baseWidth={isMobile ? 800 : 1000} baseHeight={isMobile ? 1200 : 700}>
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
@@ -409,7 +410,7 @@ export const LetterTracing = () => {
         </ToolPanel>
       </div>
 
-      <div className="flex-[5] lg:w-96 min-h-0 flex flex-col gap-4 lg:gap-8">
+      <div className="flex-[5] lg:flex-none lg:w-72 min-h-0 flex flex-col gap-4 lg:gap-8">
         <div className="flex-1 bg-white p-4 lg:p-6 rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 flex flex-col gap-4 relative overflow-hidden">
           <div className="flex items-center justify-between border-b-4 border-slate-50 pb-4">
              <div className="flex items-center gap-3">
@@ -420,21 +421,30 @@ export const LetterTracing = () => {
                  <FormattedMessage id="lettertracing.label.mastery" />
                </h4>
              </div>
+             <div className="flex items-center gap-2">
+               <button onClick={() => setMasteryPage(p => Math.max(0, p - 1))} className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-20" disabled={masteryPage === 0}>
+                 <ChevronLeft size={16} />
+               </button>
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{masteryPage + 1} / 3</span>
+               <button onClick={() => setMasteryPage(p => Math.min(2, p + 1))} className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-20" disabled={masteryPage === 2}>
+                 <ChevronRight size={16} />
+               </button>
+             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar">
+          <div className="flex-1 overflow-y-auto no-scrollbar overflow-x-visible">
             <div className="flex flex-col gap-4 lg:gap-6">
               {[
                 { label: 'ABC', set: CHAR_SETS.upper, id: 0 },
                 { label: 'abc', set: CHAR_SETS.lower, id: 1 },
                 { label: '123', set: CHAR_SETS.numbers, id: 2 }
-              ].map((group) => (
-                <div key={group.label} className="flex flex-col lg:flex-row gap-2 lg:gap-4 items-start lg:items-center">
-                  <div className="w-12 shrink-0 flex flex-row lg:flex-col items-center gap-2 lg:gap-1">
+              ].filter((_, idx) => idx === masteryPage).map((group) => (
+                <div key={group.label} className="flex flex-col gap-2 items-start">
+                  <div className="w-full flex items-center gap-2">
                     <span className="text-[10px] font-black text-slate-300 tracking-widest">{group.label}</span>
-                    <div className="flex-1 lg:w-full h-px bg-slate-100" />
+                    <div className="flex-1 h-px bg-slate-100" />
                   </div>
-                  <div className="grid grid-cols-13 md:grid-cols-10 gap-1 md:gap-2 flex-1 w-full">
+                  <div className="grid grid-cols-13 lg:grid-cols-5 gap-1 lg:gap-2 flex-1 w-full p-1 lg:p-2">
                     {group.set.split('').map(char => {
                       const charScore = mastery[char] || 0;
                       return (
@@ -446,7 +456,7 @@ export const LetterTracing = () => {
                             setCurrentLetter(char);
                             audioEngine.playTick(settings.soundTheme);
                           }}
-                          className={`w-full aspect-square rounded-xl lg:rounded-lg font-black text-xs md:text-sm transition-all border-2 flex items-center justify-center relative overflow-hidden ${
+                          className={`w-full aspect-square rounded-lg lg:rounded-xl font-black text-[8px] lg:text-sm transition-all border-2 flex items-center justify-center relative overflow-hidden ${
                             currentLetter === char ? 'border-indigo-600 bg-white text-indigo-600 scale-110 z-10 shadow-md' : 'border-slate-50 bg-slate-50 text-slate-300 hover:border-indigo-100'
                           }`}
                         >

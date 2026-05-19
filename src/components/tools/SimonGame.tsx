@@ -217,7 +217,7 @@ export const SimonGame = () => {
                 onClick={startGame}
                 className="w-full h-20 lg:h-24 bg-indigo-600 text-white rounded-[2rem] lg:rounded-[2.5rem] font-black text-xl lg:text-2xl uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-4 lg:gap-6 hover:bg-indigo-700 shadow-xl shadow-indigo-500/20"
               >
-                <Play size={24} lg:size={32} fill="currentColor" strokeWidth={0} /> Play
+                <Play size={isMobile ? 24 : 32} fill="currentColor" strokeWidth={0} /> Play
               </button>
             </div>
           </motion.div>
@@ -240,7 +240,7 @@ export const SimonGame = () => {
                 >
                   <div className="bg-white p-8 lg:p-16 rounded-[2.5rem] lg:rounded-[4rem] border-8 border-rose-500 flex flex-col items-center gap-6 lg:gap-10 text-center max-w-sm lg:max-w-md w-full mx-4 shadow-2xl">
                     <div className="w-16 h-16 lg:w-24 lg:h-24 bg-rose-500 rounded-2xl lg:rounded-[2rem] flex items-center justify-center text-white -rotate-6">
-                      <RotateCcw size={32} lg:size={48} strokeWidth={3} />
+                      <RotateCcw size={isMobile ? 32 : 48} strokeWidth={3} />
                     </div>
                     <div>
                       <h2 className="text-2xl lg:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-tight mb-1 lg:mb-2">Game Over</h2>
@@ -251,7 +251,7 @@ export const SimonGame = () => {
                         onClick={startGame}
                         className="w-full h-14 lg:h-20 bg-indigo-600 text-white font-black text-lg lg:text-xl uppercase tracking-widest rounded-2xl lg:rounded-[2rem] hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-3 lg:gap-4"
                       >
-                        <RotateCcw size={18} lg:size={24} strokeWidth={3} /> Try Again
+                        <RotateCcw size={isMobile ? 18 : 24} strokeWidth={3} /> Try Again
                       </button>
                       <button
                         onClick={resetGame}
@@ -299,14 +299,14 @@ export const SimonGame = () => {
                     >
                       {gameState === 'playback' ? (
                         <div className="flex flex-col items-center gap-1 lg:gap-2">
-                           <Volume2 size={isMobile ? 24 : 32} lg:size={40} className="text-indigo-400 animate-bounce" strokeWidth={3} />
+                           <Volume2 size={isMobile ? 24 : 40} className="text-indigo-400 animate-bounce" strokeWidth={3} />
                         </div>
                       ) : gameState === 'playing' ? (
                         <div className="flex flex-col items-center gap-1 lg:gap-2">
                            <div className="w-2.5 h-2.5 lg:w-4 lg:h-4 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
                         </div>
                       ) : (
-                        <Gamepad2 size={isMobile ? 24 : 32} lg:size={40} className="text-slate-700" strokeWidth={1} />
+                        <Gamepad2 size={isMobile ? 24 : 40} className="text-slate-700" strokeWidth={1} />
                       )}
                     </motion.div>
                   </AnimatePresence>

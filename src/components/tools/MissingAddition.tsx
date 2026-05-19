@@ -214,12 +214,8 @@ export const MissingAddition = () => {
           >
             {/* Branding Header */}
             <div className="text-center space-y-4 shrink-0 mb-12">
-              <div className="w-20 h-20 bg-indigo-600 rounded-[1.5rem] flex items-center justify-center text-white mx-auto  rotate-3 border-4 border-white mb-6">
-                <Calculator size={32} strokeWidth={3} />
-              </div>
               <div className="space-y-1">
                  <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">Missing Addition</h1>
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Math Game</p>
               </div>
             </div>
 

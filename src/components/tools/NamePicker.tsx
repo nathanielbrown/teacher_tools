@@ -339,7 +339,6 @@ export const NamePicker = () => {
         className={`italic ${isMobile ? 'bg-transparent border-transparent shadow-none' : ''}`} 
         baseWidth={isMobile ? 400 : 1200} 
         baseHeight={900}
-        alignTop
         fluid={isMobile}
       >
         <div className="flex flex-col h-full w-full relative">
@@ -373,7 +372,7 @@ export const NamePicker = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="relative cursor-pointer"
+                  className="w-full h-full flex items-center justify-center relative cursor-pointer"
                   onClick={handlePick}
                 >
                   <WheelView names={availableStudents} spinning={isSpinning} winner={winner} onFinish={handleFinish} isMobile={isMobile} />
@@ -384,7 +383,7 @@ export const NamePicker = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="cursor-pointer"
+                  className="w-full h-full flex items-center justify-center cursor-pointer"
                   onClick={handlePick}
                 >
                   <ListView names={availableStudents} spinning={isSpinning} winner={winner} onFinish={handleFinish} isMobile={isMobile} />

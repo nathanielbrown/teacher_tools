@@ -421,9 +421,6 @@ export const Crossword = () => {
           <AnimatePresence mode="wait">
             {status === 'setup' ? (
               <motion.div key="setup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center gap-12">
-                 <div className="w-24 h-24 bg-slate-900 flex items-center justify-center text-white border-4 border-white">
-                    <Grid3X3 size={48} strokeWidth={2.5} />
-                 </div>
                  <div className="text-center">
                     <h2 className="text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                       <FormattedMessage id="crossword.title" />

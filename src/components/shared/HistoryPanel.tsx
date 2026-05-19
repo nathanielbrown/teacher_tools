@@ -29,6 +29,7 @@ interface HistoryPanelProps {
   className?: string;
   onClose?: () => void;
   reservePaginationSpace?: boolean;
+  children?: React.ReactNode;
 }
 
 export const HistoryPanel = ({
@@ -44,7 +45,8 @@ export const HistoryPanel = ({
   listClassName = "space-y-2",
   className = "",
   onClose,
-  reservePaginationSpace = false
+  reservePaginationSpace = false,
+  children
 }: HistoryPanelProps) => {
   const intl = useIntl();
   const [currentPage, setCurrentPage] = useState(1);
@@ -108,6 +110,7 @@ export const HistoryPanel = ({
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 custom-scrollbar no-scrollbar italic flex flex-col">
+        {children}
         <div className="flex-1">
           <AnimatePresence initial={false} mode="popLayout">
             {items.length === 0 ? (

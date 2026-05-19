@@ -220,35 +220,47 @@ export const BinaryNumbers = () => {
 
   useEffect(() => {
     setHeaderActions(
-      <div className="flex bg-slate-100 p-1 rounded-xl">
-        <button
-          onClick={() => setMode('practice')}
-          className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'practice' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-            }`}
+      isMobile ? (
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value as any)}
+          className="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-indigo-600 outline-none border-none cursor-pointer appearance-none"
         >
-          Practice
-        </button>
-        <button
-          onClick={() => setMode('challenge')}
-          className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'challenge' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-            }`}
-        >
-          Challenge
-        </button>
-      </div>
+          <option value="practice">Practice</option>
+          <option value="challenge">Challenge</option>
+        </select>
+      ) : (
+        <div className="flex bg-slate-100 p-1 rounded-xl">
+          <button
+            onClick={() => setMode('practice')}
+            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'practice' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+              }`}
+          >
+            Practice
+          </button>
+          <button
+            onClick={() => setMode('challenge')}
+            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'challenge' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+              }`}
+          >
+            Challenge
+          </button>
+        </div>
+      )
     );
-  }, [mode, setHeaderActions]);
+  }, [mode, setHeaderActions, isMobile]);
 
   return (
     <ToolPanel 
-      className="flex-col items-center justify-center p-2 lg:p-8 overflow-hidden"
+      className="flex-col items-center justify-center p-2 lg:p-12 overflow-hidden"
       fluid={isMobile}
-      alignTop={isMobile}
+      baseWidth={isMobile ? 800 : 1200}
+      baseHeight={isMobile ? 1200 : 900}
     >
-      <div className={`w-full max-w-6xl flex flex-col items-center gap-2 lg:gap-6 relative z-10 ${isMobile ? 'overflow-y-auto h-full px-2' : ''}`}>
+      <div className={`w-full max-w-5xl mx-auto flex flex-col items-center gap-4 lg:gap-10 relative z-10 ${isMobile ? 'overflow-y-auto h-full px-2' : ''}`}>
 
         {/* Top Header Area */}
-        <div className={`w-full ${isMobile ? 'h-auto py-4' : 'h-[160px]'} flex flex-col items-center justify-center gap-4 shrink-0`}>
+        <div className={`w-full ${isMobile ? 'h-auto py-2' : 'min-h-[100px] py-4'} flex flex-col items-center justify-center gap-2 lg:gap-4 shrink-0`}>
           {mode === 'challenge' && (
             <div className="w-full flex items-center justify-between px-2 lg:px-8">
               <div className="flex flex-col items-start">
@@ -274,16 +286,16 @@ export const BinaryNumbers = () => {
 
           <div className="flex flex-col items-center gap-2 text-center">
             {mode === 'challenge' ? (
-              <div className="flex flex-col items-center gap-1 md:gap-3">
-                <span className="text-[8px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">Challenge Mode</span>
-                <span className="text-2xl md:text-5xl lg:text-6xl font-black text-indigo-600 uppercase tracking-tighter">
+              <div className="flex flex-col items-center gap-1 md:gap-4">
+                <span className="text-[10px] md:text-xs font-black text-indigo-400 uppercase tracking-[0.4em]">Challenge Mode</span>
+                <span className="text-3xl md:text-7xl lg:text-8xl font-black text-indigo-600 uppercase tracking-tighter">
                   Question {questionNumber}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1 md:mb-2">Practice Mode</span>
-                <div className="text-sm md:text-2xl font-black text-indigo-400 bg-indigo-50 px-4 md:px-6 py-1 md:py-2 rounded-xl md:rounded-2xl uppercase tracking-widest">
+                <span className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.4em] mb-2 md:mb-4">Practice Mode</span>
+                <div className="text-xl md:text-4xl lg:text-5xl font-black text-indigo-400 bg-indigo-50 px-6 md:px-10 py-2 md:py-4 rounded-2xl md:rounded-[2.5rem] uppercase tracking-widest">
                   Explore Binary
                 </div>
               </div>
@@ -292,15 +304,15 @@ export const BinaryNumbers = () => {
         </div>
 
         {/* Binary Bit Row Area */}
-        <div className={`w-full ${isMobile ? 'h-auto py-4' : 'h-[280px]'} flex flex-col items-center justify-center shrink-0`}>
-          <div className="w-full grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-4 lg:gap-8 max-w-5xl">
+        <div className={`w-full ${isMobile ? 'h-auto py-2' : 'h-auto py-6'} flex flex-col items-center justify-center shrink-0`}>
+          <div className="w-full grid grid-cols-8 gap-1 md:gap-4 lg:gap-8 max-w-5xl">
             {binary.map((bit, idx) => {
               const val = Math.pow(2, 7 - idx);
               const isBinaryDisabled = isCorrect || (mode === 'challenge' && challengeType === 'toDecimal');
               
               return (
-                <div key={idx} className="flex flex-col items-center gap-1 md:gap-2">
-                  <span className="text-[10px] md:text-[14px] font-black text-slate-300 tabular-nums uppercase">{val}</span>
+                <div key={idx} className="flex flex-col items-center gap-2 md:gap-4">
+                  <span className="text-xs md:text-xl lg:text-2xl font-black text-slate-300 tabular-nums uppercase">{val}</span>
                   <motion.button
                     whileHover={isBinaryDisabled ? {} : { y: -4, scale: 1.02 }}
                     whileTap={isBinaryDisabled ? {} : { scale: 0.98 }}
@@ -317,7 +329,7 @@ export const BinaryNumbers = () => {
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
-                        className="text-3xl md:text-7xl lg:text-8xl font-black tabular-nums"
+                        className="text-3xl md:text-7xl lg:text-9xl font-black tabular-nums"
                       >
                         {bit}
                       </motion.span>
@@ -342,65 +354,63 @@ export const BinaryNumbers = () => {
         </div>
 
         {/* Math Summary Area */}
-        <div className={`w-full max-w-6xl ${isMobile ? 'h-auto py-4' : 'h-[460px]'} flex items-center justify-center`}>
+        <div className={`w-full max-w-6xl ${isMobile ? 'flex-1 py-2' : 'flex-1 py-4'} flex items-center justify-center overflow-hidden`}>
             {gameState === 'playing' ? (
               <div
                 className={`w-full h-full rounded-[2rem] lg:rounded-[2.5rem] px-4 py-6 lg:px-8 lg:py-6 border-4 flex flex-col items-center justify-center gap-6 lg:gap-16 transition-colors duration-300 ${isCorrect ? 'bg-emerald-50/50 border-emerald-400' : 'bg-slate-50/50 border-white'}`}
               >
                 {mode === 'challenge' ? (
-                  <div className={`flex flex-col md:flex-row items-center gap-6 md:gap-12 lg:gap-20 ${isMobile ? 'w-full' : ''}`}>
-                    <div className={`flex flex-col items-center gap-2 md:gap-4 ${isMobile ? 'w-full' : 'w-[480px] flex-shrink-0'}`}>
-                      <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">Decimal Number</span>
-                      <div className={`bg-white text-5xl md:text-7xl lg:text-9xl font-black text-indigo-600 w-full ${isMobile ? 'h-[100px]' : 'h-[180px] lg:h-[220px]'} flex items-center justify-center rounded-2xl md:rounded-[3.5rem] tabular-nums shadow-sm border-none`}>
+                  <div className={`flex flex-col md:flex-row items-center gap-4 md:gap-8 lg:gap-12 ${isMobile ? 'w-full' : ''}`}>
+                    <div className={`flex flex-col items-center gap-2 md:gap-4 ${isMobile ? 'w-full' : 'w-[320px] lg:w-[400px] flex-shrink-0'}`}>
+                      <span className="text-xs md:text-sm font-black text-indigo-500 uppercase tracking-[0.2em]">Decimal Number</span>
+                      <div className={`bg-white text-5xl md:text-8xl lg:text-9xl font-black text-indigo-600 w-full ${isMobile ? 'h-[100px]' : 'h-[140px] lg:h-[200px]'} flex items-center justify-center rounded-2xl md:rounded-[2.5rem] tabular-nums shadow-sm border-none`}>
                         {challengeType === 'toBinary' ? targetDecimal : (userDecimalInput || '???')}
                       </div>
                     </div>
 
                     {/* Number Pad */}
-                    <div className={`grid grid-cols-3 gap-2 md:gap-6 lg:gap-8 w-full md:w-max ${challengeType === 'toBinary' ? 'opacity-20 pointer-events-none' : ''}`}>
+                    <div className={`grid grid-cols-3 gap-2 md:gap-3 lg:gap-4 w-full md:w-max ${challengeType === 'toBinary' ? 'opacity-20 pointer-events-none' : ''}`}>
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                         <button
                           key={num}
                           onClick={() => setUserDecimalInput(prev => (prev.length < 3 ? prev + num : prev))}
-                          className="w-full md:w-20 h-14 md:h-20 bg-white hover:bg-indigo-50 text-indigo-600 rounded-xl md:rounded-[1.5rem] font-black text-xl md:text-3xl shadow-sm transition-all active:scale-90 border-2 border-indigo-50/50"
+                          className="w-full md:w-16 lg:w-20 h-12 md:h-16 lg:h-20 bg-white hover:bg-indigo-50 text-indigo-600 rounded-xl md:rounded-[1.2rem] font-black text-lg md:text-2xl shadow-sm transition-all active:scale-90 border-2 border-indigo-50/50"
                         >
                           {num}
                         </button>
                       ))}
                       <button
                         onClick={() => setUserDecimalInput(prev => prev.slice(0, -1))}
-                        className="w-full md:w-20 h-14 md:h-20 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl md:rounded-[1.5rem] flex items-center justify-center shadow-sm transition-all active:scale-90"
+                        className="w-full md:w-16 lg:w-20 h-12 md:h-16 lg:h-20 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl md:rounded-[1.2rem] flex items-center justify-center shadow-sm transition-all active:scale-90"
                       >
                         <Delete size={isMobile ? 20 : 32} />
                       </button>
                       <button
                         onClick={() => setUserDecimalInput(prev => (prev.length < 3 ? prev + '0' : prev))}
-                        className="w-full md:w-20 h-14 md:h-20 bg-white hover:bg-indigo-50 text-indigo-600 rounded-xl md:rounded-[1.5rem] font-black text-xl md:text-3xl shadow-sm transition-all active:scale-90 border-2 border-indigo-50/50"
+                        className="w-full md:w-16 lg:w-20 h-12 md:h-16 lg:h-20 bg-white hover:bg-indigo-50 text-indigo-600 rounded-xl md:rounded-[1.2rem] font-black text-lg md:text-2xl shadow-sm transition-all active:scale-90 border-2 border-indigo-50/50"
                       >
                         0
                       </button>
                       <button
                         onClick={() => {}}
-                        className="w-full md:w-20 h-14 md:h-20 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl md:rounded-[1.5rem] flex items-center justify-center shadow-sm transition-all active:scale-90"
+                        className="w-full md:w-16 lg:w-20 h-12 md:h-16 lg:h-20 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl md:rounded-[1.2rem] flex items-center justify-center shadow-sm transition-all active:scale-90"
                       >
                         <Check size={isMobile ? 20 : 32} strokeWidth={3} />
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
+                  <div className="flex flex-wrap lg:flex-nowrap items-center justify-center gap-1 md:gap-2 min-h-[100px] lg:min-h-[160px] w-full overflow-x-auto no-scrollbar">
                     {binary.map((bit, i) => bit === 1 && (
-                      <div key={i} className="flex items-center gap-2 md:gap-4 px-3 md:px-6 py-2 md:py-4 bg-indigo-600 text-white rounded-xl md:rounded-2xl shadow-sm">
-                        <span className="text-sm md:text-2xl font-black tabular-nums">{Math.pow(2, 7 - i)}</span>
-                        {binary.slice(i + 1).some(b => b === 1) && <span className="text-indigo-300 font-black text-xs md:text-base">+</span>}
+                      <div key={i} className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-2 bg-indigo-600 text-white rounded-lg md:rounded-xl shadow-sm shrink-0">
+                        <span className="text-xs md:text-xl font-black tabular-nums">{Math.pow(2, 7 - i)}</span>
+                        {binary.slice(i + 1).some(b => b === 1) && <span className="text-indigo-300 font-black text-xs md:text-sm">+</span>}
                       </div>
                     ))}
-                    {!binary.every(b => b === 0) && (
-                      <div className="flex items-center gap-2 md:gap-4 px-3 md:px-6 py-2 md:py-4">
-                        <span className="text-slate-300 font-black text-xl md:text-3xl">=</span>
-                        <span className="text-3xl md:text-6xl font-black text-indigo-600 tabular-nums tracking-tighter">{decimal}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 md:py-4 shrink-0">
+                      <span className="text-slate-300 font-black text-xl md:text-4xl">=</span>
+                      <span className="text-4xl md:text-7xl lg:text-9xl font-black text-indigo-600 tabular-nums tracking-tighter leading-none min-w-[3ch] text-center">{decimal}</span>
+                    </div>
                   </div>
                 )}
               </div>

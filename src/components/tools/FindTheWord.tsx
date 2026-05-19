@@ -130,14 +130,53 @@ export const FindTheWord = () => {
   const [foundPaths, setFoundPaths] = useState<any[]>([]); 
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isBankOpen, setIsBankOpen] = useState(false);
+  const [gridDimensions, setGridDimensions] = useState<{ width: number, height: number, left: number, top: number } | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (status !== 'playing') {
+      setGridDimensions(null);
+      return;
+    }
+    
+    let observer: ResizeObserver | null = null;
+    
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setGridDimensions({
+          width: rect.width,
+          height: rect.height,
+          left: rect.left,
+          top: rect.top
+        });
+      }
+    };
+
+    // Use a small delay to ensure AnimatePresence has mounted the component
+    const timeoutId = setTimeout(() => {
+      if (containerRef.current) {
+        observer = new ResizeObserver(updateDimensions);
+        observer.observe(containerRef.current);
+        window.addEventListener('scroll', updateDimensions, true);
+        updateDimensions();
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer?.disconnect();
+      window.removeEventListener('scroll', updateDimensions, true);
+    };
+  }, [status]);
 
 
   const handleWordsChange = (newWords: string[]) => {
@@ -197,16 +236,35 @@ export const FindTheWord = () => {
   const getCellFromEvent = (e: any) => {
     if (!containerRef.current) return null;
     const rect = containerRef.current.getBoundingClientRect();
-    const clientX = e.clientX ?? (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
     
+    const clientX = e.clientX ?? (e.touches?.[0]?.clientX) ?? (e.changedTouches?.[0]?.clientX);
+    const clientY = e.clientY ?? (e.touches?.[0]?.clientY) ?? (e.changedTouches?.[0]?.clientY);
+
+    if (clientX === undefined || clientY === undefined) return null;
+
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     
-    const cellWidth = rect.width / GRID_SIZE;
-    const cellHeight = rect.height / GRID_SIZE;
-    const r = Math.floor(y / cellHeight);
-    const c = Math.floor(x / cellWidth);
+    // Account for the visual border size. 
+    // Tailwind's border-4/8 are unscaled pixels. They get scaled by ToolPanel.
+    // We can get the actual computed border width for maximum accuracy.
+    const style = window.getComputedStyle(containerRef.current);
+    const borderLeft = parseFloat(style.borderLeftWidth) || 0;
+    const borderTop = parseFloat(style.borderTopWidth) || 0;
+    const borderRight = parseFloat(style.borderRightWidth) || 0;
+    const borderBottom = parseFloat(style.borderBottomWidth) || 0;
+
+    const contentWidth = rect.width - borderLeft - borderRight;
+    const contentHeight = rect.height - borderTop - borderBottom;
+    
+    const relativeX = x - borderLeft;
+    const relativeY = y - borderTop;
+    
+    const cellWidth = contentWidth / GRID_SIZE;
+    const cellHeight = contentHeight / GRID_SIZE;
+    
+    const r = Math.floor(relativeY / cellHeight);
+    const c = Math.floor(relativeX / cellWidth);
     
     return { 
       r: Math.max(0, Math.min(GRID_SIZE - 1, r)), 
@@ -260,7 +318,15 @@ export const FindTheWord = () => {
   const handleEnd = (e: any) => {
     if (!isDragging) return;
     setIsDragging(false);
-    e.currentTarget.releasePointerCapture(e.pointerId);
+    
+    // Only release if we have a pointerId (PointerEvent)
+    if (e.pointerId !== undefined) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignore if capture was already lost
+      }
+    }
 
     if (selection) {
       const selectedWord = getWordFromPath(selection.start, selection.end);
@@ -276,6 +342,19 @@ export const FindTheWord = () => {
           audioEngine.playAlarm(settings.soundTheme);
           setTimeout(() => setStatus('finished'), 1000);
         }
+      }
+    }
+    setSelection(null);
+  };
+
+  const handleCancel = (e: any) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (e.pointerId !== undefined) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignore if capture was already lost
       }
     }
     setSelection(null);
@@ -298,11 +377,23 @@ export const FindTheWord = () => {
     const x2 = (end.c + 0.5) * cellWidth;
     const y2 = (end.r + 0.5) * cellHeight;
     
-    // Calculate visually correct angle and distance using purely percentage logic
+    // Calculate visually correct angle and distance
+    // To handle non-square squashing, we adjust the dy by the aspect ratio of the container if needed
+    // But better to ensure the container IS square.
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const distancePercent = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    
+    // Use actual visual dimensions for angle if available to prevent squashing effects
+    let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    let distancePercent = Math.sqrt(dx * dx + dy * dy);
+
+    if (gridDimensions && gridDimensions.width > 0 && gridDimensions.height > 0) {
+      const visualDx = dx * (gridDimensions.width / 100);
+      const visualDy = dy * (gridDimensions.height / 100);
+      angle = Math.atan2(visualDy, visualDx) * (180 / Math.PI);
+      // Distance needs to be relative to the width for the horizontal line transform
+      distancePercent = Math.sqrt(visualDx * visualDx + visualDy * visualDy) / (gridDimensions.width / 100);
+    }
     
     const totalWidthPercent = distancePercent + cellWidth;
     const thicknessPercent = cellHeight * 0.8;
@@ -361,15 +452,12 @@ export const FindTheWord = () => {
         baseWidth={isMobile ? (status === 'playing' ? 600 : 800) : (isPanelVisible ? 1200 : 1600)} 
         baseHeight={isMobile ? (status === 'playing' ? 1100 : 1000) : 800}
       >
-        <div className={`w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-white ${isMobile ? 'p-4' : 'p-12'}`}>
+        <div className={`w-full h-full flex flex-col items-center justify-center relative overflow-hidden ${isMobile ? 'p-4' : 'p-12'}`}>
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
           <AnimatePresence mode="wait">
             {status === 'setup' ? (
               <motion.div key="setup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center gap-12">
-                 <div className="w-24 h-24 bg-indigo-600 rounded-[2rem] flex items-center justify-center text-white  rotate-3 border-4 border-white">
-                    <Search size={48} strokeWidth={2.5} />
-                 </div>
                  <div className="text-center">
                     <h2 className="text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none italic">
                       <FormattedMessage id="findtheword.title" />
@@ -380,13 +468,15 @@ export const FindTheWord = () => {
                  </button>
               </motion.div>
             ) : status === 'playing' ? (
-              <div className={`flex-1 w-full flex ${isMobile ? 'flex-col' : 'flex-row'} gap-6 lg:gap-12 overflow-hidden`}>
+              <div className={`flex-1 w-full flex ${isMobile ? 'flex-col items-center' : 'flex-row'} gap-6 lg:gap-12 overflow-hidden`}>
                  <div 
                     ref={containerRef}
                     onPointerDown={handleStart}
                     onPointerMove={handleMove}
                     onPointerUp={handleEnd}
-                    className="flex-1 aspect-square bg-slate-50 rounded-[2rem] lg:rounded-[3rem]  border-4 lg:border-8 border-white grid touch-none select-none relative overflow-hidden"
+                    onPointerCancel={handleCancel}
+                    onPointerLeave={handleCancel}
+                    className="flex-1 aspect-square max-h-full max-w-full bg-white rounded-[2rem] lg:rounded-[3rem]  border-4 lg:border-8 border-white grid touch-none select-none relative overflow-hidden shadow-sm"
                     style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`, gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)` }}
                  >
                     {foundPaths.map((path, i) => (
@@ -398,30 +488,84 @@ export const FindTheWord = () => {
                         {letter}
                       </div>
                     )))}
+
                  </div>
- 
-                 <div className={`${isMobile ? 'w-full h-48' : 'w-[300px] h-full'} flex flex-col gap-4 lg:gap-6`}>
-                    <div className="flex-1 bg-white/80 backdrop-blur-md rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-8 border-4 border-slate-50  flex flex-col overflow-hidden">
-                       <div className="flex items-center justify-between mb-4 lg:mb-6 border-b-2 border-slate-50 pb-2 lg:pb-4">
-                          <h4 className="text-[8px] lg:text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                            <FormattedMessage id="findtheword.label.bank" />
-                          </h4>
-                          <span className="px-2 lg:px-3 py-0.5 lg:py-1 bg-slate-900 text-white rounded-lg text-[8px] lg:text-[10px] font-black tabular-nums">{foundWords.length}/{targetWords.length}</span>
-                       </div>
-                       <div className={`flex-1 overflow-y-auto no-scrollbar grid ${isMobile ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1'} gap-2`}>
-                          {targetWords.map((word, i) => (
-                            <div key={i} className={`p-2 lg:p-4 rounded-xl font-black text-[10px] lg:text-sm uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-white text-slate-400 border-2 border-slate-50'}`}>
-                              {word}
-                            </div>
-                          ))}
-                       </div>
-                    </div>
-                    {!isMobile && (
-                      <button onClick={resetTool} className="w-full py-6 bg-slate-100 text-slate-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all">
-                         <RotateCcw size={20} />
-                      </button>
+  
+                 {/* Mobile Word Bank Overlay - Moved outside grid to avoid pointer event interference */}
+                 <AnimatePresence>
+                    {isMobile && isBankOpen && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsBankOpen(false)}
+                        className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"
+                      >
+                         <motion.div 
+                           initial={{ scale: 0.9, y: 20 }}
+                           animate={{ scale: 1, y: 0 }}
+                           exit={{ scale: 0.9, y: 20 }}
+                           className="bg-white rounded-[2rem] p-6 w-full max-w-xs shadow-2xl overflow-hidden flex flex-col"
+                           onClick={e => e.stopPropagation()}
+                         >
+                           <div className="flex items-center justify-between mb-4 border-b-2 border-slate-50 pb-2">
+                              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                                <FormattedMessage id="findtheword.label.bank" />
+                              </h4>
+                              <button onClick={() => setIsBankOpen(false)} className="p-1 hover:bg-slate-50 rounded-lg transition-all">
+                                <X size={20} className="text-slate-400" />
+                              </button>
+                           </div>
+                           <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-2 gap-2">
+                              {targetWords.map((word, i) => (
+                                <div key={i} className={`p-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-slate-50 text-slate-400 border-2 border-slate-100'}`}>
+                                  {word}
+                                </div>
+                              ))}
+                           </div>
+                         </motion.div>
+                      </motion.div>
                     )}
-                 </div>
+                 </AnimatePresence>
+
+                 {!isMobile ? (
+                   <div className="w-[300px] h-full flex flex-col gap-4 lg:gap-6">
+                      <div className="flex-1 bg-white/80 backdrop-blur-md rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-8 border-4 border-slate-50  flex flex-col overflow-hidden">
+                         <div className="flex items-center justify-between mb-4 lg:mb-6 border-b-2 border-slate-50 pb-2 lg:pb-4">
+                            <h4 className="text-[8px] lg:text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                              <FormattedMessage id="findtheword.label.bank" />
+                            </h4>
+                            <span className="px-2 lg:px-3 py-0.5 lg:py-1 bg-slate-900 text-white rounded-lg text-[8px] lg:text-[10px] font-black tabular-nums">{foundWords.length}/{targetWords.length}</span>
+                         </div>
+                         <div className={`flex-1 overflow-y-auto no-scrollbar grid grid-cols-1 gap-2`}>
+                            {targetWords.map((word, i) => (
+                              <div key={i} className={`p-2 lg:p-4 rounded-xl font-black text-[10px] lg:text-sm uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-white text-slate-400 border-2 border-slate-50'}`}>
+                                {word}
+                              </div>
+                            ))}
+                         </div>
+                      </div>
+                   </div>
+                 ) : (
+                   <div className="w-full">
+                     <button 
+                        onClick={() => setIsBankOpen(true)}
+                        className="w-full flex items-center justify-between px-8 py-6 bg-white border-4 border-slate-50 rounded-[2rem] active:scale-95 transition-all shadow-sm group"
+                      >
+                        <div className="flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                              <BookOpen size={18} strokeWidth={2.5} />
+                           </div>
+                           <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+                              <FormattedMessage id="findtheword.label.bank" />
+                           </h4>
+                        </div>
+                        <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-black tabular-nums">
+                          {foundWords.length}/{targetWords.length}
+                        </span>
+                     </button>
+                   </div>
+                 )}
               </div>
             ) : (
               <motion.div key="win" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-12">

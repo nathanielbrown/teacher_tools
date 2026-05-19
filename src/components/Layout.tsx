@@ -17,7 +17,7 @@ import { AboutModal } from './AboutModal';
 import { tools, Tool, sectionIcons, sectionKeyMap, sectionEmojis } from '../data/tools';
 import { FlagIcon } from './shared/FlagIcon';
 import logo from '../assets/ClassRex_logo.png';
-import { useIntl } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 
 const NoCookieIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block drop-shadow-sm">
@@ -209,7 +209,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
         <aside
           className={`fixed ${isMobile ? 'top-24 bottom-6' : 'inset-y-4'} left-4 z-50 glass-card rounded-[3rem] transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col shadow-2xl ${sidebarMode === 'hidden' ? '-translate-x-[120%]' : 'translate-x-0'} w-80`}
         >
-          <div className="flex items-center p-6 justify-between">
+          <div className="flex items-center p-4 justify-between">
             <button
               onClick={() => onNavigate('home')}
               className="flex items-center transition-all active:scale-95 group gap-3"
@@ -230,16 +230,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               onClick={() => setSidebarMode('hidden')}
               className={`p-2.5 rounded-2xl hover:bg-slate-100/80 text-${themeColor} transition-all active:scale-90`}
               title="Hide Sidebar"
+              aria-label="Hide Sidebar"
             >
               {settings.theme === 'early-years' ? (
-                <span className="text-2xl">👈</span>
+                <span className="text-2xl" aria-hidden="true">👈</span>
               ) : (
-                <ChevronLeft size={24} strokeWidth={3} />
+                <ChevronLeft size={24} strokeWidth={3} aria-hidden="true" />
               )}
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto custom-scrollbar py-2 px-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto custom-scrollbar py-0.5 px-3 space-y-0.5">
             {filteredGroups.map((group, idx) => {
               const isExpanded = group.title === '' || expandedSections[group.title];
               const SectionIcon = group.icon || LayoutGrid;
@@ -252,16 +253,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                     {group.title && (
                       <button
                         onClick={() => toggleSection(group.title)}
-                        className={`flex items-center transition-all group w-full justify-between px-3 py-2 text-[11px] font-medium uppercase tracking-[0.25em] ${isExpanded
+                        className={`flex items-center transition-all group w-full justify-between px-3 py-1 text-[11px] font-medium uppercase tracking-[0.25em] ${isExpanded
                             ? 'text-' + themeColor
                             : 'text-slate-400 hover:text-' + themeColor
                           }`}
+                        aria-expanded={isExpanded}
                       >
                         <div className="flex items-center gap-2">
                           {settings.theme === 'early-years' ? (
-                            <span className="text-sm">{group.emoji || '🛠️'}</span>
+                            <span className="text-sm" aria-hidden="true">{group.emoji || '🛠️'}</span>
                           ) : (
-                            <group.icon size={16} strokeWidth={2.5} />
+                            <group.icon size={16} strokeWidth={2.5} aria-hidden="true" />
                           )}
                           <span>
                             {intl.formatMessage({
@@ -270,7 +272,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                             })}
                           </span>
                         </div>
-                        <ChevronDown size={14} className={`transform transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`transform transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
                       </button>
                     )}
 
@@ -280,7 +282,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="space-y-1 overflow-hidden"
+                          className="space-y-0.5"
                         >
                           {group.items.map((tool) => {
                             const isActive = tool.id === currentTool;
@@ -288,16 +290,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                               <button
                                 key={tool.id}
                                 onClick={() => onNavigate(tool.id)}
-                                className={`group relative flex items-center transition-all duration-300 w-full px-4 py-2.5 space-x-3 rounded-2xl ${isActive
-                                    ? `bg-${themeColor} text-white shadow-xl shadow-${themeColor}/30 scale-[1.05] z-10`
+                                className={`group relative flex items-center transition-all duration-300 w-full px-4 py-1.5 space-x-3 rounded-2xl ${isActive
+                                    ? `bg-${themeColor} text-white shadow-xl shadow-${themeColor}/30 scale-[1.02] z-10`
                                     : `hover:bg-white/60 text-slate-500 ${settings.theme === 'early-years' ? '' : `hover:text-${themeColor}`}`
                                   }`}
+                                aria-current={isActive ? 'page' : undefined}
                               >
                                 <div className={`flex items-center justify-center transform transition-transform duration-300 w-6 h-6 ${isActive ? '' : 'group-hover:scale-125 group-hover:rotate-6'}`}>
                                   {settings.theme === 'early-years' ? (
-                                    <span className="text-2xl leading-none">{tool.emoji || '🛠️'}</span>
+                                    <span className="text-2xl leading-none" aria-hidden="true">{tool.emoji || '🛠️'}</span>
                                   ) : (
-                                    <tool.icon size={18} strokeWidth={isActive ? 3 : 2.5} />
+                                    <tool.icon size={18} strokeWidth={isActive ? 3 : 2.5} aria-hidden="true" />
                                   )}
                                 </div>
                                 <span className="text-sm font-medium truncate">
@@ -320,7 +323,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
             {/* Sidebar Footer - Only Dashboard link now */}
             <button
               onClick={() => onNavigate('home')}
-              className="p-4 text-slate-300 hover:text-indigo-500 transition-all rounded-2xl hover:bg-indigo-50/80 active:scale-90"
+              className="p-3 text-slate-300 hover:text-indigo-500 transition-all rounded-2xl hover:bg-indigo-50/80 active:scale-90"
               title="Go to Dashboard"
             >
               <Home size={24} strokeWidth={3} />
@@ -421,6 +424,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                     <button
                       onClick={() => setIsNavDropdownOpen(!isNavDropdownOpen)}
                       className={`flex items-center justify-between gap-1 sm:gap-1.5 px-2 sm:px-4 py-2 w-36 sm:w-48 rounded-xl bg-${themeColor} text-white font-black text-[10px] uppercase tracking-wider shadow-lg active:scale-95 transition-all whitespace-nowrap`}
+                      aria-expanded={isNavDropdownOpen}
+                      aria-haspopup="menu"
                     >
                       <span className="truncate flex-1 text-center">
                         {activeTab === 'Teacher Tools'
@@ -429,7 +434,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                             ? intl.formatMessage({ id: 'nav.classroom_games', defaultMessage: 'Classroom Games' })
                             : intl.formatMessage({ id: 'nav.student_tools', defaultMessage: 'Student Tools' })}
                       </span>
-                      <ChevronDown size={14} strokeWidth={3} className={`transform transition-transform duration-300 ${isNavDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown size={14} strokeWidth={3} className={`transform transition-transform duration-300 ${isNavDropdownOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
                     </button>
 
                     <AnimatePresence>
@@ -500,6 +505,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                           ? `bg-${tabColorClass} border-${tabColorClass} text-white shadow-xl shadow-${tabColorClass}/30 scale-105 z-10`
                           : `bg-transparent border-transparent text-slate-400 hover:text-${tabColorClass} hover:bg-white`
                         }`}
+                      aria-current={isTabActive ? 'page' : undefined}
                     >
                       <span className="relative z-10">{tabLabel}</span>
                       {isTabActive && (
@@ -579,6 +585,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 className="absolute top-48 md:top-64 right-12 md:right-16 w-[calc(100vw-4rem)] md:w-96 bg-slate-800 text-white p-8 rounded-[3rem] shadow-2xl pointer-events-auto text-sm leading-relaxed border border-white/10 premium-shadow"
                 onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-label={activeOverlay === 'info' ? 'Tool Information' : 'How to Use'}
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
@@ -598,7 +607,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                 </div>
 
                 <div className="space-y-4 text-slate-300 font-medium overflow-y-auto max-h-[60vh] custom-scrollbar pr-2">
-                  {renderOverlayContent(activeOverlay === 'info' ? (headerInfo || currentToolMetadata?.infoContent) : (helpContent || currentToolMetadata?.helpContent))}
+                  {activeOverlay === 'info' ? (
+                    headerInfo || (currentToolMetadata ? (
+                      <FormattedMessage 
+                        id={`tool.${currentToolMetadata.id}.info`} 
+                        defaultMessage={typeof currentToolMetadata.infoContent === 'string' ? currentToolMetadata.infoContent : undefined}
+                      >
+                        {(txt) => renderOverlayContent(txt || currentToolMetadata.infoContent)}
+                      </FormattedMessage>
+                    ) : null)
+                  ) : (
+                    helpContent || currentToolMetadata?.helpContent
+                  )}
                 </div>
               </motion.div>
             </div>

@@ -142,11 +142,14 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
       <div 
         className="bg-white shadow-2xl rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
       >
         <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
-          <h2 className="text-xl font-black text-slate-800 tracking-tight">Settings</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-xl transition-all active:scale-90 text-slate-400 hover:text-slate-600">
-            <span className="text-xl">❌</span>
+          <h2 id="settings-title" className="text-xl font-black text-slate-800 tracking-tight">Settings</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-xl transition-all active:scale-90 text-slate-400 hover:text-slate-600" aria-label="Close Settings">
+            <span className="text-xl" aria-hidden="true">❌</span>
           </button>
         </div>
 
@@ -171,9 +174,10 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                     ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
                     : 'border-slate-100 bg-white hover:border-primary/30 hover:bg-slate-50'
                     }`}
+                  aria-pressed={settings.theme === theme.id}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xl">{theme.emoji}</span>
+                    <span className="text-xl" aria-hidden="true">{theme.emoji}</span>
                     <span className="font-bold text-slate-800 text-sm">{theme.name}</span>
                   </div>
                   <div className="text-[10px] text-slate-500 font-medium">{theme.desc}</div>
@@ -198,6 +202,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                       ? 'border-primary bg-primary text-white shadow-md'
                       : 'border-slate-100 bg-white text-slate-600 hover:border-primary/30 hover:bg-slate-50'
                   }`}
+                  aria-pressed={settings.selectedYear === year}
                 >
                   {year === 'Prep' ? 'Prep' : year === 'All' ? 'All' : `Yr ${year}`}
                 </button>
@@ -233,8 +238,9 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                       ? 'border-primary bg-primary/5 text-primary shadow-md shadow-primary/5'
                       : 'border-slate-100 bg-white hover:border-primary/30 text-slate-500 hover:text-primary hover:bg-slate-50'
                   }`}
+                  aria-pressed={settings.soundTheme === theme.id}
                 >
-                  <span className="text-2xl">{theme.emoji}</span>
+                  <span className="text-2xl" aria-hidden="true">{theme.emoji}</span>
                   <span className="font-bold text-[10px] uppercase tracking-wider">{theme.name}</span>
                 </button>
               ))}
@@ -265,6 +271,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                     ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
                     : 'border-slate-100 bg-white hover:border-primary/30 hover:bg-slate-50'
                     }`}
+                  aria-pressed={settings.language === lang.id}
                 >
                   <div className="flex items-center gap-2">
                     <FlagIcon country={lang.country} className="w-6 h-4 shadow-sm rounded-sm" />
@@ -286,7 +293,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 onClick={handleExport}
                 className="flex-1 flex items-center justify-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
               >
-                <span className="text-xl">📤</span>
+                <span className="text-xl" aria-hidden="true">📤</span>
                 <span>Export Backup</span>
               </button>
 
@@ -294,7 +301,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 onClick={() => fileInputRef.current?.click()}
                 className="flex-1 flex items-center justify-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
               >
-                <span className="text-xl">📥</span>
+                <span className="text-xl" aria-hidden="true">📥</span>
                 <span>Import Backup</span>
               </button>
               <input
@@ -303,13 +310,14 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 onChange={handleImport}
                 accept=".json,application/json"
                 className="hidden"
+                aria-label="Import Backup JSON"
               />
 
               <button
                 onClick={handleClearData}
                 className="flex-1 flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
               >
-                <span className="text-xl">🧹</span>
+                <span className="text-xl" aria-hidden="true">🧹</span>
                 <span>Clear Database</span>
               </button>
             </div>
@@ -343,8 +351,9 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 <h4 className="font-bold text-slate-800 text-md">Create New Class</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Class Name</label>
+                    <label htmlFor="new-class-name" className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Class Name</label>
                     <input
+                      id="new-class-name"
                       type="text"
                       value={newClassName}
                       onChange={(e) => setNewClassName(e.target.value)}
@@ -353,8 +362,9 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Students (One per line)</label>
+                    <label htmlFor="new-class-students" className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Students (One per line)</label>
                     <textarea
+                      id="new-class-students"
                       value={newClassStudents}
                       onChange={(e) => setNewClassStudents(e.target.value)}
                       placeholder="Alice&#10;Bob&#10;Charlie"
@@ -368,7 +378,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                   disabled={!newClassName.trim() || !newClassStudents.trim()}
                   className="w-full flex items-center justify-center space-x-2 bg-primary text-white px-4 py-3 rounded-xl text-sm font-bold hover:shadow-md hover:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-30"
                 >
-                  <span className="text-xl">➕</span>
+                  <span className="text-xl" aria-hidden="true">➕</span>
                   <span>Add Class to Database</span>
                 </button>
               </div>
@@ -388,6 +398,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                             </span>
                           </div>
                           <textarea
+                            aria-label={`Students for ${cls.name}`}
                             defaultValue={cls.students.join('\n')}
                             onBlur={(e) => handleUpdateClass(cls.id, e.target.value)}
                             rows={3}
@@ -398,8 +409,9 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                           onClick={() => deleteClass(cls.id)}
                           className="self-start p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-90"
                           title="Delete Class"
+                          aria-label={`Delete Class ${cls.name}`}
                         >
-                          <span className="text-xl">🗑️</span>
+                          <span className="text-xl" aria-hidden="true">🗑️</span>
                         </button>
                       </div>
                     ))}

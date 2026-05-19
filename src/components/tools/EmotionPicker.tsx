@@ -115,7 +115,7 @@ export const EmotionPicker = () => {
       fluid={isMobile}
       alignTop
     >
-      <div className="w-full flex flex-col items-center gap-12 lg:gap-16 relative z-10 px-4 md:px-10">
+      <div className="w-full flex flex-col items-center gap-4 md:gap-6 lg:gap-8 relative z-10 px-4 md:px-10">
         
         <div className="text-center space-y-2 shrink-0">
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">
@@ -124,7 +124,7 @@ export const EmotionPicker = () => {
         </div>
 
         {/* Emotion Display Container - Stabilized Height */}
-        <div className="w-full bg-slate-50/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-white p-6 md:p-10 lg:p-14 min-h-[600px] md:min-h-[700px] flex items-center justify-center relative overflow-hidden">
+        <div className="w-full bg-slate-50/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-white p-4 md:p-6 lg:p-8 min-h-[450px] md:min-h-[520px] flex items-center justify-center relative overflow-hidden">
            <div className="tool-grid-bg opacity-10 pointer-events-none" />
            
            <AnimatePresence mode="wait">
@@ -136,25 +136,25 @@ export const EmotionPicker = () => {
                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
                  className="w-full"
                >
-                 <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
-                   {EMOTIONS.map((emotion, index) => (
-                     <motion.button
-                       key={emotion.label}
-                       initial={{ opacity: 0, y: 10 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       transition={{ delay: index * 0.02 }}
-                       onClick={() => { setSelectedEmotion(emotion); audioEngine.playTick(settings.soundTheme); }}
-                       className="group aspect-square w-full bg-white border-2 md:border-4 border-slate-100 rounded-2xl md:rounded-3xl hover:border-rose-200  transition-all active:scale-95 flex flex-col items-center justify-center gap-1 md:gap-3 p-2 md:p-4 "
-                     >
-                       <span className="text-4xl md:text-6xl transition-transform group-hover:scale-110 duration-500">
-                         {emotion.emoji}
-                       </span>
-                       <span className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                         {intl.formatMessage({ id: emotion.id, defaultMessage: emotion.label })}
-                       </span>
-                     </motion.button>
-                   ))}
-                 </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
+                    {EMOTIONS.map((emotion, index) => (
+                      <motion.button
+                        key={emotion.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.02 }}
+                        onClick={() => { setSelectedEmotion(emotion); audioEngine.playTick(settings.soundTheme); }}
+                        className="group aspect-square lg:aspect-auto w-full bg-white rounded-2xl md:rounded-3xl hover:bg-rose-50/50 transition-all active:scale-95 flex flex-col items-center justify-center gap-1 md:gap-2 lg:gap-2.5 xl:gap-3 p-2 md:p-3 lg:py-2.5 lg:px-6 xl:py-3.5 xl:px-8"
+                      >
+                        <span className="text-4xl md:text-6xl lg:text-7xl xl:text-[5rem] transition-transform group-hover:scale-110 duration-500">
+                          {emotion.emoji}
+                        </span>
+                        <span className="text-[7px] md:text-[9px] lg:text-xl xl:text-[1.35rem] font-black text-slate-400 uppercase tracking-widest lg:tracking-wide xl:tracking-normal leading-tight text-center px-2">
+                          {intl.formatMessage({ id: emotion.id, defaultMessage: emotion.label })}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
                </motion.div>
              ) : (
                <motion.div

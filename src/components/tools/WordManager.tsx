@@ -27,11 +27,11 @@ const HELP_INFO = (
       </div>
       <div className="flex gap-2 text-left">
         <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Click <b>Add</b> to save a list to your archive.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">Click <b>Add</b> to save a list to your lists.</p>
       </div>
       <div className="flex gap-2 text-left">
         <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight"><b>Modify</b> lists in your archive to suit your needs.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight"><b>Modify</b> lists in your lists to suit your needs.</p>
       </div>
     </div>
   </div>
@@ -52,6 +52,13 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
   const [myLists, setMyLists] = useLocalStorage<any[]>('word_manager_lists', []);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editingList, setEditingList] = useState<any>(null);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setHelpContent(HELP_INFO);
@@ -133,17 +140,55 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
   const currentData = selectedYear === 'saved' ? myLists : RECOMMENDED_DATA[selectedYear as number];
 
   return (
-    <ToolPanel className="italic" baseWidth={1200} baseHeight={800}>
-      <div className="flex flex-row gap-8 w-full h-full p-4 lg:py-6 lg:px-12">
+    <ToolPanel className="italic" baseWidth={windowWidth < 1024 ? 600 : 1200} baseHeight={800}>
+      <div className="flex flex-col lg:flex-row gap-8 w-full h-full p-4 lg:py-6 lg:px-12">
         {/* Navigation Sidebar */}
-        <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-8 relative z-20 h-full">
-          <div className="bg-slate-50 p-6 rounded-[2rem] border-4 border-white flex flex-col gap-6 relative overflow-hidden shrink-0 h-full">
-             <div className="flex items-center gap-4 relative z-10">
-                <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
-                   <GraduationCap size={20} strokeWidth={3} />
+        <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-8 relative z-20 lg:h-full">
+          <div className="bg-slate-50 p-6 rounded-[2rem] border-4 border-white flex flex-col gap-6 relative overflow-visible lg:overflow-hidden shrink-0 lg:h-full">
+             <div className="flex items-center justify-between lg:justify-start gap-4 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white shrink-0">
+                     <GraduationCap size={20} strokeWidth={3} />
+                  </div>
+                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Word Lists</h4>
                 </div>
-                <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Word Lists</h4>
+
+                {/* Mobile Dropdown */}
+                <div className="lg:hidden relative flex-1 max-w-[200px]">
+                  <select
+                    value={selectedYear.toString()}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === 'create_new') {
+                        handleCreateList();
+                        audioEngine.playTick(settings.soundTheme);
+                      } else {
+                        setSelectedYear(val === 'saved' ? 'saved' : parseInt(val));
+                        audioEngine.playTick(settings.soundTheme);
+                      }
+                    }}
+                    className="appearance-none w-full bg-white pl-4 pr-10 py-2.5 rounded-xl border-2 border-slate-100 text-slate-700 font-black text-[10px] uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    <optgroup label="Grade Lists">
+                      {YEAR_LEVELS.map(year => (
+                        <option key={year} value={year.toString()}>
+                          Year {year}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="My Lists">
+                      <option value="create_new">Create New</option>
+                      <option value="saved">My Lists</option>
+                    </optgroup>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
+                </div>
              </div>
+
+             {/* Desktop Navigation */}
+             <div className="hidden lg:flex flex-col gap-6 flex-1 overflow-hidden">
 
              <div className="space-y-2 relative z-10 flex-1 overflow-y-auto no-scrollbar pr-2">
                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] ml-1">Grade Lists</span>
@@ -191,10 +236,11 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
              >
                <Archive size={20} strokeWidth={3} />
                <div className="flex flex-col items-start leading-none">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">My Archive</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">My Lists</span>
                   <span className="text-[8px] font-black opacity-60 uppercase mt-1">{myLists.length} lists</span>
                </div>
              </button>
+             </div>
           </div>
 
 
@@ -230,7 +276,6 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
                     {currentData.map((item: any, idx: number) => {
                       const isCurriculumView = selectedYear !== 'saved';
                       const isAlreadyAdded = myLists.some((l: any) => l.name === item.name);
-                      const isEdited = isCurriculumView && item.isEdited;
 
                       // For Archive diffing
                       let sourceWords = item.sourceWords;
@@ -285,7 +330,7 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
                             </div>
                           </td>
                           <td className="pr-6 py-2 text-right">
-                            <div className={`flex items-center justify-end gap-2 transition-all ${isAlreadyAdded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0'}`}>
+                            <div className="flex items-center justify-end gap-2 transition-all opacity-100">
                               {isCurriculumView ? (
                                 <>
                                   <button onClick={() => addToList(item)} disabled={isAlreadyAdded} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all ${isAlreadyAdded ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'} disabled:opacity-30`} title="Add">
@@ -317,7 +362,7 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
                   </div>
                   <div className="space-y-2">
                      <p className="text-xl font-black text-slate-300 uppercase tracking-[0.4em] italic">Empty</p>
-                     <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">No lists found in your archive</p>
+                     <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">No lists found in your lists</p>
                   </div>
                 </div>
               )}
@@ -328,65 +373,64 @@ export const WordManager = ({ preActions }: { preActions?: React.ReactNode }) =>
       {/* Editor Modal */}
       <AnimatePresence>
         {editingList && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-xl italic">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-6 bg-slate-950/60 backdrop-blur-xl italic">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
-              className="bg-white rounded-[4rem] p-16 w-full max-w-2xl flex flex-col gap-10 relative overflow-hidden border-8 border-white"
+              className="bg-white rounded-[2.5rem] lg:rounded-[4rem] p-6 lg:p-16 w-full max-h-full lg:h-auto max-w-2xl flex flex-col gap-6 lg:gap-10 relative overflow-hidden border-4 lg:border-8 border-white shadow-2xl"
             >
               <div className="absolute top-0 left-0 w-full h-3 bg-indigo-600" />
               <div className="tool-grid-bg opacity-10 pointer-events-none" />
               
-              <div className="flex justify-between items-start relative z-10">
-                 <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-600 flex items-center justify-center text-white">
-                       <Pencil size={32} strokeWidth={3} />
+              <div className="flex justify-between items-start relative z-10 shrink-0">
+                 <div className="flex items-center gap-4 lg:gap-6">
+                    <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-[1.25rem] lg:rounded-[1.5rem] bg-indigo-600 flex items-center justify-center text-white shrink-0">
+                       <Pencil size={24} strokeWidth={3} className="lg:w-8 lg:h-8" />
                     </div>
                     <div className="flex flex-col">
-                       <h3 className="text-3xl font-black text-slate-800 tracking-tight uppercase leading-none">{editingList?.isNew ? 'Create List' : 'Edit List'}</h3>
-                       <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mt-3">{editingList?.isNew ? 'Add your own words' : 'Changing words'}</span>
+                       <h3 className="text-xl lg:text-3xl font-black text-slate-800 tracking-tight uppercase leading-none">{editingList?.isNew ? 'Create List' : 'Edit List'}</h3>
+                       <span className="text-[9px] lg:text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mt-2 lg:mt-3">{editingList?.isNew ? 'Add your own words' : 'Changing words'}</span>
                     </div>
                  </div>
-                 <button onClick={() => setEditingList(null)} className="w-12 h-12 flex items-center justify-center text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-2xl">
-                    <X size={28} strokeWidth={3} />
+                 <button onClick={() => setEditingList(null)} className="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl lg:rounded-2xl shrink-0">
+                    <X size={24} strokeWidth={3} />
                  </button>
               </div>
               
-              <div className="space-y-8 relative z-10">
-                <div className="space-y-4">
+              <div className="flex flex-col flex-1 space-y-6 lg:space-y-8 relative z-10 min-h-0">
+                <div className="space-y-3 lg:space-y-4 shrink-0">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] ml-2">Name</label>
                   <input
                     type="text"
                     value={editingList.name}
                     onChange={(e) => setEditingList({...editingList, name: e.target.value})}
-                    className="w-full h-20 px-4 bg-slate-50 border-4 border-transparent rounded-[1.5rem] text-sm font-black text-slate-800 outline-none focus:bg-white focus:border-indigo-100 transition-all uppercase tracking-widest"
+                    className="w-full h-16 lg:h-20 px-4 bg-slate-50 border-4 border-transparent rounded-2xl lg:rounded-[1.5rem] text-sm font-black text-slate-800 outline-none focus:bg-white focus:border-indigo-100 transition-all uppercase tracking-widest"
                     placeholder="e.g., Spelling Week 1"
                   />
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex flex-col flex-1 space-y-3 lg:space-y-4 min-h-0">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] ml-2">Words (comma separated)</label>
                   <textarea
                     value={editingList.words}
                     onChange={(e) => setEditingList({...editingList, words: e.target.value})}
-                    rows={6}
-                    className="w-full bg-slate-50 border-4 border-transparent rounded-[2.5rem] p-10 text-xl font-black text-slate-600 outline-none focus:bg-white focus:border-indigo-100 transition-all resize-none no-scrollbar italic leading-relaxed"
+                    className="w-full flex-1 bg-slate-50 border-4 border-transparent rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 text-lg lg:text-xl font-black text-slate-600 outline-none focus:bg-white focus:border-indigo-100 transition-all resize-none no-scrollbar italic leading-relaxed"
                     placeholder="apple, banana, cherry..."
                   />
                 </div>
               </div>
 
-              <div className="flex gap-4 relative z-10">
+              <div className="flex gap-4 relative z-10 shrink-0">
                 <button
                   onClick={() => setEditingList(null)}
-                  className="flex-1 h-20 rounded-[2rem] text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] hover:bg-slate-50 transition-all"
+                  className="flex-1 h-16 lg:h-20 rounded-2xl lg:rounded-[2rem] text-[10px] lg:text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] hover:bg-slate-50 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 h-20 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-[0.3em] hover:bg-indigo-700 transition-all active:scale-95 border-8 border-white/5"
+                  className="flex-1 h-16 lg:h-20 bg-indigo-600 text-white rounded-2xl lg:rounded-[2rem] text-[10px] lg:text-sm font-black uppercase tracking-[0.3em] hover:bg-indigo-700 transition-all active:scale-95 border-4 lg:border-8 border-white/5"
                 >
                   Save
                 </button>

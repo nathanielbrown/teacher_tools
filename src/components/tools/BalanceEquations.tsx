@@ -13,6 +13,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import ToolPanel from '../shared/ToolPanel';
 
 // 1. Constants
 const YEAR_LEVELS = [
@@ -261,25 +262,16 @@ export const BalanceEquations = () => {
   }, [gameState, feedback, handleCheck, handleNext, handleNumpad]);
 
   useEffect(() => {
-    if (gameState !== 'menu') {
-      setHeaderActions(
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => { setGameState('menu'); audioEngine.playTick(settings.soundTheme); }}
-            className="flex items-center gap-2 px-6 py-2 bg-slate-50 text-slate-500 rounded-xl font-black text-xs uppercase tracking-tight hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95"
-          >
-            <ChevronLeft size={14} /> Back
-          </button>
-        </div>
-      );
-    } else {
-      setHeaderActions(null);
-    }
-  }, [gameState, settings.soundTheme, setHeaderActions]);
+    setHeaderActions(null);
+  }, [setHeaderActions]);
 
   return (
-    <div className={`tool-container flex flex-col items-center justify-center h-full font-['Outfit'] select-none relative bg-white rounded-[2rem] lg:rounded-[4rem] p-4 lg:p-12 ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
-      
+    <ToolPanel 
+      className="flex-col items-center justify-center p-2 lg:p-6 overflow-hidden"
+      fluid={isMobile}
+      baseWidth={isMobile ? 800 : 1200}
+      baseHeight={isMobile ? 1200 : 800}
+    >
       <div className="tool-grid-bg opacity-30 pointer-events-none" />
 
       <AnimatePresence mode="wait">
@@ -289,10 +281,10 @@ export const BalanceEquations = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            className="w-full max-w-5xl flex flex-col items-center gap-8 md:gap-16 lg:gap-20 py-8"
+            className="w-full max-w-5xl flex flex-col items-center gap-4 md:gap-8 lg:gap-10 py-4"
           >
             <div className="text-center px-4">
-              <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-slate-900 tracking-tighter uppercase leading-none">Balance Equations</h1>
+              <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-none">Balance Equations</h1>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-4xl px-4">
@@ -320,17 +312,17 @@ export const BalanceEquations = () => {
             key="playing"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`w-full max-w-6xl flex flex-col items-center gap-8 lg:gap-16 ${isMobile ? 'py-4' : ''}`}
+            className={`w-full max-w-5xl flex flex-col items-center gap-4 lg:gap-6 ${isMobile ? 'py-1' : ''}`}
           >
             {/* Progress Bar */}
-            <div className="w-full max-w-md space-y-3 md:space-y-4 px-4">
+            <div className="w-full max-w-md space-y-1 md:space-y-2 px-4">
               <div className="flex justify-between items-end">
                 <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Question {currentIndex + 1} of 10</span>
-                <div className="bg-indigo-600 px-3 md:px-4 py-1 md:py-1.5 rounded-full">
-                   <span className="text-[10px] md:text-sm font-black text-white tabular-nums tracking-widest uppercase">Score: {score}</span>
+                <div className="bg-indigo-600 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
+                   <span className="text-[10px] md:text-xs font-black text-white tabular-nums tracking-widest uppercase">Score: {score}</span>
                 </div>
               </div>
-              <div className="w-full h-2 md:h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border-none ">
+              <div className="w-full h-1.5 md:h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border-none ">
                 <motion.div 
                   className="h-full bg-indigo-600 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.4)]"
                   initial={false}
@@ -339,12 +331,12 @@ export const BalanceEquations = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-8 lg:gap-16 w-full">
+            <div className="flex flex-col items-center gap-2 lg:gap-6 w-full flex-1">
               {/* Equation Area */}
-              <div className="flex-1 flex flex-col items-center gap-8 lg:gap-12 w-full px-4">
-                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 lg:gap-12 w-full">
+              <div className="flex-1 flex flex-col items-center gap-2 lg:gap-6 w-full px-4 justify-center">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 lg:gap-10 w-full">
                   {/* Left Side */}
-                  <div className="flex items-center gap-3 lg:gap-6 relative overflow-hidden group">
+                    <div className="flex items-center gap-3 lg:gap-5 relative overflow-hidden group">
                     <div className="tool-grid-bg opacity-10 pointer-events-none" />
                     {questions[currentIndex].leftSide.map((part: string | number, i: number) => (
                       <span key={i} className={`${isMobile ? 'text-3xl' : 'text-5xl lg:text-7xl'} font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
@@ -356,12 +348,12 @@ export const BalanceEquations = () => {
                   <span className={`${isMobile ? 'text-4xl' : 'text-6xl lg:text-8xl'} font-black text-slate-200 tracking-tighter`}>=</span>
 
                   {/* Right Side */}
-                  <div className="flex items-center gap-3 lg:gap-6 relative overflow-hidden group">
+                  <div className="flex items-center gap-3 lg:gap-5 relative overflow-hidden group">
                     <div className="tool-grid-bg opacity-10 pointer-events-none" />
                     {questions[currentIndex].rightSide.map((part: string | number, i: number) => (
                       <React.Fragment key={i}>
                         {part === '?' ? (
-                          <div className={`w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28 rounded-xl md:rounded-2xl border-4 flex items-center justify-center ${isMobile ? 'text-3xl' : 'text-4xl lg:text-6xl'} font-black transition-all tabular-nums ${
+                          <div className={`w-14 h-14 md:w-20 md:h-20 lg:w-28 lg:h-28 rounded-xl md:rounded-[2rem] border-2 md:border-4 flex items-center justify-center ${isMobile ? 'text-3xl' : 'text-5xl lg:text-6xl'} font-black transition-all tabular-nums ${
                             feedback ? (feedback.isCorrect ? 'bg-emerald-500 border-white/20 text-white shadow-lg shadow-emerald-500/20' : 'bg-rose-500 border-white/20 text-white shadow-lg shadow-rose-500/20') :
                             'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
                           }`}>
@@ -378,14 +370,14 @@ export const BalanceEquations = () => {
                 </div>
 
                 {/* Feedback Message */}
-                <div className={`${isMobile ? 'h-16' : 'h-24'}`}>
+                <div className={`${isMobile ? 'h-12' : 'h-16 lg:h-20'}`}>
                   <AnimatePresence mode="wait">
                     {feedback && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
-                        className={`flex items-center gap-3 md:gap-6 px-6 md:px-12 py-3 md:py-5 rounded-2xl md:rounded-[2rem] ${isMobile ? 'text-xl' : 'text-3xl'} font-black uppercase tracking-tighter ${feedback.isCorrect ? 'text-emerald-600 bg-emerald-50 border-4 border-white' : 'text-rose-600 bg-rose-50 border-4 border-white'}`}
+                        className={`flex items-center gap-2 md:gap-4 px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-[1.5rem] ${isMobile ? 'text-lg' : 'text-2xl'} font-black uppercase tracking-tighter ${feedback.isCorrect ? 'text-emerald-600 bg-emerald-50 border-4 border-white' : 'text-rose-600 bg-rose-50 border-4 border-white'}`}
                       >
                         {feedback.isCorrect ? <Star fill="currentColor" size={isMobile ? 24 : 32} /> : <RotateCcw size={isMobile ? 24 : 32} />}
                         {feedback.isCorrect ? 'Correct!' : `Wrong! It was ${feedback.correctAnswer}`}
@@ -397,28 +389,28 @@ export const BalanceEquations = () => {
 
               {/* Numpad Area */}
               <div className="w-full max-w-4xl flex flex-col md:flex-row items-center gap-4 md:gap-8 px-4">
-                <div className="grid grid-cols-3 gap-2 md:gap-3 flex-1 w-full">
+                <div className="grid grid-cols-3 gap-1.5 md:gap-2 flex-1 w-full">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'clear'].map((val) => (
                     <button
                       key={val}
                       onClick={() => handleNumpad(val.toString())}
-                      className={`h-14 md:h-16 lg:h-20 rounded-xl md:rounded-2xl text-2xl md:text-3xl font-black transition-all active:scale-95 border-2 md:border-4 tabular-nums ${
+                      className={`h-11 md:h-14 lg:h-16 rounded-xl md:rounded-2xl text-xl md:text-2xl font-black transition-all active:scale-95 border-2 md:border-4 tabular-nums ${
                         val === 'clear' ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-white border-slate-100 text-slate-800 hover:border-indigo-100'
                       } ${val === 'clear' ? 'col-span-3' : ''} ${val === 0 ? 'col-start-2' : ''}`}
                     >
-                      {val === 'clear' ? <RotateCcw size={isMobile ? 20 : 28} strokeWidth={3} /> : val}
+                      {val === 'clear' ? <RotateCcw size={isMobile ? 18 : 24} strokeWidth={3} /> : val}
                     </button>
                   ))}
                 </div>
                 <button
                   onClick={feedback ? handleNext : handleCheck}
                   disabled={!userAnswer && !feedback}
-                  className={`w-full md:w-64 h-14 md:h-16 lg:h-20 rounded-xl md:rounded-2xl text-lg md:text-xl font-black transition-all flex items-center justify-center gap-3 uppercase tracking-widest ${
+                  className={`w-full md:w-48 lg:w-56 h-11 md:h-14 lg:h-16 rounded-xl md:rounded-2xl text-base md:text-lg font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest ${
                     !userAnswer && !feedback ? 'bg-slate-100 text-slate-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 border-4 border-white/10 shadow-lg shadow-indigo-500/20'
                   }`}
                 >
                   {feedback ? 'Next' : 'Check'}
-                  <ChevronRight size={isMobile ? 20 : 28} strokeWidth={3} />
+                  <ChevronRight size={isMobile ? 18 : 24} strokeWidth={3} />
                 </button>
               </div>
             </div>
@@ -468,7 +460,7 @@ export const BalanceEquations = () => {
 
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
-    </div>
+    </ToolPanel>
   );
 };
 

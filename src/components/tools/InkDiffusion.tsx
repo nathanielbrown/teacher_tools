@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Droplets, 
   Thermometer, 
@@ -21,11 +21,12 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import ToolPanel from '../shared/ToolPanel';
 import SettingsPanel from '../shared/SettingsPanel';
-import { FormattedMessage } from 'react-intl';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useIntl, FormattedMessage } from 'react-intl';
 
 // 1. Constants
-const BEAKER_WIDTH = 300;
-const BEAKER_HEIGHT = 400;
+const BEAKER_WIDTH = 400;
+const BEAKER_HEIGHT = 450;
 const INK_COLORS = [
   { id: 'blue', name: 'Royal Blue', color: '#3b82f6' },
   { id: 'red', name: 'Ruby Red', color: '#ef4444' },
@@ -36,21 +37,41 @@ const INK_COLORS = [
 // 2. Config (None)
 
 // 3. Text (Help and Info)
-const HELP_INFO = (
+const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
-    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Use the Ink Lab</h3>
+    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+      <FormattedMessage id="inkdiffusion.help.title" defaultMessage="How to Use the Ink Lab" />
+    </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Adjust the <b>Temperature</b> sliders at the bottom to change the water speed.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">
+          <FormattedMessage 
+            id="inkdiffusion.help.step1" 
+            defaultMessage="Adjust the Temperature sliders to change the water speed." 
+            values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
+          />
+        </p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Click or tap inside the <b>beakers</b> to add a drop of ink.</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">
+          <FormattedMessage 
+            id="inkdiffusion.help.step2" 
+            defaultMessage="Click or tap inside the beakers to add a drop of ink." 
+            values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
+          />
+        </p>
       </div>
       <div className="flex gap-3 text-left">
         <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
-        <p className="text-sm text-slate-600 font-medium leading-tight">Notice how the ink spreads faster in <b>hot water</b>!</p>
+        <p className="text-sm text-slate-600 font-medium leading-tight">
+          <FormattedMessage 
+            id="inkdiffusion.help.step3" 
+            defaultMessage="Notice how the ink spreads faster in hot water!" 
+            values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }}
+          />
+        </p>
       </div>
     </div>
   </div>
@@ -157,10 +178,10 @@ const Beaker = React.forwardRef(({ temperature, isPlaying, label }: { temperatur
   return (
     <div className="relative flex flex-col items-center">
       {/* Label */}
-      <h4 className="mb-6 text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">{label}</h4>
+      <h4 className="mb-2 lg:mb-6 text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">{label}</h4>
       
       {/* Beaker Container */}
-      <div className="relative w-[300px] h-[400px] bg-white/20 backdrop-blur-xl rounded-b-[5rem] border-x-8 border-b-8 border-white  overflow-hidden group beaker-container">
+      <div className="relative w-[400px] h-[450px] bg-white/20 backdrop-blur-xl rounded-b-[5rem] border-x-8 border-b-8 border-white  overflow-hidden group beaker-container">
         <div className="absolute top-0 left-0 right-0 h-12 bg-white/40 border-b-4 border-white/20 z-20" />
         <canvas 
           ref={canvasRef} 
@@ -188,11 +209,14 @@ const Beaker = React.forwardRef(({ temperature, isPlaying, label }: { temperatur
 export const InkDiffusion = () => {
   const { setHeaderActions, setOnReset, clearHeader, setHelpContent, isConfigOpen, setIsConfigOpen, setHasConfig, setOnConfigToggle } = useHeader();
   const { settings } = useSettings();
+  const intl = useIntl();
   
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
-  const [tempA, setTempA] = useState(10);
-  const [tempB, setTempB] = useState(90);
-  const [selectedInk, setSelectedInk] = useState(INK_COLORS[0]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [tempA, setTempA] = useLocalStorage('inkdiffusion_temp_a', 10);
+  const [tempB, setTempB] = useLocalStorage('inkdiffusion_temp_b', 90);
+  const [selectedInkId, setSelectedInkId] = useLocalStorage('inkdiffusion_selected_ink', INK_COLORS[0].id);
+  const selectedInk = INK_COLORS.find(ink => ink.id === selectedInkId) || INK_COLORS[0];
+  
   const [isPlaying, setIsPlaying] = useState(true);
   const beakerARef = useRef<any>(null);
   const beakerBRef = useRef<any>(null);
@@ -230,13 +254,15 @@ export const InkDiffusion = () => {
 
   useEffect(() => {
     setOnReset(() => resetLab);
-    setHelpContent(HELP_INFO);
+    setHelpContent(<HelpContent />);
     setHasConfig(true);
+    setIsConfigOpen(!isMobile);
     setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
     return () => {
       clearHeader();
+      setOnConfigToggle(null);
     };
-  }, [clearHeader, setOnReset, resetLab, setHelpContent, setHasConfig, setOnConfigToggle, setIsConfigOpen]);
+  }, [clearHeader, setOnReset, resetLab, setHelpContent, setHasConfig, setOnConfigToggle, setIsConfigOpen, isMobile]);
 
   useEffect(() => {
     setHeaderActions(
@@ -245,127 +271,135 @@ export const InkDiffusion = () => {
           onClick={() => { setIsPlaying(!isPlaying); audioEngine.playTick(settings.soundTheme); }}
           className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all  ${isPlaying ? 'bg-amber-100 text-amber-600' : 'bg-emerald-600 text-white '}`}
         >
-          {isPlaying ? <Pause size={14} strokeWidth={3} /> : <Play size={14} strokeWidth={3} />} {isPlaying ? 'Freeze' : 'Live'}
+          {isPlaying ? <Pause size={14} strokeWidth={3} /> : <Play size={14} strokeWidth={3} />} 
+          <FormattedMessage id={isPlaying ? 'inkdiffusion.action.freeze' : 'inkdiffusion.action.live'} defaultMessage={isPlaying ? 'Freeze' : 'Live'} />
         </button>
       </div>
     );
   }, [isPlaying, setHeaderActions, settings.soundTheme]);
 
   return (
-    <div className={`flex flex-col lg:flex-row gap-4 lg:gap-8 h-full w-full italic ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
-      <ToolPanel 
-        className="flex-1" 
-        baseWidth={isMobile ? 400 : 1200} 
-        baseHeight={isMobile ? 800 : 800}
-        fluid={isMobile}
-        alignTop={isMobile}
-      >
-        <div className="flex flex-col gap-6 lg:gap-12 h-full font-['Outfit'] select-none relative italic overflow-hidden p-2 lg:p-0">
-        
-        {/* Observation Deck */}
-        <div 
-          className="flex-1 relative overflow-hidden bg-slate-50/50 border-4 border-white rounded-[3rem] lg:rounded-[4.5rem] flex items-center justify-center cursor-crosshair group " 
-          onClick={handleBeakerClick}
-        >
-          <div className={`flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-48 relative z-10 p-4 lg:p-12 w-full h-full ${isMobile ? 'scale-[0.65] sm:scale-[0.8]' : ''}`}>
-              <Beaker 
-                ref={beakerARef}
-                temperature={tempA} 
-                isPlaying={isPlaying} 
-                label="Cold"
-              />
-              <Beaker 
-                ref={beakerBRef}
-                temperature={tempB} 
-                isPlaying={isPlaying} 
-                label="Hot"
-              />
-          </div>
-
-          <div className="absolute bottom-6 lg:bottom-12 right-6 lg:right-12 flex items-center gap-4 z-20 pointer-events-none opacity-20 italic">
-             <p className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.4em]">Tap beakers to add ink</p>
-             <MousePointer2 size={isMobile ? 16 : 24} />
-          </div>
-        </div>
-        </div>
-      </ToolPanel>
-
-      <SettingsPanel
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-        title="Lab Controls"
-      >
-        <div className="space-y-10">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 border-b-4 border-slate-50 pb-4">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Thermometer size={20} strokeWidth={3} />
-              </div>
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] leading-none">Temperature</h4>
-            </div>
-            
-            <div className="space-y-8">
-              <div className="space-y-4 p-6 bg-slate-50 rounded-[2.5rem] border-4 border-white shadow-sm">
-                <div className="flex justify-between items-center px-2">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Cold Beaker</span>
-                  <span className="text-3xl font-black text-indigo-600 tabular-nums italic leading-none">{tempA}°C</span>
-                </div>
-                <input 
-                  type="range" min="0" max="50" value={tempA}
-                  onChange={(e) => setTempA(parseInt(e.target.value))}
-                  className="w-full h-4 bg-white rounded-full appearance-none cursor-pointer accent-indigo-600 border-2 border-slate-100"
-                />
-              </div>
-
-              <div className="space-y-4 p-6 bg-slate-50 rounded-[2.5rem] border-4 border-white shadow-sm">
-                <div className="flex justify-between items-center px-2">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Hot Beaker</span>
-                  <span className="text-3xl font-black text-rose-600 tabular-nums italic leading-none">{tempB}°C</span>
-                </div>
-                <input 
-                  type="range" min="51" max="100" value={tempB}
-                  onChange={(e) => setTempB(parseInt(e.target.value))}
-                  className="w-full h-4 bg-white rounded-full appearance-none cursor-pointer accent-rose-600 border-2 border-slate-100"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 border-b-4 border-slate-50 pb-4">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Palette size={20} strokeWidth={3} />
-              </div>
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] leading-none">Ink Color</h4>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              {INK_COLORS.map(ink => (
-                <button
-                  key={ink.id}
-                  onClick={() => { setSelectedInk(ink); audioEngine.playTick(settings.soundTheme); }}
-                  className={`p-6 rounded-[2.5rem] border-4 transition-all flex flex-col items-center gap-4 ${
-                    selectedInk.id === ink.id ? 'border-indigo-500 bg-white shadow-lg scale-[1.02]' : 'border-slate-50 bg-slate-50/50 hover:border-indigo-100'
-                  }`}
-                >
-                  <div className="w-10 h-10 rounded-full border-4 border-white shadow-md" style={{ backgroundColor: ink.color }} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 text-center leading-tight">{ink.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="h-px bg-slate-50 w-full" />
-
-          <button
-            onClick={() => { resetLab(); }}
-            className="w-full py-8 bg-white border-4 border-slate-50 text-slate-400 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center gap-4"
+    <div className={`flex flex-col lg:flex-row gap-4 lg:gap-8 h-full w-full italic overflow-hidden`}>
+      <AnimatePresence>
+        {isConfigOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[100] p-4 bg-slate-100/60 backdrop-blur-xl lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none lg:w-[320px] lg:h-full flex flex-col italic overflow-hidden shrink-0"
           >
-            <RotateCcw size={20} strokeWidth={3} />
-            Reset Lab
-          </button>
-        </div>
-      </SettingsPanel>
+            <SettingsPanel
+              isOpen={isConfigOpen}
+              onClose={() => setIsConfigOpen(false)}
+              title={intl.formatMessage({ id: 'inkdiffusion.config.title', defaultMessage: 'Lab Controls' })}
+              className="h-full"
+              compact
+            >
+              <div className="space-y-8">
+                {/* Temperature Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 opacity-60">
+                    <Thermometer size={16} strokeWidth={3} className="text-indigo-600" />
+                    <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+                      <FormattedMessage id="inkdiffusion.config.temperature" defaultMessage="Temperature" />
+                    </h4>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="p-4 bg-white border-2 border-slate-100 rounded-[1.5rem] shadow-sm space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                          <FormattedMessage id="inkdiffusion.config.tempA" defaultMessage="Cold Beaker" />
+                        </span>
+                        <span className="text-xl font-black text-indigo-600 tabular-nums italic leading-none">{tempA}°C</span>
+                      </div>
+                      <input 
+                        type="range" min="1" max="99" value={tempA}
+                        onChange={(e) => setTempA(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
+                      />
+                    </div>
+        
+                    <div className="p-4 bg-white border-2 border-slate-100 rounded-[1.5rem] shadow-sm space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                          <FormattedMessage id="inkdiffusion.config.tempB" defaultMessage="Hot Beaker" />
+                        </span>
+                        <span className="text-xl font-black text-rose-600 tabular-nums italic leading-none">{tempB}°C</span>
+                      </div>
+                      <input 
+                        type="range" min="1" max="99" value={tempB}
+                        onChange={(e) => setTempB(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-rose-600"
+                      />
+                    </div>
+                  </div>
+                </div>
+      
+                {/* Ink Color Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 opacity-60">
+                    <Palette size={16} strokeWidth={3} className="text-indigo-600" />
+                    <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+                      <FormattedMessage id="inkdiffusion.config.ink" defaultMessage="Ink Color" />
+                    </h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {INK_COLORS.map(ink => (
+                      <button
+                        key={ink.id}
+                        onClick={() => { setSelectedInkId(ink.id); audioEngine.playTick(settings.soundTheme); }}
+                        className={`p-3 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-2 ${
+                          selectedInk.id === ink.id ? 'border-indigo-500 bg-white shadow-md' : 'border-slate-50 bg-slate-50/50 hover:border-indigo-100'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-full border-4 border-white shadow-sm" style={{ backgroundColor: ink.color }} />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 text-center leading-tight">{ink.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SettingsPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {(!isMobile || !isConfigOpen) && (
+        <ToolPanel 
+          className="flex-1" 
+          baseWidth={isMobile ? 400 : 1200} 
+          baseHeight={isMobile ? 1000 : 800}
+          fluid={false}
+          alignTop={isMobile}
+        >
+          <div className="flex flex-col gap-6 lg:gap-12 h-full font-['Outfit'] select-none relative italic overflow-hidden p-0">
+          
+          {/* Observation Deck */}
+          <div 
+            className="flex-1 relative overflow-hidden flex items-center justify-center cursor-crosshair group" 
+            onClick={handleBeakerClick}
+          >
+            <div className={`flex flex-col lg:flex-row items-center justify-between gap-2 lg:gap-4 relative z-10 p-4 lg:p-8 w-full h-full`}>
+                <Beaker 
+                  ref={beakerARef}
+                  temperature={tempA} 
+                  isPlaying={isPlaying} 
+                  label="Cold"
+                />
+                <Beaker 
+                  ref={beakerBRef}
+                  temperature={tempB} 
+                  isPlaying={isPlaying} 
+                  label="Hot"
+                />
+            </div>
+          </div>
+          </div>
+        </ToolPanel>
+      )}
     </div>
   );
 };

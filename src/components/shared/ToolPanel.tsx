@@ -12,6 +12,8 @@ interface ToolPanelProps {
   alignTop?: boolean;
   /** Whether to let the tool change shape (height) to fill the screen perfectly. */
   fluid?: boolean;
+  /** Optional padding around the scaling content. Defaults to 20. */
+  padding?: number;
 }
 
 /**
@@ -24,7 +26,8 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   baseWidth = 1200,
   baseHeight = 800,
   alignTop = false,
-  fluid = true
+  fluid = true,
+  padding = 20
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -38,7 +41,6 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
       const { width, height } = container.getBoundingClientRect();
 
       // Calculate scale to fit within the container with minimal padding
-      const padding = 20;
       const availableWidth = width - padding;
       const availableHeight = height - padding;
 
@@ -93,7 +95,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
             position: 'absolute',
             left: '50%',
             marginLeft: -(baseWidth / 2),
-            top: alignTop ? '0' : '50%',
+            top: alignTop ? (padding / 2) : '50%',
             marginTop: alignTop ? '0' : -(dynamicHeight / 2)
           }}
           className={`z-10 flex ${alignTop ? 'flex-col items-stretch justify-start' : 'items-center justify-center'}`}

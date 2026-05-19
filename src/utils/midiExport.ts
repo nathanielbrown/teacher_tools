@@ -6,7 +6,7 @@ export const exportMidi = (
   notes: number[],
   tempo: number,
   splits: number,
-  beatsPerBar: number
+  _beatsPerBar: number
 ) => {
   // Map of our instrument IDs to General MIDI Program Numbers
   const PROGRAM_MAP: Record<string, number> = {
@@ -30,11 +30,7 @@ export const exportMidi = (
   // Calculate duration in ticks (MidiWriter defaults to 128 ticks per quarter note)
   // Our "splits" define how many subdivisions per beat. So each step is 128 / splits ticks long.
   const ticksPerQuarter = 128;
-  const ticksPerStep = ticksPerQuarter / (splits / (beatsPerBar > 0 ? 1 : 1)); // Wait, splits is usually 2, 4 per quarter note. 
-  // Let's assume the user's tempo is in BPM (Quarter notes per minute).
-  // A beat is a quarter note. Splits is divisions of a beat.
-  // So step duration = "T" followed by ticks? MidiWriter has duration like '4' (quarter), '8' (eighth). 
-  // Alternatively, we can use tick-based duration: `T${ticksPerStep}`
+  // Alternatively, we can use tick-based duration: `T${ticks}`
   const stepDurationStr = `T${Math.floor(ticksPerQuarter / splits)}`;
 
   // Iterate over instruments

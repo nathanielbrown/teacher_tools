@@ -1,7 +1,7 @@
 {
   "name": "teacher-tools",
   "private": true,
-  "version": "1026",
+  "version": "1036",
   "type": "module",
   "homepage": "https://beta.classrex.com",
   "scripts": {
@@ -11,7 +11,7 @@
     "predeploy:ftp": "node bump-version.js && npm run build",
     "deploy:ftp": "node deploy-ftp.js",
     "prebuild": "node gen_sitemap.js",
-    "build": "vite build",
+    "build": "npm run type-check && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

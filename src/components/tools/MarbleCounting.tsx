@@ -258,13 +258,8 @@ export const MarbleCounting = () => {
             exit={{ opacity: 0, scale: 0.95 }}
             className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-[3rem] p-12  border-none flex flex-col items-center gap-12 text-center italic"
           >
-            <div className="w-32 h-32 rounded-[2.5rem] bg-indigo-600 flex items-center justify-center text-white  rotate-3 border-4 border-white">
-              <Box size={64} strokeWidth={1.5} />
-            </div>
-
             <div className="space-y-4">
               <h2 className="text-6xl font-black text-slate-900 tracking-tight uppercase leading-none">Marble Counting</h2>
-              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em]">Math Game</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full italic">

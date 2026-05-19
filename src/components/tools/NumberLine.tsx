@@ -191,9 +191,13 @@ export const NumberLine = () => {
     }
   };
 
-  const handleTap = (_: any, info: any) => {
+  const handleTap = (e: any, info: any) => {
     // If we were just panning, don't drop a pin
     if (isPanningRef.current) return;
+
+    // If the click bubbled from an interactive item (like a jump arc or pin head), 
+    // it was already handled for removal, so we shouldn't add a pin.
+    if (e.target.closest('.interactive-item')) return;
 
     const pt = getSvgPoint(info.point.x, info.point.y);
     const val = getValueFromX(pt.x, range.start, range.end, step);
@@ -201,7 +205,27 @@ export const NumberLine = () => {
     const end = parseFloat(range.end as any) || 0;
     
     if (val >= start && val <= end) {
-      togglePin(val);
+      // 1. Try to remove a pin first
+      const existingPin = pins.find((p: any) => Math.abs(p.value - val) < step / 2);
+      if (existingPin) {
+        setPins((prev: any[]) => prev.filter(p => p !== existingPin));
+        audioEngine.playTick(settings.soundTheme);
+        return;
+      }
+
+      // 2. Try to remove a jump if it starts or ends here
+      const existingJump = jumps.find((j: any) => 
+        Math.abs(j.start - val) < step / 2 || Math.abs(j.end - val) < step / 2
+      );
+      if (existingJump) {
+        setJumps((prev: any[]) => prev.filter(j => j !== existingJump));
+        audioEngine.playTick(settings.soundTheme);
+        return;
+      }
+
+      // 3. If nothing removed, add a pin
+      setPins((prev: any[]) => [...prev, { value: val, color: COLORS[prev.length % COLORS.length] }]);
+      audioEngine.playTick(settings.soundTheme);
     }
   };
 
@@ -331,13 +355,13 @@ export const NumberLine = () => {
                   return (
                     <motion.g
                       key={`jump-${i}`}
+                      className="interactive-item"
                       initial={{ opacity: 0, pathLength: 0 }}
                       animate={{ opacity: 1, pathLength: 1 }}
                       exit={{ opacity: 0 }}
-                      className="group/jump cursor-pointer"
-                      onClick={(e) => { e.stopPropagation(); setJumps((prev: any[]) => prev.filter((_, idx) => idx !== i)); audioEngine.playTick(settings.soundTheme); }}
+                      onTap={(e) => { e.stopPropagation(); setJumps((prev: any[]) => prev.filter((_, idx) => idx !== i)); audioEngine.playTick(settings.soundTheme); }}
                     >
-                      <path d={path} fill="none" stroke="transparent" strokeWidth="50" className="cursor-pointer" />
+                      <path d={path} fill="none" stroke="transparent" strokeWidth="60" className="cursor-pointer" />
                       <path d={path} fill="none" stroke={jump.color} strokeWidth="8" strokeLinecap="round" className="opacity-60" />
                       <path 
                         d={isPositive ? `M ${x2 - 16} ${LINE_Y - 16} L ${x2} ${LINE_Y} L ${x2 - 16} ${LINE_Y + 16}` : `M ${x2 + 16} ${LINE_Y - 16} L ${x2} ${LINE_Y} L ${x2 + 16} ${LINE_Y + 16}`}
@@ -363,9 +387,14 @@ export const NumberLine = () => {
                       initial={{ opacity: 0, y: -40, scale: 0.8 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -40, scale: 0.8 }}
-                      className="cursor-pointer group/pin"
-                      onTap={(e) => { e.stopPropagation(); togglePin(pin.value); }}
+                      className="interactive-item cursor-pointer group/pin"
+                      onTap={(e) => { 
+                        e.stopPropagation(); 
+                        togglePin(pin.value); 
+                      }}
                     >
+                      {/* Transparent Hit Area */}
+                      <rect x={x - 40} y={LINE_Y - 175} width={80} height={200} fill="transparent" />
                       <circle cx={x} cy={LINE_Y} r="12" fill={pin.color} stroke="white" strokeWidth="4" />
                       <line x1={x} y1={LINE_Y} x2={x} y2={LINE_Y - 120} stroke={pin.color} strokeWidth="8" strokeLinecap="round" />
                       <circle cx={x} cy={LINE_Y - 130} r="35" fill={pin.color} stroke="white" strokeWidth="4" className="" />
@@ -397,14 +426,14 @@ export const NumberLine = () => {
         onClose={() => setIsConfigOpen(false)}
         title="Settings"
       >
-          <div className="space-y-10">
-            <div className="space-y-6">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
+          <div className="space-y-6">
+            <div>
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-3">
                 <FormattedMessage id="numberline.settings.range" />
               </label>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest block text-center">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block opacity-70">
                     <FormattedMessage id="numberline.settings.start" />
                   </span>
                   <input 
@@ -419,11 +448,11 @@ export const NumberLine = () => {
                         setRange((prev: any) => ({ start: numVal, end: Math.max(numVal, parseFloat(prev.end) || 0) }));
                       }
                     }}
-                    className="w-full bg-slate-50 p-6 rounded-[2rem] border-4 border-slate-100 outline-none font-black text-3xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
+                    className="w-full bg-white p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-xl md:text-2xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
                   />
                 </div>
-                <div className="space-y-2">
-                  <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest block text-center">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block opacity-70">
                     <FormattedMessage id="numberline.settings.end" />
                   </span>
                   <input 
@@ -438,14 +467,14 @@ export const NumberLine = () => {
                         setRange((prev: any) => ({ start: Math.min(numVal, parseFloat(prev.start) || 0), end: numVal }));
                       }
                     }}
-                    className="w-full bg-slate-50 p-6 rounded-[2rem] border-4 border-slate-100 outline-none font-black text-3xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
+                    className="w-full bg-white p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-xl md:text-2xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
                   />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
+            <div>
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-3">
                 <FormattedMessage id="numberline.settings.steps" />
               </label>
               <input 
@@ -453,25 +482,16 @@ export const NumberLine = () => {
                 value={step}
                 step="0.1"
                 onChange={(e) => setStep(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
-                className="w-full bg-slate-50 p-6 rounded-[2rem] border-4 border-slate-100 outline-none font-black text-4xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
+                className="w-full bg-white p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-2xl md:text-3xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
               />
             </div>
+            
             <button
               onClick={() => { setShowLabels(!showLabels); audioEngine.playTick(settings.soundTheme); }}
-              className={`w-full h-24 rounded-[2.5rem] border-4 transition-all flex items-center justify-center gap-4 font-black text-sm uppercase tracking-[0.2em]  ${showLabels ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+              className={`w-full h-16 md:h-20 rounded-2xl border-4 transition-all flex items-center justify-center gap-4 font-black text-sm uppercase tracking-widest ${showLabels ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white border-slate-100 text-slate-400'}`}
             >
-              {showLabels ? <Eye size={24} strokeWidth={3} /> : <EyeOff size={24} strokeWidth={3} />}
+              {showLabels ? <Eye size={20} strokeWidth={3} /> : <EyeOff size={20} strokeWidth={3} />}
               <FormattedMessage id="numberline.settings.labels" />
-            </button>
-
-            <div className="h-px bg-slate-100 w-full" />
-
-            <button
-              onClick={resetAll}
-              className="w-full py-8 bg-white border-4 border-slate-100 text-slate-400 rounded-[2.5rem] font-black text-sm uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center gap-4 "
-            >
-              <RotateCcw size={24} strokeWidth={3} />
-              <FormattedMessage id="numberline.settings.reset" />
             </button>
           </div>
         </SettingsPanel>

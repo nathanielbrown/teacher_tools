@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
 import { useSettings } from '../../contexts/SettingsContext';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
 
 // 1. Constants
@@ -40,6 +40,7 @@ const HelpContent = () => (
 );
 
 export const RandomGroupNameGenerator = () => {
+  const intl = useIntl();
   const { clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
   const [groups, setGroups] = useState<string[]>([]);
@@ -63,13 +64,23 @@ export const RandomGroupNameGenerator = () => {
       for (let i = 0; i < 6; i++) {
         const randomAdj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
         const randomNoun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-        newGroups.push(`${randomAdj} ${randomNoun}`);
+        
+        const adj = intl.formatMessage({ 
+          id: `groupname.adj.${randomAdj.toLowerCase()}`, 
+          defaultMessage: randomAdj 
+        });
+        const noun = intl.formatMessage({ 
+          id: `groupname.noun.${randomNoun.toLowerCase()}`, 
+          defaultMessage: randomNoun 
+        });
+        
+        newGroups.push(`${adj} ${noun}`);
       }
       setGroups(newGroups);
       setIsGenerating(false);
       audioEngine.playSuccess(settings.soundTheme);
     }, 800);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, intl]);
 
   useEffect(() => {
     setHelpContent(<HelpContent />);

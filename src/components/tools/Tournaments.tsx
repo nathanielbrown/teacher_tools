@@ -43,7 +43,6 @@ import { ClassPanel } from '../shared/ClassPanel';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useHeader } from '../../contexts/HeaderContext';
 import { audioEngine } from '../../utils/audio';
-import { downloadCanvasAsPNG } from '../../utils/export';
 // Custom Bracket Implementation
 // 1. Constants
 const K_FACTOR = 32;
@@ -306,31 +305,6 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
     audioEngine.playTick(settings.soundTheme);
   };
 
-  const handleExport = async () => {
-    if (!exportRef.current) return;
-    try {
-      // Ensure the capture is clean by temporarily removing any scrolling constraints
-      const el = exportRef.current;
-      const dataUrl = await htmlToImage.toPng(el, { 
-        backgroundColor: '#ffffff', 
-        pixelRatio: 2,
-        width: el.clientWidth,
-        height: el.clientHeight,
-        style: {
-          transform: 'none',
-          borderRadius: '0'
-        }
-      });
-      const link = document.createElement('a');
-      link.download = `leaderboard-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
-      audioEngine.playTick(settings.soundTheme);
-    } catch (err) {
-      console.error('Export failed', err);
-    }
-  };
-
   return (
     <div className="flex flex-col lg:flex-row-reverse gap-4 h-full min-h-0 italic">
       {/* Best Players Panel */}
@@ -493,7 +467,7 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
   );
 };
 
-const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack, isMobile }: any) => {
+const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack }: any) => {
   const { settings } = useSettings();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -835,7 +809,7 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
 
   return (
     <div className="flex-1 flex flex-col min-h-0 italic overflow-hidden">
-      <div className="px-10 py-8 flex items-center justify-between border-b-4 border-slate-50 bg-white shrink-0">
+      <div className="px-6 py-6 flex items-center justify-between border-b-4 border-slate-50 bg-white shrink-0">
         <div className="flex-1 flex items-center gap-6">
           <button 
             onClick={onBack}
@@ -1141,7 +1115,7 @@ export const Tournaments = () => {
         onClose={() => {}} // Satisfy required prop
       />
 
-      <ToolPanel alignTop fluid baseWidth={isMobile ? 640 : 1200} baseHeight={800}>
+      <ToolPanel alignTop fluid baseWidth={isMobile ? 640 : 1200} baseHeight={800} padding={40}>
         <div className="w-full flex flex-col relative z-10 h-full overflow-hidden">
           {!activeTournament ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-12 relative overflow-hidden group">
@@ -1163,80 +1137,90 @@ export const Tournaments = () => {
           ) : step === 'setup' ? (
             <div className="flex-1 flex flex-col gap-6 relative overflow-hidden group">
               {/* Tournament Config */}
-              <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-md rounded-[2.5rem] border-4 border-white p-8 shrink-0 relative z-10">
-                <div className="flex items-center gap-6 mb-2">
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
-                    <Trophy size={28} strokeWidth={3} />
+              <div className="flex flex-col bg-white/40 backdrop-blur-md rounded-[3rem] border-4 border-white shrink-0 relative z-10 overflow-hidden">
+                {/* Tournament Config Section */}
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 p-6 lg:p-8">
+                  {/* Left side: Icon and Name */}
+                  <div className="flex-1 flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                      <Trophy size={32} strokeWidth={3} />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Tournament Name</span>
+                      <div className="relative group/input">
+                        <input 
+                          type="text" 
+                          value={activeTournament?.name || ''}
+                          onChange={(e) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, name: e.target.value } : t))}
+                          className="w-full text-3xl font-black text-slate-800 uppercase tracking-tight bg-white/60 border-4 border-white focus:border-indigo-500 focus:bg-white rounded-[1.5rem] px-5 py-3 outline-none transition-all placeholder:text-slate-200"
+                          placeholder="Enter Tournament Name..."
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 block">Tournament Name</span>
-                    <input 
-                      type="text" 
-                      value={activeTournament?.name || ''}
-                      onChange={(e) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, name: e.target.value } : t))}
-                      className="w-full text-3xl font-black text-slate-800 uppercase tracking-tight bg-transparent border-none outline-none focus:text-indigo-600 transition-colors placeholder:text-slate-200"
-                      placeholder="Enter Tournament Name..."
-                    />
+
+                  <div className="hidden lg:block w-px h-16 bg-white/50 mx-2" />
+
+                  {/* Right side: Type selection */}
+                  <div className="flex-1 flex flex-col lg:justify-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block lg:hidden">Tournament Type</span>
+                    <div className="flex gap-2">
+                      {[
+                        { id: 'single', label: 'Single', Icon: Trophy },
+                        { id: 'double', label: 'Double', Icon: RotateCcw },
+                        { id: 'elo', label: 'Ranking', Icon: TrendingUp }
+                      ].map((t) => {
+                        const isStarted = activeTournament?.matches && activeTournament.matches.length > 0;
+                        const isDisabled = isStarted;
+                        
+                        return (
+                          <button
+                            key={t.id}
+                            disabled={isDisabled}
+                            onClick={() => {
+                              setTournaments((prev: any) => prev.map((curr: any) => curr.id === activeTournamentId ? { ...curr, type: t.id } : curr));
+                              audioEngine.playTick(settings.soundTheme);
+                            }}
+                            className={`flex-1 flex items-center justify-center gap-3 px-4 py-6 lg:py-4 rounded-[1.5rem] font-black text-xl lg:text-xs uppercase tracking-widest transition-all ${
+                              (activeTournament?.type || 'elo') === t.id
+                                ? 'bg-indigo-600 text-white shadow-lg scale-105'
+                                : isDisabled
+                                  ? 'bg-slate-50 border-4 border-slate-50 text-slate-200 cursor-not-allowed opacity-50'
+                                  : 'bg-white border-4 border-white text-slate-400 hover:border-indigo-100 hover:text-indigo-600'
+                            }`}
+                          >
+                            <t.Icon size={isMobile ? 24 : 16} /> {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 pt-4 border-t-2 border-white/50">
-                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shrink-0 border-2 border-white">
-                    <Settings size={20} strokeWidth={3} />
-                  </div>
-                  <div className="flex-1 flex gap-2">
-                    {[
-                      { id: 'single', label: 'Single', icon: <Trophy size={14} /> },
-                      { id: 'double', label: 'Double', icon: <RotateCcw size={14} /> },
-                      { id: 'elo', label: 'Ranking', icon: <TrendingUp size={14} /> }
-                    ].map((t) => {
-                      const isStarted = activeTournament?.matches && activeTournament.matches.length > 0;
-                      const isDisabled = isStarted;
-                      
-                      return (
-                        <button
-                          key={t.id}
-                          disabled={isDisabled}
-                          onClick={() => {
-                            setTournaments((prev: any) => prev.map((curr: any) => curr.id === activeTournamentId ? { ...curr, type: t.id } : curr));
-                            audioEngine.playTick(settings.soundTheme);
-                          }}
-                          className={`flex-1 flex items-center justify-center gap-3 px-6 py-6 rounded-2xl font-black text-xl lg:text-sm uppercase tracking-widest transition-all ${
-                            (activeTournament?.type || 'elo') === t.id
-                              ? 'bg-indigo-600 text-white shadow-lg scale-105'
-                              : isDisabled
-                                ? 'bg-slate-50 border-2 border-slate-50 text-slate-200 cursor-not-allowed opacity-50'
-                                : 'bg-white border-2 border-slate-100 text-slate-400 hover:border-indigo-100 hover:text-indigo-600'
-                          }`}
-                        >
-                          {React.cloneElement(t.icon as React.ReactElement, { size: 20 })} {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+                {/* Divider */}
+                <div className="h-px bg-white/50" />
 
-              {/* Header Bar */}
-              <div className="flex items-center justify-between shrink-0 bg-white/40 backdrop-blur-md rounded-[2.5rem] border-4 border-white px-10 py-6 relative z-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 border-2 border-slate-50">
-                    <Users size={24} strokeWidth={3} />
+                {/* Players Header Section */}
+                <div className="flex items-center justify-between px-8 py-6 bg-white/20">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 border-2 border-slate-50">
+                      <Users size={24} strokeWidth={3} />
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Players</h3>
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Select participants</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Players</h3>
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Select participants</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <button 
-                    onClick={() => { setSelectedStudents(settings.classes.find(c => c.id === selectedClassId)?.students || []); audioEngine.playTick(settings.soundTheme); }} 
-                    className="px-8 py-4 bg-white border-2 border-slate-100 rounded-xl text-xs font-black text-slate-400 uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all"
-                  >
-                    All
-                  </button>
-                  <div className="h-14 px-8 bg-white/60 rounded-full flex items-center justify-center text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-2 border-white">
-                    <span className="text-indigo-600 mr-2">{selectedStudents.length}</span> Selected
+                  <div className="flex items-center gap-6">
+                    <button 
+                      onClick={() => { setSelectedStudents(settings.classes.find(c => c.id === selectedClassId)?.students || []); audioEngine.playTick(settings.soundTheme); }} 
+                      className="px-8 py-4 bg-white border-2 border-slate-100 rounded-xl text-xs font-black text-slate-400 uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all"
+                    >
+                      All
+                    </button>
+                    <div className="h-14 px-8 bg-white/60 rounded-full flex items-center justify-center text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-2 border-white">
+                      <span className="text-indigo-600 mr-2">{selectedStudents.length}</span> Selected
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1307,7 +1291,6 @@ export const Tournaments = () => {
                     setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, step: 'setup' } : t));
                     setStep('setup');
                   }}
-                  isMobile={isMobile}
                 />
               )}
             </div>

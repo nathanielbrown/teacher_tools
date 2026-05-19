@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Plus, Trash2, Download, Upload } from 'lucide-react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
@@ -20,36 +20,61 @@ export const Config = () => {
   const initialTab = currentPath.includes('/wordmanager') ? 'words' : currentPath.includes('/classes') ? 'classes' : 'general';
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  const navigateToTab = (tab: string) => {
+  const navigateToTab = useCallback((tab: string) => {
     setActiveTab(tab);
     const path = tab === 'words' ? '/config/wordmanager' : tab === 'classes' ? '/config/classes' : '/config';
     window.history.pushState({}, '', path);
-  };
+  }, []);
 
   const { setHeaderActions, clearHeader } = useHeader();
 
-  const configTabs = useMemo(() => (
-    <div className="flex items-center gap-1.5 bg-slate-100/60 p-1 rounded-2xl border border-slate-200/50 backdrop-blur-md ">
-      {[
-        { id: 'general', name: intl.formatMessage({ id: 'config.tabs.general', defaultMessage: 'General' }), emoji: '⚙️' },
-        { id: 'classes', name: intl.formatMessage({ id: 'config.tabs.classes', defaultMessage: 'Class Manager' }), emoji: '👥' },
-        { id: 'words', name: intl.formatMessage({ id: 'config.tabs.words', defaultMessage: 'Word Manager' }), emoji: '📖' },
-      ].map(tab => (
-        <button
-          key={tab.id}
-          onClick={() => navigateToTab(tab.id)}
-          className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 ${
-            activeTab === tab.id
-              ? 'bg-indigo-600 text-white '
-              : 'text-slate-400 hover:text-slate-600 hover:bg-white/80'
-          }`}
-        >
-          <span className="text-base">{tab.emoji}</span>
-          <span>{tab.name}</span>
-        </button>
-      ))}
-    </div>
-  ), [intl, activeTab]);
+  const configTabs = useMemo(() => {
+    const tabs = [
+      { id: 'general', name: intl.formatMessage({ id: 'config.tabs.general', defaultMessage: 'General' }), emoji: '⚙️' },
+      { id: 'classes', name: intl.formatMessage({ id: 'config.tabs.classes', defaultMessage: 'Class Manager' }), emoji: '👥' },
+      { id: 'words', name: intl.formatMessage({ id: 'config.tabs.words', defaultMessage: 'Word Manager' }), emoji: '📖' },
+    ];
+
+    return (
+      <div className="flex items-center">
+        {/* Mobile Dropdown */}
+        <div className="md:hidden relative">
+          <select
+            value={activeTab}
+            onChange={(e) => navigateToTab(e.target.value)}
+            className="appearance-none bg-slate-100/60 pl-3 pr-8 py-2 rounded-xl border border-slate-200/50 backdrop-blur-md text-slate-700 font-black text-[10px] uppercase tracking-widest outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            {tabs.map(tab => (
+              <option key={tab.id} value={tab.id}>
+                {tab.emoji} {tab.name}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+            <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+          </div>
+        </div>
+
+        {/* Desktop Tabs */}
+        <div className="hidden md:flex items-center gap-1.5 bg-slate-100/60 p-1 rounded-2xl border border-slate-200/50 backdrop-blur-md">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => navigateToTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 ${
+                activeTab === tab.id
+                  ? 'bg-indigo-600 text-white '
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-white/80'
+              }`}
+            >
+              <span className="text-base">{tab.emoji}</span>
+              <span>{tab.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }, [intl, activeTab, navigateToTab]);
 
   useEffect(() => {
     if (activeTab !== 'words') {
@@ -196,7 +221,7 @@ export const Config = () => {
   };
 
   return (
-    <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex-1 flex flex-col space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {activeTab === 'general' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="space-y-8">
@@ -515,7 +540,7 @@ export const Config = () => {
     )}
 
     {activeTab === 'words' && (
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100vh-280px)]">
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1 w-full md:h-[calc(100vh-280px)]">
         <WordManager preActions={configTabs} />
       </div>
     )}

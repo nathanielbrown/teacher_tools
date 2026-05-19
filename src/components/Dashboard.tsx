@@ -27,6 +27,13 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, activeTab }) => {
   const { settings } = useSettings();
   const intl = useIntl();
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const isEarlyYears = settings.theme === 'early-years';
   const isNature = settings.theme === 'primary';
 
@@ -162,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, activeTab }) =
                               {settings.theme === 'early-years' ? (
                                 <span className="text-2xl md:text-4xl">{tool.emoji}</span>
                               ) : (
-                                <Icon size={24} md:size={40} strokeWidth={2.5} />
+                                <Icon size={isMobile ? 24 : 40} strokeWidth={2.5} />
                               )}
                             </div>
                         </div>

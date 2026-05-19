@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'favicon.png', 'assets/classroom_bg.png'],
+      includeAssets: ['favicon.png', 'assets/classroom_bg.png'],
       manifest: {
         name: 'Teacher Tools',
         short_name: 'ClassRex Tools',
@@ -22,12 +22,7 @@ export default defineConfig({
           {
             src: 'favicon.png',
             sizes: '256x256',
-            type: 'image/png'
-          },
-          {
-            src: 'favicon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any maskable'
           }
         ]

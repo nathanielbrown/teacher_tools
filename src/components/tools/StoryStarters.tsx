@@ -21,46 +21,46 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 // 1. Constants
 const STORY_PROMPTS = {
   1: [
-    "Once upon a time, a little dog found a magic bone...",
-    "In a dark forest, a friendly bear woke up and...",
-    "The sun was shining when suddenly it started raining blue drops...",
-    "A brave kitten wanted to climb the highest tree...",
-    "Under the sea, a tiny fish found a shiny coin..."
+    { id: 'magic_bone', text: "Once upon a time, a little dog found a magic bone..." },
+    { id: 'friendly_bear', text: "In a dark forest, a friendly bear woke up and..." },
+    { id: 'blue_drops', text: "The sun was shining when suddenly it started raining blue drops..." },
+    { id: 'brave_kitten', text: "A brave kitten wanted to climb the highest tree..." },
+    { id: 'shiny_coin', text: "Under the sea, a tiny fish found a shiny coin..." }
   ],
   2: [
-    "The old toy box in the attic started making a strange noise...",
-    "When I looked out my window, the moon was missing!",
-    "A magical paintbrush drew things that came to life.",
-    "The secret door in the library led to a world of candy.",
-    "My  started walking the opposite way I was going!"
+    { id: 'toy_box', text: "The old toy box in the attic started making a strange noise..." },
+    { id: 'missing_moon', text: "When I looked out my window, the moon was missing!" },
+    { id: 'paintbrush', text: "A magical paintbrush drew things that came to life." },
+    { id: 'candy_world', text: "The secret door in the library led to a world of candy." },
+    { id: 'walking_opposite', text: "My shadow started walking the opposite way I was going!" }
   ],
   3: [
-    "The map had an X, but it wasn't on the ground, it was in the sky.",
-    "Every time the clock struck thirteen, time would freeze.",
-    "The new kid at school had a tail sticking out of his backpack.",
-    "A message in a bottle washed ashore, written in invisible ink.",
-    "The zoo animals swapped voices for a day."
+    { id: 'sky_x', text: "The map had an X, but it wasn't on the ground, it was in the sky." },
+    { id: 'clock_thirteen', text: "Every time the clock struck thirteen, time would freeze." },
+    { id: 'tail_backpack', text: "The new kid at school had a tail sticking out of his backpack." },
+    { id: 'invisible_ink', text: "A message in a bottle washed ashore, written in invisible ink." },
+    { id: 'swapped_voices', text: "The zoo animals swapped voices for a day." }
   ],
   4: [
-    "The spaceship landed in our backyard, but it was the size of a bug.",
-    "I discovered my grandma was a retired superhero.",
-    "The ancient coin allowed whoever held it to speak to animals.",
-    "The painting in the museum winked at me when no one was looking.",
-    "We found a train ticket with tomorrow's date and an unknown destination."
+    { id: 'bug_spaceship', text: "The spaceship landed in our backyard, but it was the size of a bug." },
+    { id: 'grandma_superhero', text: "I discovered my grandma was a retired superhero." },
+    { id: 'animal_coin', text: "The ancient coin allowed whoever held it to speak to animals." },
+    { id: 'winking_painting', text: "The painting in the museum winked at me when no one was looking." },
+    { id: 'train_ticket', text: "We found a train ticket with tomorrow's date and an unknown destination." }
   ],
   5: [
-    "The storm brought more than rain; it brought creatures of wind and lightning.",
-    "The last library on Earth contained a book that wrote itself.",
-    "Every reflection in the mirror showed a slightly different world.",
-    "The invention was meant to clean rooms, but it started deleting them instead.",
-    "A mysterious signal interrupted every screen in the city."
+    { id: 'storm_creatures', text: "The storm brought more than rain; it brought creatures of wind and lightning." },
+    { id: 'self_writing_book', text: "The last library on Earth contained a book that wrote itself." },
+    { id: 'mirror_worlds', text: "Every reflection in the mirror showed a slightly different world." },
+    { id: 'deleting_invention', text: "The invention was meant to clean rooms, but it started deleting them instead." },
+    { id: 'mysterious_signal', text: "A mysterious signal interrupted every screen in the city." }
   ],
   6: [
-    "The chronometer didn't tell time; it told you how much time you had left.",
-    "The city floated above the clouds, anchored by massive chains that were rusting.",
-    "Nobody remembered the event, except for the photographs that proved it happened.",
-    "The artifact hummed with a frequency that unlocked forgotten memories.",
-    "We were warned never to go past the perimeter, but the perimeter was shrinking."
+    { id: 'time_left', text: "The chronometer didn't tell time; it told you how much time you had left." },
+    { id: 'floating_city', text: "The city floated above the clouds, anchored by massive chains that were rusting." },
+    { id: 'forgotten_event', text: "Nobody remembered the event, except for the photographs that proved it happened." },
+    { id: 'forgotten_memories', text: "The artifact hummed with a frequency that unlocked forgotten memories." },
+    { id: 'shrinking_perimeter', text: "We were warned never to go past the perimeter, but the perimeter was shrinking." }
   ]
 };
 
@@ -108,10 +108,10 @@ export const StoryStarters = () => {
   const { settings } = useSettings();
   
   const [yearLevel, setYearLevel] = useLocalStorage<number>('story_starters_year_level', 3);
-  const [hasSelectedYear, setHasSelectedYear] = useLocalStorage<boolean>('story_starters_year_selected', false);
-  const [prompt, setPrompt] = useLocalStorage<string | null>('story_starters_prompt', null);
+  const [hasSelectedYear, setHasSelectedYear] = useLocalStorage<boolean>('story_star_year_selected', false);
+  const [prompt, setPrompt] = useLocalStorage<any | null>('story_starters_prompt', null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [history, setHistory] = useLocalStorage<string[]>('story_starters_history', []);
+  const [history, setHistory] = useLocalStorage<any[]>('story_starters_history', []);
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
@@ -128,11 +128,15 @@ export const StoryStarters = () => {
     audioEngine.playTick(settings.soundTheme);
     
     setTimeout(() => {
-      const prompts = STORY_PROMPTS[yearLevel as keyof typeof STORY_PROMPTS];
+      const currentYear = (yearLevel >= 1 && yearLevel <= 6) ? yearLevel : 3;
+      const prompts = STORY_PROMPTS[currentYear as keyof typeof STORY_PROMPTS];
       const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-      setPrompt(randomPrompt);
-      setHistory(prev => [randomPrompt, ...prev].slice(0, 50));
-      setHistoryIndex(0);
+      
+      if (randomPrompt) {
+        setPrompt(randomPrompt);
+        setHistory(prev => [randomPrompt, ...prev].slice(0, 50));
+        setHistoryIndex(0);
+      }
       setIsGenerating(false);
     }, 600);
   }, [yearLevel, settings.soundTheme, setPrompt, setHistory, setIsGenerating]);
@@ -164,7 +168,7 @@ export const StoryStarters = () => {
             <AnimatePresence mode="wait">
               {prompt ? (
                 <motion.div
-                  key={prompt}
+                  key={prompt.id}
                   initial={{ opacity: 0, scale: 0.95, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 1.05, y: -30 }}
@@ -173,7 +177,10 @@ export const StoryStarters = () => {
 
                   
                   <h2 className="text-2xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter italic uppercase ">
-                    {prompt}
+                    <FormattedMessage 
+                      id={`storystarters.prompt.${prompt?.id || 'unknown'}`} 
+                      defaultMessage={prompt?.text || ''} 
+                    />
                   </h2>
                   
                   <div className="flex items-center justify-center gap-6">
@@ -324,7 +331,10 @@ export const StoryStarters = () => {
                      exit={{ opacity: 0, scale: 1.1 }}
                      className="text-lg font-black text-slate-800 italic leading-tight"
                    >
-                     "{history[historyIndex]}"
+                     "<FormattedMessage 
+                       id={`storystarters.prompt.${history[historyIndex]?.id || 'unknown'}`} 
+                       defaultMessage={history[historyIndex]?.text || ''} 
+                     />"
                    </motion.p>
                  </AnimatePresence>
               </div>
@@ -354,7 +364,12 @@ export const StoryStarters = () => {
                    <FormattedMessage id="storystarters.history.item" />
                  </span>
               </div>
-              <p className="text-xs font-black text-slate-900 italic leading-relaxed truncate w-full">"{item}"</p>
+              <p className="text-xs font-black text-slate-900 italic leading-relaxed truncate w-full">
+                "<FormattedMessage 
+                  id={`storystarters.prompt.${item?.id || 'unknown'}`} 
+                  defaultMessage={item?.text || ''} 
+                />"
+              </p>
             </motion.div>
           )}
         />

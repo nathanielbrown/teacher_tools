@@ -23,82 +23,82 @@ import { FormattedMessage, useIntl } from 'react-intl';
 const CATEGORIES = [
   { 
     id: 'classic', 
-    name: 'Classic', 
+    nameKey: 'simonsays.category.classic',
     icon: User, 
     gradient: 'from-blue-400 to-indigo-500',
     commands: [
-      'Touch your nose', 
-      'Clap your hands', 
-      'Jump 3 times', 
-      'Touch your toes', 
-      'Pat your head', 
-      'Stand on one leg',
-      'Spin around once',
-      'Point to the ceiling'
+      { id: 'touch_nose', text: 'Touch your nose' }, 
+      { id: 'clap_hands', text: 'Clap your hands' }, 
+      { id: 'jump_3', text: 'Jump 3 times' }, 
+      { id: 'touch_toes', text: 'Touch your toes' }, 
+      { id: 'pat_head', text: 'Pat your head' }, 
+      { id: 'stand_leg', text: 'Stand on one leg' },
+      { id: 'spin_once', text: 'Spin around once' },
+      { id: 'point_ceiling', text: 'Point to the ceiling' }
     ] 
   },
   { 
     id: 'stretching', 
-    name: 'Stretching', 
+    nameKey: 'simonsays.category.stretching',
     icon: Dumbbell, 
     gradient: 'from-emerald-400 to-teal-500',
     commands: [
-      'Reach for the sky', 
-      'Touch your toes', 
-      'Side stretch left', 
-      'Side stretch right', 
-      'Roll your shoulders', 
-      'Neck circles',
-      'Reach for your ankles',
-      'Big arm circles'
+      { id: 'reach_sky', text: 'Reach for the sky' }, 
+      { id: 'touch_toes', text: 'Touch your toes' }, 
+      { id: 'stretch_left', text: 'Side stretch left' }, 
+      { id: 'stretch_right', text: 'Side stretch right' }, 
+      { id: 'roll_shoulders', text: 'Roll your shoulders' }, 
+      { id: 'neck_circles', text: 'Neck circles' },
+      { id: 'reach_ankles', text: 'Reach for your ankles' },
+      { id: 'arm_circles', text: 'Big arm circles' }
     ] 
   },
   { 
     id: 'animals', 
-    name: 'Animals', 
+    nameKey: 'simonsays.category.animals',
     icon: Dog, 
     gradient: 'from-orange-400 to-red-500',
     commands: [
-      'Hop like a frog', 
-      'Roar like a lion', 
-      'Flap like a bird', 
-      'Slither like a snake', 
-      'Waddle like a penguin', 
-      'Stomp like an elephant',
-      'Bark like a dog',
-      'Tall like a giraffe'
+      { id: 'hop_frog', text: 'Hop like a frog' }, 
+      { id: 'roar_lion', text: 'Roar like a lion' }, 
+      { id: 'flap_bird', text: 'Flap like a bird' }, 
+      { id: 'slither_snake', text: 'Slither like a snake' }, 
+      { id: 'waddle_penguin', text: 'Waddle like a penguin' }, 
+      { id: 'stomp_elephant', text: 'Stomp like an elephant' },
+      { id: 'bark_dog', text: 'Bark like a dog' },
+      { id: 'tall_giraffe', text: 'Tall like a giraffe' }
     ] 
   },
   { 
     id: 'funny', 
-    name: 'Funny Faces', 
+    nameKey: 'simonsays.category.funny',
     icon: Ghost, 
     gradient: 'from-purple-400 to-pink-500',
     commands: [
-      'Stick out your tongue', 
-      'Wiggle your ears', 
-      'Puff your cheeks', 
-      'Blink both eyes', 
-      'Scowl like a pirate', 
-      'Blow a kiss',
-      'Show your teeth',
-      'Wink at a friend'
+      { id: 'stick_tongue', text: 'Stick out your tongue' }, 
+      { id: 'wiggle_ears', text: 'Wiggle your ears' }, 
+      { id: 'puff_cheeks', text: 'Puff your cheeks' }, 
+      { id: 'blink_eyes', text: 'Blink both eyes' }, 
+      { id: 'scowl_pirate', text: 'Scowl like a pirate' }, 
+      { id: 'blow_kiss', text: 'Blow a kiss' },
+      { id: 'show_teeth', text: 'Show your teeth' },
+      { id: 'wink_friend', text: 'Wink at a friend' }
     ] 
   },
   { 
     id: 'miming', 
-    name: 'Miming', 
+    nameKey: 'simonsays.category.miming',
     icon: Camera, 
     gradient: 'from-amber-400 to-yellow-500',
     commands: [
-      'Brush your teeth', 
-      'Drive a car', 
-      'Play the guitar', 
-      'Eat an apple', 
-      'Open a gift', 
-      'Sleep on your hands',
-      'Row a boat',
-      'Talk on the phone'
+      { id: 'brush_teeth', text: 'Brush your teeth' }, 
+      { id: 'drive_car', text: 'Drive a car' }, 
+      { id: 'play_guitar', text: 'Play the guitar' }, 
+      { id: 'eat_apple', text: 'Eat an apple' }, 
+      { id: 'open_gift', text: 'Open a gift' }, 
+      { id: 'sleep_hands', text: 'Sleep on your hands' },
+      { id: 'row_boat', text: 'Row a boat' },
+      { id: 'talk_phone', text: 'Talk on the phone' }
     ] 
   }
 ];
@@ -183,9 +183,9 @@ export const SimonSays = () => {
     
     const isSimon = Math.random() > 0.3;
     const commands = selectedCategory.commands;
-    const text = commands[Math.floor(Math.random() * commands.length)];
+    const command = commands[Math.floor(Math.random() * commands.length)];
     
-    setCurrentCommand({ isSimon, text });
+    setCurrentCommand({ isSimon, command });
     setProgress(100);
     audioEngine.playTick(settings.soundTheme);
 
@@ -333,7 +333,7 @@ export const SimonSays = () => {
                   <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-90`} />
                   <div className={`absolute inset-0 flex flex-col items-center justify-center ${isMobile ? 'p-2' : 'p-6'} text-white space-y-4 italic`}>
                     <span className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} font-black tracking-tighter uppercase`}>
-                      <FormattedMessage id={`simonsays.category.${cat.id}`} defaultMessage={cat.name} />
+                      <FormattedMessage id={cat.nameKey} defaultMessage={cat.id.charAt(0).toUpperCase() + cat.id.slice(1)} />
                     </span>
                   </div>
                   <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
@@ -397,7 +397,10 @@ export const SimonSays = () => {
                     </div>
                       
                     <h2 className="text-7xl md:text-9xl font-black text-slate-800 tracking-tighter leading-none uppercase drop-shadow-sm">
-                      {currentCommand?.text}
+                      <FormattedMessage 
+                        id={`simonsays.command.${currentCommand?.command.id}`} 
+                        defaultMessage={currentCommand?.command.text} 
+                      />
                     </h2>
                  </motion.div>
                </AnimatePresence>

@@ -76,6 +76,13 @@ export const EmojiMatch = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const initGame = useCallback((lvlKey: keyof typeof LEVELS) => {
     const lvl = LEVELS[lvlKey];
@@ -184,7 +191,7 @@ export const EmojiMatch = () => {
                   className="group p-8 lg:p-10 bg-white border-4 border-slate-50 rounded-[2.5rem] lg:rounded-[3rem] hover:border-indigo-100 transition-all flex flex-col items-center gap-4 lg:gap-6 active:scale-95 shadow-sm"
                 >
                   <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform" style={{ color: lvl.color }}>
-                    <lvl.icon size={28} lg:size={32} />
+                    <lvl.icon size={isMobile ? 28 : 32} />
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-2xl lg:text-3xl font-black text-slate-800 uppercase tracking-tighter">{lvl.name}</span>
@@ -203,9 +210,9 @@ export const EmojiMatch = () => {
           >
             <div className="space-y-6">
               <div className="w-32 h-32 lg:w-40 lg:h-40 bg-amber-400 rounded-[2.5rem] lg:rounded-[3rem] flex items-center justify-center text-white mx-auto relative border-8 border-white/20 rotate-12 shadow-md">
-                <Trophy size={60} lg:size={80} />
+                <Trophy size={isMobile ? 60 : 80} />
                 <div className="absolute -top-3 -right-3 lg:-top-4 lg:-right-4 w-12 h-12 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center text-amber-500 border-4 border-amber-50 animate-bounce">
-                  <Star fill="currentColor" size={24} lg:size={32} />
+                  <Star fill="currentColor" size={isMobile ? 24 : 32} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -256,7 +263,7 @@ export const EmojiMatch = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3 lg:gap-4 bg-slate-800 px-6 lg:px-8 py-2 lg:py-3 rounded-2xl shadow-inner">
-                <Timer size={18} lg:size={20} className="text-indigo-400" />
+                <Timer size={isMobile ? 18 : 20} className="text-indigo-400" />
                 <span className="text-xl lg:text-2xl tabular-nums font-black text-white">{elapsed}s</span>
               </div>
             </div>

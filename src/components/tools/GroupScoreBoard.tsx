@@ -266,7 +266,7 @@ export const GroupScoreBoard = () => {
                 className="bg-slate-50/50 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-white transition-all flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px] group/add"
               >
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-[2rem] flex items-center justify-center border-4 border-slate-50 group-hover/add:scale-110 transition-transform group-hover/add:rotate-90">
-                  <Plus size={28} md:size={32} strokeWidth={3} className="text-slate-300 group-hover/add:text-indigo-600 transition-colors" />
+                  <Plus size={isMobile ? 28 : 32} strokeWidth={3} className="text-slate-300 group-hover/add:text-indigo-600 transition-colors" />
                 </div>
                 <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mt-6 group-hover/add:text-indigo-400">
                   <FormattedMessage id="groupscoreboard.add_group" defaultMessage="Add Group" />

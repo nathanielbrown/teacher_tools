@@ -84,12 +84,12 @@ export const GuessingGame = () => {
       icon: '🦁',
       color: 'emerald',
       items: [
-        { emoji: '🐶', name: 'Dog' }, { emoji: '🐱', name: 'Cat' }, { emoji: '🐭', name: 'Mouse' },
-        { emoji: '🐹', name: 'Hamster' }, { emoji: '🐰', name: 'Rabbit' }, { emoji: '🦊', name: 'Fox' },
-        { emoji: '🐻', name: 'Bear' }, { emoji: '🐼', name: 'Panda' }, { emoji: '🐨', name: 'Koala' },
-        { emoji: '🐯', name: 'Tiger' }, { emoji: '🦁', name: 'Lion' }, { emoji: '🐮', name: 'Cow' },
-        { emoji: '🐷', name: 'Pig' }, { emoji: '🐸', name: 'Frog' }, { emoji: '🐵', name: 'Monkey' },
-        { emoji: '🐔', name: 'Chicken' }, { emoji: '🐧', name: 'Penguin' }, { emoji: '🐦', name: 'Bird' }
+        { id: 'dog', emoji: '🐶', name: 'Dog' }, { id: 'cat', emoji: '🐱', name: 'Cat' }, { id: 'mouse', emoji: '🐭', name: 'Mouse' },
+        { id: 'hamster', emoji: '🐹', name: 'Hamster' }, { id: 'rabbit', emoji: '🐰', name: 'Rabbit' }, { id: 'fox', emoji: '🦊', name: 'Fox' },
+        { id: 'bear', emoji: '🐻', name: 'Bear' }, { id: 'panda', emoji: '🐼', name: 'Panda' }, { id: 'koala', emoji: '🐨', name: 'Koala' },
+        { id: 'tiger', emoji: '🐯', name: 'Tiger' }, { id: 'lion', emoji: '🦁', name: 'Lion' }, { id: 'cow', emoji: '🐮', name: 'Cow' },
+        { id: 'pig', emoji: '🐷', name: 'Pig' }, { id: 'frog', emoji: '🐸', name: 'Frog' }, { id: 'monkey', emoji: '🐵', name: 'Monkey' },
+        { id: 'chicken', emoji: '🐔', name: 'Chicken' }, { id: 'penguin', emoji: '🐧', name: 'Penguin' }, { id: 'bird', emoji: '🐦', name: 'Bird' }
       ]
     },
     fruits: {
@@ -98,11 +98,11 @@ export const GuessingGame = () => {
       icon: '🍎',
       color: 'rose',
       items: [
-        { emoji: '🍎', name: 'Apple' }, { emoji: '🍌', name: 'Banana' }, { emoji: '🍉', name: 'Watermelon' },
-        { emoji: '🍇', name: 'Grapes' }, { emoji: '🍓', name: 'Strawberry' }, { emoji: '🍒', name: 'Cherries' },
-        { emoji: '🍍', name: 'Pineapple' }, { emoji: '🥝', name: 'Kiwi' }, { emoji: '🥭', name: 'Mango' },
-        { emoji: '🍑', name: 'Peach' }, { emoji: '🍊', name: 'Orange' }, { emoji: '🍋', name: 'Lemon' },
-        { emoji: '🍈', name: 'Melon' }, { emoji: '🍏', name: 'Green Apple' }, { emoji: '🍐', name: 'Pear' }
+        { id: 'apple', emoji: '🍎', name: 'Apple' }, { id: 'banana', emoji: '🍌', name: 'Banana' }, { id: 'watermelon', emoji: '🍉', name: 'Watermelon' },
+        { id: 'grapes', emoji: '🍇', name: 'Grapes' }, { id: 'strawberry', emoji: '🍓', name: 'Strawberry' }, { id: 'cherries', emoji: '🍒', name: 'Cherries' },
+        { id: 'pineapple', emoji: '🍍', name: 'Pineapple' }, { id: 'kiwi', emoji: '🥝', name: 'Kiwi' }, { id: 'mango', emoji: '🥭', name: 'Mango' },
+        { id: 'peach', emoji: '🍑', name: 'Peach' }, { id: 'orange', emoji: '🍊', name: 'Orange' }, { id: 'lemon', emoji: '🍋', name: 'Lemon' },
+        { id: 'melon', emoji: '🍈', name: 'Melon' }, { id: 'green_apple', emoji: '🍏', name: 'Green Apple' }, { id: 'pear', emoji: '🍐', name: 'Pear' }
       ]
     },
     space: {
@@ -111,10 +111,10 @@ export const GuessingGame = () => {
       icon: '🚀',
       color: 'indigo',
       items: [
-        { emoji: '🚀', name: 'Rocket' }, { emoji: '🛸', name: 'UFO' }, { emoji: '🛰', name: 'Satellite' },
-        { emoji: '🪐', name: 'Planet' }, { emoji: '🌟', name: 'Star' }, { emoji: '☄️', name: 'Comet' },
-        { emoji: '🌙', name: 'Moon' }, { emoji: '🌞', name: 'Sun' }, { emoji: '🌍', name: 'Earth' },
-        { emoji: '👨‍🚀', name: 'Astronaut' }, { emoji: '🔭', name: 'Telescope' }, { emoji: '🌌', name: 'Milky Way' }
+        { id: 'rocket', emoji: '🚀', name: 'Rocket' }, { id: 'ufo', emoji: '🛸', name: 'UFO' }, { id: 'satellite', emoji: '🛰', name: 'Satellite' },
+        { id: 'planet', emoji: '🪐', name: 'Planet' }, { id: 'star', emoji: '🌟', name: 'Star' }, { id: 'comet', emoji: '☄️', name: 'Comet' },
+        { id: 'moon', emoji: '🌙', name: 'Moon' }, { id: 'sun', emoji: '🌞', name: 'Sun' }, { id: 'earth', emoji: '🌍', name: 'Earth' },
+        { id: 'astronaut', emoji: '👨‍🚀', name: 'Astronaut' }, { id: 'telescope', emoji: '🔭', name: 'Telescope' }, { id: 'milky_way', emoji: '🌌', name: 'Milky Way' }
       ]
     },
     vehicles: {
@@ -123,11 +123,11 @@ export const GuessingGame = () => {
       icon: '🚗',
       color: 'blue',
       items: [
-        { emoji: '🚗', name: 'Car' }, { emoji: '🚕', name: 'Taxi' }, { emoji: '🚙', name: 'SUV' },
-        { emoji: '🚌', name: 'Bus' }, { emoji: '🏎️', name: 'Race Car' }, { emoji: '🚓', name: 'Police Car' },
-        { emoji: '🚑', name: 'Ambulance' }, { emoji: '🚒', name: 'Fire Engine' }, { emoji: '🚜', name: 'Tractor' },
-        { emoji: '🛴', name: 'Scooter' }, { emoji: '🚲', name: 'Bicycle' }, { emoji: '✈️', name: 'Airplane' },
-        { emoji: '🚁', name: 'Helicopter' }, { emoji: '🚢', name: 'Ship' }, { emoji: '🚂', name: 'Train' }
+        { id: 'car', emoji: '🚗', name: 'Car' }, { id: 'taxi', emoji: '🚕', name: 'Taxi' }, { id: 'suv', emoji: '🚙', name: 'SUV' },
+        { id: 'bus', emoji: '🚌', name: 'Bus' }, { id: 'race_car', emoji: '🏎️', name: 'Race Car' }, { id: 'police_car', emoji: '🚓', name: 'Police Car' },
+        { id: 'ambulance', emoji: '🚑', name: 'Ambulance' }, { id: 'fire_engine', emoji: '🚒', name: 'Fire Engine' }, { id: 'tractor', emoji: '🚜', name: 'Tractor' },
+        { id: 'scooter', emoji: '🛴', name: 'Scooter' }, { id: 'bicycle', emoji: '🚲', name: 'Bicycle' }, { id: 'airplane', emoji: '✈️', name: 'Airplane' },
+        { id: 'helicopter', emoji: '🚁', name: 'Helicopter' }, { id: 'ship', emoji: '🚢', name: 'Ship' }, { id: 'train', emoji: '🚂', name: 'Train' }
       ]
     }
   }), [intl]);
@@ -324,7 +324,7 @@ export const GuessingGame = () => {
                       disabled={isEvaluating}
                       className={`py-6 lg:py-8 px-8 rounded-[2rem] border-4 font-black text-3xl lg:text-4xl transition-all uppercase tracking-tighter italic ${buttonStyle} disabled:cursor-default`}
                     >
-                      {option.name}
+                      {intl.formatMessage({ id: `guessingGame.item.${option.id}`, defaultMessage: option.name })}
                     </button>
                   );
                 })}
@@ -349,7 +349,7 @@ export const GuessingGame = () => {
             <div className="relative">
                <div className="absolute -inset-10 bg-yellow-500/20 rounded-full blur-[100px] animate-pulse" />
                <div className="p-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-[3rem] -[0_40px_80px_-10px_rgba(234,179,8,0.4)] rotate-12 animate-bounce border-[8px] border-white/20 relative z-10">
-                 <Trophy size={60} lg:size={80} className="text-white fill-white" strokeWidth={1} />
+                 <Trophy size={isMobile ? 60 : 80} className="text-white fill-white" strokeWidth={1} />
                </div>
             </div>
             

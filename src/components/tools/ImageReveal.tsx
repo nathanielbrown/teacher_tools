@@ -23,6 +23,7 @@ import { audioEngine } from '../../utils/audio';
 import { FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
 import SettingsPanel from '../shared/SettingsPanel';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useIntl } from 'react-intl';
 
 // 1. Constants
@@ -121,14 +122,14 @@ const PixelatedImage = ({ src, progress }: { src: string, progress: number }) =>
 
 // 7. Component
 export const ImageReveal = () => {
-  const { setHasConfig, setOnConfigToggle, setHeaderActions, setOnReset, clearHeader, setHelpContent, isConfigOpen, setIsConfigOpen } = useHeader();
+  const { setHasConfig, setOnConfigToggle, setOnReset, clearHeader, setHelpContent, isConfigOpen, setIsConfigOpen } = useHeader();
   const { settings } = useSettings();
   const intl = useIntl();
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useLocalStorage<string[]>('imagereveal_images', []);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [mode, setMode] = useState<'reveal' | 'lightsOut'>('reveal');
-  const [revealEffect, setRevealEffect] = useState('blur');
-  const [revealSpeed, setRevealSpeed] = useState(1);
+  const [mode, setMode] = useLocalStorage<'reveal' | 'lightsOut'>('imagereveal_mode', 'reveal');
+  const [revealEffect, setRevealEffect] = useLocalStorage('imagereveal_effect', 'blur');
+  const [revealSpeed, setRevealSpeed] = useLocalStorage('imagereveal_speed', 1);
   const [progress, setProgress] = useState(0);
   const [isRevealing, setIsRevealing] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
@@ -137,7 +138,7 @@ export const ImageReveal = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const revealTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [flashAdd, setFlashAdd] = useState(false);
 
   useEffect(() => {
@@ -189,44 +190,6 @@ export const ImageReveal = () => {
     };
   }, [clearHeader, setOnReset, resetReveal, setHelpContent, setHasConfig, setIsConfigOpen, setOnConfigToggle, isMobile]);
 
-  useEffect(() => {
-    const handleModeChange = (newMode: 'reveal' | 'lightsOut') => {
-      setMode(newMode);
-      resetReveal();
-    };
-
-    setHeaderActions(
-      <div className="flex items-center gap-2 italic">
-        {isMobile ? (
-          <div className="bg-white px-3 py-1.5 rounded-xl border-2 border-slate-50 shadow-sm flex items-center gap-2">
-            <select
-              value={mode}
-              onChange={(e) => handleModeChange(e.target.value as any)}
-              className="bg-transparent text-[10px] font-black uppercase tracking-widest text-indigo-600 outline-none cursor-pointer pr-4"
-            >
-              <option value="reveal">{intl.formatMessage({ id: 'imagereveal.mode.reveal', defaultMessage: 'Reveal' })}</option>
-              <option value="lightsOut">{intl.formatMessage({ id: 'imagereveal.mode.flashlight', defaultMessage: 'Flashlight' })}</option>
-            </select>
-          </div>
-        ) : (
-          <div className="bg-white p-1 rounded-xl flex items-center gap-1 border-2 border-slate-50 shadow-sm">
-            <button
-              onClick={() => handleModeChange('reveal')}
-              className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'reveal' ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-slate-500'}`}
-            >
-              <FormattedMessage id="imagereveal.mode.reveal" defaultMessage="Reveal" />
-            </button>
-            <button
-              onClick={() => handleModeChange('lightsOut')}
-              className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'lightsOut' ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-slate-500'}`}
-            >
-              <FormattedMessage id="imagereveal.mode.flashlight" defaultMessage="Flashlight" />
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }, [mode, resetReveal, setHeaderActions, isMobile, intl]);
 
   useEffect(() => {
     if (isRevealing && mode === 'reveal') {
@@ -310,7 +273,7 @@ export const ImageReveal = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[100] p-4 bg-slate-100/60 backdrop-blur-xl lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none lg:w-[260px] lg:h-full flex flex-col gap-8 italic overflow-hidden shrink-0"
+            className="fixed inset-0 z-[100] p-4 bg-slate-100/60 backdrop-blur-xl lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none lg:w-[320px] lg:h-full flex flex-col italic overflow-hidden shrink-0"
           >
             <SettingsPanel
               isOpen={isConfigOpen}
@@ -319,88 +282,120 @@ export const ImageReveal = () => {
               compact
               title={intl.formatMessage({ id: 'imagereveal.config.title', defaultMessage: 'Settings' })}
             >
-              <div className="space-y-5">
+              <div className="space-y-6">
+                {/* Mode Selection */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
+                    <FormattedMessage id="imagereveal.config.mode" defaultMessage="Game Mode" />
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      onClick={() => { setMode('reveal'); resetReveal(); }}
+                      className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${mode === 'reveal' ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
+                    >
+                      <FormattedMessage id="imagereveal.mode.reveal" defaultMessage="Reveal" />
+                    </button>
+                    <button
+                      onClick={() => { setMode('lightsOut'); resetReveal(); }}
+                      className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${mode === 'lightsOut' ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
+                    >
+                      <FormattedMessage id="imagereveal.mode.flashlight" defaultMessage="Flashlight" />
+                    </button>
+                  </div>
+                </div>
+
                 {/* Reveal Effect Selection */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 ml-2">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
                     <FormattedMessage id="imagereveal.config.effect" defaultMessage="Reveal Effect" />
                   </label>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {REVEAL_EFFECTS.map(effect => (
                       <button
                         key={effect.id}
-                        onClick={() => { setRevealEffect(effect.id); resetReveal(); if (isMobile) setIsConfigOpen(false); }}
-                        className={`p-3 rounded-2xl border-4 transition-all text-left flex items-center gap-4 ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                        onClick={() => { setRevealEffect(effect.id); resetReveal(); }}
+                        className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
                       >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${revealEffect === effect.id ? 'bg-white/10 text-white' : 'bg-slate-50 text-slate-300'}`}>
-                          <effect.icon size={20} />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest">
-                          <FormattedMessage id={`imagereveal.effect.${effect.id}`} defaultMessage={effect.label} />
-                        </span>
+                        <FormattedMessage id={`imagereveal.effect.${effect.id}`} defaultMessage={effect.label} />
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Reveal Speed Selection */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 ml-2">
-                    <FormattedMessage id="imagereveal.config.speed" defaultMessage="Reveal Speed" />
-                  </label>
-                  <div className="space-y-2 p-3 bg-white rounded-2xl border-4 border-slate-50">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Speed</span>
-                      <span className="text-xl font-black text-indigo-600 tabular-nums italic leading-none">{revealSpeed}x</span>
+                <div className="space-y-3">
+                  <div className="flex flex-row items-center justify-between px-4 py-3 bg-white border-2 border-slate-100 rounded-[1.5rem] italic">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+                        <Play size={14} />
+                      </div>
+                      <div className="text-xs font-black text-slate-900 uppercase">
+                        <FormattedMessage id="imagereveal.config.speed" defaultMessage="Speed" />
+                      </div>
                     </div>
+                    <div className="text-sm font-black text-indigo-600 tabular-nums">{revealSpeed}x</div>
+                  </div>
+                  <div className="px-2">
                     <input 
                       type="range" min="0.5" max="3" step="0.5" value={revealSpeed}
                       onChange={(e) => setRevealSpeed(parseFloat(e.target.value))}
-                      className="w-full h-2 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
+                      className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
                     />
                   </div>
                 </div>
 
                 {/* Manage Images */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 ml-2">
-                    <FormattedMessage id="imagereveal.config.images" defaultMessage="Manage Images" />
-                  </label>
-                  
-                  <div className="grid grid-cols-1 gap-2">
-                    <motion.label 
-                      animate={flashAdd ? { scale: [1, 1.1, 1], backgroundColor: ['#f8fafc', '#e0e7ff', '#f8fafc'], borderColor: ['#f1f5f9', '#6366f1', '#f1f5f9'] } : {}}
-                      transition={{ duration: 0.5, repeat: flashAdd ? 3 : 0 }}
-                      className="flex items-center gap-3 p-3 rounded-2xl border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50 transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group"
-                    >
-                      <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
-                      <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50 group-hover:border-indigo-200">
-                        <Upload size={20} strokeWidth={3} />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest">
-                        <FormattedMessage id="imagereveal.action.add" defaultMessage="Add New Image" />
-                      </span>
-                    </motion.label>
+                <div className="space-y-3 pt-4 border-t-2 border-slate-50">
+                  <div className="flex items-center justify-between px-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest opacity-60">
+                      <FormattedMessage id="imagereveal.config.images" defaultMessage="Images" />
+                    </label>
+                    {images.length > 0 && (
+                      <button 
+                        onClick={() => setImages([])}
+                        className="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+                      >
+                        <FormattedMessage id="shared.history.clear" defaultMessage="Clear All" />
+                      </button>
+                    )}
+                  </div>
 
-                    <AnimatePresence mode="popLayout">
+                  <motion.label 
+                    animate={flashAdd ? { scale: [1, 1.05, 1], backgroundColor: ['#f8fafc', '#e0e7ff', '#f8fafc'] } : {}}
+                    className="flex items-center gap-3 p-4 rounded-[1.5rem] border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-white transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group"
+                  >
+                    <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50 group-hover:border-indigo-200">
+                      <Upload size={20} strokeWidth={3} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      <FormattedMessage id="imagereveal.action.add" defaultMessage="Add New Image" />
+                    </span>
+                  </motion.label>
+
+                  <div className="space-y-2">
+                    <AnimatePresence initial={false} mode="popLayout">
                       {images.map((img, idx) => (
                         <motion.div 
                           layout
                           key={img}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
                           onClick={() => { setCurrentIndex(idx); resetReveal(); if (isMobile) setIsConfigOpen(false); }}
-                          className={`relative flex items-center gap-4 p-3 rounded-2xl border-4 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-indigo-50' : 'border-slate-50 bg-white hover:border-indigo-100'}`}
+                          className={`relative flex items-center gap-4 p-3 rounded-[1.5rem] border-2 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-indigo-50' : 'border-slate-50 bg-white hover:border-indigo-100'}`}
                         >
                           <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border-2 border-white">
                             <img src={img} className="w-full h-full object-cover" alt="" />
                           </div>
-                          <span className="flex-1 text-[10px] font-black text-slate-600 uppercase truncate">
+                          <span className="flex-1 text-[10px] font-black text-slate-600 uppercase truncate tracking-widest">
                             <FormattedMessage id="imagereveal.imageIndex" values={{ index: idx + 1 }} defaultMessage={`Image ${idx + 1}`} />
                           </span>
                           <button 
                             onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
                             className="p-2 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
                           >
-                            <Trash2 size={14} strokeWidth={3} />
+                            <Trash2 size={12} strokeWidth={3} />
                           </button>
                         </motion.div>
                       ))}

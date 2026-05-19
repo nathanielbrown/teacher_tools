@@ -738,7 +738,7 @@ export const tools: Tool[] = [
     name: 'Word Builder', 
     icon: Sparkles, 
     emoji: '🧩', 
-    mainSection: 'Student Tools', 
+    mainSection: 'Teacher Tools', 
     section: 'Literacy', 
     color: '#6366f1', 
     yearRange: [0, 4],
@@ -1241,7 +1241,8 @@ export const mainSections = [
       { name: 'Classroom Management', emoji: '🏫', icon: Users },
       { name: 'Teaching Aids', emoji: '📚', icon: BookOpen },
       { name: 'Randomizers', emoji: '🎲', icon: Dices },
-      { name: 'Utilities', emoji: '🛠️', icon: Settings2 }
+      { name: 'Utilities', emoji: '🛠️', icon: Settings2 },
+      { name: 'Literacy', emoji: '✍️', icon: PenTool }
     ] 
   },
   { 

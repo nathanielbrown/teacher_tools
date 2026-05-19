@@ -233,10 +233,15 @@ export const HundredsChart = () => {
   useEffect(() => {
     setHasConfig(true);
     if (window.innerWidth >= 1024) setIsConfigOpen(true);
-    setOnReset(() => clearAll);
     setHelpContent(<HelpContent />);
     setOnConfigToggle(() => () => setIsConfigOpen(prev => !prev));
+  }, [setHasConfig, setIsConfigOpen, setHelpContent, setOnConfigToggle]);
 
+  useEffect(() => {
+    setOnReset(() => clearAll);
+  }, [clearAll, setOnReset]);
+
+  useEffect(() => {
     return () => {
       clearHeader();
       if (audioRef.current) {
@@ -245,7 +250,7 @@ export const HundredsChart = () => {
         audioRef.current = null;
       }
     };
-  }, [clearAll, clearHeader, setOnReset, setHelpContent, setHasConfig, setOnConfigToggle, setIsConfigOpen]);
+  }, [clearHeader]);
 
   const handleCellClick = (num: number) => {
     playSound(num);

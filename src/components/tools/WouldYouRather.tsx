@@ -166,7 +166,7 @@ export const WouldYouRather = () => {
             <HistoryPanel 
               items={history.map(h => ({ 
                 id: h.id, 
-                content: h.winner
+                content: intl.formatMessage({ id: h.winner, defaultMessage: h.winner })
               }))}
               onClear={() => setHistory([])}
               onDownload={exportHistory}
@@ -228,7 +228,7 @@ export const WouldYouRather = () => {
                     className={`group relative ${isMobile ? 'p-6' : 'p-12'} bg-slate-50 border-8 border-white rounded-[5rem] hover:border-indigo-600 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95`}
                   >
                     <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors uppercase italic tracking-tighter`}>
-                      {currentPair ? currentPair[0] : ""}
+                      {currentPair ? intl.formatMessage({ id: currentPair[0], defaultMessage: currentPair[0] }) : ""}
                     </p>
                     <div className="absolute bottom-12 right-12 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
                       <ChevronRight size={64} className="text-indigo-400" />
@@ -244,7 +244,7 @@ export const WouldYouRather = () => {
                     className={`group relative ${isMobile ? 'p-6' : 'p-12'} bg-slate-50 border-8 border-white rounded-[5rem] hover:border-rose-500 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95`}
                   >
                     <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-rose-600 transition-colors uppercase italic tracking-tighter`}>
-                      {currentPair ? currentPair[1] : ""}
+                      {currentPair ? intl.formatMessage({ id: currentPair[1], defaultMessage: currentPair[1] }) : ""}
                     </p>
                     <div className="absolute bottom-12 right-12 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
                       <ChevronRight size={64} className="text-rose-400" />

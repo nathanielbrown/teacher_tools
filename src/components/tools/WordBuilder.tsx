@@ -93,11 +93,16 @@ export const WordBuilder = () => {
   const [speakingId, setSpeakingId] = useState<number | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isSpeakingWord, setIsSpeakingWord] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    
     return () => {
+      window.removeEventListener('resize', handleResize);
       window.speechSynthesis.cancel();
       if (audioRef.current) {
         audioRef.current.pause();
@@ -230,8 +235,8 @@ export const WordBuilder = () => {
   }, [clearHeader, setOnReset, clearWord, setHelpContent]);
 
   return (
-    <ToolPanel baseWidth={1200} baseHeight={800}>
-      <div className="w-full h-full flex flex-col gap-6 relative overflow-hidden p-10 italic">
+    <ToolPanel baseWidth={windowWidth < 1024 ? 600 : 1200} baseHeight={windowWidth < 1024 ? 1000 : 800}>
+      <div className="w-full h-full flex flex-col gap-4 lg:gap-6 relative overflow-hidden p-4 lg:p-10 italic">
         <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
           <div className="flex items-center justify-between">
@@ -249,7 +254,7 @@ export const WordBuilder = () => {
               </div>
           </div>
 
-          <div className="flex-1 bg-white/50 backdrop-blur-xl rounded-[4rem] border-4 border-white flex items-center justify-center p-12 relative">
+          <div className="h-48 shrink-0 lg:h-auto lg:flex-1 bg-white/50 backdrop-blur-xl rounded-[2rem] lg:rounded-[4rem] border-4 border-white flex items-center justify-center p-4 lg:p-12 relative overflow-hidden">
              <div className="tool-grid-bg opacity-10 pointer-events-none" />
              <motion.div 
                 animate={{ scale: isSpeakingWord ? 1.1 : 1 }}
@@ -268,7 +273,7 @@ export const WordBuilder = () => {
                          animate={{ scale: isSpeakingWord ? [1, 1.3, 1] : (speakingId === sound.id ? 1.2 : 1), opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                          exit={{ scale: 0.8, opacity: 0, y: -20 }}
                           onClick={() => removeSound(sound.id)}
-                          className={`w-28 h-36 rounded-[2.5rem] flex flex-col items-center justify-center text-5xl font-bold border-[10px] border-white active:scale-95 group relative ${
+                          className={`w-20 h-24 lg:w-28 lg:h-36 rounded-2xl lg:rounded-[2.5rem] flex flex-col items-center justify-center text-3xl lg:text-5xl font-bold border-4 lg:border-[10px] border-white active:scale-95 group relative ${
                             sound.type === 'vowel' ? 'bg-rose-500 text-white shadow-lg shadow-rose-100' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
                           }`}
                         >
@@ -280,21 +285,21 @@ export const WordBuilder = () => {
              </motion.div>
           </div>
 
-          <div className="bg-indigo-50/50 backdrop-blur-md p-10 rounded-[3.5rem] border-4 border-white italic shrink-0 overflow-y-auto max-h-[450px]">
-             <div className="flex gap-16 items-start justify-start">
+          <div className="flex-1 lg:shrink-0 bg-indigo-50/50 backdrop-blur-md p-2 lg:p-10 rounded-[1.5rem] lg:rounded-[3.5rem] border-4 border-white italic overflow-y-auto lg:max-h-[450px]">
+             <div className="flex flex-row gap-1.5 lg:gap-16 items-start justify-between w-full pb-2 lg:pb-0">
                 {Object.entries(PHONICS).map(([key, sounds]) => (
-                  <div key={key} className={`space-y-4 ${key === 'single' ? 'flex-[2]' : 'flex-1'}`}>
-                    <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] px-2 text-left">
+                  <div key={key} className={`space-y-1 lg:space-y-4 shrink-0 ${key === 'single' ? 'flex-[4] lg:flex-[2]' : 'flex-[2] lg:flex-1'}`}>
+                    <h4 className="text-[8px] lg:text-[10px] font-bold text-indigo-400 uppercase tracking-[0.1em] lg:tracking-[0.2em] px-1 lg:px-2 text-left truncate">
                       <FormattedMessage id={`wordbuilder.group.${key}`} />
                     </h4>
-                    <div className={`grid gap-2 justify-start ${
-                      key === 'single' ? 'grid-cols-6' : 'grid-cols-3'
+                    <div className={`grid gap-[2px] lg:gap-2 justify-start w-full ${
+                      key === 'single' ? 'grid-cols-4 lg:grid-cols-6' : 'grid-cols-2 lg:grid-cols-3'
                     }`}>
                       {sounds.map((sound) => (
                         <button
                           key={sound.char}
                           onClick={() => addSound(sound)}
-                          className={`w-12 h-12 rounded-xl font-bold text-base flex items-center justify-center transition-all border-2 hover:scale-110 active:scale-90 ${
+                          className={`w-full aspect-square lg:aspect-auto lg:w-12 lg:h-12 rounded-md lg:rounded-xl font-bold text-sm lg:text-base flex items-center justify-center transition-all border-2 hover:scale-110 active:scale-90 ${
                             sound.type === 'vowel' 
                               ? 'bg-white border-rose-100 text-rose-500 hover:border-rose-400' 
                               : 'bg-white border-indigo-100 text-indigo-600 hover:border-indigo-400'

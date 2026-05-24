@@ -23,7 +23,7 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="moneytool.help.step1" defaultMessage="Pick your <b>Money</b> in the top menu." values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }} />
         </p>
@@ -41,7 +41,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="moneytool.help.step4" defaultMessage="Click money on the <b>Table</b> to remove it." values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }} />
         </p>
@@ -129,7 +129,7 @@ export const MoneyTool = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={generateTarget}
-          className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2 bg-surface border-2 border-slate-100 text-neutral-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/20 hover:text-primary transition-all active:scale-95"
         >
           <RefreshCcw size={14} /> <FormattedMessage id="moneytool.action.new" defaultMessage="New Goal" />
         </button>
@@ -143,8 +143,8 @@ export const MoneyTool = () => {
         
         {/* Left Side: Goal & Feedback */}
         <div className="w-full lg:w-1/3 flex flex-col gap-6">
-          <div className="bg-white p-8 text-center space-y-4 rounded-[3rem] border-none">
-            <h3 className="text-slate-400 font-black uppercase tracking-widest text-[10px]">
+          <div className="bg-surface p-8 text-center space-y-4 rounded-[3rem] border-none">
+            <h3 className="text-neutral-400 font-black uppercase tracking-widest text-[10px]">
               <FormattedMessage id="moneytool.label.target" defaultMessage="Goal" />
             </h3>
             <div className="text-6xl font-black text-slate-800 tabular-nums tracking-tight">
@@ -152,22 +152,22 @@ export const MoneyTool = () => {
             </div>
           </div>
 
-          <div className="bg-white p-8 text-center space-y-4 flex-1 flex flex-col justify-center min-h-[200px] rounded-[3rem] border-none">
-            <h3 className="text-slate-400 font-black uppercase tracking-widest text-[10px]">
+          <div className="bg-surface p-8 text-center space-y-4 flex-1 flex flex-col justify-center min-h-[200px] rounded-[3rem] border-none">
+            <h3 className="text-neutral-400 font-black uppercase tracking-widest text-[10px]">
               <FormattedMessage id="moneytool.label.table" defaultMessage="Total" />
             </h3>
-            <div className="text-5xl font-black text-indigo-600 tabular-nums tracking-tight">
+            <div className="text-5xl font-black text-primary tabular-nums tracking-tight">
               {formatCurrency(currentTotal, currentCurrencyData.symbol)}
             </div>
             
             <div className="h-16 flex items-center justify-center mt-4">
               {isSuccess ? (
-                <div className="flex items-center gap-2 text-emerald-600 font-black text-xl animate-in zoom-in uppercase">
+                <div className="flex items-center gap-2 text-success font-black text-xl animate-in zoom-in uppercase">
                   <CheckCircle2 size={28} /> <FormattedMessage id="moneytool.feedback.match" defaultMessage="WELL DONE!" />
                 </div>
               ) : difference === 0 ? null : (
                 <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest px-4 py-3 rounded-2xl animate-in fade-in  ${
-                  difference > 0 ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                  difference > 0 ? 'bg-caution-bg text-caution border border-caution-border' : 'bg-primary/5 text-primary border border-primary/20'
                 }`}>
                   <AlertCircle size={16} />
                   {difference > 0 
@@ -181,7 +181,7 @@ export const MoneyTool = () => {
             {isSuccess && (
               <button
                 onClick={generateTarget}
-                className="mt-4 w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-indigo-600 transition-all animate-in slide-in-from-bottom-2 uppercase tracking-widest text-xs"
+                className="mt-4 w-full py-4 bg-dark-bg text-white font-black rounded-2xl hover:bg-primary transition-all animate-in slide-in-from-bottom-2 uppercase tracking-widest text-xs"
               >
                 <FormattedMessage id="moneytool.action.again" defaultMessage="Play Again" />
               </button>
@@ -193,7 +193,7 @@ export const MoneyTool = () => {
         <div className="w-full lg:w-2/3 flex flex-col gap-6">
           
           {/* The Table */}
-          <div className="bg-white p-12 rounded-[4rem] border-none min-h-[300px] relative overflow-hidden flex flex-col group">
+          <div className="bg-surface p-12 rounded-[4rem] border-none min-h-[300px] relative overflow-hidden flex flex-col group">
             <div className="tool-grid-bg opacity-30" />
             <div className="absolute top-8 left-8 flex items-center gap-2 opacity-20 group-hover:opacity-40 transition-opacity z-10">
                <div className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
@@ -251,7 +251,7 @@ export const MoneyTool = () => {
           </div>
 
           {/* The Bank */}
-          <div className="bg-white/80 backdrop-blur-xl p-10 space-y-10 rounded-[3rem] border-none">
+          <div className="bg-surface/80 backdrop-blur-xl p-10 space-y-10 rounded-[3rem] border-none">
             <div className="flex items-center gap-4 justify-center">
                <div className="h-px flex-1 bg-slate-100" />
                <h3 className="text-slate-300 font-black uppercase tracking-[0.4em] text-[10px]">
@@ -313,7 +313,7 @@ export const MoneyTool = () => {
                     setSelectedCurrency(next);
                     generateTarget();
                   }}
-                  className="px-6 py-3 border-2 border-slate-100 rounded-xl font-black text-slate-500 bg-white hover:border-indigo-100 focus:outline-none transition-all cursor-pointer text-xs uppercase tracking-widest outline-none"
+                  className="px-6 py-3 border-2 border-slate-100 rounded-xl font-black text-slate-500 bg-surface hover:border-primary/20 focus:outline-none transition-all cursor-pointer text-xs uppercase tracking-widest outline-none"
                 >
                   <option value="AUD">🇦🇺 Australian ($)</option>
                   <option value="CAD">🇨🇦 Canadian ($)</option>

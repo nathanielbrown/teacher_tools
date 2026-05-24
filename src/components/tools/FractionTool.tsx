@@ -35,25 +35,25 @@ const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="fractionTool.help.step1" defaultMessage="Use the arrows to change the top number (numerator) and bottom number (denominator)." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="fractionTool.help.step2" defaultMessage="Watch the rectangle and number line change to show your fraction." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="fractionTool.help.step3" defaultMessage="Click on pieces of the rectangle to select how many you have." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="fractionTool.help.step4" defaultMessage="Open the Colors menu to change the color of your fraction." />
         </p>
@@ -146,7 +146,7 @@ export const FractionTool = () => {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={`
               ${isConfigOpen ? 'flex' : 'hidden'} 
-              fixed inset-0 z-[100] p-4 bg-slate-900/20 backdrop-blur-sm
+              fixed inset-0 z-[100] p-4 bg-dark-bg/20 backdrop-blur-sm
               lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none
               lg:flex lg:w-[320px] flex-col h-full gap-8 italic overflow-hidden shrink-0
             `}
@@ -159,7 +159,7 @@ export const FractionTool = () => {
             >
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 italic">
                     <FormattedMessage id="fractionTool.settings.color" defaultMessage="Fraction Color" />
                   </h4>
                   <div className="grid grid-cols-4 gap-4">
@@ -170,7 +170,7 @@ export const FractionTool = () => {
                         className={`aspect-square rounded-2xl border-4 transition-all hover:scale-110 flex items-center justify-center ${activeColor === c.value ? 'border-indigo-600 scale-110 ' : 'border-white '}`}
                         style={{ backgroundColor: c.value }}
                       >
-                         {activeColor === c.value && <div className="w-4 h-4 rounded-full bg-white " />}
+                         {activeColor === c.value && <div className="w-4 h-4 rounded-full bg-surface " />}
                       </button>
                     ))}
                   </div>
@@ -190,20 +190,20 @@ export const FractionTool = () => {
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 w-full h-full relative z-10 p-4 lg:p-8 overflow-y-auto lg:overflow-hidden custom-scrollbar">
         
          {/* Left: Fraction Readout Core */}
-        <div className="w-full lg:w-[400px] shrink-0 bg-white rounded-[2rem] lg:rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group py-2 md:py-12 lg:py-0">
-           <div className="flex flex-col items-center gap-2 lg:gap-4 bg-white p-2 md:p-6 lg:p-8 rounded-[2rem] lg:rounded-[5rem] border-4 border-white relative group/core">
+        <div className="w-full lg:w-[400px] shrink-0 bg-surface rounded-[2rem] lg:rounded-[4rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden group py-2 md:py-12 lg:py-0">
+           <div className="flex flex-col items-center gap-2 lg:gap-4 bg-surface p-2 md:p-6 lg:p-8 rounded-[2rem] lg:rounded-[5rem] border-4 border-white relative group/core">
               <div className="flex items-center gap-2 md:gap-6 lg:gap-8">
-                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
+                <button onClick={() => updateNumerator(-1)} className="text-slate-200 hover:text-primary transition-all active:scale-95"><Minus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
                 <span className="text-[4rem] md:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{numerator}</span>
-                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
+                <button onClick={() => updateNumerator(1)} className="text-slate-200 hover:text-primary transition-all active:scale-95"><Plus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
               </div>
               
               <div className="w-full h-1.5 md:h-4 bg-slate-800 rounded-full" />
               
               <div className="flex items-center gap-2 md:gap-6 lg:gap-8">
-                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Minus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
+                <button onClick={() => updateDenominator(-1)} className="text-slate-200 hover:text-primary transition-all active:scale-95"><Minus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
                 <span className="text-[4rem] md:text-[10rem] font-black leading-none text-slate-800 tabular-nums tracking-tighter">{denominator}</span>
-                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-indigo-600 transition-all active:scale-95"><Plus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
+                <button onClick={() => updateDenominator(1)} className="text-slate-200 hover:text-primary transition-all active:scale-95"><Plus size={isMobile ? 24 : 48} strokeWidth={4} /></button>
               </div>
             </div>
         </div>
@@ -211,7 +211,7 @@ export const FractionTool = () => {
         {/* Right Column: Circle (Top) and Line (Bottom) */}
         <div className="flex-1 flex flex-col gap-8">
            {/* Rectangle Visualization Module (Top Right) */}
-           <div className="flex-1 bg-white rounded-[2.5rem] md:rounded-[4rem] border-4 border-white flex items-center justify-center relative overflow-hidden p-4 md:p-8">
+           <div className="flex-1 bg-surface rounded-[2.5rem] md:rounded-[4rem] border-4 border-white flex items-center justify-center relative overflow-hidden p-4 md:p-8">
               <div className="w-full max-w-[900px] h-24 md:h-32 border-4 border-slate-100 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden flex bg-slate-50 relative group/rect">
                  {Array.from({ length: denominator }).map((_, i) => {
                    const isActive = i < numerator;
@@ -231,29 +231,29 @@ export const FractionTool = () => {
            </div>
 
            {/* Number Line Module (Bottom Right) */}
-           <div className="h-[140px] md:h-[250px] bg-white p-2 md:p-8 rounded-[1.5rem] md:rounded-[4rem] border-4 border-white flex flex-col justify-end pb-4 md:pb-12 relative overflow-hidden shrink-0 select-none">
+           <div className="h-[140px] md:h-[250px] bg-surface p-2 md:p-8 rounded-[1.5rem] md:rounded-[4rem] border-4 border-white flex flex-col justify-end pb-4 md:pb-12 relative overflow-hidden shrink-0 select-none">
               <div className="px-4 md:px-8 pt-16 md:pt-24 pb-4 md:pb-8 relative z-10">
                  <div ref={lineRef} onClick={handleLineClick} className="h-4 bg-slate-50 rounded-full w-full relative cursor-pointer group ">
                     <div className="absolute top-1/2 -translate-y-1/2 left-0 h-8 md:h-16 w-1 bg-slate-100">
                        <div className="absolute -top-10 md:-top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                          <span className="text-xs md:text-sm font-black text-slate-400">0</span>
+                          <span className="text-xs md:text-sm font-black text-neutral-400">0</span>
                           <div className="w-4 h-0.5 bg-slate-200 my-0.5" />
-                          <span className="text-xs md:text-sm font-black text-slate-400">{denominator}</span>
+                          <span className="text-xs md:text-sm font-black text-neutral-400">{denominator}</span>
                        </div>
                     </div>
                     <div className="absolute top-1/2 -translate-y-1/2 right-0 h-8 md:h-16 w-1 bg-slate-100">
                        <div className="absolute -top-10 md:-top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                          <span className="text-xs md:text-sm font-black text-slate-400">{denominator}</span>
+                          <span className="text-xs md:text-sm font-black text-neutral-400">{denominator}</span>
                           <div className="w-4 h-0.5 bg-slate-200 my-0.5" />
-                          <span className="text-xs md:text-sm font-black text-slate-400">{denominator}</span>
+                          <span className="text-xs md:text-sm font-black text-neutral-400">{denominator}</span>
                        </div>
                     </div>
                     {denominator > 1 && Array.from({ length: denominator - 1 }).map((_, i) => (
                       <div key={i} className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 md:h-8 bg-slate-100" style={{ left: `${((i + 1) / denominator) * 100}%` }}>
                          <div className="absolute -top-12 md:-top-20 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className={`text-sm md:text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{i + 1}</span>
+                            <span className={`text-sm md:text-xl font-black text-neutral-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{i + 1}</span>
                             <div className={`w-4 md:w-6 h-1 bg-slate-200 my-0.5 ${denominator > 12 ? 'hidden sm:block' : ''}`} />
-                            <span className={`text-sm md:text-xl font-black text-slate-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{denominator}</span>
+                            <span className={`text-sm md:text-xl font-black text-neutral-400 ${denominator > 12 ? 'hidden sm:block' : ''}`}>{denominator}</span>
                          </div>
                       </div>
                     ))}
@@ -276,7 +276,7 @@ export const FractionTool = () => {
                       }}
                       transition={{ type: 'spring', damping: 25, stiffness: 600 }}
                     >
-                       <div className="w-2 h-2 rounded-full bg-white/50" />
+                       <div className="w-2 h-2 rounded-full bg-surface/50" />
                     </motion.div>
                  </div>
               </div>
@@ -284,8 +284,8 @@ export const FractionTool = () => {
         </div>
       </div>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-caution-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </ToolPanel>
     </div>
   );

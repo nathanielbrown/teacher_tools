@@ -65,7 +65,7 @@ export const ToolHeader = ({
         </motion.div>
 
         <div className="space-y-0.5 relative min-w-0">
-          <h2 className="text-lg md:text-2xl font-black text-slate-800 tracking-tight leading-none truncate">
+          <h2 className="text-lg md:text-2xl font-black text-text tracking-tight leading-none truncate">
             {displayTitle}
           </h2>
         </div>
@@ -107,23 +107,11 @@ export const ToolHeader = ({
             </button>
           )}
 
-          {/* Info Button */}
-          <button
-            onClick={() => toggleOverlay('info')}
-            className={`p-1.5 md:p-2.5 rounded-lg md:rounded-[1rem] transition-all duration-300 ${activeOverlay === 'info'
-              ? 'bg-slate-800 text-white shadow-lg'
-              : 'text-slate-600 bg-slate-100/50 hover:bg-slate-200/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/80'
-              }`}
-            title={intl.formatMessage({ id: 'header.tooltip.info', defaultMessage: 'Tool Information' })}
-          >
-            {isEarlyYears ? <span className="text-base">ℹ️</span> : <Info size={16} className="md:w-5 md:h-5" strokeWidth={2.5} />}
-          </button>
-
-          {/* Help Button */}
+          {/* Help & Info Button */}
           <button
             onClick={() => toggleOverlay('help')}
             className={`p-1.5 md:p-2.5 rounded-lg md:rounded-[1rem] transition-all duration-300 ${activeOverlay === 'help'
-              ? 'bg-slate-800 text-white shadow-lg'
+              ? 'bg-slate-800 text-white border border-slate-800'
               : 'text-slate-600 bg-slate-100/50 hover:bg-slate-200/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/80'
               }`}
             title={intl.formatMessage({ id: 'header.tooltip.help', defaultMessage: 'Help & Usage' })}

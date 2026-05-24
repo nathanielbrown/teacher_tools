@@ -37,7 +37,7 @@ const HelpContent = () => (
     <div className="space-y-3">
       {[1, 2].map((step) => (
         <div key={step} className="flex gap-3 text-left">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">{step}</div>
+          <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">{step}</div>
           <p className="text-sm text-slate-600 font-medium leading-tight">
             <FormattedMessage 
               id={`findtheword.help.step${step}`} 
@@ -437,7 +437,7 @@ export const FindTheWord = () => {
               {isMobile && (
                 <button
                   onClick={startActivity}
-                  className="w-full py-6 bg-indigo-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
+                  className="w-full py-6 bg-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
                 >
                   <Play size={20} strokeWidth={3} fill="currentColor" />
                   <FormattedMessage id="shared.button.play" />
@@ -463,7 +463,7 @@ export const FindTheWord = () => {
                       <FormattedMessage id="findtheword.title" />
                     </h2>
                  </div>
-                 <button onClick={startActivity} className="px-12 py-6 bg-slate-900 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-widest hover:bg-indigo-600 transition-all ">
+                 <button onClick={startActivity} className="px-12 py-6 bg-dark-bg text-white rounded-[2.5rem] font-black text-sm uppercase tracking-widest hover:bg-primary transition-all ">
                     <Play size={24} fill="currentColor" strokeWidth={0} />
                  </button>
               </motion.div>
@@ -476,7 +476,7 @@ export const FindTheWord = () => {
                     onPointerUp={handleEnd}
                     onPointerCancel={handleCancel}
                     onPointerLeave={handleCancel}
-                    className="flex-1 aspect-square max-h-full max-w-full bg-white rounded-[2rem] lg:rounded-[3rem]  border-4 lg:border-8 border-white grid touch-none select-none relative overflow-hidden shadow-sm"
+                    className="flex-1 aspect-square max-h-full max-w-full bg-surface rounded-[2rem] lg:rounded-[3rem]  border-4 lg:border-8 border-white grid touch-none select-none relative overflow-hidden shadow-sm"
                     style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`, gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)` }}
                  >
                     {foundPaths.map((path, i) => (
@@ -499,26 +499,26 @@ export const FindTheWord = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsBankOpen(false)}
-                        className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"
+                        className="absolute inset-0 z-50 bg-dark-bg/60 backdrop-blur-md flex items-center justify-center p-4"
                       >
                          <motion.div 
                            initial={{ scale: 0.9, y: 20 }}
                            animate={{ scale: 1, y: 0 }}
                            exit={{ scale: 0.9, y: 20 }}
-                           className="bg-white rounded-[2rem] p-6 w-full max-w-xs shadow-2xl overflow-hidden flex flex-col"
+                           className="bg-surface rounded-[2rem] p-6 w-full max-w-xs shadow-2xl overflow-hidden flex flex-col"
                            onClick={e => e.stopPropagation()}
                          >
                            <div className="flex items-center justify-between mb-4 border-b-2 border-slate-50 pb-2">
-                              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                              <h4 className="text-[10px] font-black text-primary/70 uppercase tracking-widest">
                                 <FormattedMessage id="findtheword.label.bank" />
                               </h4>
                               <button onClick={() => setIsBankOpen(false)} className="p-1 hover:bg-slate-50 rounded-lg transition-all">
-                                <X size={20} className="text-slate-400" />
+                                <X size={20} className="text-neutral-400" />
                               </button>
                            </div>
                            <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-2 gap-2">
                               {targetWords.map((word, i) => (
-                                <div key={i} className={`p-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-slate-50 text-slate-400 border-2 border-slate-100'}`}>
+                                <div key={i} className={`p-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-slate-50 text-neutral-400 border-2 border-slate-100'}`}>
                                   {word}
                                 </div>
                               ))}
@@ -530,16 +530,16 @@ export const FindTheWord = () => {
 
                  {!isMobile ? (
                    <div className="w-[300px] h-full flex flex-col gap-4 lg:gap-6">
-                      <div className="flex-1 bg-white/80 backdrop-blur-md rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-8 border-4 border-slate-50  flex flex-col overflow-hidden">
+                      <div className="flex-1 bg-surface/80 backdrop-blur-md rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-8 border-4 border-slate-50  flex flex-col overflow-hidden">
                          <div className="flex items-center justify-between mb-4 lg:mb-6 border-b-2 border-slate-50 pb-2 lg:pb-4">
-                            <h4 className="text-[8px] lg:text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                            <h4 className="text-[8px] lg:text-[10px] font-black text-primary/70 uppercase tracking-widest">
                               <FormattedMessage id="findtheword.label.bank" />
                             </h4>
-                            <span className="px-2 lg:px-3 py-0.5 lg:py-1 bg-slate-900 text-white rounded-lg text-[8px] lg:text-[10px] font-black tabular-nums">{foundWords.length}/{targetWords.length}</span>
+                            <span className="px-2 lg:px-3 py-0.5 lg:py-1 bg-dark-bg text-white rounded-lg text-[8px] lg:text-[10px] font-black tabular-nums">{foundWords.length}/{targetWords.length}</span>
                          </div>
                          <div className={`flex-1 overflow-y-auto no-scrollbar grid grid-cols-1 gap-2`}>
                             {targetWords.map((word, i) => (
-                              <div key={i} className={`p-2 lg:p-4 rounded-xl font-black text-[10px] lg:text-sm uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-white text-slate-400 border-2 border-slate-50'}`}>
+                              <div key={i} className={`p-2 lg:p-4 rounded-xl font-black text-[10px] lg:text-sm uppercase tracking-widest transition-all ${foundWords.includes(word) ? 'bg-emerald-500 text-white line-through opacity-50' : 'bg-surface text-neutral-400 border-2 border-slate-50'}`}>
                                 {word}
                               </div>
                             ))}
@@ -550,17 +550,17 @@ export const FindTheWord = () => {
                    <div className="w-full">
                      <button 
                         onClick={() => setIsBankOpen(true)}
-                        className="w-full flex items-center justify-between px-8 py-6 bg-white border-4 border-slate-50 rounded-[2rem] active:scale-95 transition-all shadow-sm group"
+                        className="w-full flex items-center justify-between px-8 py-6 bg-surface border-4 border-slate-50 rounded-[2rem] active:scale-95 transition-all shadow-sm group"
                       >
                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                           <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                               <BookOpen size={18} strokeWidth={2.5} />
                            </div>
                            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
                               <FormattedMessage id="findtheword.label.bank" />
                            </h4>
                         </div>
-                        <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-black tabular-nums">
+                        <span className="px-3 py-1 bg-dark-bg text-white rounded-lg text-[10px] font-black tabular-nums">
                           {foundWords.length}/{targetWords.length}
                         </span>
                      </button>
@@ -569,18 +569,18 @@ export const FindTheWord = () => {
               </div>
             ) : (
               <motion.div key="win" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-12">
-                 <div className="w-40 h-40 bg-slate-900 rounded-[3rem] flex items-center justify-center text-emerald-400  border-8 border-white">
+                 <div className="w-40 h-40 bg-dark-bg rounded-[3rem] flex items-center justify-center text-emerald-400  border-8 border-white">
                     <Trophy size={100} strokeWidth={1.5} />
                  </div>
                  <div className="space-y-4 text-center">
                     <h2 className="text-8xl font-black text-slate-900 tracking-tighter uppercase leading-none italic">
                       <FormattedMessage id="findtheword.label.done" />
                     </h2>
-                    <p className="text-2xl font-black text-indigo-400 uppercase tracking-[0.4em]">
+                    <p className="text-2xl font-black text-primary/70 uppercase tracking-[0.4em]">
                        <FormattedMessage id="findtheword.label.found" />: {targetWords.length}
                     </p>
                  </div>
-                 <button onClick={resetTool} className="px-16 py-8 bg-indigo-600 text-white rounded-[2.5rem] font-black text-2xl uppercase tracking-widest hover:bg-indigo-700 transition-all  flex items-center gap-4 italic">
+                 <button onClick={resetTool} className="px-16 py-8 bg-primary text-white rounded-[2.5rem] font-black text-2xl uppercase tracking-widest hover:bg-primary/90 transition-all  flex items-center gap-4 italic">
                     <RotateCcw size={32} strokeWidth={3} /> <FormattedMessage id="typinggame.label.restart" />
                  </button>
               </motion.div>

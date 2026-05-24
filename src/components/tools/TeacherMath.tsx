@@ -31,7 +31,7 @@ const HelpContent = () => (
     <div className="space-y-3 italic">
       {[1, 2, 3, 4].map(step => (
         <div key={step} className="flex gap-3 text-left">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">{step}</div>
+          <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">{step}</div>
           <p className="text-sm text-slate-600 font-medium leading-tight">
             <FormattedMessage 
               id={`teachermath.help.step${step}`} 
@@ -218,10 +218,10 @@ export const TeacherMath = () => {
         {/* Sidebar (Formulas) */}
         <div className="w-full lg:w-[320px] shrink-0 flex-1 lg:flex-none flex flex-col justify-center lg:justify-start gap-4 relative z-20">
           
-          <div className="flex-1 bg-white/50 p-6 rounded-[2rem] border-4 border-white flex flex-col gap-4 min-h-0">
+          <div className="flex-1 bg-surface/50 p-6 rounded-[2rem] border-4 border-white flex flex-col gap-4 min-h-0">
              <div className="flex items-center justify-between shrink-0 border-b-4 border-white pb-1 text-left">
                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white ">
+                    <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white ">
                        <Terminal size={20} strokeWidth={3} />
                     </div>
                    <div className="flex flex-col">
@@ -230,13 +230,6 @@ export const TeacherMath = () => {
                      </h4>
                    </div>
                 </div>
-                <button 
-                  onClick={resetPlane} 
-                  className="p-2 bg-white border-2 border-slate-100 rounded-xl text-slate-300 hover:text-rose-600 transition-all  active:scale-95"
-                  title="Clear All"
-                >
-                  <RotateCcw size={14} strokeWidth={3} />
-                </button>
              </div>
 
              <div className="flex-1 overflow-y-auto no-scrollbar pr-2 pb-4 space-y-2">
@@ -252,11 +245,11 @@ export const TeacherMath = () => {
                         key={element.id}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className={`p-3 lg:p-4 rounded-xl border-4 transition-all flex flex-col gap-1 italic ${isInvalid ? 'border-rose-100 bg-rose-50/20' : 'bg-white border-white hover:border-indigo-100 '}`}
+                        className={`p-3 lg:p-4 rounded-xl border-4 transition-all flex flex-col gap-1 italic ${isInvalid ? 'border-caution-border bg-caution-bg/20' : 'bg-surface border-white hover:border-primary/20 '}`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-white font-black" style={{ backgroundColor: element.raw.trim() ? element.color : '#f1f5f9' }}>
-                             {isPoint ? <Target size={18} strokeWidth={3} /> : isFormula ? <TrendingUp size={18} strokeWidth={3} /> : <Calculator size={18} strokeWidth={3} className="opacity-20 text-slate-400" />}
+                             {isPoint ? <Target size={18} strokeWidth={3} /> : isFormula ? <TrendingUp size={18} strokeWidth={3} /> : <Calculator size={18} strokeWidth={3} className="opacity-20 text-neutral-400" />}
                           </div>
                           <div className="flex-1 min-w-0">
                              <input
@@ -269,7 +262,7 @@ export const TeacherMath = () => {
                              />
                           </div>
                           {index < elements.length - 1 && (
-                            <button onClick={() => removeElement(element.id)} className="w-6 h-6 flex items-center justify-center text-slate-200 hover:text-rose-600 transition-all shrink-0">
+                            <button onClick={() => removeElement(element.id)} className="w-6 h-6 flex items-center justify-center text-slate-200 hover:text-caution transition-all shrink-0">
                               <X size={14} strokeWidth={3} />
                             </button>
                           )}
@@ -283,7 +276,7 @@ export const TeacherMath = () => {
         </div>
 
         {/* Primary Stage (Grid) */}
-        <div className="flex-none lg:flex-1 shrink-0 bg-white/50 rounded-[2rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden p-6 lg:p-8">
+        <div className="flex-none lg:flex-1 shrink-0 bg-surface/50 rounded-[2rem] border-4 border-white flex flex-col items-center justify-center relative overflow-hidden p-6 lg:p-8">
           
           <div className="w-full lg:max-w-[700px] lg:max-h-[500px] xl:max-h-[600px] aspect-square flex items-center justify-center">
              <svg 
@@ -346,9 +339,9 @@ export const TeacherMath = () => {
           </div>
 
           {/* Grid Settings Below */}
-          <div className="mt-4 lg:mt-6 flex flex-col sm:flex-row items-center gap-6 bg-white/80 backdrop-blur-md p-4 lg:p-5 px-8 rounded-[2rem] border-4 border-white shadow-sm relative z-30">
+          <div className="mt-4 lg:mt-6 flex flex-col sm:flex-row items-center gap-6 bg-surface/80 backdrop-blur-md p-4 lg:p-5 px-8 rounded-[2rem] border-4 border-white relative z-30">
             <div className="flex items-center gap-4 min-w-[240px]">
-              <span className="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest italic shrink-0">
+              <span className="text-xs lg:text-sm font-black text-neutral-400 uppercase tracking-widest italic shrink-0">
                 <FormattedMessage id="teachermath.settings.resolution" />
               </span>
               <input 
@@ -358,22 +351,22 @@ export const TeacherMath = () => {
                 onChange={(e) => setGridConfig({ ...gridConfig, range: parseInt(e.target.value) })} 
                 className="w-full accent-indigo-600 h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer" 
               />
-              <span className="text-sm font-black text-indigo-600 italic tabular-nums w-8 text-right">±{gridConfig.range}</span>
+              <span className="text-sm font-black text-primary italic tabular-nums w-8 text-right">±{gridConfig.range}</span>
             </div>
 
             <div className="w-px h-6 bg-slate-200 hidden sm:block" />
 
             <div className="flex items-center gap-4">
-              <span className="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest italic shrink-0">
+              <span className="text-xs lg:text-sm font-black text-neutral-400 uppercase tracking-widest italic shrink-0">
                 <FormattedMessage id="teachermath.settings.labels" />
               </span>
               <button 
                 onClick={() => { setGridConfig({ ...gridConfig, showLabels: !gridConfig.showLabels }); audioEngine.playTick(settings.soundTheme); }} 
-                className={`w-10 h-6 rounded-full relative transition-all border-2 ${gridConfig.showLabels ? 'bg-indigo-600 border-indigo-400/50' : 'bg-slate-200 border-slate-300/50'}`}
+                className={`w-10 h-6 rounded-full relative transition-all border-2 ${gridConfig.showLabels ? 'bg-primary border-indigo-400/50' : 'bg-slate-200 border-slate-300/50'}`}
               >
                 <motion.div 
                   animate={{ left: gridConfig.showLabels ? '18px' : '2px' }}
-                  className="absolute top-0.5 w-4 h-4 bg-white rounded-full " 
+                  className="absolute top-0.5 w-4 h-4 bg-surface rounded-full " 
                 />
               </button>
             </div>

@@ -37,7 +37,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="stopwatch.help.step1" 
@@ -57,7 +57,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="stopwatch.help.step3" 
@@ -130,8 +130,8 @@ export const StopWatch = () => {
       <button
         onClick={() => setIsHistoryVisible(prev => !prev)}
         className={`p-2.5 rounded-[1rem] transition-all duration-300 ${isHistoryVisible 
-          ? 'bg-indigo-600 text-white' 
-          : 'text-indigo-600 bg-indigo-50/50 hover:bg-indigo-100/80'}`}
+          ? 'bg-primary text-white' 
+          : 'text-primary bg-primary/5/50 hover:bg-primary/10/80'}`}
         title="Toggle History"
       >
         <HistoryIcon size={20} strokeWidth={2.5} />
@@ -193,9 +193,9 @@ export const StopWatch = () => {
               compact
             >
               <div className="space-y-4">
-                <div className="flex flex-row items-center justify-between px-4 py-3 bg-white border-2 border-slate-100 rounded-[1.5rem] italic">
+                <div className="flex flex-row items-center justify-between px-4 py-3 bg-surface border-2 border-slate-100 rounded-[1.5rem] italic">
                   <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-lg ${isMuted ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                    <div className={`p-1.5 rounded-lg ${isMuted ? 'bg-caution-bg text-caution' : 'bg-primary/5 text-primary'}`}>
                       {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
                     </div>
                     <div className="text-xs font-black text-slate-900 uppercase">
@@ -206,12 +206,12 @@ export const StopWatch = () => {
                     onClick={() => setIsMuted(!isMuted)}
                     className={`w-10 h-6 rounded-full transition-all relative ${isMuted ? 'bg-rose-500' : 'bg-slate-200'}`}
                   >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isMuted ? 'right-1' : 'left-1'}`} />
+                    <div className={`absolute top-1 w-4 h-4 bg-surface rounded-full transition-all ${isMuted ? 'right-1' : 'left-1'}`} />
                   </button>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
+                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest block text-center opacity-60">
                     <FormattedMessage id="stopwatch.settings.tick_sound" defaultMessage="Tick Sound" />
                   </label>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -219,7 +219,7 @@ export const StopWatch = () => {
                       <button
                         key={theme}
                         onClick={() => { setTickSound(theme); audioEngine.playTick(theme); }}
-                        className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] sm:text-[7px] tracking-widest text-center truncate ${tickSound === theme ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
+                        className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] sm:text-[7px] tracking-widest text-center truncate ${tickSound === theme ? 'bg-primary border-indigo-400 text-white ' : 'bg-surface border-slate-100 text-slate-300 hover:border-primary/20'}`}
                       >
                         <FormattedMessage id={`stopwatch.sound.${theme}`} defaultMessage={theme} />
                       </button>
@@ -244,10 +244,10 @@ export const StopWatch = () => {
                       key={lap.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="p-4 bg-white/80 backdrop-blur-sm border-2 border-white rounded-[2rem] flex items-center justify-between group hover:border-indigo-100 transition-colors"
+                      className="p-4 bg-surface/80 backdrop-blur-sm border-2 border-white rounded-[2rem] flex items-center justify-between group hover:border-primary/20 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-xs font-black text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-xs font-black text-neutral-400 group-hover:bg-primary/5 group-hover:text-primary shrink-0">
                           {laps.length - index}
                         </div>
                         <div>
@@ -273,7 +273,7 @@ export const StopWatch = () => {
 
       <ToolPanel className="flex-1 font-['Outfit'] select-none" baseWidth={isMobile ? 800 : 1100} baseHeight={800} fluid={false}>
         <div className="flex flex-col items-center justify-center gap-8 w-full italic relative z-10">
-          <div className="bg-white rounded-[3rem] border-4 border-white flex items-center justify-center py-12 px-16 gap-10 relative overflow-hidden">
+          <div className="bg-surface rounded-[3rem] border-4 border-white flex items-center justify-center py-12 px-16 gap-10 relative overflow-hidden">
             <div className="flex items-center gap-6 relative z-10">
               <div className="flex flex-col items-center">
                 <div className="text-[12rem] font-black tabular-nums tracking-tighter leading-none text-slate-900 italic">
@@ -281,10 +281,10 @@ export const StopWatch = () => {
                 </div>
               </div>
 
-              <div className="text-8xl font-black text-indigo-600 animate-pulse">:</div>
+              <div className="text-8xl font-black text-primary animate-pulse">:</div>
 
               <div className="flex flex-col items-center">
-                <div className="text-[12rem] font-black tabular-nums tracking-tighter leading-none text-indigo-600 italic">
+                <div className="text-[12rem] font-black tabular-nums tracking-tighter leading-none text-primary italic">
                   {Math.floor((time % 60000) / 1000).toString().padStart(2, '0')}
                 </div>
               </div>
@@ -292,7 +292,7 @@ export const StopWatch = () => {
               <div className="text-8xl font-black text-slate-300">:</div>
 
               <div className="flex flex-col items-center self-end pb-4">
-                <div className="text-[8rem] font-black tabular-nums tracking-tighter leading-none text-rose-500 italic">
+                <div className="text-[8rem] font-black tabular-nums tracking-tighter leading-none text-caution italic">
                   {Math.floor((time % 1000) / 10).toString().padStart(2, '0')}
                 </div>
               </div>
@@ -304,7 +304,7 @@ export const StopWatch = () => {
               onClick={toggle}
               className={`w-44 h-44 rounded-[2.5rem] flex items-center justify-center transition-all active:scale-95 border-[10px] ${isRunning
                   ? 'bg-rose-600 text-white border-rose-500/30 hover:bg-rose-700'
-                  : 'bg-indigo-600 text-white border-indigo-500/30 hover:bg-indigo-700 hover:border-indigo-600'
+                  : 'bg-primary text-white border-indigo-500/30 hover:bg-primary/90 hover:border-indigo-600'
                 }`}
             >
               {isRunning ? <Pause size={64} fill="currentColor" strokeWidth={0} /> : <Play size={64} fill="currentColor" strokeWidth={0} className="ml-2" />}
@@ -314,13 +314,13 @@ export const StopWatch = () => {
               <button
                 onClick={addLap}
                 disabled={time === 0}
-                className="w-24 h-24 rounded-[1.5rem] bg-white border-4 border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-24 h-24 rounded-[1.5rem] bg-surface border-4 border-slate-100 flex items-center justify-center text-neutral-400 hover:text-blue-600 hover:border-blue-100 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Flag size={32} strokeWidth={3} />
               </button>
               <button
                 onClick={reset}
-                className="w-24 h-24 rounded-[1.5rem] bg-white border-4 border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:border-rose-100 transition-all active:scale-90"
+                className="w-24 h-24 rounded-[1.5rem] bg-surface border-4 border-slate-100 flex items-center justify-center text-neutral-400 hover:text-caution hover:border-caution-border transition-all active:scale-90"
               >
                 <RotateCcw size={32} strokeWidth={3} />
               </button>
@@ -329,8 +329,8 @@ export const StopWatch = () => {
         </div>
       </ToolPanel>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-caution-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
   );
 };

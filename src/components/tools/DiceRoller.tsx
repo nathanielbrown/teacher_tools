@@ -20,7 +20,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Use</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Click on a <b>die</b> below to add it to the table.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -147,8 +147,8 @@ export const DiceRoller = () => {
                  style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '64px 64px' }} />
             
             {/* Total Result Overlay */}
-            <div className="absolute top-6 lg:top-10 right-6 lg:right-10 z-20 flex flex-col items-end bg-white/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/50">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total</span>
+            <div className="absolute top-6 lg:top-10 right-6 lg:right-10 z-20 flex flex-col items-end bg-surface/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/50">
+              <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-1">Total</span>
               <motion.span 
                 key={totalValue}
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -213,8 +213,8 @@ export const DiceRoller = () => {
             </div>
 
             {/* Stage Indicator */}
-            <div className="absolute bottom-10 right-10 flex items-center gap-4 bg-white/50 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white opacity-40 group-hover:opacity-100 transition-all">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Click stage to roll all</span>
+            <div className="absolute bottom-10 right-10 flex items-center gap-4 bg-surface/50 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white opacity-40 group-hover:opacity-100 transition-all">
+              <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest">Click stage to roll all</span>
             </div>
           </div>
 
@@ -227,7 +227,7 @@ export const DiceRoller = () => {
                   e.stopPropagation();
                   addDie(type.sides);
                 }}
-                className="group relative flex flex-col items-center justify-center w-24 h-28 lg:w-32 lg:h-36 rounded-2xl lg:rounded-[2.5rem] bg-white border-4 border-transparent hover:border-indigo-100 hover:scale-105 transition-all active:scale-95 shadow-sm"
+                className="group relative flex flex-col items-center justify-center w-24 h-28 lg:w-32 lg:h-36 rounded-2xl lg:rounded-[2.5rem] bg-surface border-4 border-transparent hover:border-primary/20 hover:scale-105 transition-all active:scale-95 shadow-sm"
               >
                 <DieSVG 
                   sides={type.sides} 
@@ -237,7 +237,7 @@ export const DiceRoller = () => {
                   showValue={false}
                   className="mb-2 lg:mb-3"
                 />
-                <span className="text-[9px] lg:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <span className="text-[9px] lg:text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em]">
                   {type.label}
                 </span>
               </button>
@@ -265,7 +265,7 @@ export const DiceRoller = () => {
               key={`${h}-${i}`}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="h-16 lg:h-20 rounded-2xl bg-white border-4 border-slate-100 flex items-center justify-center text-xl font-black text-indigo-500 shadow-sm hover:scale-105 transition-transform"
+              className="h-16 lg:h-20 rounded-2xl bg-surface border-4 border-slate-100 flex items-center justify-center text-xl font-black text-primary shadow-sm hover:scale-105 transition-transform"
             >
               {h}
             </motion.div>

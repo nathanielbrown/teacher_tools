@@ -43,25 +43,25 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="imagereveal.help.step1" defaultMessage="Upload one or more images using the add button." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="imagereveal.help.step2" defaultMessage="Choose between Reveal mode or Flashlight mode at the top." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="imagereveal.help.step3" defaultMessage="In Reveal mode, click play to start revealing the image slowly." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="imagereveal.help.step4" defaultMessage="Try to guess the image before it's fully revealed!" />
         </p>
@@ -116,7 +116,7 @@ const PixelatedImage = ({ src, progress }: { src: string, progress: number }) =>
   }, [src, progress]);
 
   return (
-    <canvas ref={canvasRef} className="w-full h-full object-contain bg-slate-900" />
+    <canvas ref={canvasRef} className="w-full h-full object-contain bg-dark-bg" />
   );
 };
 
@@ -285,19 +285,19 @@ export const ImageReveal = () => {
               <div className="space-y-6">
                 {/* Mode Selection */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
+                  <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest block text-center opacity-60">
                     <FormattedMessage id="imagereveal.config.mode" defaultMessage="Game Mode" />
                   </label>
                   <div className="grid grid-cols-2 gap-1.5">
                     <button
                       onClick={() => { setMode('reveal'); resetReveal(); }}
-                      className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${mode === 'reveal' ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
+                      className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${mode === 'reveal' ? 'bg-primary border-indigo-400 text-white ' : 'bg-surface border-slate-100 text-slate-300 hover:border-primary/20'}`}
                     >
                       <FormattedMessage id="imagereveal.mode.reveal" defaultMessage="Reveal" />
                     </button>
                     <button
                       onClick={() => { setMode('lightsOut'); resetReveal(); }}
-                      className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${mode === 'lightsOut' ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
+                      className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${mode === 'lightsOut' ? 'bg-primary border-indigo-400 text-white ' : 'bg-surface border-slate-100 text-slate-300 hover:border-primary/20'}`}
                     >
                       <FormattedMessage id="imagereveal.mode.flashlight" defaultMessage="Flashlight" />
                     </button>
@@ -306,7 +306,7 @@ export const ImageReveal = () => {
 
                 {/* Reveal Effect Selection */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
+                  <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest block text-center opacity-60">
                     <FormattedMessage id="imagereveal.config.effect" defaultMessage="Reveal Effect" />
                   </label>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -314,7 +314,7 @@ export const ImageReveal = () => {
                       <button
                         key={effect.id}
                         onClick={() => { setRevealEffect(effect.id); resetReveal(); }}
-                        className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${revealEffect === effect.id ? 'bg-indigo-600 border-indigo-400 text-white ' : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'}`}
+                        className={`px-1 py-3 rounded-xl border-2 transition-all italic uppercase font-black text-[9px] tracking-widest text-center ${revealEffect === effect.id ? 'bg-primary border-indigo-400 text-white ' : 'bg-surface border-slate-100 text-slate-300 hover:border-primary/20'}`}
                       >
                         <FormattedMessage id={`imagereveal.effect.${effect.id}`} defaultMessage={effect.label} />
                       </button>
@@ -324,16 +324,16 @@ export const ImageReveal = () => {
 
                 {/* Reveal Speed Selection */}
                 <div className="space-y-3">
-                  <div className="flex flex-row items-center justify-between px-4 py-3 bg-white border-2 border-slate-100 rounded-[1.5rem] italic">
+                  <div className="flex flex-row items-center justify-between px-4 py-3 bg-surface border-2 border-slate-100 rounded-[1.5rem] italic">
                     <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+                      <div className="p-1.5 rounded-lg bg-primary/5 text-primary">
                         <Play size={14} />
                       </div>
                       <div className="text-xs font-black text-slate-900 uppercase">
                         <FormattedMessage id="imagereveal.config.speed" defaultMessage="Speed" />
                       </div>
                     </div>
-                    <div className="text-sm font-black text-indigo-600 tabular-nums">{revealSpeed}x</div>
+                    <div className="text-sm font-black text-primary tabular-nums">{revealSpeed}x</div>
                   </div>
                   <div className="px-2">
                     <input 
@@ -347,13 +347,13 @@ export const ImageReveal = () => {
                 {/* Manage Images */}
                 <div className="space-y-3 pt-4 border-t-2 border-slate-50">
                   <div className="flex items-center justify-between px-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest opacity-60">
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest opacity-60">
                       <FormattedMessage id="imagereveal.config.images" defaultMessage="Images" />
                     </label>
                     {images.length > 0 && (
                       <button 
                         onClick={() => setImages([])}
-                        className="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+                        className="text-[9px] font-black uppercase tracking-widest text-caution hover:text-caution transition-colors"
                       >
                         <FormattedMessage id="shared.history.clear" defaultMessage="Clear All" />
                       </button>
@@ -362,10 +362,10 @@ export const ImageReveal = () => {
 
                   <motion.label 
                     animate={flashAdd ? { scale: [1, 1.05, 1], backgroundColor: ['#f8fafc', '#e0e7ff', '#f8fafc'] } : {}}
-                    className="flex items-center gap-3 p-4 rounded-[1.5rem] border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-white transition-all cursor-pointer text-slate-300 hover:text-indigo-600 group"
+                    className="flex items-center gap-3 p-4 rounded-[1.5rem] border-4 border-dashed border-slate-100 bg-slate-50 hover:border-indigo-400 hover:bg-surface transition-all cursor-pointer text-slate-300 hover:text-primary group"
                   >
                     <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border-2 border-slate-50 group-hover:border-indigo-200">
+                    <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center border-2 border-slate-50 group-hover:border-primary/30">
                       <Upload size={20} strokeWidth={3} />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-widest">
@@ -383,17 +383,17 @@ export const ImageReveal = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           onClick={() => { setCurrentIndex(idx); resetReveal(); if (isMobile) setIsConfigOpen(false); }}
-                          className={`relative flex items-center gap-4 p-3 rounded-[1.5rem] border-2 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-indigo-50' : 'border-slate-50 bg-white hover:border-indigo-100'}`}
+                          className={`relative flex items-center gap-4 p-3 rounded-[1.5rem] border-2 transition-all cursor-pointer ${currentIndex === idx ? 'border-indigo-600 bg-primary/5' : 'border-slate-50 bg-surface hover:border-primary/20'}`}
                         >
                           <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border-2 border-white">
-                            <img src={img} className="w-full h-full object-cover" alt="" />
+                            <img src={img} width={48} height={48} className="w-full h-full object-cover" alt="Thumbnail" />
                           </div>
                           <span className="flex-1 text-[10px] font-black text-slate-600 uppercase truncate tracking-widest">
                             <FormattedMessage id="imagereveal.imageIndex" values={{ index: idx + 1 }} defaultMessage={`Image ${idx + 1}`} />
                           </span>
                           <button 
                             onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
-                            className="p-2 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
+                            className="p-2 bg-caution-bg text-caution rounded-xl hover:bg-rose-500 hover:text-white transition-all"
                           >
                             <Trash2 size={12} strokeWidth={3} />
                           </button>
@@ -416,7 +416,7 @@ export const ImageReveal = () => {
       >
         <div className="w-full h-full flex flex-col gap-4 lg:gap-6 relative z-10 overflow-hidden">
           {/* Main Display Area */}
-          <div className="flex-1 relative bg-white rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 overflow-hidden flex flex-col shadow-sm">
+          <div className="flex-1 relative bg-surface rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 overflow-hidden flex flex-col shadow-sm">
             <div 
               ref={containerRef}
               onMouseMove={handleMouseMove}
@@ -484,13 +484,13 @@ export const ImageReveal = () => {
                     <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-10 pointer-events-none z-30">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setCurrentIndex(prev => (prev - 1 + images.length) % images.length); resetReveal(); }}
-                        className="p-4 bg-white/80 backdrop-blur-md rounded-2xl text-slate-900 hover:bg-indigo-600 hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white shadow-lg"
+                        className="p-4 bg-surface/80 backdrop-blur-md rounded-2xl text-slate-900 hover:bg-primary hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white shadow-lg"
                       >
                         <ChevronLeft size={32} strokeWidth={3} />
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); setCurrentIndex(prev => (prev + 1) % images.length); resetReveal(); }}
-                        className="p-4 bg-white/80 backdrop-blur-md rounded-2xl text-slate-900 hover:bg-indigo-600 hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white shadow-lg"
+                        className="p-4 bg-surface/80 backdrop-blur-md rounded-2xl text-slate-900 hover:bg-primary hover:text-white transition-all active:scale-90 pointer-events-auto border-2 border-white shadow-lg"
                       >
                         <ChevronRight size={32} strokeWidth={3} />
                       </button>
@@ -499,7 +499,7 @@ export const ImageReveal = () => {
                 </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-200 gap-8">
-                  <div className="w-40 h-40 bg-white rounded-[2.5rem] border-4 border-slate-50 flex items-center justify-center rotate-6 shadow-sm">
+                  <div className="w-40 h-40 bg-surface rounded-[2.5rem] border-4 border-slate-50 flex items-center justify-center rotate-6 shadow-sm">
                     <ImageIcon size={80} strokeWidth={1} className="text-slate-100" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Add images to start</span>
@@ -510,7 +510,7 @@ export const ImageReveal = () => {
               {mode === 'reveal' && images.length > 0 && (
                 <div className="absolute bottom-0 left-0 right-0 h-3 bg-slate-50 overflow-hidden z-20">
                   <motion.div 
-                    className="h-full bg-indigo-600"
+                    className="h-full bg-primary"
                     animate={{ width: `${progress}%` }}
                     transition={{ ease: "linear", duration: 0.1 }}
                   />
@@ -525,13 +525,13 @@ export const ImageReveal = () => {
               <div className="flex gap-2">
                 <button 
                   onClick={() => { setCurrentIndex(prev => (prev - 1 + images.length) % images.length); resetReveal(); }}
-                  className="w-16 h-16 lg:w-20 lg:h-20 bg-white border-4 border-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all active:scale-95"
+                  className="w-16 h-16 lg:w-20 lg:h-20 bg-surface border-4 border-slate-50 rounded-2xl flex items-center justify-center text-neutral-400 hover:text-primary hover:border-primary/20 transition-all active:scale-95"
                 >
                   <ChevronLeft size={32} strokeWidth={3} />
                 </button>
                 <button 
                   onClick={() => { setCurrentIndex(prev => (prev + 1) % images.length); resetReveal(); }}
-                  className="w-16 h-16 lg:w-20 lg:h-20 bg-white border-4 border-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all active:scale-95"
+                  className="w-16 h-16 lg:w-20 lg:h-20 bg-surface border-4 border-slate-50 rounded-2xl flex items-center justify-center text-neutral-400 hover:text-primary hover:border-primary/20 transition-all active:scale-95"
                 >
                   <ChevronRight size={32} strokeWidth={3} />
                 </button>
@@ -545,7 +545,7 @@ export const ImageReveal = () => {
                 className={`flex-1 h-16 lg:h-24 rounded-[2rem] flex items-center justify-center gap-4 text-lg lg:text-2xl font-black uppercase tracking-widest transition-all active:scale-[0.98] ${
                   isRevealing 
                     ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' 
-                    : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                    : 'bg-primary text-white shadow-lg shadow-indigo-200'
                 } disabled:opacity-30 disabled:shadow-none`}
               >
                 {isRevealing ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" />}
@@ -557,7 +557,7 @@ export const ImageReveal = () => {
               <button
                 onClick={resetReveal}
                 disabled={images.length === 0 || (progress === 0 && !isRevealing)}
-                className="w-16 h-16 lg:w-24 lg:h-24 bg-white border-4 border-slate-50 rounded-[2rem] flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-100 transition-all active:scale-95 disabled:opacity-30"
+                className="w-16 h-16 lg:w-24 lg:h-24 bg-surface border-4 border-slate-50 rounded-[2rem] flex items-center justify-center text-neutral-400 hover:text-caution hover:border-caution-border transition-all active:scale-95 disabled:opacity-30"
               >
                 <RotateCcw size={isMobile ? 28 : 36} strokeWidth={3} />
               </button>
@@ -566,8 +566,8 @@ export const ImageReveal = () => {
         </div>
       </ToolPanel>
 
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[120px] opacity-30 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-rose-50 rounded-full blur-[120px] opacity-30 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] opacity-30 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-caution-bg rounded-full blur-[120px] opacity-30 -z-10 pointer-events-none" />
     </div>
   );
 };

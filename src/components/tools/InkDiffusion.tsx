@@ -44,7 +44,7 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="inkdiffusion.help.step1" 
@@ -64,7 +64,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="inkdiffusion.help.step3" 
@@ -181,8 +181,8 @@ const Beaker = React.forwardRef(({ temperature, isPlaying, label }: { temperatur
       <h4 className="mb-2 lg:mb-6 text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">{label}</h4>
       
       {/* Beaker Container */}
-      <div className="relative w-[400px] h-[450px] bg-white/20 backdrop-blur-xl rounded-b-[5rem] border-x-8 border-b-8 border-white  overflow-hidden group beaker-container">
-        <div className="absolute top-0 left-0 right-0 h-12 bg-white/40 border-b-4 border-white/20 z-20" />
+      <div className="relative w-[400px] h-[450px] bg-surface/20 backdrop-blur-xl rounded-b-[5rem] border-x-8 border-b-8 border-white  overflow-hidden group beaker-container">
+        <div className="absolute top-0 left-0 right-0 h-12 bg-surface/40 border-b-4 border-white/20 z-20" />
         <canvas 
           ref={canvasRef} 
           width={BEAKER_WIDTH} 
@@ -193,7 +193,7 @@ const Beaker = React.forwardRef(({ temperature, isPlaying, label }: { temperatur
         <div className="absolute left-8 top-24 bottom-12 w-10 flex flex-col justify-between items-start opacity-10 pointer-events-none">
            {[400, 300, 200, 100].map(m => (
              <div key={m} className="flex items-center gap-3">
-                <div className="w-8 h-1 bg-slate-900 rounded-full" />
+                <div className="w-8 h-1 bg-dark-bg rounded-full" />
                 <span className="text-[10px] font-black">{m}</span>
              </div>
            ))}
@@ -269,7 +269,7 @@ export const InkDiffusion = () => {
       <div className="flex items-center gap-4 italic">
         <button
           onClick={() => { setIsPlaying(!isPlaying); audioEngine.playTick(settings.soundTheme); }}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all  ${isPlaying ? 'bg-amber-100 text-amber-600' : 'bg-emerald-600 text-white '}`}
+          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all  ${isPlaying ? 'bg-amber-100 text-warning' : 'bg-emerald-600 text-white '}`}
         >
           {isPlaying ? <Pause size={14} strokeWidth={3} /> : <Play size={14} strokeWidth={3} />} 
           <FormattedMessage id={isPlaying ? 'inkdiffusion.action.freeze' : 'inkdiffusion.action.live'} defaultMessage={isPlaying ? 'Freeze' : 'Live'} />
@@ -300,19 +300,19 @@ export const InkDiffusion = () => {
                 {/* Temperature Section */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 opacity-60">
-                    <Thermometer size={16} strokeWidth={3} className="text-indigo-600" />
+                    <Thermometer size={16} strokeWidth={3} className="text-primary" />
                     <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
                       <FormattedMessage id="inkdiffusion.config.temperature" defaultMessage="Temperature" />
                     </h4>
                   </div>
                   
                   <div className="space-y-3">
-                    <div className="p-4 bg-white border-2 border-slate-100 rounded-[1.5rem] shadow-sm space-y-3">
+                    <div className="p-4 bg-surface border-2 border-slate-100 rounded-[1.5rem] shadow-sm space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                        <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest italic">
                           <FormattedMessage id="inkdiffusion.config.tempA" defaultMessage="Cold Beaker" />
                         </span>
-                        <span className="text-xl font-black text-indigo-600 tabular-nums italic leading-none">{tempA}°C</span>
+                        <span className="text-xl font-black text-primary tabular-nums italic leading-none">{tempA}°C</span>
                       </div>
                       <input 
                         type="range" min="1" max="99" value={tempA}
@@ -321,12 +321,12 @@ export const InkDiffusion = () => {
                       />
                     </div>
         
-                    <div className="p-4 bg-white border-2 border-slate-100 rounded-[1.5rem] shadow-sm space-y-3">
+                    <div className="p-4 bg-surface border-2 border-slate-100 rounded-[1.5rem] shadow-sm space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                        <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest italic">
                           <FormattedMessage id="inkdiffusion.config.tempB" defaultMessage="Hot Beaker" />
                         </span>
-                        <span className="text-xl font-black text-rose-600 tabular-nums italic leading-none">{tempB}°C</span>
+                        <span className="text-xl font-black text-caution tabular-nums italic leading-none">{tempB}°C</span>
                       </div>
                       <input 
                         type="range" min="1" max="99" value={tempB}
@@ -340,7 +340,7 @@ export const InkDiffusion = () => {
                 {/* Ink Color Section */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 opacity-60">
-                    <Palette size={16} strokeWidth={3} className="text-indigo-600" />
+                    <Palette size={16} strokeWidth={3} className="text-primary" />
                     <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
                       <FormattedMessage id="inkdiffusion.config.ink" defaultMessage="Ink Color" />
                     </h4>
@@ -352,7 +352,7 @@ export const InkDiffusion = () => {
                         key={ink.id}
                         onClick={() => { setSelectedInkId(ink.id); audioEngine.playTick(settings.soundTheme); }}
                         className={`p-3 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-2 ${
-                          selectedInk.id === ink.id ? 'border-indigo-500 bg-white shadow-md' : 'border-slate-50 bg-slate-50/50 hover:border-indigo-100'
+                          selectedInk.id === ink.id ? 'border-indigo-500 bg-surface shadow-md' : 'border-slate-50 bg-slate-50/50 hover:border-primary/20'
                         }`}
                       >
                         <div className="w-8 h-8 rounded-full border-4 border-white shadow-sm" style={{ backgroundColor: ink.color }} />

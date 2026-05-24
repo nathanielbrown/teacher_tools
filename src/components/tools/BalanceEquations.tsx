@@ -31,19 +31,19 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Play Balance Equations</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Pick a <b>Year Level</b> to start your math mission.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-info-bg flex items-center justify-center text-xs font-black text-info shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Look at the <b>Left Side</b> and <b>Right Side</b> of the equals sign. They must have the same total!</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Use the <b>Numpad</b> to type in the missing number (represented by the <b>?</b> box).</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Click <b>Check</b> to see if you are right. Try to get 10/10!</p>
       </div>
     </div>
@@ -292,15 +292,15 @@ export const BalanceEquations = () => {
                 <button
                   key={level.id}
                   onClick={() => startGame(level.id)}
-                  className="group p-6 md:p-8 bg-slate-50 border-4 border-transparent rounded-[2rem] md:rounded-[3rem] hover:border-indigo-100 hover:bg-white transition-all flex items-center justify-between text-left shadow-sm hover:shadow-xl"
+                  className="group p-6 md:p-8 bg-surface border-4 border-border rounded-[2rem] md:rounded-[3rem] hover:border-primary hover:bg-neutral-50/50 transition-all flex items-center justify-between text-left"
                 >
                   <div className="flex flex-col items-start gap-1">
                     <span className="text-2xl md:text-4xl font-black text-slate-800 tracking-tighter">{level.label}</span>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
                       {level.sub}
                     </span>
                   </div>
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-all ">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl border-2 border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all ">
                     <ChevronRight size={isMobile ? 20 : 24} />
                   </div>
                 </button>
@@ -317,14 +317,14 @@ export const BalanceEquations = () => {
             {/* Progress Bar */}
             <div className="w-full max-w-md space-y-1 md:space-y-2 px-4">
               <div className="flex justify-between items-end">
-                <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Question {currentIndex + 1} of 10</span>
-                <div className="bg-indigo-600 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
+                <span className="text-[8px] md:text-[10px] font-black text-neutral-400 uppercase tracking-widest">Question {currentIndex + 1} of 10</span>
+                <div className="bg-primary px-2 md:px-3 py-0.5 md:py-1 rounded-full">
                    <span className="text-[10px] md:text-xs font-black text-white tabular-nums tracking-widest uppercase">Score: {score}</span>
                 </div>
               </div>
-              <div className="w-full h-1.5 md:h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border-none ">
+              <div className="w-full h-1.5 md:h-2 bg-neutral-100 rounded-full overflow-hidden p-0.5 border-none ">
                 <motion.div 
-                  className="h-full bg-indigo-600 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+                  className="h-full bg-primary rounded-full"
                   initial={false}
                   animate={{ width: `${(currentIndex + 1) * 10}%` }}
                 />
@@ -339,7 +339,7 @@ export const BalanceEquations = () => {
                     <div className="flex items-center gap-3 lg:gap-5 relative overflow-hidden group">
                     <div className="tool-grid-bg opacity-10 pointer-events-none" />
                     {questions[currentIndex].leftSide.map((part: string | number, i: number) => (
-                      <span key={i} className={`${isMobile ? 'text-3xl' : 'text-5xl lg:text-7xl'} font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
+                      <span key={i} className={`${isMobile ? 'text-3xl' : 'text-5xl lg:text-7xl'} font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-primary'}`}>
                         {part}
                       </span>
                     ))}
@@ -354,13 +354,13 @@ export const BalanceEquations = () => {
                       <React.Fragment key={i}>
                         {part === '?' ? (
                           <div className={`w-14 h-14 md:w-20 md:h-20 lg:w-28 lg:h-28 rounded-xl md:rounded-[2rem] border-2 md:border-4 flex items-center justify-center ${isMobile ? 'text-3xl' : 'text-5xl lg:text-6xl'} font-black transition-all tabular-nums ${
-                            feedback ? (feedback.isCorrect ? 'bg-emerald-500 border-white/20 text-white shadow-lg shadow-emerald-500/20' : 'bg-rose-500 border-white/20 text-white shadow-lg shadow-rose-500/20') :
-                            'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
+                            feedback ? (feedback.isCorrect ? 'bg-emerald-500 border-white/20 text-white' : 'bg-rose-500 border-white/20 text-white') :
+                            'bg-primary border-indigo-400 text-white'
                           }`}>
                             {userAnswer || (feedback ? '' : '?')}
                           </div>
                         ) : (
-                          <span key={i} className={`${isMobile ? 'text-3xl' : 'text-5xl lg:text-7xl'} font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-indigo-600'}`}>
+                          <span key={i} className={`${isMobile ? 'text-3xl' : 'text-5xl lg:text-7xl'} font-black tracking-tighter ${typeof part === 'number' ? 'text-slate-800' : 'text-primary'}`}>
                             {part}
                           </span>
                         )}
@@ -377,7 +377,7 @@ export const BalanceEquations = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
-                        className={`flex items-center gap-2 md:gap-4 px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-[1.5rem] ${isMobile ? 'text-lg' : 'text-2xl'} font-black uppercase tracking-tighter ${feedback.isCorrect ? 'text-emerald-600 bg-emerald-50 border-4 border-white' : 'text-rose-600 bg-rose-50 border-4 border-white'}`}
+                        className={`flex items-center gap-2 md:gap-4 px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-[1.5rem] ${isMobile ? 'text-lg' : 'text-2xl'} font-black uppercase tracking-tighter ${feedback.isCorrect ? 'text-success bg-success-bg border-4 border-white' : 'text-caution bg-caution-bg border-4 border-white'}`}
                       >
                         {feedback.isCorrect ? <Star fill="currentColor" size={isMobile ? 24 : 32} /> : <RotateCcw size={isMobile ? 24 : 32} />}
                         {feedback.isCorrect ? 'Correct!' : `Wrong! It was ${feedback.correctAnswer}`}
@@ -395,7 +395,7 @@ export const BalanceEquations = () => {
                       key={val}
                       onClick={() => handleNumpad(val.toString())}
                       className={`h-11 md:h-14 lg:h-16 rounded-xl md:rounded-2xl text-xl md:text-2xl font-black transition-all active:scale-95 border-2 md:border-4 tabular-nums ${
-                        val === 'clear' ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-white border-slate-100 text-slate-800 hover:border-indigo-100'
+                        val === 'clear' ? 'bg-caution-bg border-2 md:border-4 border-caution-border text-caution' : 'bg-surface border-border text-slate-800 hover:border-primary hover:text-primary'
                       } ${val === 'clear' ? 'col-span-3' : ''} ${val === 0 ? 'col-start-2' : ''}`}
                     >
                       {val === 'clear' ? <RotateCcw size={isMobile ? 18 : 24} strokeWidth={3} /> : val}
@@ -405,8 +405,8 @@ export const BalanceEquations = () => {
                 <button
                   onClick={feedback ? handleNext : handleCheck}
                   disabled={!userAnswer && !feedback}
-                  className={`w-full md:w-48 lg:w-56 h-11 md:h-14 lg:h-16 rounded-xl md:rounded-2xl text-base md:text-lg font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest ${
-                    !userAnswer && !feedback ? 'bg-slate-100 text-slate-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 border-4 border-white/10 shadow-lg shadow-indigo-500/20'
+                  className={`w-full md:w-48 lg:w-56 h-11 md:h-14 lg:h-16 rounded-xl md:rounded-2xl text-base md:text-lg font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest border-2 md:border-4 ${
+                    !userAnswer && !feedback ? 'bg-neutral-100 text-neutral-300 border-border' : 'bg-primary text-white hover:bg-primary/90 border-primary'
                   }`}
                 >
                   {feedback ? 'Next' : 'Check'}
@@ -423,17 +423,17 @@ export const BalanceEquations = () => {
             className="w-full max-w-3xl flex flex-col items-center gap-8 md:gap-12 text-center py-8 px-4"
           >
             <div className="space-y-6 md:space-y-8">
-              <div className="w-32 h-32 md:w-48 md:h-48 bg-amber-400 rounded-[2.5rem] md:rounded-[4rem] flex items-center justify-center text-white mx-auto relative border-8 border-white rotate-6 shadow-xl">
+              <div className="w-32 h-32 md:w-48 md:h-48 bg-amber-400 rounded-[2.5rem] md:rounded-[4rem] flex items-center justify-center text-white mx-auto relative border-8 border-white rotate-6">
                 <Trophy size={isMobile ? 64 : 96} strokeWidth={1.5} />
-                <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 w-14 h-14 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center text-amber-500 border-4 border-amber-50 animate-bounce">
+                <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 w-14 h-14 md:w-20 md:h-20 bg-surface rounded-full flex items-center justify-center text-amber-500 border-4 border-amber-50 animate-bounce">
                   <Star fill="currentColor" size={isMobile ? 24 : 40} />
                 </div>
               </div>
               <div className="space-y-2">
                 <h2 className="text-5xl md:text-7xl font-black text-slate-900 uppercase tracking-tighter leading-none">Well Done!</h2>
                 <div className="flex flex-col items-center gap-2 mt-4">
-                   <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Your Score</span>
-                   <p className="text-7xl md:text-9xl font-black text-indigo-600 tabular-nums tracking-tighter leading-none">
+                   <span className="text-[8px] md:text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">Your Score</span>
+                   <p className="text-7xl md:text-9xl font-black text-primary tabular-nums tracking-tighter leading-none">
                      {score}<span className="text-2xl md:text-3xl text-slate-200 ml-2 md:ml-3">/10</span>
                    </p>
                 </div>
@@ -443,13 +443,13 @@ export const BalanceEquations = () => {
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full max-w-lg mt-4 md:mt-8">
               <button
                 onClick={() => setGameState('menu')}
-                className="flex-1 py-4 md:py-8 bg-slate-100 text-slate-400 font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-slate-200 transition-all active:scale-95 uppercase tracking-widest"
+                className="flex-1 py-4 md:py-8 bg-surface border-4 border-border text-slate-400 font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-neutral-50 hover:border-neutral-300 transition-all active:scale-95 uppercase tracking-widest"
               >
                 Menu
               </button>
               <button
                 onClick={() => startGame(yearLevel)}
-                className="flex-1 py-4 md:py-8 bg-indigo-600 text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest shadow-xl shadow-indigo-500/20"
+                className="flex-1 py-4 md:py-8 bg-primary border-4 border-primary text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-primary/90 transition-all active:scale-95 uppercase tracking-widest"
               >
                 Play Again
               </button>
@@ -458,8 +458,8 @@ export const BalanceEquations = () => {
         )}
       </AnimatePresence>
 
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-info-bg rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
     </ToolPanel>
   );
 };

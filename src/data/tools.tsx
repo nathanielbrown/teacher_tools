@@ -74,6 +74,8 @@ import ClassRex from '../components/tools/ClassRex';
 import { SongMaker } from '../components/tools/SongMaker';
 import { Config } from '../components/tools/Config';
 import { NamePicker } from '../components/tools/NamePicker';
+import { BehaviourDiamond } from '../components/tools/BehaviourDiamond';
+import { StarChart } from '../components/tools/StarChart';
 
 export interface Tool {
   id: string;
@@ -316,6 +318,61 @@ export const tools: Tool[] = [
     description: "Multi-format Bracket & Ranking Engine",
     infoContent: "Run single or double elimination tournaments for your class. Use the Elo system to track skill levels over time. Perfect for classroom games, spelling bees, or sports.",
     component: Tournaments
+  },
+  { 
+    id: 'behaviourdiamond', 
+    name: 'Behaviour Diamond', 
+    icon: Sparkles, 
+    emoji: '💎', 
+    mainSection: 'Teacher Tools', 
+    section: 'Classroom Management', 
+    color: '#a855f7', 
+    yearRange: [0, 8],
+    description: "Visual choices and behavior tracking chart",
+    infoContent: (
+      <div className="space-y-4 text-xs font-bold text-slate-600">
+        <p>The Behaviour Diamond is a fun way to celebrate good choices! Kids can see how their daily actions help them climb higher toward 'Amazing'. It helps students reflect on their feelings and actions in a positive way.</p>
+      </div>
+    ),
+    helpContent: (
+      <div className="space-y-4 text-xs font-bold text-slate-600">
+        <p>How to use this tool:</p>
+        <ol className="list-decimal pl-4 space-y-2">
+          <li><strong>Select a Class:</strong> Choose a class from the drop-down menu in the top tool header.</li>
+          <li><strong>Move Cards:</strong> Drag and drop student name cards to any position on the diamond.</li>
+          <li><strong>Quick Buttons:</strong> Click the small UP or DOWN arrow on a card to move a student and position them automatically.</li>
+          <li><strong>Configure:</strong> Click the Settings gear icon in the tool header to change colors, edit level names, or reset everyone.</li>
+        </ol>
+      </div>
+    ),
+    component: BehaviourDiamond
+  },
+  { 
+    id: 'starchart', 
+    name: 'Star Chart', 
+    icon: Award, 
+    emoji: '⭐', 
+    mainSection: 'Teacher Tools', 
+    section: 'Classroom Management', 
+    color: '#fbbf24', 
+    yearRange: [0, 8],
+    description: "Star reward store and student card customization board",
+    infoContent: (
+      <div className="space-y-4 text-xs font-bold text-slate-600">
+        <p>The Star Chart is a fun way to celebrate awesome behavior! Kids get stars for doing great things, and then they can spend their stars in the Star Shop to customize their very own student name card with badges, background gradients, custom borders, and style texts!</p>
+      </div>
+    ),
+    helpContent: (
+      <div className="space-y-4 text-xs font-bold text-slate-600">
+        <p>How to use this tool:</p>
+        <ol className="list-decimal pl-4 space-y-2">
+          <li><strong>Select a Class:</strong> Choose a class list from the dropdown menu in the top tool header.</li>
+          <li><strong>Award Stars:</strong> Press the (+ ⭐) button on a card to give stars, or (- ⭐) to subtract stars.</li>
+          <li><strong>Shop & Customize:</strong> Tap a student card to select them, then visit the Star Shop at the bottom to preview and buy awesome styles and emoji badges. Tap once to preview, and tap a second time to buy!</li>
+        </ol>
+      </div>
+    ),
+    component: StarChart
   },
 
   // Teacher Tools - Teaching Aids
@@ -732,24 +789,6 @@ export const tools: Tool[] = [
       </div>
     ),
     component: FindTheWord
-  },
-  { 
-    id: 'wordbuilder', 
-    name: 'Word Builder', 
-    icon: Sparkles, 
-    emoji: '🧩', 
-    mainSection: 'Teacher Tools', 
-    section: 'Literacy', 
-    color: '#6366f1', 
-    yearRange: [0, 4],
-    description: "Phonemic Awareness & Syllabic Assembly",
-    infoContent: (
-      <div className="space-y-4">
-        <p>Build words by dragging letters or phonemes into the workspace. Perfect for early literacy and phonics practice.</p>
-        <p><strong>Audio:</strong> Hear the sounds of the letters as you build your words.</p>
-      </div>
-    ),
-    component: WordBuilder
   },
   { 
     id: 'crossword', 
@@ -1231,6 +1270,223 @@ export const tools: Tool[] = [
     ),
     component: SongMaker
   },
+
+  // Duplicated Tools for Teachers & Students
+  { 
+    id: 'wordbuilder', 
+    name: 'Word Builder', 
+    icon: Sparkles, 
+    emoji: '🧩', 
+    mainSection: 'Teacher Tools', 
+    section: 'Teaching Aids', 
+    color: '#6366f1', 
+    yearRange: [0, 4],
+    description: "Phonemic Awareness & Syllabic Assembly",
+    infoContent: (
+      <div className="space-y-4">
+        <p>Build words by dragging letters or phonemes into the workspace. Perfect for early literacy and phonics practice.</p>
+        <p><strong>Audio:</strong> Hear the sounds of the letters as you build your words.</p>
+      </div>
+    ),
+    component: WordBuilder
+  },
+  { 
+    id: 'wordbuilder', 
+    name: 'Word Builder', 
+    icon: Sparkles, 
+    emoji: '🧩', 
+    mainSection: 'Student Tools', 
+    section: 'Literacy', 
+    color: '#6366f1', 
+    yearRange: [0, 4],
+    description: "Phonemic Awareness & Syllabic Assembly",
+    infoContent: (
+      <div className="space-y-4">
+        <p>Build words by dragging letters or phonemes into the workspace. Perfect for early literacy and phonics practice.</p>
+        <p><strong>Audio:</strong> Hear the sounds of the letters as you build your words.</p>
+      </div>
+    ),
+    component: WordBuilder
+  },
+  { 
+    id: 'hundredschart', 
+    name: 'Hundreds Chart', 
+    icon: Grid3X3, 
+    emoji: '🔢', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#fab1a0', 
+    yearRange: [0, 6],
+    description: "Interactive base-10 exploration and pattern finding",
+    infoContent: "Use 'Hide Mode' to conceal numbers for guessing games. Use colors to highlight multiples or skip-counting patterns. Quickly highlight multiples of 2, 3, 5, or 10 with the pattern cascade buttons.",
+    component: HundredsChart
+  },
+  { 
+    id: 'mabblocks', 
+    name: 'MAB Blocks', 
+    icon: Layers, 
+    emoji: '🧊', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#ffeaa7', 
+    yearRange: [0, 6],
+    description: "Interactive Base-10 Place Value Simulation",
+    infoContent: "Drag blocks from the bank onto the workspace to explore place value. Drag a block off the workspace to remove it. Use the sort button to automatically organize your blocks into hundreds, tens, and ones columns.",
+    component: MABBlocks
+  },
+  { 
+    id: 'abacus', 
+    name: 'Abacus', 
+    icon: Hash, 
+    emoji: '🧮', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#f43f5e', 
+    yearRange: [0, 6],
+    description: "Interactive base-10 calculation tool",
+    infoContent: "Shift beads across rows to represent numbers from ones to billions. A classic tool for understanding place value and addition.",
+    component: Abacus
+  },
+  { 
+    id: 'fractiontool', 
+    name: 'Fraction Tool', 
+    icon: PieChart, 
+    emoji: '🍕', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#a29bfe', 
+    yearRange: [2, 8],
+    description: "Interactive Part-Whole Relationship Model",
+    infoContent: "Explore fractions using both area models (Circle) and linear models (Number Line) simultaneously. Click directly on the circle segments or the number line to quickly jump to a value.",
+    component: FractionTool
+  },
+  { 
+    id: 'fractionwall', 
+    name: 'Fraction Wall', 
+    icon: Layout, 
+    emoji: '🧱', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#a855f7', 
+    yearRange: [2, 10],
+    description: "Visual equivalence and comparison engine",
+    infoContent: "Compare different fraction layers to find equivalent values. Highlight specific segments to see how they align across the wall.",
+    component: FractionWall
+  },
+  { 
+    id: 'numberline', 
+    name: 'Number Line', 
+    icon: MoveRight, 
+    emoji: '📏', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#00cec9', 
+    yearRange: [0, 12],
+    description: "Visualize sequences, addition, and subtraction jumps",
+    infoContent: "Click a number to add or remove a pin. Click and drag between two numbers to create a jump. Adjust the range and step size to explore different number scales.",
+    component: NumberLine
+  },
+  { 
+    id: 'diceroller', 
+    name: 'Dice Roller', 
+    icon: Dices, 
+    emoji: '🎲', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#fa8231', 
+    yearRange: [0, 12],
+    description: "Multi-sided 3D Dice Laboratory",
+    infoContent: "Click dice buttons to add them to your pool. You can add up to 24 dice! Roll the pool to see random values and their total sum.",
+    component: DiceRoller
+  },
+  { 
+    id: 'flipcoin', 
+    name: 'Flip Coin', 
+    icon: Coins, 
+    emoji: '🪙', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#2ed573', 
+    yearRange: [0, 12],
+    description: "Probability & Chance Simulator",
+    infoContent: "Click the coin or flip button to start the toss. The coin uses real physics-based rotation! Track results with the live chart and download data as CSV.",
+    component: FlipCoin
+  },
+  { 
+    id: 'numberspinner', 
+    name: 'Number Spinner', 
+    icon: Loader, 
+    emoji: '🎡', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#1e90ff', 
+    yearRange: [0, 12],
+    description: "Interactive Probability and Random Selection Wheel",
+    infoContent: "Set your min and max values. The wheel will automatically divide into segments. Track every spin in history and download CSV report.",
+    component: NumberSpinner
+  },
+  { 
+    id: 'storystarters', 
+    name: 'Story Starters', 
+    icon: Sparkles, 
+    emoji: '✍️', 
+    mainSection: 'Student Tools', 
+    section: 'Literacy', 
+    color: '#ff7675', 
+    yearRange: [0, 12],
+    description: "Creative Prompts for Narrative Writing",
+    infoContent: "Overcome writer's block with aged-tailored creative prompts. Select a year level to get sentences that match the literacy expectations for that age group.",
+    component: StoryStarters
+  },
+  { 
+    id: 'teachermath', 
+    name: 'Cartesian Plane', 
+    icon: TrendingUp, 
+    emoji: '📉', 
+    mainSection: 'Student Tools', 
+    section: 'Math', 
+    color: '#0984e3', 
+    yearRange: [3, 12],
+    description: "Explore coordinates and equations",
+    infoContent: "Click the grid to drop points or type equations like 'y = 2x + 1' in the sidebar. Explore coordinates and equations on an interactive Cartesian plane.",
+    component: TeacherMath
+  },
+  { 
+    id: 'metronome', 
+    name: 'Metronome', 
+    icon: Activity, 
+    emoji: '🎵', 
+    mainSection: 'Student Tools', 
+    section: 'Arts & Music', 
+    color: '#20bf6b', 
+    yearRange: [0, 12],
+    description: "Precision Rhythmic & Timing Standard",
+    infoContent: (
+      <div className="space-y-4">
+        <p>Keep a steady beat with this precision metronome. Adjust the tempo (BPM) and time signature to suit your music.</p>
+        <p><strong>Presets:</strong> Quickly switch between common tempos like Allegro, Moderato, or Adagio.</p>
+      </div>
+    ),
+    component: Metronome
+  },
+  { 
+    id: 'colourpicker', 
+    name: 'Colour Picker', 
+    icon: Palette, 
+    emoji: '🎨', 
+    mainSection: 'Student Tools', 
+    section: 'Arts & Music', 
+    color: '#ff6b81', 
+    yearRange: [0, 12],
+    description: "Digital Palette & Color Theory Explorer",
+    infoContent: (
+      <div className="space-y-4">
+        <p>A simple tool for selecting and comparing colors. Explore HEX, RGB, and HSL values for any color you choose.</p>
+        <p><strong>Palettes:</strong> Generate complementary or analogous color schemes automatically.</p>
+      </div>
+    ),
+    component: ColourPicker
+  },
 ];
 
 export const mainSections = [
@@ -1241,8 +1497,7 @@ export const mainSections = [
       { name: 'Classroom Management', emoji: '🏫', icon: Users },
       { name: 'Teaching Aids', emoji: '📚', icon: BookOpen },
       { name: 'Randomizers', emoji: '🎲', icon: Dices },
-      { name: 'Utilities', emoji: '🛠️', icon: Settings2 },
-      { name: 'Literacy', emoji: '✍️', icon: PenTool }
+      { name: 'Utilities', emoji: '🛠️', icon: Settings2 }
     ] 
   },
   { 
@@ -1258,8 +1513,7 @@ export const mainSections = [
       { name: 'Math', emoji: '🔢', icon: Calculator },
       { name: 'Memory & Games', emoji: '🧠', icon: Brain },
       { name: 'Science', emoji: '🧪', icon: Beaker },
-      { name: 'Arts & Music', emoji: '🎵', icon: Music },
-      { name: 'History', emoji: '🏛️', icon: Library }
+      { name: 'Arts & Music', emoji: '🎵', icon: Music }
     ] 
   }
 ];

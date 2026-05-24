@@ -731,6 +731,168 @@ class AudioEngine {
     }
   }
 
+  playChildAlarm(theme: any) {
+    if (!theme || theme === 'none' || theme === false) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+
+    // Use sine for all high frequency tones to avoid harsh harmonics/distortion on speakers
+    osc.type = 'sine';
+
+    if (theme === 'classic' || theme === true) {
+      const duration = 1.0;
+      osc.frequency.setValueAtTime(15500, now);
+      osc.frequency.setValueAtTime(17500, now + 0.2);
+      osc.frequency.setValueAtTime(15500, now + 0.4);
+      osc.frequency.setValueAtTime(17500, now + 0.6);
+      osc.frequency.setValueAtTime(15500, now + 0.8);
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.4, now + 0.1);
+      gain.gain.setValueAtTime(0.4, now + duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'digital') {
+      const duration = 0.8;
+      for(let i=0; i<8; i++) {
+        osc.frequency.setValueAtTime(16000, now + i*0.1);
+        osc.frequency.setValueAtTime(17500, now + i*0.1 + 0.05);
+      }
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+      gain.gain.setValueAtTime(0.2, now + duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'soft') {
+      const duration = 1.5;
+      osc.frequency.setValueAtTime(15500, now);
+      osc.frequency.linearRampToValueAtTime(17000, now + 0.5);
+      osc.frequency.linearRampToValueAtTime(15500, now + 1.0);
+      osc.frequency.linearRampToValueAtTime(17000, now + 1.5);
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.3);
+      gain.gain.setValueAtTime(0.3, now + duration - 0.3);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'bubbly') {
+      const duration = 1.0;
+      for(let i=0; i<5; i++) {
+        osc.frequency.setValueAtTime(15000, now + i*0.2);
+        osc.frequency.exponentialRampToValueAtTime(17500, now + i*0.2 + 0.15);
+      }
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.1);
+      gain.gain.setValueAtTime(0.3, now + duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'chime') {
+      const duration = 1.5;
+      osc.frequency.setValueAtTime(15000, now);
+      osc.frequency.setValueAtTime(16000, now + 0.2);
+      osc.frequency.setValueAtTime(16800, now + 0.4);
+      osc.frequency.setValueAtTime(17800, now + 0.6);
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+      gain.gain.setValueAtTime(0.3, now + 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'synth') {
+      const duration = 2.0;
+      osc.frequency.setValueAtTime(15500, now);
+      osc.frequency.linearRampToValueAtTime(17500, now + 1.0);
+      osc.frequency.linearRampToValueAtTime(15500, now + 2.0);
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.2, now + 0.2);
+      gain.gain.setValueAtTime(0.2, now + 1.5);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'beep') {
+      const duration = 1.2;
+      for(let i=0; i<6; i++) {
+        osc.frequency.setValueAtTime(16500, now + i*0.2);
+      }
+      gain.gain.setValueAtTime(0, now);
+      for(let i=0; i<6; i++) {
+        gain.gain.setValueAtTime(0.3, now + i*0.2);
+        gain.gain.setValueAtTime(0, now + i*0.2 + 0.1);
+      }
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'siren') {
+      const duration = 2.0;
+      for(let i=0; i<4; i++) {
+        osc.frequency.setValueAtTime(17500, now + i*0.5);
+        osc.frequency.setValueAtTime(15500, now + i*0.5 + 0.25);
+      }
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.1);
+      gain.gain.setValueAtTime(0.15, now + duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+    else if (theme === 'cosmic') {
+      const duration = 1.5;
+      for(let i=0; i<3; i++) {
+        osc.frequency.setValueAtTime(17500, now + i*0.5);
+        osc.frequency.exponentialRampToValueAtTime(15000, now + i*0.5 + 0.4);
+      }
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.1);
+      gain.gain.setValueAtTime(0.3, now + duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(now + duration);
+    }
+  }
+
   playReady(theme: any) {
     if (!theme || theme === 'none' || theme === false) return;
     this.init();

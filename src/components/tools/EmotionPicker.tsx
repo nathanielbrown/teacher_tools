@@ -8,6 +8,7 @@ import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
 import { ToolPanel } from '../shared/ToolPanel';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants
 const EMOTIONS = [
@@ -43,7 +44,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="emotion.help.step1" defaultMessage="Look at the different emojis and choose the one that best matches how you feel right now." />
         </p>
@@ -59,7 +60,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="emotion.help.step3" 
@@ -81,6 +82,7 @@ const getHelpInfo = () => (
 // 7. Component
 export const EmotionPicker = () => {
   const [selectedEmotion, setSelectedEmotion] = useState<any>(null);
+  const [lastSelectedId, setLastSelectedId] = useLocalStorage<string | null>('emotion_picker_last_selected', null);
   const { setHeaderActions, setOnReset, clearHeader, setHelpContent } = useHeader();
   const { settings } = useSettings();
   const intl = useIntl();
@@ -95,8 +97,9 @@ export const EmotionPicker = () => {
 
   const resetTool = useCallback(() => {
     setSelectedEmotion(null);
+    setLastSelectedId(null);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setLastSelectedId]);
 
   useEffect(() => {
     setOnReset(() => resetTool);
@@ -137,23 +140,43 @@ export const EmotionPicker = () => {
                  className="w-full"
                >
                   <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
-                    {EMOTIONS.map((emotion, index) => (
-                      <motion.button
-                        key={emotion.label}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.02 }}
-                        onClick={() => { setSelectedEmotion(emotion); audioEngine.playTick(settings.soundTheme); }}
-                        className="group aspect-square lg:aspect-auto w-full bg-white rounded-2xl md:rounded-3xl hover:bg-rose-50/50 transition-all active:scale-95 flex flex-col items-center justify-center gap-1 md:gap-2 lg:gap-2.5 xl:gap-3 p-2 md:p-3 lg:py-2.5 lg:px-6 xl:py-3.5 xl:px-8"
-                      >
-                        <span className="text-4xl md:text-6xl lg:text-7xl xl:text-[5rem] transition-transform group-hover:scale-110 duration-500">
-                          {emotion.emoji}
-                        </span>
-                        <span className="text-[7px] md:text-[9px] lg:text-xl xl:text-[1.35rem] font-black text-slate-400 uppercase tracking-widest lg:tracking-wide xl:tracking-normal leading-tight text-center px-2">
-                          {intl.formatMessage({ id: emotion.id, defaultMessage: emotion.label })}
-                        </span>
-                      </motion.button>
-                    ))}
+                    {EMOTIONS.map((emotion, index) => {
+                      const isSelected = emotion.id === lastSelectedId;
+                      return (
+                        <motion.button
+                          key={emotion.label}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.02 }}
+                          onClick={() => {
+                            setSelectedEmotion(emotion);
+                            setLastSelectedId(emotion.id);
+                            audioEngine.playTick(settings.soundTheme);
+                          }}
+                          className={`group relative aspect-square lg:aspect-auto w-full bg-surface rounded-2xl md:rounded-3xl hover:bg-caution-bg/50 transition-all active:scale-95 flex flex-col items-center justify-center gap-1 md:gap-2 lg:gap-2.5 xl:gap-3 p-2 md:p-3 lg:py-2.5 lg:px-6 xl:py-3.5 xl:px-8 border-4 ${
+                            isSelected ? '' : 'border-transparent'
+                          }`}
+                          style={isSelected ? { borderColor: emotion.color } : undefined}
+                        >
+                          {isSelected && (
+                            <div 
+                              className="absolute top-2 right-2 w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-white"
+                              style={{ backgroundColor: emotion.color }}
+                            >
+                              <Heart size={10} className="md:w-3 md:h-3" fill="currentColor" />
+                            </div>
+                          )}
+                          <span className="text-4xl md:text-6xl lg:text-7xl xl:text-[5rem] transition-transform group-hover:scale-110 duration-500">
+                            {emotion.emoji}
+                          </span>
+                          <span className={`text-[7px] md:text-[9px] lg:text-xl xl:text-[1.35rem] font-black uppercase tracking-widest lg:tracking-wide xl:tracking-normal leading-tight text-center px-2 transition-colors ${
+                            isSelected ? 'text-slate-900 font-extrabold' : 'text-neutral-400'
+                          }`}>
+                            {intl.formatMessage({ id: emotion.id, defaultMessage: emotion.label })}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
                   </div>
                </motion.div>
              ) : (
@@ -179,8 +202,11 @@ export const EmotionPicker = () => {
                   </div>
 
                   <button 
-                    onClick={resetTool}
-                    className="px-12 py-6 bg-white text-slate-900 border-4 border-slate-50 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-sm hover:bg-slate-50 transition-all active:scale-95 "
+                    onClick={() => {
+                      setSelectedEmotion(null);
+                      audioEngine.playTick(settings.soundTheme);
+                    }}
+                    className="px-12 py-6 bg-surface text-slate-900 border-4 border-slate-50 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-sm hover:bg-slate-50 transition-all active:scale-95 "
                   >
                     <FormattedMessage id="emotion.change" defaultMessage="Change" />
                   </button>
@@ -190,8 +216,8 @@ export const EmotionPicker = () => {
         </div>
       </div>
 
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-caution-bg rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
     </ToolPanel>
   );
 };

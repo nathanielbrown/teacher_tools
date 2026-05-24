@@ -57,29 +57,21 @@ describe('Layout Smoke Test', () => {
     expect(screen.queryByText('About ClassRex')).toBeNull();
   });
 
-  it('renders the tool header and info overlay for a specific tool', async () => {
+  it('renders the tool header and the combined help & info panel', async () => {
     renderLayout('storystarters');
     
     // Use role to distinguish the header from the sidebar link
     expect(screen.getByRole('heading', { name: /Story Starters/i })).toBeDefined();
 
-    const toolInfoButton = screen.getByTitle('Tool Information');
-    fireEvent.click(toolInfoButton);
+    const helpInfoButton = screen.getByTitle('Help & Usage');
+    fireEvent.click(helpInfoButton);
 
-    expect(screen.getByText('Tool Information')).toBeDefined();
+    expect(screen.getByText('Information')).toBeDefined();
+    expect(screen.getByText('How to Use')).toBeDefined();
     
     const closeOverlayButton = screen.getAllByRole('button').find(b => b.innerHTML.includes('X') || b.querySelector('svg'));
     if (closeOverlayButton) {
         fireEvent.click(closeOverlayButton);
     }
-  });
-
-  it('renders the help overlay', async () => {
-    renderLayout('storystarters');
-    
-    const helpButton = screen.getByTitle('Help & Usage');
-    fireEvent.click(helpButton);
-    
-    expect(screen.getByText('How to Use')).toBeDefined();
   });
 });

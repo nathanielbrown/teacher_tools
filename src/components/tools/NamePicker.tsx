@@ -137,7 +137,7 @@ const WheelView = ({ names, spinning, winner, onFinish, isMobile }: { names: str
           })}
         </svg>
         {/* Center hub */}
-        <div className="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full border-4 border-slate-100 z-10" />
+        <div className="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-surface rounded-full border-4 border-slate-100 z-10" />
       </motion.div>
     </div>
   );
@@ -211,7 +211,7 @@ const ListView = ({ names, spinning, winner, onFinish, isMobile }: { names: stri
       <div className={`absolute ${isMobile ? 'left-[-20px] border-l-[15px] border-t-[10px] border-b-[10px]' : 'left-[-40px] border-l-[25px] border-t-[15px] border-b-[15px]'} top-1/2 -translate-y-1/2 w-0 h-0 border-t-transparent border-b-transparent border-l-slate-800 z-20`} />
       <div className={`absolute ${isMobile ? 'right-[-20px] border-r-[15px] border-t-[10px] border-b-[10px]' : 'right-[-40px] border-r-[25px] border-t-[15px] border-b-[15px]'} top-1/2 -translate-y-1/2 w-0 h-0 border-t-transparent border-b-transparent border-r-slate-800 z-20`} />
 
-      <div className={`bg-white rounded-[2rem] border-8 border-white overflow-hidden ${isMobile ? 'w-[280px]' : 'w-[400px]'}`}>
+      <div className={`bg-surface rounded-[2rem] border-8 border-white overflow-hidden ${isMobile ? 'w-[280px]' : 'w-[400px]'}`}>
         {displayNames.map((name, i) => {
           const colorIndex = names.indexOf(name);
           const backgroundColor = colorIndex !== -1 ? COLORS[colorIndex % COLORS.length] : '#f1f5f9';
@@ -327,7 +327,7 @@ export const NamePicker = () => {
         {isMobile && (
           <button
             onClick={() => { setIsClassPanelOpen(false); handlePick(); }}
-            className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl uppercase tracking-[0.1em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 mt-4 italic border-4 border-white"
+            className="w-full py-5 bg-primary text-white rounded-[2rem] font-black text-xl uppercase tracking-[0.1em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 mt-4 italic border-4 border-white"
           >
             <Play size={24} fill="currentColor" />
             <FormattedMessage id="namepicker.spin" defaultMessage="Spin" />
@@ -345,17 +345,17 @@ export const NamePicker = () => {
           
           {/* Mode Selector */}
           <div className={`${isMobile ? 'relative mb-4 flex justify-center w-full' : 'absolute right-4 top-1/2 -translate-y-1/2'} z-40`}>
-            <div className={`bg-white/80 backdrop-blur-xl p-2 rounded-[2.5rem] flex ${isMobile ? 'flex-row' : 'flex-col'} items-center gap-2 border-4 border-white shadow-lg`}>
+            <div className={`bg-surface/80 backdrop-blur-xl p-2 rounded-[2.5rem] flex ${isMobile ? 'flex-row' : 'flex-col'} items-center gap-2 border-4 border-white shadow-lg`}>
               <button
                 onClick={() => { setMode('wheel'); reset(); }}
-                className={`flex items-center gap-3 ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-[2rem] transition-all active:scale-95 ${mode === 'wheel' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-indigo-600'}`}
+                className={`flex items-center gap-3 ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-[2rem] transition-all active:scale-95 ${mode === 'wheel' ? 'bg-primary text-white' : 'text-neutral-400 hover:text-primary'}`}
               >
                 <CircleDot size={20} />
                 <span className="text-sm font-black uppercase tracking-widest">Wheel</span>
               </button>
               <button
                 onClick={() => { setMode('list'); reset(); }}
-                className={`flex items-center gap-3 ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-[2rem] transition-all active:scale-95 ${mode === 'list' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-indigo-600'}`}
+                className={`flex items-center gap-3 ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-[2rem] transition-all active:scale-95 ${mode === 'list' ? 'bg-primary text-white' : 'text-neutral-400 hover:text-primary'}`}
               >
                 <List size={20} />
                 <span className="text-sm font-black uppercase tracking-widest">List</span>
@@ -400,13 +400,13 @@ export const NamePicker = () => {
                   exit={{ opacity: 0, scale: 0.5, y: 20 }}
                   className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
                 >
-                  <div className="bg-white/90 backdrop-blur-xl px-16 py-10 rounded-[3rem] border-8 border-indigo-600 shadow-2xl flex flex-col items-center gap-4">
-                    <span className="text-indigo-600 font-black uppercase tracking-[0.3em] text-xl">Winner!</span>
+                  <div className="bg-surface/90 backdrop-blur-xl px-16 py-10 rounded-[3rem] border-8 border-indigo-600 shadow-2xl flex flex-col items-center gap-4">
+                    <span className="text-primary font-black uppercase tracking-[0.3em] text-xl">Winner!</span>
                     <span className="text-7xl font-black text-slate-900 tracking-tight">{winner}</span>
                     <div className="flex gap-4 mt-4 pointer-events-auto">
                       <button 
                         onClick={(e) => { e.stopPropagation(); reset(); }}
-                        className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all active:scale-95"
+                        className="bg-dark-bg text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all active:scale-95"
                       >
                         <FormattedMessage id="namepicker.reset" defaultMessage="Try Again" />
                       </button>

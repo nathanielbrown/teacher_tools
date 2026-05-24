@@ -5,11 +5,16 @@
 
 /* Base Card Components */
 .tool-card-base {
-  @apply rounded-3xl shadow-sm border-4 border-[var(--color-border)] overflow-hidden;
+  @apply overflow-hidden border border-[var(--color-border)];
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-card-dark-base {
-  @apply rounded-3xl bg-slate-900 border-none text-white shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] overflow-hidden;
+  @apply bg-[var(--color-dark-bg)] border-none text-[var(--color-white)] overflow-hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-card {
@@ -21,24 +26,37 @@
 }
 
 .tool-stage {
-  @apply flex-1 flex flex-col items-center justify-center relative rounded-[2rem] border-4 border-[var(--color-border)] shadow-inner overflow-hidden;
+  @apply flex-1 flex flex-col items-center justify-center relative overflow-hidden border border-[var(--color-border)];
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-inner);
   background-color: color-mix(in srgb, var(--color-surface), transparent 50%);
 }
 
 .tool-menu-card {
-  @apply text-center space-y-8 bg-[var(--color-surface)] p-12 rounded-[2rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] border-4 border-[var(--color-surface)] max-w-2xl w-full mx-4;
+  @apply text-center space-y-8 bg-[var(--color-surface)] p-12 max-w-2xl w-full mx-4 border border-[var(--color-surface)];
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-sidebar-card {
-  @apply bg-[var(--color-surface)] p-8 rounded-[2rem] border-4 border-[var(--color-border)] shadow-inner h-full flex flex-col gap-8 relative overflow-hidden;
+  @apply bg-[var(--color-surface)] p-8 h-full flex flex-col gap-8 relative overflow-hidden border border-[var(--color-border)];
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-inner);
 }
 
 .tool-sidebar-card-flush {
-  @apply bg-slate-50/50 backdrop-blur-xl p-0 rounded-[3rem] h-full flex flex-col relative overflow-hidden border-4 border-white shadow-xl;
+  @apply backdrop-blur-xl p-0 h-full flex flex-col relative overflow-hidden border border-[var(--color-white)];
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-card);
+  background-color: color-mix(in srgb, var(--color-neutral-50), transparent 50%);
 }
 
 .tool-card-sidebar {
-  @apply tool-card-base bg-white w-full lg:w-96 flex flex-col gap-4;
+  @apply tool-card-base bg-[var(--color-white)] w-full lg:w-96 flex flex-col gap-4;
 }
 
 .tool-card-sidebar-dark {
@@ -46,11 +64,11 @@
 }
 
 .tool-card-warning {
-  @apply bg-amber-50 border-amber-100 animate-pulse;
+  @apply bg-[var(--color-warning-bg)] border-[var(--color-warning-border)] animate-pulse;
 }
 
 .tool-card-caution {
-  @apply bg-rose-50 border-rose-100;
+  @apply bg-[var(--color-caution-bg)] border-[var(--color-caution-border)];
 }
 
 /* Secondary Info Cards */
@@ -64,19 +82,19 @@
 }
 
 .tool-status-pill-synced {
-  @apply bg-emerald-50 border-emerald-100 text-emerald-600;
+  @apply bg-[var(--color-success-bg)] border-[var(--color-success-border)] text-[var(--color-success-text)];
 }
 
 .tool-status-pill-manual {
-  @apply bg-amber-50 border-amber-100 text-amber-600;
+  @apply bg-[var(--color-warning-bg)] border-[var(--color-warning-border)] text-[var(--color-warning-text)];
 }
 
 .tool-status-pill-active {
-  @apply bg-indigo-50 border-indigo-100 text-indigo-600;
+  @apply bg-[var(--color-info-bg)] border-[var(--color-info-border)] text-[var(--color-info-text)];
 }
 
 .tool-status-pill-dark {
-  @apply bg-white/5 border-white/10 text-white/40;
+  @apply bg-[var(--color-white-opacity-5)] border-[var(--color-white-opacity-10)] text-[var(--color-white-opacity-40)];
 }
 
 /* Typography */
@@ -85,19 +103,19 @@
 }
 
 .tool-title-hero-white {
-  @apply tool-title-hero text-white;
+  @apply tool-title-hero text-[var(--color-white)];
 }
 
 .tool-sub-label {
-  @apply text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4;
+  @apply text-[10px] font-black text-[var(--color-neutral-400)] uppercase tracking-[0.4em] mb-4;
 }
 
 .tool-sub-label-indigo {
-  @apply tool-sub-label text-indigo-400;
+  @apply tool-sub-label text-[var(--color-primary)];
 }
 
 .tool-sub-label-white {
-  @apply tool-sub-label text-white/40;
+  @apply tool-sub-label text-[var(--color-white-opacity-40)];
 }
 
 /* Decorative Icon Containers */
@@ -106,15 +124,15 @@
 }
 
 .tool-icon-container-indigo {
-  @apply tool-icon-container bg-indigo-50 border-indigo-100 text-indigo-600;
+  @apply tool-icon-container bg-[var(--color-info-bg)] border-[var(--color-info-border)] text-[var(--color-info-text)];
 }
 
 .tool-icon-container-rose {
-  @apply tool-icon-container bg-rose-50 border-rose-100 text-rose-500;
+  @apply tool-icon-container bg-[var(--color-caution-bg)] border-[var(--color-caution-border)] text-[var(--color-caution-text)];
 }
 
 .tool-icon-container-emerald {
-  @apply tool-icon-container bg-emerald-50 border-emerald-100 text-emerald-600;
+  @apply tool-icon-container bg-[var(--color-success-bg)] border-[var(--color-success-border)] text-[var(--color-success-text)];
 }
 
 /* Digits and Time Displays */
@@ -131,20 +149,23 @@
 }
 
 .tool-digits-white {
-  @apply text-white;
+  @apply text-[var(--color-white)];
 }
 
 .tool-digits-accent {
-  @apply text-indigo-600;
+  @apply text-[var(--color-primary)];
 }
 
 /* Specialized Display Containers */
 .tool-display-hero {
-  @apply relative w-full max-w-2xl min-h-[200px] md:aspect-[2/1] bg-slate-900 rounded-3xl md:rounded-[5rem] shadow-[0_64px_120px_-24px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center border-8 md:border-[12px] border-slate-800 overflow-hidden;
+  @apply relative w-full max-w-2xl min-h-[200px] md:aspect-[2/1] bg-[var(--color-dark-bg)] flex flex-col items-center justify-center border border-[var(--color-dark-border)] overflow-hidden;
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-display);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-display-hero-light {
-  @apply tool-display-hero bg-white border-slate-50 shadow-xl;
+  @apply tool-display-hero bg-[var(--color-white)] border-[var(--color-neutral-50)] shadow-xl;
 }
 
 .tool-digit-cluster {
@@ -156,11 +177,16 @@
 }
 
 .tool-digit-box {
-  @apply tool-digit-box-base w-32 h-32 md:w-56 md:h-56 bg-white/5 rounded-[3rem] md:rounded-[4rem] border-[10px] border-white/5 shadow-inner;
+  @apply tool-digit-box-base w-32 h-32 md:w-56 md:h-56 bg-[var(--color-white-opacity-5)] border border-[var(--color-white-opacity-5)];
+  border-radius: var(--radius-inner);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-inner);
 }
 
 .tool-digit-box-light {
-  @apply tool-digit-box-base w-24 h-24 md:w-32 md:h-32 bg-slate-50 rounded-3xl border-4 border-slate-100;
+  @apply tool-digit-box-base w-24 h-24 md:w-32 md:h-32 bg-[var(--color-neutral-50)] border border-[var(--color-neutral-100)];
+  border-radius: var(--radius-inner);
+  border-width: var(--border-width-card);
 }
 
 /* Standardized control rows and buttons */
@@ -173,72 +199,88 @@
 }
 
 .tool-button {
-  @apply w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply w-20 h-20 rounded-full flex items-center justify-center text-[var(--color-white)] transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  box-shadow: var(--shadow-button);
 }
 
 .tool-button-play {
-  @apply bg-emerald-500 hover:bg-emerald-600 shadow-emerald-100;
+  @apply bg-[var(--color-success-text)] hover:opacity-90;
 }
 
 .tool-button-pause {
-  @apply bg-rose-500 hover:bg-rose-600 shadow-rose-100;
+  @apply bg-[var(--color-caution-text)] hover:opacity-90;
 }
 
 .tool-button-reset {
-  @apply bg-slate-100 text-slate-500 hover:bg-slate-200 shadow-sm;
+  @apply bg-[var(--color-neutral-100)] text-[var(--color-neutral-500)] hover:bg-[var(--color-neutral-200)] shadow-sm;
 }
 
 .tool-button-secondary {
-  @apply bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100;
+  @apply bg-[var(--color-primary)] text-[var(--color-white)] hover:opacity-90;
 }
 
 /* Specialized Buttons */
 .tool-button-main {
-  @apply w-32 h-32 md:w-36 md:h-36 rounded-[3.5rem] md:rounded-[4rem] flex items-center justify-center transition-all active:scale-90 shadow-2xl relative text-white;
+  @apply w-32 h-32 md:w-36 md:h-36 flex items-center justify-center transition-all active:scale-90 relative text-[var(--color-white)];
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-button);
 }
 
 .tool-start-button {
-  @apply w-full py-6 bg-slate-900 text-white text-2xl font-black rounded-3xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3 active:scale-95;
+  @apply w-full py-6 bg-[var(--color-dark-bg)] text-[var(--color-white)] text-2xl font-black hover:bg-[var(--color-primary)] transition-all flex items-center justify-center gap-3 active:scale-95;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-button);
 }
 
 .tool-header-button {
-  @apply p-2 bg-slate-50 text-slate-400 rounded-xl hover:text-rose-500 transition-all shadow-sm border border-slate-100;
+  @apply p-2 bg-[var(--color-neutral-50)] text-[var(--color-neutral-400)] transition-all border border-[var(--color-neutral-100)];
+  border-radius: var(--radius-inner);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-header-stat {
-  @apply bg-[var(--color-surface)] px-4 py-1.5 rounded-xl shadow-sm border border-[var(--color-border)] text-center;
+  @apply bg-[var(--color-surface)] px-4 py-1.5 border border-[var(--color-border)] text-center;
+  border-radius: var(--radius-inner);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-header-stat-dark {
-  @apply bg-slate-900 px-4 py-1.5 rounded-xl shadow-lg border border-slate-800 text-center;
+  @apply bg-[var(--color-dark-bg)] px-4 py-1.5 border border-[var(--color-dark-border)] text-center;
+  border-radius: var(--radius-inner);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-header-stat-label {
-  @apply text-slate-400 text-[10px] font-black uppercase tracking-tighter;
+  @apply text-[var(--color-neutral-400)] text-[10px] font-black uppercase tracking-tighter;
 }
 
 .tool-header-stat-label-indigo {
-  @apply text-indigo-400 text-[10px] font-black uppercase tracking-tighter;
+  @apply text-[var(--color-primary)] text-[10px] font-black uppercase tracking-tighter;
 }
 
 .tool-header-stat-value {
-  @apply text-lg font-black text-indigo-600 tabular-nums leading-none;
+  @apply text-lg font-black text-[var(--color-primary)] tabular-nums leading-none;
 }
 
 .tool-header-stat-value-white {
-  @apply text-lg font-black text-white tabular-nums leading-none;
+  @apply text-lg font-black text-[var(--color-white)] tabular-nums leading-none;
 }
 
 .tool-hero-stat-card {
-  @apply bg-slate-900 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col items-center justify-center border border-slate-800 transition-all hover:scale-105;
+  @apply bg-[var(--color-dark-bg)] p-8 relative overflow-hidden flex flex-col items-center justify-center border border-[var(--color-dark-border)] transition-all hover:scale-105;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-button-icon {
-  @apply w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-[var(--color-surface)] border-2 border-[var(--color-border)] shadow-md flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all;
+  @apply w-12 h-12 md:w-16 md:h-16 bg-[var(--color-surface)] border-2 border-[var(--color-border)] flex items-center justify-center text-[var(--color-neutral-400)] hover:text-[var(--color-primary)] transition-all;
+  border-radius: var(--radius-inner);
+  box-shadow: var(--shadow-button);
 }
 
 .tool-button-icon-dark {
-  @apply w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all;
+  @apply w-12 h-12 bg-[var(--color-white-opacity-5)] border border-[var(--color-white-opacity-10)] flex items-center justify-center text-[var(--color-white-opacity-40)] hover:text-[var(--color-white)] transition-all;
+  border-radius: var(--radius-inner);
 }
 
 /* Configuration cards and panels */
@@ -247,28 +289,32 @@
 }
 
 .tool-config-card {
-  @apply flex flex-col space-y-3 bg-[var(--color-surface)] p-6 rounded-2xl shadow-xl border border-[var(--color-border)] w-full;
+  @apply flex flex-col space-y-3 bg-[var(--color-surface)] p-6 border border-[var(--color-border)] w-full;
+  border-radius: var(--radius-inner);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-label {
-  @apply text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] border-b border-[var(--color-border)] pb-4 mb-4 flex items-center gap-3;
+  @apply text-[10px] text-[var(--color-neutral-400)] font-black uppercase tracking-[0.3em] border-b border-[var(--color-border)] pb-4 mb-4 flex items-center gap-3;
 }
 
 .tool-label-indigo {
-  @apply tool-label text-indigo-400 border-indigo-500/20;
+  @apply tool-label;
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary), transparent 80%);
 }
 
 .tool-label-white {
-  @apply tool-label text-white/40 border-white/5;
+  @apply tool-label text-[var(--color-white-opacity-40)] border-[var(--color-white-opacity-5)];
 }
 
 /* Progress Indicators */
 .tool-progress-container {
-  @apply w-full h-2 bg-slate-100 rounded-full overflow-hidden;
+  @apply w-full h-2 bg-[var(--color-neutral-100)] rounded-full overflow-hidden;
 }
 
 .tool-progress-container-dark {
-  @apply w-full h-1.5 bg-white/5 rounded-full overflow-hidden;
+  @apply w-full h-1.5 bg-[var(--color-white-opacity-5)] rounded-full overflow-hidden;
 }
 
 .tool-progress-bar {
@@ -277,29 +323,35 @@
 
 /* Selection Grids (Modes, Sounds, etc) */
 .tool-option-grid {
-  @apply grid gap-2 p-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-background)];
+  @apply grid gap-2 p-1.5 border border-[var(--color-border)] bg-[var(--color-background)];
+  border-radius: var(--radius-inner);
 }
 
 .tool-option-button {
-  @apply p-3 rounded-lg transition-all flex justify-center text-slate-400 hover:text-slate-600;
+  @apply p-3 rounded-lg transition-all flex justify-center text-[var(--color-neutral-400)] hover:text-[var(--color-neutral-600)];
 }
 
 .tool-option-button-active {
-  @apply bg-[var(--color-surface)] text-primary shadow-md;
+  @apply bg-[var(--color-surface)] text-primary;
+  box-shadow: var(--shadow-card);
 }
 
 /* Inputs */
 .tool-input-number {
-  @apply w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-primary focus:outline-none transition-all font-bold text-2xl text-center;
+  @apply w-full p-4 bg-[var(--color-neutral-50)] border-2 border-[var(--color-neutral-100)] focus:border-primary focus:outline-none transition-all font-bold text-2xl text-center;
+  border-radius: var(--radius-inner);
 }
 
 .tool-input-text {
-  @apply w-full p-4 bg-[var(--color-background)] border-2 border-[var(--color-border)] rounded-2xl focus:border-primary focus:outline-none transition-all font-bold text-lg;
+  @apply w-full p-4 bg-[var(--color-background)] border-2 border-[var(--color-border)] focus:border-primary focus:outline-none transition-all font-bold text-lg;
+  border-radius: var(--radius-inner);
 }
 
 /* Lists and History */
 .tool-list-container {
-  @apply w-full bg-[var(--color-surface)] rounded-[2.5rem] shadow-2xl border border-[var(--color-border)] overflow-hidden flex flex-col;
+  @apply w-full bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden flex flex-col;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
 .tool-list-header {
@@ -311,44 +363,55 @@
 }
 
 .tool-list-item {
-  @apply flex items-center justify-between px-4 py-2.5 bg-[var(--color-background)] rounded-xl border border-[var(--color-border)] transition-colors;
+  @apply flex items-center justify-between px-4 py-2.5 bg-[var(--color-background)] border border-[var(--color-border)] transition-colors;
+  border-radius: var(--radius-inner);
 }
 
 .tool-list-empty {
-  @apply h-full flex flex-col items-center justify-center text-slate-300 italic gap-3 p-12;
+  @apply h-full flex flex-col items-center justify-center text-[var(--color-neutral-300)] italic gap-3 p-12;
 }
 
 .tool-history-header {
-  @apply bg-white/40 backdrop-blur-sm px-6 py-4 flex justify-between items-center shrink-0 border-b-4 border-white rounded-t-[3rem];
+  @apply bg-[var(--color-white-opacity-40)] backdrop-blur-sm px-6 py-4 flex justify-between items-center shrink-0 border-b border-[var(--color-white)];
+  border-top-left-radius: var(--radius-card);
+  border-top-right-radius: var(--radius-card);
+  border-bottom-width: var(--border-width-card);
 }
 
 .tool-history-header h4 {
-  @apply text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-0;
+  @apply text-[10px] font-black uppercase tracking-[0.3em] text-[var(--color-neutral-400)] mb-0;
 }
 
 .tool-history-badge {
-  @apply bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-full border border-indigo-100;
+  @apply bg-[var(--color-info-bg)] text-[var(--color-info-text)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--color-info-border)];
 }
 
 .tool-history-button {
-  @apply w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-slate-50 transition-all;
+  @apply w-8 h-8 flex items-center justify-center bg-[var(--color-white)] border border-[var(--color-neutral-200)] text-[var(--color-neutral-400)] hover:text-[var(--color-primary)] hover:border-[var(--color-info-border)] hover:bg-[var(--color-neutral-50)] transition-all;
+  border-radius: var(--radius-inner);
 }
 
 .tool-history-button-danger {
-  @apply w-8 h-8 flex items-center justify-center bg-white border border-rose-100 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-all;
+  @apply w-8 h-8 flex items-center justify-center bg-[var(--color-white)] border border-[var(--color-caution-border)] text-[var(--color-caution-text)] hover:text-[var(--color-caution-text)] hover:bg-[var(--color-caution-bg)] transition-all;
+  border-radius: var(--radius-inner);
 }
 
 .tool-legend {
-  @apply mt-10 grid grid-cols-2 gap-x-8 gap-y-4 text-[9px] font-black text-slate-400 uppercase tracking-widest italic;
+  @apply mt-10 grid grid-cols-2 gap-x-8 gap-y-4 text-[9px] font-black text-[var(--color-neutral-400)] uppercase tracking-widest italic;
 }
 
 /* Overlays */
 .tool-overlay-container {
-  @apply absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm rounded-[4rem];
+  @apply absolute inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm;
+  background-color: color-mix(in srgb, var(--color-dark-bg), transparent 60%);
+  border-radius: var(--radius-card);
 }
 
 .tool-overlay-card {
-  @apply bg-[var(--color-surface)] p-12 rounded-[3.5rem] shadow-2xl border-4 border-[var(--color-surface)] text-center space-y-8 max-w-sm w-full;
+  @apply bg-[var(--color-surface)] p-12 border border-[var(--color-surface)] text-center space-y-8 max-w-sm w-full;
+  border-radius: var(--radius-card);
+  border-width: var(--border-width-card);
+  box-shadow: var(--shadow-card);
 }
 
 /* Legacy Support (Aliases for ts- classes) */

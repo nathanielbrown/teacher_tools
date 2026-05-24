@@ -36,7 +36,7 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="lettertracing.help.step1" 
@@ -46,7 +46,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="lettertracing.help.step2" 
@@ -56,7 +56,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="lettertracing.help.step3" 
@@ -66,7 +66,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="lettertracing.help.step4" 
@@ -332,20 +332,20 @@ export const LetterTracing = () => {
           <div className="tool-grid-bg opacity-20 pointer-events-none" />
           
           <div className="absolute top-10 left-12 flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white  -rotate-3 border-2 border-white">
+             <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white  -rotate-3 border-2 border-white">
                 <PenTool size={24} strokeWidth={3} />
              </div>
              <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                   <FormattedMessage id="lettertracing.label.trace" />
                 </h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] leading-none mt-2">
+                <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] leading-none mt-2">
                   <FormattedMessage id="lettertracing.label.letter" />: {currentLetter}
                 </p>
              </div>
           </div>
 
-          <div className="relative w-[360px] h-[360px] lg:w-[600px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] border-[12px] lg:border-[16px] border-white bg-white group shadow-xl">
+          <div className="relative w-[360px] h-[360px] lg:w-[600px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] border-[12px] lg:border-[16px] border-white bg-surface group shadow-xl">
             <canvas ref={baseCanvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="absolute top-0 left-0 w-full h-full rounded-[4rem] pointer-events-none" />
             <canvas
               ref={drawCanvasRef}
@@ -360,11 +360,11 @@ export const LetterTracing = () => {
             />
             <canvas ref={hiddenCanvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="hidden" />
             
-            <button onClick={prevLetter} className="absolute -left-14 lg:-left-20 top-1/2 -translate-y-1/2 p-3 lg:p-4 bg-white border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-indigo-600 hover:border-indigo-50 transition-all active:scale-90">
+            <button onClick={prevLetter} className="absolute -left-14 lg:-left-20 top-1/2 -translate-y-1/2 p-3 lg:p-4 bg-surface border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-primary hover:border-indigo-50 transition-all active:scale-90">
               <ChevronLeft size={24} className="lg:hidden" strokeWidth={3} />
               <ChevronLeft size={32} className="hidden lg:block" strokeWidth={3} />
             </button>
-            <button onClick={nextLetter} className="absolute -right-14 lg:-right-20 top-1/2 -translate-y-1/2 p-3 lg:p-4 bg-white border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-indigo-600 hover:border-indigo-50 transition-all active:scale-90">
+            <button onClick={nextLetter} className="absolute -right-14 lg:-right-20 top-1/2 -translate-y-1/2 p-3 lg:p-4 bg-surface border-4 border-slate-50 rounded-2xl text-slate-300 hover:text-primary hover:border-indigo-50 transition-all active:scale-90">
               <ChevronRight size={24} className="lg:hidden" strokeWidth={3} />
               <ChevronRight size={32} className="hidden lg:block" strokeWidth={3} />
             </button>
@@ -375,16 +375,16 @@ export const LetterTracing = () => {
                   initial={{ opacity: 0, scale: 0.8 }} 
                   animate={{ opacity: 1, scale: 1 }} 
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-[4rem] flex flex-col items-center justify-center z-20"
+                  className="absolute inset-0 bg-surface/90 backdrop-blur-sm rounded-[4rem] flex flex-col items-center justify-center z-20"
                 >
-                  <div className="w-32 h-32 rounded-full bg-indigo-600 border-8 border-white flex flex-col items-center justify-center shadow-xl mb-4">
+                  <div className="w-32 h-32 rounded-full bg-primary border-8 border-white flex flex-col items-center justify-center shadow-xl mb-4">
                      <span className="text-4xl font-black text-white">{score.accuracy}%</span>
                   </div>
                   <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-1">{score.msg}</h3>
-                  <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-6">
+                  <p className="text-xs font-black text-primary/70 uppercase tracking-widest mb-6">
                     <FormattedMessage id="lettertracing.label.precision" />
                   </p>
-                  <button onClick={nextLetter} className="py-4 px-8 bg-indigo-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-3">
+                  <button onClick={nextLetter} className="py-4 px-8 bg-primary text-white rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center justify-center gap-3">
                     <FormattedMessage id="lettertracing.label.next" /> <ArrowRight size={16} />
                   </button>
                 </motion.div>
@@ -395,13 +395,13 @@ export const LetterTracing = () => {
           <div className="absolute bottom-6 lg:bottom-10 right-8 lg:right-12 flex flex-col gap-3 lg:gap-4">
             <button
               onClick={checkScore}
-              className="flex items-center gap-2 px-10 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all "
+              className="flex items-center gap-2 px-10 py-3 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all "
             >
               <CheckCircle size={16} /> <FormattedMessage id="lettertracing.label.verify" />
             </button>
             <button
               onClick={clearDrawing}
-              className="flex items-center gap-2 px-8 py-3 bg-white border-4 border-slate-50 text-slate-400 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all "
+              className="flex items-center gap-2 px-8 py-3 bg-surface border-4 border-slate-50 text-neutral-400 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all "
             >
               <Eraser size={16} /> <FormattedMessage id="lettertracing.label.clear" />
             </button>
@@ -411,10 +411,10 @@ export const LetterTracing = () => {
       </div>
 
       <div className="flex-[5] lg:flex-none lg:w-72 min-h-0 flex flex-col gap-4 lg:gap-8">
-        <div className="flex-1 bg-white p-4 lg:p-6 rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 flex flex-col gap-4 relative overflow-hidden">
+        <div className="flex-1 bg-surface p-4 lg:p-6 rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 flex flex-col gap-4 relative overflow-hidden">
           <div className="flex items-center justify-between border-b-4 border-slate-50 pb-4">
              <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+               <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
                   <Award size={20} strokeWidth={3} />
                </div>
                <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">
@@ -422,11 +422,11 @@ export const LetterTracing = () => {
                </h4>
              </div>
              <div className="flex items-center gap-2">
-               <button onClick={() => setMasteryPage(p => Math.max(0, p - 1))} className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-20" disabled={masteryPage === 0}>
+               <button onClick={() => setMasteryPage(p => Math.max(0, p - 1))} className="p-2 bg-slate-50 rounded-lg text-neutral-400 disabled:opacity-20" disabled={masteryPage === 0}>
                  <ChevronLeft size={16} />
                </button>
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{masteryPage + 1} / 3</span>
-               <button onClick={() => setMasteryPage(p => Math.min(2, p + 1))} className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-20" disabled={masteryPage === 2}>
+               <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">{masteryPage + 1} / 3</span>
+               <button onClick={() => setMasteryPage(p => Math.min(2, p + 1))} className="p-2 bg-slate-50 rounded-lg text-neutral-400 disabled:opacity-20" disabled={masteryPage === 2}>
                  <ChevronRight size={16} />
                </button>
              </div>
@@ -457,7 +457,7 @@ export const LetterTracing = () => {
                             audioEngine.playTick(settings.soundTheme);
                           }}
                           className={`w-full aspect-square rounded-lg lg:rounded-xl font-black text-[8px] lg:text-sm transition-all border-2 flex items-center justify-center relative overflow-hidden ${
-                            currentLetter === char ? 'border-indigo-600 bg-white text-indigo-600 scale-110 z-10 shadow-md' : 'border-slate-50 bg-slate-50 text-slate-300 hover:border-indigo-100'
+                            currentLetter === char ? 'border-indigo-600 bg-surface text-primary scale-110 z-10 shadow-md' : 'border-slate-50 bg-slate-50 text-slate-300 hover:border-primary/20'
                           }`}
                         >
                           <div 

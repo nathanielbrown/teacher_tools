@@ -25,7 +25,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Play</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Fill the grid so every <b>Row</b>, <b>Column</b>, and <b>3x3 Square</b> has the numbers 1 to 9.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -33,11 +33,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Click a box and type a number (1-9) or click to change it.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Red marks show where numbers are in the <b>wrong</b> place.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Fill the whole grid correctly to <b>win</b>!</p>
       </div>
     </div>
@@ -174,13 +174,13 @@ export const Sudoku = () => {
       setStatus('playing');
       setSelected(null);
     }, 100);
-  }, [difficulty]);
+  }, [difficulty, setGrid, setInitialGrid, setSolution, setStatus]);
 
   useEffect(() => {
     if (status === 'loading') {
       initGame(difficulty);
     }
-  }, []);
+  }, [difficulty, initGame, status]);
 
   // Persistence handled by useLocalStorage
 
@@ -191,7 +191,7 @@ export const Sudoku = () => {
       setSelected(null);
       audioEngine.playSuccess(settings.soundTheme);
     }
-  }, [solution, difficulty, settings.soundTheme]);
+  }, [solution, difficulty, settings.soundTheme, setStatus, setStats]);
 
   const handleCellClick = (row: number, col: number) => {
     if (status !== 'playing') return;
@@ -226,7 +226,7 @@ export const Sudoku = () => {
     setGrid(newGrid);
     audioEngine.playTick(settings.soundTheme);
     checkSolved(newGrid);
-  }, [selected, status, initialGrid, grid, settings.soundTheme, checkSolved]);
+  }, [selected, status, initialGrid, grid, settings.soundTheme, checkSolved, setGrid]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!selected || status !== 'playing') return;
@@ -247,7 +247,7 @@ export const Sudoku = () => {
     setGrid(initialGrid.map(row => [...row]));
     setSelected(null);
     audioEngine.playTick(settings.soundTheme);
-  }, [initialGrid, settings.soundTheme]);
+  }, [initialGrid, settings.soundTheme, setGrid]);
 
   useEffect(() => {
     setOnReset(() => resetGame);
@@ -258,12 +258,12 @@ export const Sudoku = () => {
   useEffect(() => {
     setHeaderActions(
       <div className="flex items-center gap-4 italic">
-         <div className="flex bg-white p-1.5 rounded-2xl border-2 border-slate-100 ">
+         <div className="flex bg-surface p-1.5 rounded-2xl border-2 border-slate-100 ">
            {['Easy', 'Medium', 'Hard'].map((level) => (
              <button
                key={level}
                onClick={() => { setDifficulty(level); initGame(level); audioEngine.playTick(settings.soundTheme); }}
-               className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${difficulty === level ? 'bg-indigo-600 text-white ' : 'text-slate-300 hover:text-indigo-600'}`}
+               className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${difficulty === level ? 'bg-primary text-white ' : 'text-slate-300 hover:text-primary'}`}
              >
                {level}
              </button>
@@ -271,13 +271,13 @@ export const Sudoku = () => {
          </div>
          <button
             onClick={resetGame}
-            className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 "
+            className="flex items-center gap-2 px-6 py-2 bg-surface border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all active:scale-95 "
          >
             <RotateCcw size={14} strokeWidth={3} /> Reset
          </button>
       </div>
     );
-  }, [difficulty, resetGame, initGame, settings.soundTheme, setHeaderActions]);
+  }, [difficulty, resetGame, initGame, settings.soundTheme, setHeaderActions, setDifficulty]);
 
   return (
     <ToolPanel className="flex-row gap-8 p-4 lg:p-12 italic">
@@ -294,8 +294,8 @@ export const Sudoku = () => {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-6 z-10"
             >
-              <div className="w-20 h-20 border-8 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-              <p className="text-xs font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Loading...</p>
+              <div className="w-20 h-20 border-8 border-primary/20 border-t-indigo-600 rounded-full animate-spin" />
+              <p className="text-xs font-black text-neutral-400 uppercase tracking-[0.4em] animate-pulse">Loading...</p>
             </motion.div>
           ) : (
             <motion.div 
@@ -304,7 +304,7 @@ export const Sudoku = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center gap-12 z-10 w-full max-w-4xl"
             >
-               <div className="relative p-6 bg-slate-900 rounded-[4rem]  overflow-hidden border-[12px] border-slate-800 group/board">
+               <div className="relative p-6 bg-dark-bg rounded-[4rem]  overflow-hidden border-[12px] border-dark-border group/board">
                   <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
                   
                   <div className="grid grid-cols-9 gap-[4px] bg-slate-700 border-4 border-slate-700 rounded-[2.5rem] overflow-hidden p-1  relative z-10">
@@ -326,10 +326,10 @@ export const Sudoku = () => {
                             w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-3xl font-black transition-all relative italic
                             ${r % 3 === 0 && r !== 0 ? 'mt-[8px]' : ''}
                             ${c % 3 === 0 && c !== 0 ? 'ml-[8px]' : ''}
-                            ${isInitial ? 'bg-slate-50 text-slate-900' : 'bg-white text-indigo-600'}
-                            ${isInGroup && !isSelected ? 'bg-indigo-50/50' : ''}
-                            ${isConflicted ? 'bg-rose-50 text-rose-600' : ''}
-                            ${isSelected ? 'z-10 bg-indigo-600 text-white  scale-110 rounded-2xl' : ''}
+                            ${isInitial ? 'bg-slate-50 text-slate-900' : 'bg-surface text-primary'}
+                            ${isInGroup && !isSelected ? 'bg-primary/5/50' : ''}
+                            ${isConflicted ? 'bg-caution-bg text-caution' : ''}
+                            ${isSelected ? 'z-10 bg-primary text-white  scale-110 rounded-2xl' : ''}
                             hover:z-20 hover:scale-105 hover:rounded-xl transition-all
                           `}
                         >
@@ -347,7 +347,7 @@ export const Sudoku = () => {
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl flex flex-col items-center justify-center z-30 p-12 text-center italic"
+                        className="absolute inset-0 bg-dark-bg/95 backdrop-blur-xl flex flex-col items-center justify-center z-30 p-12 text-center italic"
                       >
                         <div className="relative mb-10">
                            <div className="absolute inset-0 bg-amber-400 blur-[80px] opacity-20" />
@@ -356,10 +356,10 @@ export const Sudoku = () => {
                            </div>
                         </div>
                         <h3 className="text-6xl font-black text-white tracking-tighter uppercase leading-none mb-4 italic">Winner!</h3>
-                        <p className="text-indigo-400 font-black text-xs uppercase tracking-[0.4em] mb-12">Solved!</p>
+                        <p className="text-primary/70 font-black text-xs uppercase tracking-[0.4em] mb-12">Solved!</p>
                         <button
                           onClick={() => initGame()}
-                          className="w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-white hover:text-indigo-600 transition-all  flex items-center justify-center gap-6"
+                          className="w-full max-w-sm h-24 bg-primary text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-surface hover:text-primary transition-all  flex items-center justify-center gap-6"
                         >
                           Next Puzzle
                         </button>
@@ -372,13 +372,13 @@ export const Sudoku = () => {
                <div className="flex gap-6 w-full max-w-2xl px-8">
                   <button
                     onClick={resetGame}
-                    className="flex-1 h-20 bg-white border-4 border-slate-100 text-slate-300 rounded-[2.5rem] font-black uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95  flex items-center justify-center gap-4"
+                    className="flex-1 h-20 bg-surface border-4 border-slate-100 text-slate-300 rounded-[2.5rem] font-black uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all active:scale-95  flex items-center justify-center gap-4"
                   >
                     <RotateCcw size={20} strokeWidth={3} /> Clear
                   </button>
                   <button
                     onClick={() => initGame()}
-                    className="flex-1 h-20 bg-slate-950 text-white rounded-[2.5rem] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95  flex items-center justify-center gap-4"
+                    className="flex-1 h-20 bg-slate-950 text-white rounded-[2.5rem] font-black uppercase tracking-widest hover:bg-primary transition-all active:scale-95  flex items-center justify-center gap-4"
                   >
                     New Game
                   </button>
@@ -392,11 +392,11 @@ export const Sudoku = () => {
       <div className="w-full lg:w-[450px] shrink-0 flex flex-col gap-8 relative z-20 italic">
         
         {/* Mastery Registry */}
-        <div className="bg-slate-900 p-12 rounded-[4rem] border-4 border-slate-800  flex flex-col items-center gap-10 relative overflow-hidden shrink-0">
+        <div className="bg-dark-bg p-12 rounded-[4rem] border-4 border-dark-border  flex flex-col items-center gap-10 relative overflow-hidden shrink-0">
            <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
            
            <div className="flex items-center justify-between w-full relative z-10">
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Score</span>
+              <span className="text-[10px] font-black text-primary/70 uppercase tracking-[0.5em]">Score</span>
            </div>
 
            <div className="relative z-10 w-full flex flex-col items-center">
@@ -406,12 +406,12 @@ export const Sudoku = () => {
                  </span>
                  <span className="text-3xl font-black text-slate-500 uppercase tracking-widest">TOTAL</span>
               </div>
-              <div className="w-full h-px bg-white/10 mb-8" />
+              <div className="w-full h-px bg-surface/10 mb-8" />
               <div className="grid grid-cols-3 gap-4 w-full">
                  {Object.entries(stats).map(([level, count]) => (
-                    <div key={level} className="p-6 bg-white/5 rounded-[2rem] border border-white/5 flex flex-col items-center gap-2">
+                    <div key={level} className="p-6 bg-surface/5 rounded-[2rem] border border-white/5 flex flex-col items-center gap-2">
                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{level}</span>
-                       <span className="text-2xl font-black text-indigo-400 italic tabular-nums">{count as number}</span>
+                       <span className="text-2xl font-black text-primary/70 italic tabular-nums">{count as number}</span>
                     </div>
                  ))}
               </div>
@@ -421,7 +421,7 @@ export const Sudoku = () => {
         {/* Objectives & Protocol Block */}
         <div className="flex-1 bg-slate-50/50 p-10 rounded-[4rem] border-4 border-white  flex flex-col gap-8 min-h-0">
            <div className="flex items-center gap-4 shrink-0 border-b-4 border-white pb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
+              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ">
                  <Target size={24} strokeWidth={3} />
               </div>
               <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none">Levels</h4>
@@ -433,15 +433,15 @@ export const Sudoku = () => {
                 const percentage = Math.min((Number(count) / totalPossible) * 100, 100);
                 
                 return (
-                  <div key={level} className="bg-white p-8 rounded-[3rem] border-4 border-white  space-y-5">
+                  <div key={level} className="bg-surface p-8 rounded-[3rem] border-4 border-white  space-y-5">
                      <div className="flex justify-between items-end">
                         <div className="flex items-center gap-3">
-                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${level === 'Easy' ? 'bg-emerald-100 text-emerald-600' : level === 'Medium' ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'}`}>
+                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${level === 'Easy' ? 'bg-emerald-100 text-success' : level === 'Medium' ? 'bg-amber-100 text-warning' : 'bg-rose-100 text-caution'}`}>
                               <Grid3X3 size={18} strokeWidth={3} />
                            </div>
                            <span className="text-sm font-black uppercase tracking-tight text-slate-900">{level}</span>
                         </div>
-                        <span className="text-xl font-black text-slate-400 tabular-nums">{count as number} <span className="text-[9px] uppercase tracking-widest opacity-60">Solved</span></span>
+                        <span className="text-xl font-black text-neutral-400 tabular-nums">{count as number} <span className="text-[9px] uppercase tracking-widest opacity-60">Solved</span></span>
                      </div>
                      <div className="w-full h-4 bg-slate-50 rounded-full p-1 border-2 border-slate-50 relative overflow-hidden">
                         <motion.div 
@@ -455,10 +455,10 @@ export const Sudoku = () => {
               })}
            </div>
 
-           <div className="p-8 bg-indigo-600 rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
+           <div className="p-8 bg-primary rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
               <div className="tool-grid-bg opacity-10 pointer-events-none" />
               <div className="flex items-center gap-4 relative z-10">
-                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white border border-white/20">
+                 <div className="w-10 h-10 rounded-xl bg-surface/20 flex items-center justify-center text-white border border-white/20">
                     <Volume2 size={20} strokeWidth={3} />
                  </div>
                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Status</h4>

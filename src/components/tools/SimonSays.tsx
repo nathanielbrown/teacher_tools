@@ -121,25 +121,25 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="simonsays.help.step1" defaultMessage="Choose a category to start the game." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="simonsays.help.step2" defaultMessage="When Simon says a command, everyone must follow it." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="simonsays.help.step3" defaultMessage="If Simon does not say it, do not move!" />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="simonsays.help.step4" defaultMessage="Use the timer at the top for automatic mode." />
         </p>
@@ -256,7 +256,7 @@ export const SimonSays = () => {
                 setTimerValue(Number(e.target.value));
                 setProgress(100);
               }}
-              className="px-4 py-2 bg-white border-2 border-slate-100 text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-indigo-600 transition-all"
+              className="px-4 py-2 bg-surface border-2 border-slate-100 text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-indigo-600 transition-all"
             >
               {TIMER_OPTIONS.map((opt) => (
                 <option key={opt.label} value={opt.value}>
@@ -265,7 +265,7 @@ export const SimonSays = () => {
               ))}
             </select>
           ) : (
-            <div className="flex bg-white p-1 rounded-xl border-2 border-slate-50 ">
+            <div className="flex bg-surface p-1 rounded-xl border-2 border-slate-50 ">
               {TIMER_OPTIONS.map((opt) => (
                 <button
                   key={opt.label}
@@ -275,8 +275,8 @@ export const SimonSays = () => {
                   }}
                   className={`px-3 py-1.5 rounded-lg font-black text-[10px] transition-all uppercase tracking-widest ${
                     timerValue === opt.value 
-                      ? 'bg-indigo-600 text-white ' 
-                      : 'text-slate-400 hover:text-indigo-600'
+                      ? 'bg-primary text-white ' 
+                      : 'text-neutral-400 hover:text-primary'
                   }`}
                 >
                   {opt.value === 0 ? (
@@ -292,8 +292,8 @@ export const SimonSays = () => {
               onClick={() => setIsPaused(!isPaused)}
               className={`p-2 rounded-xl transition-all  border ${
                 isPaused 
-                  ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                  : 'bg-amber-50 text-amber-600 border-amber-100'
+                  ? 'bg-success-bg text-success border-success-border' 
+                  : 'bg-warning-bg text-warning border-warning-border'
               }`}
             >
               {isPaused ? <Play size={20} /> : <Pause size={20} />}
@@ -336,7 +336,7 @@ export const SimonSays = () => {
                       <FormattedMessage id={cat.nameKey} defaultMessage={cat.id.charAt(0).toUpperCase() + cat.id.slice(1)} />
                     </span>
                   </div>
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-surface opacity-0 group-hover:opacity-10 transition-opacity" />
                 </button>
               ))}
             </div>
@@ -348,12 +348,12 @@ export const SimonSays = () => {
             animate={{ opacity: 1 }}
             className="flex-1 flex flex-col gap-8 relative h-full w-full"
           >
-            <div className={`flex-1 flex flex-col items-center justify-center bg-white relative overflow-hidden border-4 border-slate-50 ${isMobile ? 'rounded-none p-6' : 'rounded-[4rem] p-12'}`}>
+            <div className={`flex-1 flex flex-col items-center justify-center bg-surface relative overflow-hidden border-4 border-slate-50 ${isMobile ? 'rounded-none p-6' : 'rounded-[4rem] p-12'}`}>
                {/* Progress Bar (if auto-timer) */}
                {timerValue > 0 && (
                  <div className="absolute top-0 left-0 w-full h-3 bg-slate-50">
                     <motion.div 
-                       className="h-full bg-indigo-600"
+                       className="h-full bg-primary"
                        initial={{ width: '100%' }}
                        animate={{ width: `${progress}%` }}
                        transition={{ duration: 0.05, ease: 'linear' }}
@@ -411,7 +411,7 @@ export const SimonSays = () => {
               <div className="flex justify-center pt-4 pb-4">
                 <button
                   onClick={generateCommand}
-                  className="group flex items-center gap-6 px-16 py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-4xl  hover:bg-indigo-700 active:scale-95 transition-all tracking-tighter italic uppercase shadow-xl"
+                  className="group flex items-center gap-6 px-16 py-8 bg-primary text-white rounded-[3rem] font-black text-4xl  hover:bg-primary/90 active:scale-95 transition-all tracking-tighter italic uppercase shadow-xl"
                 >
                   <FormattedMessage id="simonsays.next" defaultMessage="Next" />
                   <ChevronRight size={48} className="group-hover:translate-x-2 transition-transform" />

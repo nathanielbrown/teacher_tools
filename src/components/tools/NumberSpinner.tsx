@@ -24,25 +24,25 @@ const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberSpinner.help.step1" defaultMessage="Set the minimum and maximum numbers in the sidebar." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberSpinner.help.step2" defaultMessage="Click the Spin button or the wheel itself to pick a number." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberSpinner.help.step3" defaultMessage="The results will be tracked in the history list." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberSpinner.help.step4" defaultMessage="You can download your results as a CSV file for math activities." />
         </p>
@@ -148,7 +148,7 @@ export const NumberSpinner = () => {
           {isMobile && (
             <div className="relative w-full px-6 py-2 flex justify-start items-end z-20">
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">
                   <FormattedMessage id="shared.config" defaultMessage="Config" />
                 </label>
                 <div className="flex gap-4">
@@ -157,7 +157,7 @@ export const NumberSpinner = () => {
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={() => { setMin(Math.max(0, min - 1)); resetStats(); }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || min <= 0}
                       >
                         <Minus size={20} strokeWidth={4} />
@@ -165,7 +165,7 @@ export const NumberSpinner = () => {
                       <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{min}</span>
                       <button 
                         onClick={() => { if (min < max - 1) { setMin(min + 1); resetStats(); } }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || min >= max - 1}
                       >
                         <Plus size={20} strokeWidth={4} />
@@ -177,7 +177,7 @@ export const NumberSpinner = () => {
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={() => { if (max > min + 1) { setMax(max - 1); resetStats(); } }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || max <= min + 1}
                       >
                         <Minus size={20} strokeWidth={4} />
@@ -185,7 +185,7 @@ export const NumberSpinner = () => {
                       <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{max}</span>
                       <button 
                         onClick={() => { if (max < 100) { setMax(max + 1); resetStats(); } }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || max >= 100}
                       >
                         <Plus size={20} strokeWidth={4} />
@@ -198,7 +198,7 @@ export const NumberSpinner = () => {
           )}
           
           {/* Main Spinner Stage */}
-          <div className="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white border-4 border-slate-50 rounded-[4rem] m-4">
+          <div className="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-surface border-4 border-slate-50 rounded-[4rem] m-4">
             <div className="tool-grid-bg opacity-30 pointer-events-none" />
             
             <div className="relative w-full max-w-[550px] lg:max-w-[700px] aspect-square flex items-center justify-center z-10 p-8">
@@ -222,7 +222,7 @@ export const NumberSpinner = () => {
                       audioEngine.playSuccess(settings.soundTheme);
                     }
                   }}
-                  className="w-full h-full rounded-full border-[16px] border-white  relative overflow-hidden bg-white cursor-pointer group/wheel"
+                  className="w-full h-full rounded-full border-[16px] border-white  relative overflow-hidden bg-surface cursor-pointer group/wheel"
                   onClick={spin}
                   style={{
                     background: `conic-gradient(${
@@ -256,9 +256,9 @@ export const NumberSpinner = () => {
                   })}
 
                   {/* Center Hub */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white rounded-full z-20 border-[14px] border-slate-50 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-indigo-500 rounded-full border-4 border-white/30 flex items-center justify-center">
-                      <div className="w-4 h-4 bg-white/40 rounded-full animate-pulse" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-surface rounded-full z-20 border-[14px] border-slate-50 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-primary rounded-full border-4 border-white/30 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-surface/40 rounded-full animate-pulse" />
                     </div>
                   </div>
                 </motion.div>
@@ -269,7 +269,7 @@ export const NumberSpinner = () => {
           {!isMobile && (
             <div className="absolute bottom-10 left-10 z-20 flex justify-start items-end">
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">
                   <FormattedMessage id="shared.config" defaultMessage="Config" />
                 </label>
                 <div className="flex gap-4">
@@ -278,7 +278,7 @@ export const NumberSpinner = () => {
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={() => { setMin(Math.max(0, min - 1)); resetStats(); }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || min <= 0}
                       >
                         <Minus size={20} strokeWidth={4} />
@@ -286,7 +286,7 @@ export const NumberSpinner = () => {
                       <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{min}</span>
                       <button 
                         onClick={() => { if (min < max - 1) { setMin(min + 1); resetStats(); } }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || min >= max - 1}
                       >
                         <Plus size={20} strokeWidth={4} />
@@ -298,7 +298,7 @@ export const NumberSpinner = () => {
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={() => { if (max > min + 1) { setMax(max - 1); resetStats(); } }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || max <= min + 1}
                       >
                         <Minus size={20} strokeWidth={4} />
@@ -306,7 +306,7 @@ export const NumberSpinner = () => {
                       <span className="text-3xl font-black text-slate-800 tabular-nums min-w-[3rem] text-center">{max}</span>
                       <button 
                         onClick={() => { if (max < 100) { setMax(max + 1); resetStats(); } }}
-                        className="text-slate-300 hover:text-indigo-500 transition-all active:scale-90"
+                        className="text-slate-300 hover:text-primary transition-all active:scale-90"
                         disabled={isSpinning || max >= 100}
                       >
                         <Plus size={20} strokeWidth={4} />
@@ -325,9 +325,9 @@ export const NumberSpinner = () => {
         {/* Statistics Panel */}
         {!isMobile && (
           <div className="bg-slate-50/80 backdrop-blur-xl rounded-[3rem] border-4 border-white flex flex-col overflow-hidden shrink-0 italic">
-            <div className="bg-white/80 backdrop-blur-sm px-8 py-3 flex justify-between items-center shrink-0 border-b-4 border-white">
+            <div className="bg-surface/80 backdrop-blur-sm px-8 py-3 flex justify-between items-center shrink-0 border-b-4 border-white">
               <div className="flex items-center gap-2">
-                <BarChart3 className="text-indigo-400" size={14} />
+                <BarChart3 className="text-primary/70" size={14} />
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 mb-0 leading-none">
                   <FormattedMessage id="numberSpinner.analytics.title" defaultMessage="Statistics" />
                 </h4>
@@ -348,13 +348,13 @@ export const NumberSpinner = () => {
                           style={{ backgroundColor: COLORS[i % COLORS.length] }}
                         >
                           {freq > 0 && (
-                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-black text-slate-400 tabular-nums">
+                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-black text-neutral-400 tabular-nums">
                               {freq}
                             </span>
                           )}
                         </motion.div>
                       </div>
-                      <span className="text-[8px] font-black text-slate-400 tabular-nums group-hover/bar:text-slate-900 transition-colors">{num}</span>
+                      <span className="text-[8px] font-black text-neutral-400 tabular-nums group-hover/bar:text-slate-900 transition-colors">{num}</span>
                     </div>
                   );
                 })}
@@ -379,7 +379,7 @@ export const NumberSpinner = () => {
               key={`${h.time}-${i}`}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="h-12 lg:h-12 rounded-xl bg-white border-2 border-slate-100 flex items-center justify-center text-lg font-black text-indigo-500 hover:scale-105 transition-transform"
+              className="h-12 lg:h-12 rounded-xl bg-surface border-2 border-slate-100 flex items-center justify-center text-lg font-black text-primary hover:scale-105 transition-transform"
             >
                {h.value}
             </motion.div>

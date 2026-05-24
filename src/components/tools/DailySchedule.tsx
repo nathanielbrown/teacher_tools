@@ -157,7 +157,7 @@ export const DailySchedule = () => {
       [currentDay]: defaultSchedules[currentDay]
     }));
     audioEngine.playTick(settings.soundTheme);
-  }, [currentDay, settings.soundTheme]);
+  }, [currentDay, settings.soundTheme, setAllSchedules]);
 
   const clearDay = () => {
     setAllSchedules(prev => ({
@@ -266,7 +266,7 @@ export const DailySchedule = () => {
         </div>
 
         <div className="px-4 sm:px-6 py-1 sm:py-3 flex flex-row items-center justify-center gap-2 sm:gap-6 shrink-0 relative z-20">
-          <div className="flex bg-white/20 backdrop-blur-md p-1 sm:p-1.5 rounded-[2rem] border-2 border-white/30 ">
+          <div className="flex bg-surface/20 backdrop-blur-md p-1 sm:p-1.5 rounded-[2rem] border-2 border-white/30 ">
             {DAYS.map(day => (
               <button
                 key={day}
@@ -276,8 +276,8 @@ export const DailySchedule = () => {
                   audioEngine.playTick(settings.soundTheme);
                 }}
                 className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${currentDay === day
-                    ? 'bg-white/40 text-black  scale-105'
-                    : 'text-black/40 hover:text-black hover:bg-white/10'
+                    ? 'bg-surface/40 text-black  scale-105'
+                    : 'text-black/40 hover:text-black hover:bg-surface/10'
                   }`}
               >
                 {day.slice(0, 3)}
@@ -290,14 +290,14 @@ export const DailySchedule = () => {
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={resetSchedule}
-              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-white/40 backdrop-blur-md text-black rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-white/60 border-2 border-white/30  transition-all active:scale-95"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-surface/40 backdrop-blur-md text-black rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-surface/60 border-2 border-white/30  transition-all active:scale-95"
               title={intl.formatMessage({ id: 'dailyschedule.controls.reset', defaultMessage: 'Reset' })}
             >
               <RotateCcw size={12} strokeWidth={3} className="sm:w-3.5 sm:h-3.5" /> <span className="hidden sm:inline"><FormattedMessage id="dailyschedule.controls.reset" defaultMessage="Reset" /></span>
             </button>
             <button
               onClick={clearDay}
-              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-white/40 backdrop-blur-md text-black rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-white/60 border-2 border-white/30  transition-all active:scale-95"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-surface/40 backdrop-blur-md text-black rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-surface/60 border-2 border-white/30  transition-all active:scale-95"
               title={intl.formatMessage({ id: 'dailyschedule.controls.clear', defaultMessage: 'Clear' })}
             >
               <Trash size={12} strokeWidth={3} className="sm:w-3.5 sm:h-3.5" /> <span className="hidden sm:inline"><FormattedMessage id="dailyschedule.controls.clear" defaultMessage="Clear" /></span>
@@ -315,7 +315,7 @@ export const DailySchedule = () => {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.02 }}
-                className="w-full relative bg-white/30 backdrop-blur-lg border-4 border-white rounded-2xl "
+                className="w-full relative bg-surface/30 backdrop-blur-lg border-4 border-white rounded-2xl "
               >
                 {/* Table Header */}
                 <div className="grid grid-cols-[130px_60px_1fr_48px] sm:grid-cols-[280px_80px_1fr_64px] gap-2 sm:gap-4 px-3 sm:px-6 py-2 bg-black/5 border-b border-black/5 shrink-0 rounded-t-xl">
@@ -332,10 +332,10 @@ export const DailySchedule = () => {
                 </div>
 
                 {/* Add Top Button Row */}
-                <div className="p-2 flex justify-center bg-white/10 border-b border-white/10">
+                <div className="p-2 flex justify-center bg-surface/10 border-b border-white/10">
                   <button 
                     onClick={() => addItem('08:00', '09:00')}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/40 text-black hover:bg-white/60 border border-white/20 rounded-xl text-xs sm:text-[10px] font-black uppercase tracking-widest transition-all  italic"
+                    className="flex items-center gap-2 px-4 py-2 bg-surface/40 text-black hover:bg-surface/60 border border-white/20 rounded-xl text-xs sm:text-[10px] font-black uppercase tracking-widest transition-all  italic"
                   >
                     <Plus size={14} /> <FormattedMessage id="dailyschedule.controls.add" defaultMessage="Add Activity" />
                   </button>
@@ -351,9 +351,9 @@ export const DailySchedule = () => {
                           layout
                           id={`schedule-item-${item.id}`}
                           className={`group relative grid grid-cols-[130px_60px_1fr_48px] sm:grid-cols-[280px_80px_1fr_64px] items-center gap-2 sm:gap-4 px-3 sm:px-6 py-1 sm:py-3 transition-all ${status === 'current'
-                              ? 'bg-white/40 z-10'
+                              ? 'bg-surface/40 z-10'
                               : index % 2 !== 0 ? 'bg-black/[0.02]' : 'bg-transparent'
-                            } hover:bg-white/10`}
+                            } hover:bg-surface/10`}
                         >
                           {/* Progress Highlight */}
                           <motion.div
@@ -374,14 +374,14 @@ export const DailySchedule = () => {
                               type="time"
                               value={item.startTime}
                               onChange={(e) => updateItem(item.id, { startTime: e.target.value })}
-                              className="text-[11px] sm:text-sm font-bold text-black bg-white/20 px-1 sm:px-2 py-0 sm:py-1 rounded-lg outline-none w-[110px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-white/40 transition-all tabular-nums"
+                              className="text-[11px] sm:text-sm font-bold text-black bg-surface/20 px-1 sm:px-2 py-0 sm:py-1 rounded-lg outline-none w-[110px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-surface/40 transition-all tabular-nums"
                             />
                             <span className="text-[7px] sm:text-[8px] font-black text-black leading-none my-0.5 sm:my-0 w-[80px] sm:w-auto text-center">TO</span>
                             <input
                               type="time"
                               value={item.endTime}
                               onChange={(e) => updateItem(item.id, { endTime: e.target.value })}
-                              className="text-[11px] sm:text-sm font-bold text-black bg-white/20 px-1 sm:px-2 py-0 sm:py-1 rounded-lg outline-none w-[110px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-white/40 transition-all tabular-nums"
+                              className="text-[11px] sm:text-sm font-bold text-black bg-surface/20 px-1 sm:px-2 py-0 sm:py-1 rounded-lg outline-none w-[110px] sm:w-[125px] border border-transparent focus:border-white/40 focus:bg-surface/40 transition-all tabular-nums"
                             />
                           </div>
 
@@ -390,10 +390,10 @@ export const DailySchedule = () => {
                             <button
                               onClick={() => handleIconClick(item)}
                               className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-lg sm:text-xl transition-all border ${selectedId === item.id
-                                  ? 'bg-white/80 border-black ring-2 ring-black ring-offset-2 scale-110'
+                                  ? 'bg-surface/80 border-black ring-2 ring-black ring-offset-2 scale-110'
                                   : status === 'current'
-                                    ? 'bg-white/60 border-black/20'
-                                    : 'bg-white/20 border-white/20 hover:border-white/40'
+                                    ? 'bg-surface/60 border-black/20'
+                                    : 'bg-surface/20 border-white/20 hover:border-white/40'
                                 }`}
                             >
                               {item.emoji}
@@ -421,7 +421,7 @@ export const DailySchedule = () => {
                             />
                              {status === 'current' && (
                               <div className="flex items-center gap-2 shrink-0 px-2 sm:px-3 py-1 bg-black text-white rounded-full ">
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-surface animate-pulse" />
                                 <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
                                   <FormattedMessage id="dailyschedule.table.now" defaultMessage="NOW" />
                                 </span>
@@ -446,7 +446,7 @@ export const DailySchedule = () => {
                             <div className="absolute left-[200px] right-6 h-px bg-slate-50" />
                             <button
                               onClick={() => fillGap(index + 1)}
-                              className="relative z-10 flex items-center gap-1.5 px-3 py-0.5 bg-white text-black hover:border-black/20 border border-slate-100 rounded-full text-[8px] font-black uppercase tracking-tighter transition-all opacity-0 group-hover/gap:opacity-100 italic"
+                              className="relative z-10 flex items-center gap-1.5 px-3 py-0.5 bg-surface text-black hover:border-black/20 border border-slate-100 rounded-full text-[8px] font-black uppercase tracking-tighter transition-all opacity-0 group-hover/gap:opacity-100 italic"
                             >
                               <Plus size={8} /> <FormattedMessage id="dailyschedule.table.fill_gap" defaultMessage="Fill Gap" />
                             </button>
@@ -457,7 +457,7 @@ export const DailySchedule = () => {
                   })}
 
                   {/* Add Bottom Button Row */}
-                  <div className="p-2 flex justify-center bg-white/5 rounded-b-xl">
+                  <div className="p-2 flex justify-center bg-surface/5 rounded-b-xl">
                     <button
                       onClick={() => {
                         if (currentSchedule.length > 0) {
@@ -467,7 +467,7 @@ export const DailySchedule = () => {
                           addItem();
                         }
                       }}
-                      className="flex items-center gap-2 px-4 py-1.5 bg-white/40 text-black hover:bg-white/60 border border-white/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all  italic"
+                      className="flex items-center gap-2 px-4 py-1.5 bg-surface/40 text-black hover:bg-surface/60 border border-white/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all  italic"
                     >
                       <Plus size={14} /> <FormattedMessage id="dailyschedule.controls.add" defaultMessage="Add Activity" />
                     </button>
@@ -498,8 +498,8 @@ export const DailySchedule = () => {
                         onClick={() => handlePaletteClick(emoji)}
                         className={`w-10 h-10 flex items-center justify-center text-xl rounded-xl transition-all ${
                           selectedId 
-                            ? 'bg-white/60 hover:bg-white hover:scale-110 border border-white/40 cursor-pointer' 
-                            : 'bg-white/20 border border-transparent opacity-50 cursor-default'
+                            ? 'bg-surface/60 hover:bg-surface hover:scale-110 border border-white/40 cursor-pointer' 
+                            : 'bg-surface/20 border border-transparent opacity-50 cursor-default'
                         }`}
                       >
                         {emoji}

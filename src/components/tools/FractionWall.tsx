@@ -31,7 +31,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="fraction.help.step1" defaultMessage="Look at the different rows. Each row represents one whole divided into different equal parts." />
         </p>
@@ -47,7 +47,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="fraction.help.step3" defaultMessage="See how many 1/4s fit into 1/2, or how many 1/8s make 1/2!" />
         </p>
@@ -172,15 +172,15 @@ export const FractionWall = () => {
         </div>
 
         {/* Denominator Toggles */}
-        <div className="w-full flex md:flex-wrap md:justify-center gap-1 md:gap-3 p-2 md:p-6 bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] border border-white shadow-xl shadow-slate-200/50">
+        <div className="w-full flex md:flex-wrap md:justify-center gap-1 md:gap-3 p-2 md:p-6 bg-surface/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] border border-white shadow-xl shadow-slate-200/50">
           {FRACTIONS.map(f => (
             <button
               key={f.den}
               onClick={() => toggleDenominator(f.den)}
               className={`flex-1 min-w-0 h-10 md:h-auto md:px-4 md:py-2 rounded-lg md:rounded-2xl border-2 font-black transition-all uppercase tracking-tighter text-[10px] md:text-sm ${
                 selectedDenominators.includes(f.den)
-              ? 'bg-indigo-600 border-indigo-600 text-white scale-105 shadow-lg shadow-indigo-200'
-              : 'bg-white border-slate-100 text-slate-400 hover:bg-white hover:border-indigo-100 hover:text-indigo-600 '
+              ? 'bg-primary border-indigo-600 text-white scale-105 shadow-lg shadow-indigo-200'
+              : 'bg-surface border-slate-100 text-neutral-400 hover:bg-surface hover:border-primary/20 hover:text-primary '
               }`}
             >
               1/{f.den}
@@ -191,8 +191,8 @@ export const FractionWall = () => {
         {/* Legend / Info */}
         <div className="flex gap-8 italic">
           <div className="flex items-center gap-3">
-             <div className="w-4 h-4 bg-indigo-600 rounded-full" />
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+             <div className="w-4 h-4 bg-primary rounded-full" />
+             <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">
                <FormattedMessage id="fraction.legend" defaultMessage="Equivalency Explorer" />
              </span>
           </div>
@@ -200,8 +200,8 @@ export const FractionWall = () => {
 
       </div>
 
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-success-bg rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
     </ToolPanel>
   );
 };

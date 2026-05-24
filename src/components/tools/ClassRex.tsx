@@ -33,7 +33,7 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Press <b>Space</b> or <b>Click</b> to jump.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Don't hit the <b>cacti</b>!</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -465,13 +465,13 @@ export const ClassRex = () => {
     setHeaderActions(
       <div className="flex items-center gap-6 italic">
         <div className="flex flex-col items-end gap-0">
-           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Best</span>
+           <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Best</span>
            <span className="text-2xl font-black text-orange-600 tabular-nums italic leading-none mt-1">{Math.floor(highScore / 10)}</span>
         </div>
         <div className="w-px h-8 bg-slate-100" />
         <button 
           onClick={() => { setGameState('START'); audioEngine.playTick(settings.soundTheme); }}
-          className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 "
+          className="flex items-center gap-2 px-6 py-2 bg-surface border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all active:scale-95 "
         >
           <RotateCcw size={14} /> Reset
         </button>
@@ -482,8 +482,8 @@ export const ClassRex = () => {
   return (
     <ToolPanel className="flex-row gap-8 p-4 lg:p-12 italic">
       {/* Primary Game Observation Deck */}
-      <div className="flex-1 relative overflow-hidden bg-white rounded-[4rem] group/stage flex items-center justify-center cursor-pointer  border-4 border-slate-50" onClick={jump}>
-        <div className="w-full h-full relative overflow-hidden rounded-[3.5rem] bg-white group/game ">
+      <div className="flex-1 relative overflow-hidden bg-surface rounded-[4rem] group/stage flex items-center justify-center cursor-pointer  border-4 border-slate-50" onClick={jump}>
+        <div className="w-full h-full relative overflow-hidden rounded-[3.5rem] bg-surface group/game ">
           <canvas 
             ref={canvasRef} 
             width={CANVAS_WIDTH} 
@@ -497,7 +497,7 @@ export const ClassRex = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-2xl z-20"
+                className="absolute inset-0 flex flex-col items-center justify-center bg-surface/90 backdrop-blur-2xl z-20"
               >
                 <div className="text-center space-y-12 italic">
                    <div className="w-48 h-48 bg-emerald-600 rounded-[4rem]  flex items-center justify-center text-white border-8 border-white rotate-3 mx-auto">
@@ -508,7 +508,7 @@ export const ClassRex = () => {
                    </div>
                    <button
                      onClick={startGame}
-                     className="px-16 py-8 bg-slate-900 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-2xl hover:bg-emerald-600 transition-all  flex items-center gap-6 border-4 border-white"
+                     className="px-16 py-8 bg-dark-bg text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-2xl hover:bg-emerald-600 transition-all  flex items-center gap-6 border-4 border-white"
                    >
                      Play
                    </button>
@@ -523,15 +523,15 @@ export const ClassRex = () => {
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 flex flex-col items-center justify-center bg-rose-600/95 backdrop-blur-xl z-20"
               >
-                <div className="text-center space-y-12 bg-white p-20 rounded-[5rem]  border-8 border-white/20 italic max-w-2xl w-full">
-                   <div className="w-32 h-32 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 border-4 border-white rotate-6 mx-auto ">
+                <div className="text-center space-y-12 bg-surface p-20 rounded-[5rem]  border-8 border-white/20 italic max-w-2xl w-full">
+                   <div className="w-32 h-32 bg-caution-bg rounded-[2.5rem] flex items-center justify-center text-caution border-4 border-white rotate-6 mx-auto ">
                       <Trophy size={64} strokeWidth={3} />
                    </div>
                    <div className="space-y-6">
                       <h1 className="text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">Game Over</h1>
                       <div className="flex gap-12 justify-center items-center">
                          <div className="flex flex-col gap-2">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] leading-none">Score</span>
+                            <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] leading-none">Score</span>
                             <span className="text-7xl font-black text-slate-900 tabular-nums tracking-tighter">{score}</span>
                          </div>
                          <div className="w-px h-16 bg-slate-100" />
@@ -543,7 +543,7 @@ export const ClassRex = () => {
                    </div>
                    <button
                      onClick={startGame}
-                     className="w-full h-24 bg-slate-900 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-2xl hover:bg-rose-500 transition-all  flex items-center justify-center gap-6 border-4 border-white"
+                     className="w-full h-24 bg-dark-bg text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-2xl hover:bg-rose-500 transition-all  flex items-center justify-center gap-6 border-4 border-white"
                    >
                      Play Again
                    </button>
@@ -563,10 +563,10 @@ export const ClassRex = () => {
 
            <div className="flex-1 flex flex-col gap-10 min-h-0 overflow-y-auto no-scrollbar italic">
               {/* Score Core */}
-              <div className="p-12 bg-slate-900 rounded-[3.5rem]  relative group overflow-hidden border-4 border-slate-800">
+              <div className="p-12 bg-dark-bg rounded-[3.5rem]  relative group overflow-hidden border-4 border-dark-border">
                  <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
                  <div className="relative z-10 flex flex-col items-center">
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-6">Score</span>
+                    <span className="text-[10px] font-black text-primary/70 uppercase tracking-[0.5em] mb-6">Score</span>
                     <div className="text-9xl font-black text-white italic tracking-tighter tabular-nums">
                        {score}
                     </div>
@@ -575,9 +575,9 @@ export const ClassRex = () => {
 
               {/* Auxiliary Metrics */}
               <div className="grid grid-cols-1 gap-6">
-                 <div className="p-8 bg-white rounded-[3rem] border-4 border-slate-100  flex items-center justify-between">
+                 <div className="p-8 bg-surface rounded-[3rem] border-4 border-slate-100  flex items-center justify-between">
                     <div className="flex flex-col gap-1">
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Speed</span>
+                       <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Speed</span>
                        <span className="text-4xl font-black text-slate-900 italic mt-2">{gameSpeed.current.toFixed(2)}x</span>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
@@ -589,7 +589,7 @@ export const ClassRex = () => {
                        <span className="text-[10px] font-black text-emerald-200 uppercase tracking-widest leading-none">Best</span>
                        <span className="text-4xl font-black tabular-nums italic mt-2">{Math.floor(highScore / 10)}</span>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+                    <div className="w-12 h-12 rounded-2xl bg-surface/20 flex items-center justify-center text-white">
                        <Trophy size={24} strokeWidth={3} />
                     </div>
                  </div>

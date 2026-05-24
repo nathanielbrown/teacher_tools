@@ -66,6 +66,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://beta.classrex.com/TeacherTools/behaviourdiamond</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://beta.classrex.com/TeacherTools/starchart</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://beta.classrex.com/TeacherTools/fractiontool</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -186,11 +196,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://beta.classrex.com/TeacherTools/wordbuilder</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://beta.classrex.com/StudentTools/crossword</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -272,6 +277,11 @@
   </url>
   <url>
     <loc>https://beta.classrex.com/StudentTools/songmaker</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://beta.classrex.com/TeacherTools/wordbuilder</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

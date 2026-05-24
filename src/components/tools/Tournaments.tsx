@@ -180,7 +180,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Tournament Rules</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Pick your players in the setup screen.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -308,17 +308,17 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
   return (
     <div className="flex flex-col lg:flex-row-reverse gap-4 h-full min-h-0 italic">
       {/* Best Players Panel */}
-      <div ref={exportRef} className="flex-1 bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden">
+      <div ref={exportRef} className="flex-1 bg-surface rounded-[2rem] border-4 border-white flex flex-col overflow-hidden">
         <div className="px-6 py-4 flex items-center justify-between border-b-4 border-slate-50 bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-3">
             <button 
               onClick={onBack}
-              className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white transition-all active:scale-90"
+              className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-surface transition-all active:scale-90"
             >
               <ChevronLeft size={16} strokeWidth={3} />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
                 <Trophy size={18} strokeWidth={3} />
               </div>
               <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight leading-none">Leaderboard</h3>
@@ -328,7 +328,7 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
           <div className="flex items-center gap-3">
             <button 
               onClick={handleExportCSV}
-              className="px-8 py-4 rounded-xl bg-indigo-600 border-2 border-indigo-600 text-white hover:bg-slate-900 hover:border-slate-900 transition-all flex items-center gap-3 text-xl font-black uppercase tracking-widest"
+              className="px-8 py-4 rounded-xl bg-primary border-2 border-indigo-600 text-white hover:bg-dark-bg hover:border-slate-900 transition-all flex items-center gap-3 text-xl font-black uppercase tracking-widest"
               title="Export as CSV"
             >
               <FileSpreadsheet size={24} strokeWidth={3} />
@@ -356,18 +356,18 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
                       ? 'bg-rose-500 border-rose-400 text-white' 
                       : isPendingWinner
                         ? 'bg-emerald-500 border-emerald-400 text-white'
-                        : 'bg-slate-50 border-white hover:border-indigo-100 hover:bg-white'
+                        : 'bg-slate-50 border-white hover:border-primary/20 hover:bg-surface'
                 }`}
               >
                 <div className={`absolute top-2 left-2 w-7 h-7 lg:w-6 lg:h-6 rounded-full flex items-center justify-center text-[10px] lg:text-[8px] font-black ${
-                  (isEditWinner || isEditLoser || isPendingWinner) ? 'bg-white/20 text-white' : 'bg-white text-slate-400 shadow-sm'
+                  (isEditWinner || isEditLoser || isPendingWinner) ? 'bg-surface/20 text-white' : 'bg-surface text-neutral-400 shadow-sm'
                 }`}>
                   #{rank}
                 </div>
                 <span className={`text-3xl lg:text-2xl font-black tabular-nums leading-none mb-1 ${
                   (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white' : 'text-slate-800'
                 }`}>{rating}</span>
-                <span className={`font-black text-base lg:text-[10px] uppercase tracking-widest truncate w-full text-center ${
+                <span className={`font-black text-lg lg:text-base uppercase tracking-widest truncate w-full text-center ${
                   (isEditWinner || isEditLoser || isPendingWinner) ? 'text-white/80' : 'text-slate-500'
                 }`}>{p}</span>
               </button>
@@ -380,15 +380,15 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
           <button 
             onClick={() => setLeaderboardPage(p => Math.max(1, p - 1))} 
             disabled={leaderboardPage === 1} 
-            className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"
+            className="p-2 bg-surface border-2 border-slate-100 rounded-lg disabled:opacity-20 text-neutral-400 hover:text-primary hover:border-primary/20 transition-all"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{leaderboardPage} / {Math.max(1, totalLeaderboardPages)}</span>
+          <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em]">{leaderboardPage} / {Math.max(1, totalLeaderboardPages)}</span>
           <button 
             onClick={() => setLeaderboardPage(p => Math.min(Math.max(1, totalLeaderboardPages), p + 1))} 
             disabled={leaderboardPage >= Math.max(1, totalLeaderboardPages)} 
-            className="p-2 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"
+            className="p-2 bg-surface border-2 border-slate-100 rounded-lg disabled:opacity-20 text-neutral-400 hover:text-primary hover:border-primary/20 transition-all"
           >
             <ChevronRight size={16} />
           </button>
@@ -396,13 +396,13 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
       </div>
 
       {/* Match History Panel */}
-      <div className="w-full lg:w-[380px] bg-white rounded-[2rem] border-4 border-white flex flex-col overflow-hidden shrink-0">
+      <div className="w-full lg:w-[380px] bg-surface rounded-[2rem] border-4 border-white flex flex-col overflow-hidden shrink-0">
         <div className="px-4 py-2 flex items-center justify-between border-b-2 border-slate-50 bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
               <History size={16} strokeWidth={3} />
             </div>
-            <h4 className="text-sm font-black uppercase tracking-widest text-indigo-600">History</h4>
+            <h4 className="text-sm font-black uppercase tracking-widest text-primary">History</h4>
           </div>
           <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{eloHistory.length} matches</span>
         </div>
@@ -427,7 +427,7 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
                   initial={{ opacity: 0, x: 10 }} 
                   animate={{ opacity: 1, x: 0 }} 
                   className={`grid grid-cols-[1.5rem_1fr_auto_1fr_auto] gap-1 items-center px-1 py-1 rounded-xl border-2 mb-1 cursor-pointer transition-all ${
-                    isEditing ? 'bg-indigo-50 border-indigo-200' : 'border-transparent hover:bg-slate-50 hover:border-slate-100'
+                    isEditing ? 'bg-primary/5 border-primary/30' : 'border-transparent hover:bg-slate-50 hover:border-slate-100'
                   }`}
                   onClick={() => { if (!isEditing) { setEditingMatchId(m.id); setSelectedWinner(''); } }}
                 >
@@ -441,7 +441,7 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
                   }`}>{m.loser || '?'}</div>
                   {isEditing ? (
                     <div className="flex gap-1">
-                      <button onClick={(e) => { e.stopPropagation(); deleteMatch(m.id); }} className="p-1 lg:p-0.5 hover:bg-rose-50 rounded text-rose-400 transition-colors"><Trash2 size={isMobile ? 18 : 10} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); deleteMatch(m.id); }} className="p-1 lg:p-0.5 hover:bg-caution-bg rounded text-rose-400 transition-colors"><Trash2 size={isMobile ? 18 : 10} /></button>
                       <button onClick={(e) => { e.stopPropagation(); setEditingMatchId(null); }} className="p-1 lg:p-0.5 hover:bg-slate-100 rounded text-slate-300 transition-colors"><X size={isMobile ? 18 : 10} /></button>
                     </div>
                   ) : (
@@ -458,9 +458,9 @@ const EloManager = ({ participants, eloRatings, setEloRatings, eloHistory, setEl
 
         {/* Paging - always visible when there are matches */}
         <div className="px-3 py-2 bg-slate-50/50 border-t-2 border-slate-50 flex items-center justify-between shrink-0">
-          <button onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage === 1} className="p-1.5 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronLeft size={12} /></button>
-          <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{historyPage} / {Math.max(1, totalHistoryPages)}</span>
-          <button onClick={() => setHistoryPage(p => Math.min(Math.max(1, totalHistoryPages), p + 1))} disabled={historyPage >= Math.max(1, totalHistoryPages)} className="p-1.5 bg-white border-2 border-slate-100 rounded-lg disabled:opacity-20 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all"><ChevronRight size={12} /></button>
+          <button onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage === 1} className="p-1.5 bg-surface border-2 border-slate-100 rounded-lg disabled:opacity-20 text-neutral-400 hover:text-primary hover:border-primary/20 transition-all"><ChevronLeft size={12} /></button>
+          <span className="text-[8px] font-black text-neutral-400 uppercase tracking-[0.2em]">{historyPage} / {Math.max(1, totalHistoryPages)}</span>
+          <button onClick={() => setHistoryPage(p => Math.min(Math.max(1, totalHistoryPages), p + 1))} disabled={historyPage >= Math.max(1, totalHistoryPages)} className="p-1.5 bg-surface border-2 border-slate-100 rounded-lg disabled:opacity-20 text-neutral-400 hover:text-primary hover:border-primary/20 transition-all"><ChevronRight size={12} /></button>
         </div>
       </div>
     </div>
@@ -629,17 +629,17 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
         ...winnersRounds.map((rm) => ({
           label: rm[0].tournamentRoundText,
           onClick: () => jumpToRound(roundMap[rm[0].tournamentRoundText], 'center'),
-          color: 'bg-white text-emerald-600 hover:text-emerald-700'
+          color: 'bg-surface text-success hover:text-emerald-700'
         })),
         ...finalRound.map(() => ({
           label: 'Final',
           onClick: () => jumpToRound(roundMap['Final'], 'center'),
-          color: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+          color: 'bg-primary text-white hover:bg-primary/90 shadow-md'
         })),
         ...losersRounds.map((rm) => ({
           label: rm[0].tournamentRoundText,
           onClick: () => jumpToRound(roundMap[rm[0].tournamentRoundText], 'center'),
-          color: 'bg-white text-rose-600 hover:text-rose-700'
+          color: 'bg-surface text-caution hover:text-rose-700'
         })).reverse()
       ];
     } else {
@@ -649,17 +649,17 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
         ...wingRounds.map((rm, idx) => ({
           label: `L${idx + 1}`,
           onClick: () => jumpToRound(idx, 'left'),
-          color: 'bg-white text-emerald-600 hover:text-emerald-700'
+          color: 'bg-surface text-success hover:text-emerald-700'
         })),
         {
           label: 'Final',
           onClick: () => jumpToRound(rounds.length - 1, 'center'),
-          color: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+          color: 'bg-primary text-white hover:bg-primary/90 shadow-md'
         },
         ...wingRounds.map((rm, idx) => ({
           label: `R${idx + 1}`,
           onClick: () => jumpToRound(idx, 'right'),
-          color: 'bg-white text-rose-600 hover:text-rose-700'
+          color: 'bg-surface text-caution hover:text-rose-700'
         })).reverse()
       ];
     }
@@ -752,8 +752,8 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
   const renderRound = (roundMatches: any[]) => (
     <div key={roundMatches[0]?.tournamentRoundText} className="flex flex-col justify-around gap-16 py-4 relative min-w-[320px]">
       <div className="absolute -top-16 left-1/2 -translate-x-1/2">
-        <div className="px-6 py-2 bg-white rounded-full border-2 border-slate-100 shadow-sm min-w-[120px]">
-          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] italic block text-center">{roundMatches[0]?.tournamentRoundText}</span>
+        <div className="px-6 py-2 bg-surface rounded-full border-2 border-slate-100 shadow-sm min-w-[120px]">
+          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] italic block text-center">{roundMatches[0]?.tournamentRoundText}</span>
         </div>
       </div>
       
@@ -761,7 +761,7 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
         <div key={m.id} className="relative flex items-center">
           <div 
             ref={(el) => { matchRefs.current[m.id] = el; }}
-            className="w-80 bg-white rounded-[2.5rem] border-4 border-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] overflow-hidden group/match transition-all z-10"
+            className="w-80 bg-surface rounded-[2.5rem] border-4 border-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] overflow-hidden group/match transition-all z-10"
           >
             {m.participants.map((p: any, pIdx: number) => {
               const isTBD = !p.id || p.id === 'TBD';
@@ -778,15 +778,15 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
                       ? 'bg-[#35B995] text-white' 
                       : isTBD || isBye 
                         ? 'bg-slate-50/50 text-slate-300' 
-                        : 'bg-white text-slate-800 hover:bg-slate-50'
+                        : 'bg-surface text-slate-800 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center gap-5 truncate relative z-10">
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-black transition-colors ${
-                      isSelectedWinner ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'
+                      isSelectedWinner ? 'bg-surface/20 text-white' : 'bg-slate-100 text-neutral-400'
                     }`}>{pIdx + 1}</div>
                     <div className="flex flex-col items-start truncate">
-                      <span className={`text-xs font-black uppercase tracking-[0.15em] ${isSelectedWinner ? 'text-white/70' : 'text-slate-400'}`}>Competitor</span>
+                      <span className={`text-xs font-black uppercase tracking-[0.15em] ${isSelectedWinner ? 'text-white/70' : 'text-neutral-400'}`}>Competitor</span>
                       <span className={`text-xl font-black uppercase truncate tracking-tight leading-none mt-1 ${isSelectedWinner ? 'text-white' : 'text-slate-700'}`}>{isBye ? 'BYE' : (p.name || 'TBD')}</span>
                     </div>
                   </div>
@@ -809,21 +809,21 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
 
   return (
     <div className="flex-1 flex flex-col min-h-0 italic overflow-hidden">
-      <div className="px-6 py-6 flex items-center justify-between border-b-4 border-slate-50 bg-white shrink-0">
+      <div className="px-6 py-6 flex items-center justify-between border-b-4 border-slate-50 bg-surface shrink-0">
         <div className="flex-1 flex items-center gap-6">
           <button 
             onClick={onBack}
-            className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-md transition-all active:scale-90"
+            className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-surface hover:shadow-md transition-all active:scale-90"
           >
             <ChevronLeft size={24} strokeWidth={3} />
           </button>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg">
               <Trophy size={24} strokeWidth={3} />
             </div>
             <div className="flex flex-col">
               <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight leading-none">{tournament.name}</h3>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{tournament.type === 'single' ? 'Single' : 'Double'} Elimination</span>
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mt-1">{tournament.type === 'single' ? 'Single' : 'Double'} Elimination</span>
             </div>
           </div>
         </div>
@@ -845,7 +845,7 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
         <div className="flex-1 flex items-center justify-end gap-3">
           <button 
             onClick={handleExport}
-            className="px-8 py-4 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest"
+            className="px-8 py-4 bg-surface border-2 border-slate-100 rounded-xl text-neutral-400 hover:text-primary hover:border-primary/20 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest"
             title="Export as PNG"
           >
             <Download size={18} strokeWidth={3} />
@@ -853,7 +853,7 @@ const BracketManager = ({ tournament, setTournaments, activeTournamentId, onBack
           </button>
           <button 
             onClick={resetView} 
-            className="p-3 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all active:scale-95"
+            className="p-3 bg-surface border-2 border-slate-100 rounded-xl text-neutral-400 hover:text-primary hover:border-primary/20 transition-all active:scale-95"
             title="Reset View"
           >
             <Maximize2 size={18} strokeWidth={3} />
@@ -981,7 +981,7 @@ export const Tournaments = () => {
       setStep('setup');
       setSelectedStudents([]);
     }
-  }, [activeTournamentId]);
+  }, [activeTournamentId, activeTournament]);
 
   const deleteTournament = useCallback(() => {
     if (activeTournamentId) {
@@ -1032,11 +1032,11 @@ export const Tournaments = () => {
   useEffect(() => {
     setHeaderActions(
       <div className="flex items-center gap-4 italic">
-        <div className="flex bg-white p-1.5 rounded-2xl border-2 border-slate-100 ">
+        <div className="flex bg-surface p-1.5 rounded-2xl border-2 border-slate-100 ">
            <select value={activeTournamentId || ''} onChange={(e) => e.target.value === 'new' ? addTournament() : setActiveTournamentId(e.target.value)} className="px-6 py-2 bg-transparent rounded-xl font-black text-[10px] text-slate-800 outline-none transition-all uppercase tracking-widest cursor-pointer">
             <option value="" disabled>Active Session</option>
             {tournaments.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            <option value="new" className="text-indigo-600 font-black">+ Start New</option>
+            <option value="new" className="text-primary font-black">+ Start New</option>
            </select>
         </div>
       </div>
@@ -1120,16 +1120,16 @@ export const Tournaments = () => {
           {!activeTournament ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-12 relative overflow-hidden group">
               <div className="tool-grid-bg opacity-20 pointer-events-none" />
-              <div className="relative w-48 h-48 rounded-[4rem] bg-indigo-600 flex items-center justify-center text-white border-[12px] border-white rotate-3 shadow-2xl">
+              <div className="relative w-48 h-48 rounded-[4rem] bg-primary flex items-center justify-center text-white border-[12px] border-white rotate-3 shadow-2xl">
                 <Trophy size={96} strokeWidth={1} />
               </div>
               <div className="text-center space-y-4">
                 <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Tournament Maker</h2>
-                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] mt-4">Make a new game or leaderboard</p>
+                <p className="text-[11px] font-black text-neutral-400 uppercase tracking-[0.5em] mt-4">Make a new game or leaderboard</p>
               </div>
               <button 
                 onClick={addTournament} 
-                className="h-20 px-16 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xl lg:text-lg uppercase tracking-[0.2em] hover:bg-slate-900 transition-all active:scale-95 border-8 border-white shadow-xl"
+                className="h-20 px-16 bg-primary text-white rounded-[2.5rem] font-black text-xl lg:text-lg uppercase tracking-[0.2em] hover:bg-dark-bg transition-all active:scale-95 border-8 border-white shadow-xl"
               >
                 Start
               </button>
@@ -1137,33 +1137,33 @@ export const Tournaments = () => {
           ) : step === 'setup' ? (
             <div className="flex-1 flex flex-col gap-6 relative overflow-hidden group">
               {/* Tournament Config */}
-              <div className="flex flex-col bg-white/40 backdrop-blur-md rounded-[3rem] border-4 border-white shrink-0 relative z-10 overflow-hidden">
+              <div className="flex flex-col bg-surface/40 backdrop-blur-md rounded-[3rem] border-4 border-white shrink-0 relative z-10 overflow-hidden">
                 {/* Tournament Config Section */}
                 <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 p-6 lg:p-8">
                   {/* Left side: Icon and Name */}
                   <div className="flex-1 flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                    <div className="w-16 h-16 rounded-[2rem] bg-primary flex items-center justify-center text-white shadow-lg shrink-0">
                       <Trophy size={32} strokeWidth={3} />
                     </div>
                     <div className="flex-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Tournament Name</span>
+                      <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 block">Tournament Name</span>
                       <div className="relative group/input">
                         <input 
                           type="text" 
                           value={activeTournament?.name || ''}
                           onChange={(e) => setTournaments((prev: any) => prev.map((t: any) => t.id === activeTournamentId ? { ...t, name: e.target.value } : t))}
-                          className="w-full text-3xl font-black text-slate-800 uppercase tracking-tight bg-white/60 border-4 border-white focus:border-indigo-500 focus:bg-white rounded-[1.5rem] px-5 py-3 outline-none transition-all placeholder:text-slate-200"
+                          className="w-full text-3xl font-black text-slate-800 uppercase tracking-tight bg-surface/60 border-4 border-white focus:border-indigo-500 focus:bg-surface rounded-[1.5rem] px-5 py-3 outline-none transition-all placeholder:text-slate-200"
                           placeholder="Enter Tournament Name..."
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="hidden lg:block w-px h-16 bg-white/50 mx-2" />
+                  <div className="hidden lg:block w-px h-16 bg-surface/50 mx-2" />
 
                   {/* Right side: Type selection */}
                   <div className="flex-1 flex flex-col lg:justify-center">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block lg:hidden">Tournament Type</span>
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 block lg:hidden">Tournament Type</span>
                     <div className="flex gap-2">
                       {[
                         { id: 'single', label: 'Single', Icon: Trophy },
@@ -1183,10 +1183,10 @@ export const Tournaments = () => {
                             }}
                             className={`flex-1 flex items-center justify-center gap-3 px-4 py-6 lg:py-4 rounded-[1.5rem] font-black text-xl lg:text-xs uppercase tracking-widest transition-all ${
                               (activeTournament?.type || 'elo') === t.id
-                                ? 'bg-indigo-600 text-white shadow-lg scale-105'
+                                ? 'bg-primary text-white shadow-lg scale-105'
                                 : isDisabled
                                   ? 'bg-slate-50 border-4 border-slate-50 text-slate-200 cursor-not-allowed opacity-50'
-                                  : 'bg-white border-4 border-white text-slate-400 hover:border-indigo-100 hover:text-indigo-600'
+                                  : 'bg-surface border-4 border-white text-neutral-400 hover:border-primary/20 hover:text-primary'
                             }`}
                           >
                             <t.Icon size={isMobile ? 24 : 16} /> {t.label}
@@ -1198,28 +1198,28 @@ export const Tournaments = () => {
                 </div>
 
                 {/* Divider */}
-                <div className="h-px bg-white/50" />
+                <div className="h-px bg-surface/50" />
 
                 {/* Players Header Section */}
-                <div className="flex items-center justify-between px-8 py-6 bg-white/20">
+                <div className="flex items-center justify-between px-8 py-6 bg-surface/20">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 border-2 border-slate-50">
+                    <div className="w-12 h-12 rounded-2xl bg-surface flex items-center justify-center text-primary border-2 border-slate-50">
                       <Users size={24} strokeWidth={3} />
                     </div>
                     <div className="flex flex-col">
                       <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Players</h3>
-                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Select participants</span>
+                      <span className="text-xs font-black text-neutral-400 uppercase tracking-widest mt-1">Select participants</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
                     <button 
                       onClick={() => { setSelectedStudents(settings.classes.find(c => c.id === selectedClassId)?.students || []); audioEngine.playTick(settings.soundTheme); }} 
-                      className="px-8 py-4 bg-white border-2 border-slate-100 rounded-xl text-xs font-black text-slate-400 uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all"
+                      className="px-8 py-4 bg-surface border-2 border-slate-100 rounded-xl text-xs font-black text-neutral-400 uppercase tracking-widest hover:border-primary/20 hover:text-primary transition-all"
                     >
                       All
                     </button>
-                    <div className="h-14 px-8 bg-white/60 rounded-full flex items-center justify-center text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-2 border-white">
-                      <span className="text-indigo-600 mr-2">{selectedStudents.length}</span> Selected
+                    <div className="h-14 px-8 bg-surface/60 rounded-full flex items-center justify-center text-xs font-black text-neutral-400 uppercase tracking-[0.2em] border-2 border-white">
+                      <span className="text-primary mr-2">{selectedStudents.length}</span> Selected
                     </div>
                   </div>
                 </div>
@@ -1235,14 +1235,14 @@ export const Tournaments = () => {
                       onClick={() => { if (isSelected) setSelectedStudents(prev => prev.filter(name => name !== s)); else setSelectedStudents(prev => [...prev, s]); audioEngine.playTick(settings.soundTheme); }} 
                       className={`p-3 min-h-[4rem] rounded-2xl border-4 transition-none group/item flex items-center gap-3 ${
                         isSelected 
-                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' 
-                          : 'bg-white border-white text-slate-600 hover:border-slate-50'
+                          ? 'bg-primary border-indigo-600 text-white shadow-lg' 
+                          : 'bg-surface border-white text-slate-600 hover:border-slate-50'
                       }`}
                     >
                       <div className={`w-8 h-8 shrink-0 rounded-xl flex items-center justify-center text-xs font-black ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-300'
+                        isSelected ? 'bg-surface/20 text-white' : 'bg-slate-50 text-slate-300'
                       }`}>{i + 1}</div>
-                      <span className="text-xs font-black uppercase tracking-tight whitespace-normal break-words leading-tight flex-1 text-left line-clamp-2">{s}</span>
+                      <span className="text-sm lg:text-base font-black uppercase tracking-tight whitespace-normal break-words leading-tight flex-1 text-left line-clamp-2">{s}</span>
                       {isSelected && <Check size={18} strokeWidth={4} />}
                     </button>
                   );
@@ -1253,14 +1253,14 @@ export const Tournaments = () => {
               <div className="shrink-0 flex justify-center items-center gap-4 pb-2">
                 <button 
                   onClick={deleteTournament}
-                  className="h-14 px-8 bg-white border-4 border-white text-slate-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:text-rose-500 transition-all active:scale-95 shadow-lg flex items-center gap-2"
+                  className="h-14 px-8 bg-surface border-4 border-white text-neutral-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:text-caution transition-all active:scale-95 shadow-lg flex items-center gap-2"
                 >
                   <Trash2 size={16} /> Delete
                 </button>
                 <button 
                   onClick={initiateTournament} 
                   disabled={selectedStudents.length < 2} 
-                  className="h-14 px-14 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-slate-900 transition-all active:scale-95 border-4 border-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="h-14 px-14 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-dark-bg transition-all active:scale-95 border-4 border-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
                   <Play size={18} fill="currentColor" className="inline mr-3" /> 
                   {(activeTournament?.type === 'elo' && activeTournament?.eloHistory?.length > 0) || (activeTournament?.matches?.length > 0) ? 'Resume' : 'Start'}

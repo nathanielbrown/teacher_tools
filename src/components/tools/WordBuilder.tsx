@@ -66,13 +66,13 @@ const PHONICS = {
 // 3. Text (Help and Info)
 const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
-    <h3 className="text-xl font-bold text-indigo-600 uppercase tracking-tight">
+    <h3 className="text-xl font-bold text-primary uppercase tracking-tight">
       <FormattedMessage id="wordbuilder.help.title" />
     </h3>
     <div className="space-y-3">
       {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex gap-3 text-left">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-bold text-indigo-600 shrink-0">{step}</div>
+          <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-bold text-primary shrink-0">{step}</div>
           <p className="text-sm text-slate-600 font-medium leading-tight">
             <FormattedMessage 
               id={`wordbuilder.help.step${step}`}
@@ -247,14 +247,14 @@ export const WordBuilder = () => {
               <div className="flex gap-4">
                 <button
                   onClick={listenToWord}
-                  className="flex items-center justify-center px-10 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                  className="flex items-center justify-center px-10 py-4 bg-primary text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-indigo-200"
                 >
                   <FormattedMessage id="wordbuilder.label.listen" />
                 </button>
               </div>
           </div>
 
-          <div className="h-48 shrink-0 lg:h-auto lg:flex-1 bg-white/50 backdrop-blur-xl rounded-[2rem] lg:rounded-[4rem] border-4 border-white flex items-center justify-center p-4 lg:p-12 relative overflow-hidden">
+          <div className="flex-1 h-auto bg-surface/50 backdrop-blur-xl rounded-[2rem] lg:rounded-[4rem] border-4 border-white flex items-center justify-center p-4 lg:p-12 relative overflow-hidden">
              <div className="tool-grid-bg opacity-10 pointer-events-none" />
              <motion.div 
                 animate={{ scale: isSpeakingWord ? 1.1 : 1 }}
@@ -274,7 +274,7 @@ export const WordBuilder = () => {
                          exit={{ scale: 0.8, opacity: 0, y: -20 }}
                           onClick={() => removeSound(sound.id)}
                           className={`w-20 h-24 lg:w-28 lg:h-36 rounded-2xl lg:rounded-[2.5rem] flex flex-col items-center justify-center text-3xl lg:text-5xl font-bold border-4 lg:border-[10px] border-white active:scale-95 group relative ${
-                            sound.type === 'vowel' ? 'bg-rose-500 text-white shadow-lg shadow-rose-100' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                            sound.type === 'vowel' ? 'bg-rose-500 text-white shadow-lg shadow-rose-100' : 'bg-primary text-white shadow-lg shadow-indigo-100'
                           }`}
                         >
                           <span className="italic">{sound.char}</span>
@@ -285,11 +285,11 @@ export const WordBuilder = () => {
              </motion.div>
           </div>
 
-          <div className="flex-1 lg:shrink-0 bg-indigo-50/50 backdrop-blur-md p-2 lg:p-10 rounded-[1.5rem] lg:rounded-[3.5rem] border-4 border-white italic overflow-y-auto lg:max-h-[450px]">
+          <div className="shrink-0 h-auto bg-primary/5/50 backdrop-blur-md p-2 lg:p-10 rounded-[1.5rem] lg:rounded-[3.5rem] border-4 border-white italic overflow-y-auto max-h-[500px] lg:max-h-[450px]">
              <div className="flex flex-row gap-1.5 lg:gap-16 items-start justify-between w-full pb-2 lg:pb-0">
                 {Object.entries(PHONICS).map(([key, sounds]) => (
                   <div key={key} className={`space-y-1 lg:space-y-4 shrink-0 ${key === 'single' ? 'flex-[4] lg:flex-[2]' : 'flex-[2] lg:flex-1'}`}>
-                    <h4 className="text-[8px] lg:text-[10px] font-bold text-indigo-400 uppercase tracking-[0.1em] lg:tracking-[0.2em] px-1 lg:px-2 text-left truncate">
+                    <h4 className="text-[8px] lg:text-[10px] font-bold text-primary/70 uppercase tracking-[0.1em] lg:tracking-[0.2em] px-1 lg:px-2 text-left truncate">
                       <FormattedMessage id={`wordbuilder.group.${key}`} />
                     </h4>
                     <div className={`grid gap-[2px] lg:gap-2 justify-start w-full ${
@@ -301,8 +301,8 @@ export const WordBuilder = () => {
                           onClick={() => addSound(sound)}
                           className={`w-full aspect-square lg:aspect-auto lg:w-12 lg:h-12 rounded-md lg:rounded-xl font-bold text-sm lg:text-base flex items-center justify-center transition-all border-2 hover:scale-110 active:scale-90 ${
                             sound.type === 'vowel' 
-                              ? 'bg-white border-rose-100 text-rose-500 hover:border-rose-400' 
-                              : 'bg-white border-indigo-100 text-indigo-600 hover:border-indigo-400'
+                              ? 'bg-surface border-caution-border text-caution hover:border-rose-400' 
+                              : 'bg-surface border-primary/20 text-primary hover:border-indigo-400'
                           }`}
                         >
                           {sound.char}
@@ -323,7 +323,7 @@ export const WordBuilder = () => {
         <div className="space-y-8">
           <button
             onClick={clearWord}
-            className="w-full py-6 bg-white border-4 border-slate-100 text-slate-400 rounded-3xl font-bold text-xs uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center"
+            className="w-full py-6 bg-surface border-4 border-slate-100 text-neutral-400 rounded-3xl font-bold text-xs uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all flex items-center justify-center"
           >
             <FormattedMessage id="emotion.reset" />
           </button>

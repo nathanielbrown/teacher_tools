@@ -400,7 +400,7 @@ export const Crossword = () => {
               {isMobile && (
                 <button
                   onClick={startPuzzle}
-                  className="w-full py-6 bg-indigo-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
+                  className="w-full py-6 bg-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all flex items-center justify-center gap-3 mb-2"
                 >
                   <Play size={20} strokeWidth={3} fill="currentColor" />
                   <FormattedMessage id="shared.button.play" />
@@ -426,14 +426,14 @@ export const Crossword = () => {
                       <FormattedMessage id="crossword.title" />
                     </h2>
                  </div>
-                  <button onClick={startPuzzle} className="px-12 py-6 bg-slate-900 text-white font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all rounded-[2rem] active:scale-95">
+                  <button onClick={startPuzzle} className="px-12 py-6 bg-dark-bg text-white font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all rounded-[2rem] active:scale-95">
                     <FormattedMessage id="crossword.label.make" />
                  </button>
               </motion.div>
             ) : (status === 'playing' && puzzle) ? (
               <div className={`flex-1 w-full flex ${isMobile ? 'flex-col' : ''} overflow-hidden`}>
                   <div 
-                    className="flex-1 bg-slate-900 overflow-hidden relative grid min-h-0"
+                    className="flex-1 bg-dark-bg overflow-hidden relative grid min-h-0"
                     style={{ 
                       gridTemplateColumns: `repeat(${puzzle.cols}, 1fr)`,
                       gridTemplateRows: `repeat(${puzzle.rows}, 1fr)`
@@ -449,12 +449,12 @@ export const Crossword = () => {
                            key={`${r}-${c}`}
                            onClick={() => handleCellClick(r, c)}
                             className={`relative flex items-center justify-center text-2xl font-black transition-all cursor-pointer ${
-                            puzzle.grid[r][c] === '' ? 'bg-slate-900' : 
-                            selectedCell?.r === r && selectedCell?.c === c ? 'bg-indigo-50 ring-4 ring-inset ring-indigo-600 z-10' : 'bg-white text-slate-900 border border-slate-900'
+                            puzzle.grid[r][c] === '' ? 'bg-dark-bg' : 
+                            selectedCell?.r === r && selectedCell?.c === c ? 'bg-primary/5 ring-4 ring-inset ring-indigo-600 z-10' : 'bg-surface text-slate-900 border border-slate-900'
                           }`}
                          >
                            {number && (
-                             <span className="absolute top-1 left-1 text-[10px] text-slate-400 font-bold leading-none select-none">
+                             <span className="absolute top-1 left-1 text-[10px] text-neutral-400 font-bold leading-none select-none">
                                {number}
                              </span>
                            )}
@@ -464,10 +464,10 @@ export const Crossword = () => {
                     }))}
                   </div>
 
-                  <div className={`${isMobile ? 'w-full h-1/2' : 'w-[320px] h-full'} flex flex-col border-t-4 lg:border-t-0 lg:border-l-4 border-slate-900 bg-white overflow-hidden`}>
+                  <div className={`${isMobile ? 'w-full h-1/2' : 'w-[320px] h-full'} flex flex-col border-t-4 lg:border-t-0 lg:border-l-4 border-slate-900 bg-surface overflow-hidden`}>
                     <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} overflow-y-auto no-scrollbar space-y-8`}>
                        <section>
-                          <h4 className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-4 lg:mb-6 flex items-center gap-2">
+                          <h4 className="text-[10px] lg:text-xs font-black text-neutral-400 uppercase tracking-widest mb-4 lg:mb-6 flex items-center gap-2">
                              <BookOpen size={14} /> <FormattedMessage id="crossword.label.across" />
                           </h4>
                           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
@@ -481,7 +481,7 @@ export const Crossword = () => {
                        </section>
  
                        <section>
-                          <h4 className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-4 lg:mb-6 flex items-center gap-2">
+                          <h4 className="text-[10px] lg:text-xs font-black text-neutral-400 uppercase tracking-widest mb-4 lg:mb-6 flex items-center gap-2">
                              <Grid3X3 size={14} /> <FormattedMessage id="crossword.label.down" />
                           </h4>
                           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
@@ -494,20 +494,20 @@ export const Crossword = () => {
                           </div>
                        </section>
                     </div>
-                    <button onClick={checkSolution} className="w-full py-6 lg:py-8 bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:bg-indigo-600">
+                    <button onClick={checkSolution} className="w-full py-6 lg:py-8 bg-dark-bg text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:bg-primary">
                        <FormattedMessage id="crossword.label.check" />
                     </button>
                   </div>
               </div>
             ) : (
               <motion.div key="win" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-12">
-                 <div className="w-40 h-40 bg-slate-900 flex items-center justify-center text-amber-400 border-8 border-white">
+                 <div className="w-40 h-40 bg-dark-bg flex items-center justify-center text-amber-400 border-8 border-white">
                     <Trophy size={100} strokeWidth={1.5} />
                  </div>
                  <h2 className="text-8xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                    <FormattedMessage id="crossword.label.solved" />
                  </h2>
-                 <button onClick={resetPuzzle} className="px-16 py-8 bg-slate-900 text-white font-black text-2xl uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-4">
+                 <button onClick={resetPuzzle} className="px-16 py-8 bg-dark-bg text-white font-black text-2xl uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-4">
                     <RotateCcw size={32} strokeWidth={3} /> <FormattedMessage id="typinggame.label.restart" />
                  </button>
               </motion.div>

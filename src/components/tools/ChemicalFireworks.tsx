@@ -34,7 +34,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Use Chemical Fireworks</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Select a <b>Chemical Block</b> from the sidebar to prepare it.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -42,7 +42,7 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Click the <b>Flame Area</b> to drop the block into the fire!</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Watch the unique colors and <b>Spectral Lines</b> at the top.</p>
       </div>
     </div>
@@ -269,7 +269,7 @@ export const ChemicalFireworks = () => {
                        initial={{ opacity: 0, height: 0 }}
                        animate={{ opacity: 1, height: '100%' }}
                        exit={{ opacity: 0, height: 0 }}
-                       className="absolute top-0 w-1.5 bg-white -[0_0_20px_#fff] z-10"
+                       className="absolute top-0 w-1.5 bg-surface -[0_0_20px_#fff] z-10"
                        style={{ left: `${x}%` }}
                      />
                    );
@@ -296,7 +296,7 @@ export const ChemicalFireworks = () => {
                   opacity: [0.8, 1, 0.8]
                 }}
                 transition={{ duration: 0.1, repeat: Infinity }}
-                className="absolute bottom-0 w-8 h-16 rounded-full bg-white/80 blur-md"
+                className="absolute bottom-0 w-8 h-16 rounded-full bg-surface/80 blur-md"
               />
            </div>
            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-40 bg-slate-800 rounded-t-2xl  border-x-4 border-slate-700" />
@@ -307,11 +307,11 @@ export const ChemicalFireworks = () => {
       </div>
 
       {/* Chemical Selector Sidebar */}
-      <div className="w-full lg:w-80 flex flex-col bg-white/80 backdrop-blur-xl p-8 rounded-[4rem]  border-4 border-white overflow-y-auto no-scrollbar italic">
+      <div className="w-full lg:w-80 flex flex-col bg-surface/80 backdrop-blur-xl p-8 rounded-[4rem]  border-4 border-white overflow-y-auto no-scrollbar italic">
         <div className="flex flex-col gap-4">
            <div className="flex items-center gap-3 mb-4 px-2">
-              <Box size={20} className="text-indigo-600" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage Unit</span>
+              <Box size={20} className="text-primary" />
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Storage Unit</span>
            </div>
            {CHEMICALS.map(chem => (
              <button
@@ -319,8 +319,8 @@ export const ChemicalFireworks = () => {
                onClick={() => { setSelectedChemId(chem.id); audioEngine.playTick(settings.soundTheme); }}
                className={`p-6 rounded-[2rem] border-4 transition-all flex items-center gap-4 group ${
                  selectedChemId === chem.id 
-                   ? 'bg-slate-900 border-slate-900 text-white  scale-105' 
-                   : 'bg-white border-slate-50 text-slate-500 hover:border-indigo-100'
+                   ? 'bg-dark-bg border-slate-900 text-white  scale-105' 
+                   : 'bg-surface border-slate-50 text-slate-500 hover:border-primary/20'
                }`}
              >
                <div 
@@ -329,7 +329,7 @@ export const ChemicalFireworks = () => {
                />
                <div className="flex flex-col items-start leading-none gap-1">
                  <span className="text-[9px] font-black uppercase tracking-widest">{chem.name}</span>
-                 <span className="text-lg font-black text-indigo-400 italic">{formatFormula(chem.formula)}</span>
+                 <span className="text-lg font-black text-primary/70 italic">{formatFormula(chem.formula)}</span>
                </div>
              </button>
            ))}
@@ -344,7 +344,7 @@ export const ChemicalFireworks = () => {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white p-12 rounded-[4rem]  max-w-4xl w-full space-y-10 relative overflow-hidden italic"
+              className="bg-surface p-12 rounded-[4rem]  max-w-4xl w-full space-y-10 relative overflow-hidden italic"
             >
               <button 
                 onClick={() => setShowExplanation(false)} 
@@ -354,20 +354,20 @@ export const ChemicalFireworks = () => {
               </button>
 
               <div className="flex items-center gap-6">
-                <div className="w-20 h-20 rounded-3xl bg-slate-900 flex items-center justify-center text-white ">
-                  <Flame size={40} className="text-indigo-400" />
+                <div className="w-20 h-20 rounded-3xl bg-dark-bg flex items-center justify-center text-white ">
+                  <Flame size={40} className="text-primary/70" />
                 </div>
                 <h2 className="text-5xl font-black text-slate-900 tracking-tighter uppercase italic">Flame Science</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border-4 border-white  space-y-4">
-                  <div className="flex items-center gap-3 text-indigo-600 font-black uppercase tracking-widest text-sm">
+                  <div className="flex items-center gap-3 text-primary font-black uppercase tracking-widest text-sm">
                     <Zap size={20} fill="currentColor" /> Phase 1
                   </div>
                   <p className="text-slate-500 font-black text-lg uppercase tracking-tighter leading-tight italic">Heat makes electrons jump to a higher level.</p>
                 </div>
-                <div className="p-8 bg-indigo-600 rounded-[2.5rem] border-4 border-indigo-400 space-y-4 text-white">
+                <div className="p-8 bg-primary rounded-[2.5rem] border-4 border-indigo-400 space-y-4 text-white">
                   <div className="flex items-center gap-3 font-black uppercase tracking-widest text-sm">
                     <Sparkles size={20} fill="currentColor" /> Phase 2
                   </div>
@@ -375,10 +375,10 @@ export const ChemicalFireworks = () => {
                 </div>
               </div>
 
-              <div className="p-8 bg-slate-900 rounded-[3rem] text-white flex justify-center">
+              <div className="p-8 bg-dark-bg rounded-[3rem] text-white flex justify-center">
                  <button
                    onClick={() => setShowExplanation(false)}
-                   className="px-12 py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl uppercase tracking-widest hover:bg-indigo-500 transition-all "
+                   className="px-12 py-5 bg-primary text-white rounded-[2rem] font-black text-xl uppercase tracking-widest hover:bg-primary transition-all "
                  >
                    Got it!
                  </button>

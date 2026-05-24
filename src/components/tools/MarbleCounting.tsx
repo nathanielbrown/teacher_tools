@@ -15,7 +15,7 @@ const MARBLE_TYPES = [
   { name: 'Yellow', color: 'bg-yellow-400', text: 'text-yellow-500' },
   { name: 'Purple', color: 'bg-purple-500', text: 'text-purple-500' },
   { name: 'Orange', color: 'bg-orange-500', text: 'text-orange-500' },
-  { name: 'Pink', color: 'bg-rose-500', text: 'text-rose-500' },
+  { name: 'Pink', color: 'bg-rose-500', text: 'text-caution' },
   { name: 'Cyan', color: 'bg-cyan-500', text: 'text-cyan-500' },
 ];
 
@@ -27,7 +27,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Play</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Pick a <b>Level</b> to start.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -35,11 +35,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Count the marbles of the <b>color</b> we ask for.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Click the <b>Number</b> that matches what you counted.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Try to get 10/10! You can also <b>click</b> marbles to push them.</p>
       </div>
     </div>
@@ -237,7 +237,7 @@ export const MarbleCounting = () => {
     if (gameState !== 'menu') {
       setHeaderActions(
         <div className="flex items-center gap-4 italic">
-          <button onClick={resetGame} className="flex items-center gap-2 px-8 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 ">
+          <button onClick={resetGame} className="flex items-center gap-2 px-8 py-2 bg-surface border-2 border-slate-100 text-neutral-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-caution-border hover:text-caution transition-all active:scale-95 ">
             <ArrowLeft size={14} /> Back
           </button>
         </div>
@@ -256,7 +256,7 @@ export const MarbleCounting = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-[3rem] p-12  border-none flex flex-col items-center gap-12 text-center italic"
+            className="w-full max-w-2xl bg-surface/80 backdrop-blur-xl rounded-[3rem] p-12  border-none flex flex-col items-center gap-12 text-center italic"
           >
             <div className="space-y-4">
               <h2 className="text-6xl font-black text-slate-900 tracking-tight uppercase leading-none">Marble Counting</h2>
@@ -264,9 +264,9 @@ export const MarbleCounting = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full italic">
               {[
-                { id: '1-5', label: 'Easy', range: '1-5', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-                { id: '5-10', label: 'Normal', range: '5-10', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
-                { id: '1-20', label: 'Hard', range: '1-20', color: 'bg-rose-50 text-rose-600 border-rose-100' }
+                { id: '1-5', label: 'Easy', range: '1-5', color: 'bg-success-bg text-success border-success-border' },
+                { id: '5-10', label: 'Normal', range: '5-10', color: 'bg-primary/5 text-primary border-primary/20' },
+                { id: '1-20', label: 'Hard', range: '1-20', color: 'bg-caution-bg text-caution border-caution-border' }
               ].map((diff) => (
                 <button
                   key={diff.id}
@@ -284,7 +284,7 @@ export const MarbleCounting = () => {
             key="result"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-2xl bg-white rounded-[3rem] p-16  border-none flex flex-col items-center text-center gap-10 italic"
+            className="w-full max-w-2xl bg-surface rounded-[3rem] p-16  border-none flex flex-col items-center text-center gap-10 italic"
           >
             <div className="relative">
               <div className="absolute -inset-8 bg-amber-400/20 rounded-full blur-3xl animate-pulse" />
@@ -296,8 +296,8 @@ export const MarbleCounting = () => {
             <div className="space-y-4">
               <h2 className="text-7xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">Finished!</h2>
               <div className="flex flex-col items-center gap-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Score</span>
-                <div className="text-9xl font-black text-indigo-600 tabular-nums tracking-tighter">
+                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">Score</span>
+                <div className="text-9xl font-black text-primary tabular-nums tracking-tighter">
                   {score}<span className="text-3xl text-slate-200 ml-2">/10</span>
                 </div>
               </div>
@@ -305,7 +305,7 @@ export const MarbleCounting = () => {
 
             <button 
               onClick={resetGame} 
-              className="w-full py-6 bg-indigo-600 text-white font-black text-xl rounded-[2rem] hover:bg-indigo-700 transition-all active:scale-95  flex items-center justify-center gap-4 uppercase tracking-widest"
+              className="w-full py-6 bg-primary text-white font-black text-xl rounded-[2rem] hover:bg-primary/90 transition-all active:scale-95  flex items-center justify-center gap-4 uppercase tracking-widest"
             >
               <RotateCcw size={24} /> Try Again
             </button>
@@ -313,13 +313,13 @@ export const MarbleCounting = () => {
         ) : (
           <div className="w-full max-w-6xl flex flex-col gap-8 h-full italic">
             {/* Header Stats */}
-            <div className="flex items-center justify-between px-10 py-6 bg-white/80 backdrop-blur-xl rounded-[3rem] border-4 border-slate-50  shrink-0">
+            <div className="flex items-center justify-between px-10 py-6 bg-surface/80 backdrop-blur-xl rounded-[3rem] border-4 border-slate-50  shrink-0">
               <div className="flex items-center gap-6">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white  border-2 border-white">
+                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white  border-2 border-white">
                   <Activity size={24} />
                 </div>
                 <div className="flex flex-col">
-                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Question</span>
+                   <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Question</span>
                    <span className="text-2xl font-black text-slate-800 tabular-nums leading-none mt-1">{currentIndex + 1} / 10</span>
                 </div>
               </div>
@@ -330,7 +330,7 @@ export const MarbleCounting = () => {
             </div>
 
             {/* Game Stage */}
-            <div className="flex-1 bg-white rounded-[4rem] relative overflow-hidden  border-none group" ref={containerRef}>
+            <div className="flex-1 bg-surface rounded-[4rem] relative overflow-hidden  border-none group" ref={containerRef}>
               <div className="tool-grid-bg opacity-20 pointer-events-none" />
               
               {/* Marbles */}
@@ -351,7 +351,7 @@ export const MarbleCounting = () => {
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    <div className="absolute top-1.5 left-1.5 w-3 h-3 bg-white/40 rounded-full blur-[1px]" />
+                    <div className="absolute top-1.5 left-1.5 w-3 h-3 bg-surface/40 rounded-full blur-[1px]" />
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -377,7 +377,7 @@ export const MarbleCounting = () => {
                             : feedback.selected === opt 
                               ? 'bg-rose-500 border-rose-400 text-white' 
                               : 'bg-slate-100 border-slate-50 text-slate-300 '
-                          : 'bg-white border-white text-slate-800 hover:border-indigo-400 hover:text-indigo-600 hover:-translate-y-2'
+                          : 'bg-surface border-white text-slate-800 hover:border-indigo-400 hover:text-primary hover:-translate-y-2'
                       }`}
                     >
                       {opt}
@@ -393,7 +393,7 @@ export const MarbleCounting = () => {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 1.1 }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 bg-white/20 backdrop-blur-sm"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 bg-surface/20 backdrop-blur-sm"
                   >
                     <div className={`p-16 rounded-[5rem] -[0_64px_128px_-24px_rgba(0,0,0,0.3)] border-8 flex flex-col items-center gap-6 ${ feedback.isCorrect ? 'bg-emerald-500 text-white border-white/20' : 'bg-rose-500 text-white border-white/20'}`}>
                       { feedback.isCorrect ? <CheckCircle2 size={120} strokeWidth={2.5} /> : <XCircle size={120} strokeWidth={2.5} /> }

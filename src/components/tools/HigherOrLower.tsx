@@ -27,25 +27,25 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="higherorlower.help.step1" defaultMessage="Pick numbers to play with." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="higherorlower.help.step2" defaultMessage="Type a number and click the arrow." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="higherorlower.help.step3" defaultMessage="I will tell you if it is higher or lower." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="higherorlower.help.step4" defaultMessage="Can you find the secret number?" />
         </p>
@@ -145,8 +145,8 @@ export const HigherOrLower = () => {
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
           {status !== 'setup' && (
             <div className="absolute top-12 left-12 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">
                 <FormattedMessage id="higherorlower.status.playing" values={{ max: difficulty }} defaultMessage={`1 to ${difficulty}`} />
               </span>
             </div>
@@ -165,7 +165,7 @@ export const HigherOrLower = () => {
                   <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic">
                     <FormattedMessage id="higherorlower.title" />
                   </h2>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
                     <FormattedMessage id="higherorlower.settings.range" />
                   </p>
                 </div>
@@ -175,12 +175,12 @@ export const HigherOrLower = () => {
                     <button
                       key={max}
                       onClick={() => startGame(max)}
-                      className="p-8 bg-white border-4 border-slate-100 rounded-[2.5rem] flex items-center justify-between group hover:border-indigo-400 transition-all hover:scale-[1.02] "
+                      className="p-8 bg-surface border-4 border-slate-100 rounded-[2.5rem] flex items-center justify-between group hover:border-indigo-400 transition-all hover:scale-[1.02] "
                     >
                       <span className="text-4xl font-black text-slate-800 uppercase italic">
                         <FormattedMessage id={`higherorlower.settings.range.${max}`} />
                       </span>
-                      <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors" aria-hidden="true">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary/5 group-hover:text-primary transition-colors" aria-hidden="true">
                         <Target size={32} />
                       </div>
                     </button>
@@ -202,7 +202,7 @@ export const HigherOrLower = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`px-10 py-6 rounded-full text-5xl font-black uppercase tracking-widest flex items-center gap-6 ${
-                          log[0].result === 'Higher' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-500'
+                          log[0].result === 'Higher' ? 'bg-primary/5 text-primary' : 'bg-caution-bg text-caution'
                         }`}
                       >
                         {log[0].result === 'Higher' ? <ArrowUp size={48} aria-hidden="true" /> : <ArrowDown size={48} aria-hidden="true" />}
@@ -227,7 +227,7 @@ export const HigherOrLower = () => {
                       max={difficulty}
                       value={guessInput}
                       onChange={(e) => setGuessInput(e.target.value)}
-                      className="w-full bg-slate-50 border-4 border-slate-100 rounded-[3rem] p-6 lg:p-8 text-center text-6xl lg:text-8xl font-black text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder:text-slate-200 tabular-nums "
+                      className="w-full bg-slate-50 border-4 border-slate-100 rounded-[3rem] p-6 lg:p-8 text-center text-6xl lg:text-8xl font-black text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-surface transition-all placeholder:text-slate-200 tabular-nums "
                       placeholder="?"
                       autoFocus
                       aria-labelledby="guess-input-label"
@@ -237,7 +237,7 @@ export const HigherOrLower = () => {
                   <button
                     type="submit"
                     disabled={!guessInput}
-                    className="w-full py-8 bg-indigo-600 text-white rounded-[2.5rem] text-3xl font-black  hover:bg-indigo-700 disabled:opacity-30 transition-all active:scale-95 flex items-center justify-center gap-4 uppercase tracking-widest italic"
+                    className="w-full py-8 bg-primary text-white rounded-[2.5rem] text-3xl font-black  hover:bg-primary/90 disabled:opacity-30 transition-all active:scale-95 flex items-center justify-center gap-4 uppercase tracking-widest italic"
                   >
                     <Send size={32} aria-hidden="true" />
                     <FormattedMessage id="higherorlower.guess.button" />
@@ -265,15 +265,15 @@ export const HigherOrLower = () => {
                   </p>
                 </div>
                 
-                <div className="bg-indigo-50 px-10 py-5 rounded-3xl border-4 border-white ">
-                  <p className="text-indigo-600 font-black uppercase tracking-widest text-lg">
+                <div className="bg-primary/5 px-10 py-5 rounded-3xl border-4 border-white ">
+                  <p className="text-primary font-black uppercase tracking-widest text-lg">
                     <FormattedMessage id="higherorlower.win.stats" values={{ n: log.length }} />
                   </p>
                 </div>
 
                 <button 
                   onClick={resetGame}
-                  className="flex items-center gap-3 px-8 py-4 bg-white border-4 border-slate-100 text-slate-400 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:border-indigo-200 hover:text-indigo-600 transition-all active:scale-95 "
+                  className="flex items-center gap-3 px-8 py-4 bg-surface border-4 border-slate-100 text-neutral-400 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:border-primary/30 hover:text-primary transition-all active:scale-95 "
                 >
                   <RotateCcw size={20} strokeWidth={3} aria-hidden="true" />
                   <FormattedMessage id="emotion.reset" />
@@ -293,7 +293,7 @@ export const HigherOrLower = () => {
           <div className="space-y-8">
             <button
               onClick={resetGame}
-              className="w-full py-6 bg-white border-4 border-slate-100 text-slate-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center gap-4 "
+              className="w-full py-6 bg-surface border-4 border-slate-100 text-neutral-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all flex items-center justify-center gap-4 "
             >
               <RotateCcw size={20} aria-hidden="true" />
               <FormattedMessage id="emotion.reset" />
@@ -320,14 +320,14 @@ export const HigherOrLower = () => {
                 isMobile ? 'flex-col p-2 gap-1 h-20 justify-center' : 'p-5'
               } ${
                 entry.result === 'Correct' 
-                  ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
-                  : 'bg-white border-white '
+                  ? 'bg-success-bg border-success-border text-emerald-700' 
+                  : 'bg-surface border-white '
               }`}
             >
               <span className={`${isMobile ? 'text-xl' : 'text-3xl'} font-black text-slate-800 tabular-nums`}>{entry.guess}</span>
               <div className="flex items-center">
                 {entry.result === 'Higher' && (
-                  <div className="flex items-center gap-1 text-indigo-600 font-black text-[10px] uppercase tracking-widest">
+                  <div className="flex items-center gap-1 text-primary font-black text-[10px] uppercase tracking-widest">
                     <ArrowUp size={isMobile ? 14 : 16} aria-hidden="true" /> 
                     <span className={isMobile ? "sr-only" : ""}>
                       <FormattedMessage id="higherorlower.result.higher" />
@@ -335,7 +335,7 @@ export const HigherOrLower = () => {
                   </div>
                 )}
                 {entry.result === 'Lower' && (
-                  <div className="flex items-center gap-1 text-rose-500 font-black text-[10px] uppercase tracking-widest">
+                  <div className="flex items-center gap-1 text-caution font-black text-[10px] uppercase tracking-widest">
                     <ArrowDown size={isMobile ? 14 : 16} aria-hidden="true" /> 
                     <span className={isMobile ? "sr-only" : ""}>
                       <FormattedMessage id="higherorlower.result.lower" />
@@ -343,7 +343,7 @@ export const HigherOrLower = () => {
                   </div>
                 )}
                 {entry.result === 'Correct' && (
-                  <div className="flex items-center gap-1 text-emerald-600 font-black text-[10px] uppercase tracking-widest">
+                  <div className="flex items-center gap-1 text-success font-black text-[10px] uppercase tracking-widest">
                     <Check size={isMobile ? 14 : 16} aria-hidden="true" /> 
                     <span className={isMobile ? "sr-only" : ""}>
                       <FormattedMessage id="higherorlower.result.correct" />

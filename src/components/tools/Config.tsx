@@ -63,8 +63,8 @@ export const Config = () => {
               onClick={() => navigateToTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 ${
                 activeTab === tab.id
-                  ? 'bg-indigo-600 text-white '
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-white/80'
+                  ? 'bg-primary text-white '
+                  : 'text-neutral-400 hover:text-slate-600 hover:bg-surface/80'
               }`}
             >
               <span className="text-base">{tab.emoji}</span>
@@ -233,25 +233,26 @@ export const Config = () => {
                 </h3>
                 <div className="flex-1 h-px bg-slate-100" />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { id: 'early-years', name: intl.formatMessage({ id: 'config.theme.early_years.name', defaultMessage: 'Early Years' }), desc: intl.formatMessage({ id: 'config.theme.early_years.desc', defaultMessage: 'Bright and colourful.' }), emoji: '🎨', icon: Palette },
                   { id: 'primary', name: intl.formatMessage({ id: 'config.theme.primary.name', defaultMessage: 'Primary' }), desc: intl.formatMessage({ id: 'config.theme.primary.desc', defaultMessage: 'Nature inspired' }), icon: Trees },
                   { id: 'secondary', name: intl.formatMessage({ id: 'config.theme.secondary.name', defaultMessage: 'Secondary' }), desc: intl.formatMessage({ id: 'config.theme.secondary.desc', defaultMessage: 'Modern & sleek' }), icon: Sparkles },
+                  { id: 'dark', name: intl.formatMessage({ id: 'config.theme.dark.name', defaultMessage: 'Dark Mode' }), desc: intl.formatMessage({ id: 'config.theme.dark.desc', defaultMessage: 'Easy on the eyes' }), icon: Moon },
                 ].map(theme => (
                   <button
                     key={theme.id}
                     onClick={() => updateTheme(theme.id)}
                     className={`p-4 rounded-2xl border-2 text-left transition-all duration-300 ${settings.theme === theme.id
                       ? 'border-primary bg-primary/5   scale-[1.02]'
-                      : 'border-slate-100 bg-white hover:border-primary/30 hover:bg-slate-50'
+                      : 'border-slate-100 bg-surface hover:border-primary/30 hover:bg-slate-50'
                       }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       {theme.id === 'early-years' ? (
                         <span className="text-xl">{theme.emoji}</span>
                       ) : (
-                        <theme.icon className={`w-5 h-5 ${settings.theme === theme.id ? 'text-primary' : 'text-slate-400'}`} />
+                        <theme.icon className={`w-5 h-5 ${settings.theme === theme.id ? 'text-primary' : 'text-neutral-400'}`} />
                       )}
                       <span className="font-bold text-slate-800 text-sm">{theme.name}</span>
                     </div>
@@ -289,7 +290,7 @@ export const Config = () => {
                     className={`p-3 rounded-2xl border-2 text-center transition-all duration-300 flex flex-col items-center gap-1 ${
                       settings.soundTheme === theme.id
                         ? 'border-primary bg-primary/5 text-primary  '
-                        : 'border-slate-100 bg-white hover:border-primary/30 text-slate-500 hover:text-primary hover:bg-slate-50'
+                        : 'border-slate-100 bg-surface hover:border-primary/30 text-slate-500 hover:text-primary hover:bg-slate-50'
                     }`}
                   >
                     <span className="text-2xl">{theme.emoji}</span>
@@ -361,7 +362,7 @@ export const Config = () => {
                     style={{ width: `${storagePercentage}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium">
+                <p className="text-[10px] text-neutral-400 font-medium">
                   <FormattedMessage id="config.data.usage_desc" defaultMessage="LocalStorage is used to save your settings, classes, and tool data directly in your browser." />
                 </p>
               </div>
@@ -391,7 +392,7 @@ export const Config = () => {
                     onClick={() => updateLanguage(lang.id)}
                     className={`p-4 rounded-2xl border-2 text-left transition-all duration-300 ${settings.language === lang.id
                       ? 'border-primary bg-primary/5  '
-                      : 'border-slate-100 bg-white hover:border-primary/30 hover:bg-slate-50'
+                      : 'border-slate-100 bg-surface hover:border-primary/30 hover:bg-slate-50'
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -419,14 +420,14 @@ export const Config = () => {
                     className={`px-1 py-2 rounded-lg border-2 font-bold text-[9px] transition-all duration-300 ${
                       settings.selectedYear === year
                         ? 'border-primary bg-primary text-white  scale-105 z-10'
-                        : 'border-slate-100 bg-white text-slate-500 hover:border-primary/30 hover:bg-slate-50'
+                        : 'border-slate-100 bg-surface text-slate-500 hover:border-primary/30 hover:bg-slate-50'
                     }`}
                   >
                     {year === 'Prep' ? 'Prep' : year === 'All' ? 'All' : `Yr ${year}`}
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] text-slate-400 font-medium italic">
+              <p className="text-[10px] text-neutral-400 font-medium italic">
                 <FormattedMessage id="config.year_level.desc" defaultMessage="Filter tools on the dashboard by year level." />
               </p>
             </section>
@@ -447,7 +448,7 @@ export const Config = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Add New Class */}
-            <div className="bg-white border border-slate-100 p-6 rounded-3xl space-y-4 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-surface border border-slate-100 p-6 rounded-3xl space-y-4 shadow-sm hover:shadow-md transition-all">
               <h4 className="font-bold text-slate-800 text-lg">
                 <FormattedMessage id="config.classes.create.title" defaultMessage="Create New Class" />
               </h4>
@@ -461,7 +462,7 @@ export const Config = () => {
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder={intl.formatMessage({ id: 'config.classes.create.name_placeholder', defaultMessage: 'e.g. Year 3 Red' })}
-                    className="w-full p-4 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold "
+                    className="w-full p-4 text-sm bg-surface border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold "
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -473,10 +474,10 @@ export const Config = () => {
                     onChange={(e) => setNewClassStudents(e.target.value)}
                     placeholder={intl.formatMessage({ id: 'config.classes.create.students_placeholder', defaultMessage: 'Alice\nBob\nCharlie' })}
                     rows={6}
-                    className="w-full p-4 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold  resize-none"
+                    className="w-full p-4 text-sm bg-surface border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold  resize-none"
                   />
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 animate-pulse-subtle">
+                <div className="flex items-center gap-2 px-4 py-2 bg-success-bg text-emerald-700 rounded-xl border border-success-border animate-pulse-subtle">
                   <span className="text-sm">🔒</span>
                   <span className="text-[10px] font-black uppercase tracking-wider">
                     <FormattedMessage id="config.classes.create.privacy_tip" defaultMessage="Privacy Tip: Use first names or initials only." />
@@ -486,7 +487,7 @@ export const Config = () => {
               <button
                 onClick={handleAddClass}
                 disabled={!newClassName.trim() || !newClassStudents.trim()}
-                className="w-full flex items-center justify-center space-x-2 bg-indigo-600 text-white px-6 py-4 rounded-xl text-sm font-bold   transition-all active:scale-[0.98] disabled:opacity-30 mt-2"
+                className="w-full flex items-center justify-center space-x-2 bg-primary text-white px-6 py-4 rounded-xl text-sm font-bold   transition-all active:scale-[0.98] disabled:opacity-30 mt-2"
               >
                 <span className="text-xl">➕</span>
                 <span>
@@ -501,13 +502,13 @@ export const Config = () => {
                 <FormattedMessage id="config.classes.list.title" defaultMessage="Current Classes" />
               </h4>
               {settings.classes.length === 0 ? (
-                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400 font-bold italic">
+                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center text-neutral-400 font-bold italic">
                   <FormattedMessage id="config.classes.list.empty" defaultMessage="No classes added yet" />
                 </div>
               ) : (
                 <div className="space-y-4 overflow-y-auto max-h-[900px] pr-2 custom-scrollbar">
                   {settings.classes.map(cls => (
-                    <div key={cls.id} className="bg-white border border-slate-100 p-6 rounded-3xl flex gap-4   transition-all">
+                    <div key={cls.id} className="bg-surface border border-slate-100 p-6 rounded-3xl flex gap-4   transition-all">
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center justify-between">
                           <h5 className="text-md font-bold text-slate-800">{cls.name}</h5>
@@ -524,7 +525,7 @@ export const Config = () => {
                       </div>
                       <button
                         onClick={() => deleteClass(cls.id)}
-                        className="self-start p-3 text-slate-400 hover:bg-slate-100 rounded-xl transition-all active:scale-90"
+                        className="self-start p-3 text-neutral-400 hover:bg-slate-100 rounded-xl transition-all active:scale-90"
                         title={intl.formatMessage({ id: 'config.classes.list.delete', defaultMessage: 'Delete Class' })}
                       >
                         <span className="text-xl">🗑️</span>

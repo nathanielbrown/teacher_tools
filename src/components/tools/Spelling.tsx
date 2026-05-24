@@ -33,13 +33,13 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="spelling.help.step1" defaultMessage="Pick a word list from the menu." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="spelling.help.step2" defaultMessage="Listen to the word and type it in the box." />
         </p>
@@ -207,7 +207,7 @@ export const Spelling = () => {
               <div className="lg:hidden">
                 <button
                   onClick={startGame}
-                  className="w-full h-16 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-indigo-200"
+                  className="w-full h-16 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-indigo-200"
                 >
                   <Play size={20} fill="currentColor" /> <FormattedMessage id="spelling.setup.start" />
                 </button>
@@ -241,7 +241,7 @@ export const Spelling = () => {
 
                 <button
                   onClick={startGame}
-                  className="w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-indigo-700 transition-all  flex items-center justify-center gap-6 border-4 border-white active:scale-95"
+                  className="w-full max-w-sm h-24 bg-primary text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-primary/90 transition-all  flex items-center justify-center gap-6 border-4 border-white active:scale-95"
                 >
                   <Play size={28} fill="currentColor" /> <FormattedMessage id="shared.button.play" />
                 </button>
@@ -257,16 +257,16 @@ export const Spelling = () => {
                 className="flex-1 flex flex-col items-center justify-center gap-12 z-10 w-full max-w-2xl"
               >
                 <div className="flex items-center gap-6">
-                  <div className="px-6 py-2 bg-white rounded-full border-2 border-slate-100 font-black text-slate-400 uppercase tracking-widest text-xs">
+                  <div className="px-6 py-2 bg-surface rounded-full border-2 border-slate-100 font-black text-neutral-400 uppercase tracking-widest text-xs">
                     <FormattedMessage id="spelling.playing.progress" values={{ current: totalWords - queue.length + 1, total: totalWords }} />
                   </div>
-                  <div className="px-6 py-2 bg-indigo-600 text-white rounded-full font-black uppercase tracking-widest text-xs">
+                  <div className="px-6 py-2 bg-primary text-white rounded-full font-black uppercase tracking-widest text-xs">
                     <FormattedMessage id="spelling.playing.score" values={{ score }} />
                   </div>
                 </div>
 
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-indigo-600 rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity" />
+                  <div className="absolute inset-0 bg-primary rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity" />
                   <button
                     onClick={repeatWord}
                     className="relative w-48 h-48 bg-rose-600 text-white rounded-full   hover:scale-110 active:scale-90 transition-all flex items-center justify-center border-8 border-white"
@@ -281,7 +281,7 @@ export const Spelling = () => {
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    className="w-full text-center text-5xl lg:text-6xl font-black p-10 bg-white border-[12px] border-slate-100 rounded-[3.5rem] focus:border-indigo-600 transition-all outline-none tabular-nums  uppercase tracking-tighter placeholder:text-4xl lg:placeholder:text-5xl"
+                    className="w-full text-center text-5xl lg:text-6xl font-black p-10 bg-surface border-[12px] border-slate-100 rounded-[3.5rem] focus:border-indigo-600 transition-all outline-none tabular-nums  uppercase tracking-tighter placeholder:text-4xl lg:placeholder:text-5xl"
                     placeholder={intl.formatMessage({ id: 'spelling.playing.placeholder' })}
                     autoComplete="off"
                     autoCorrect="off"
@@ -291,7 +291,7 @@ export const Spelling = () => {
                   <button
                     type="submit"
                     disabled={!userInput.trim() || !!feedback}
-                    className="w-full h-24 bg-indigo-600 text-white font-black text-3xl rounded-[3rem] hover:bg-indigo-700  transition-all disabled:opacity-50 tracking-[0.2em] uppercase"
+                    className="w-full h-24 bg-primary text-white font-black text-3xl rounded-[3rem] hover:bg-primary/90  transition-all disabled:opacity-50 tracking-[0.2em] uppercase"
                   >
                     <FormattedMessage id="spelling.playing.verify" />
                   </button>
@@ -304,10 +304,10 @@ export const Spelling = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       className={`w-full p-8 rounded-[3rem] flex items-center gap-6 border-8  ${
-                        feedback.type === 'success' ? 'bg-emerald-500 text-white border-white' : 'bg-rose-50 text-rose-600 border-rose-100'
+                        feedback.type === 'success' ? 'bg-emerald-500 text-white border-white' : 'bg-caution-bg text-caution border-caution-border'
                       }`}
                     >
-                      <div className={`p-4 rounded-2xl ${feedback.type === 'success' ? 'bg-white/20' : 'bg-rose-600 text-white'} `}>
+                      <div className={`p-4 rounded-2xl ${feedback.type === 'success' ? 'bg-surface/20' : 'bg-rose-600 text-white'} `}>
                         {feedback.type === 'success' ? <CheckCircle2 size={40} strokeWidth={3} /> : <XCircle size={40} strokeWidth={3} />}
                       </div>
                       <span className="font-black text-3xl tracking-tighter uppercase">{feedback.message}</span>
@@ -326,7 +326,7 @@ export const Spelling = () => {
               >
                 <div className="relative">
                   <div className="absolute inset-0 bg-emerald-500 blur-[80px] opacity-20" />
-                  <div className="relative w-48 h-48 bg-slate-800 text-emerald-400 rounded-[3.5rem] flex items-center justify-center  rotate-12 border-8 border-slate-800">
+                  <div className="relative w-48 h-48 bg-slate-800 text-emerald-400 rounded-[3.5rem] flex items-center justify-center  rotate-12 border-8 border-dark-border">
                     <CheckCircle2 size={96} strokeWidth={3} />
                   </div>
                 </div>
@@ -335,14 +335,14 @@ export const Spelling = () => {
                   <h3 className="text-7xl font-black uppercase tracking-tighter text-slate-900 leading-none">
                     <FormattedMessage id="spelling.finished.title" />
                   </h3>
-                  <p className="text-slate-400 text-xl font-black uppercase tracking-[0.4em]">
+                  <p className="text-neutral-400 text-xl font-black uppercase tracking-[0.4em]">
                     <FormattedMessage id="spelling.finished.score" values={{ score, total: totalWords }} />
                   </p>
                 </div>
                 
                 <button
                   onClick={resetToSetup}
-                  className="flex items-center justify-center gap-6 w-full max-w-sm h-24 bg-indigo-600 text-white rounded-[3.5rem] hover:bg-indigo-700 transition-all font-black text-2xl  tracking-[0.2em] uppercase"
+                  className="flex items-center justify-center gap-6 w-full max-w-sm h-24 bg-primary text-white rounded-[3.5rem] hover:bg-primary/90 transition-all font-black text-2xl  tracking-[0.2em] uppercase"
                 >
                   <ListRestart size={32} strokeWidth={3} /> <FormattedMessage id="spelling.finished.restart" />
                 </button>

@@ -29,7 +29,7 @@ const HelpContent = () => (
     <div className="space-y-3 italic">
       {[1, 2, 3, 4].map(step => (
         <div key={step} className="flex gap-3 text-left">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">{step}</div>
+          <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">{step}</div>
           <p className="text-sm text-slate-600 font-medium leading-tight">
             <FormattedMessage id={`groupnamegenerator.help.step${step}`} />
           </p>
@@ -107,9 +107,9 @@ export const RandomGroupNameGenerator = () => {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`flex items-center gap-4 py-3 lg:py-4 px-4 md:px-6 bg-white rounded-[1.5rem] md:rounded-[2rem] border-4 border-slate-50 hover:border-indigo-100 transition-all w-full ${index === groups.length - 1 && groups.length % 2 !== 0 ? 'md:col-span-2' : ''}`}
+                        className={`flex items-center gap-4 py-3 lg:py-4 px-4 md:px-6 bg-surface rounded-[1.5rem] md:rounded-[2rem] border-4 border-slate-50 hover:border-primary/20 transition-all w-full ${index === groups.length - 1 && groups.length % 2 !== 0 ? 'md:col-span-2' : ''}`}
                       >
-                        <div className="w-10 h-10 lg:w-10 lg:h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-lg lg:text-lg shrink-0">
+                        <div className="w-10 h-10 lg:w-10 lg:h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-lg lg:text-lg shrink-0">
                           {index + 1}
                         </div>
                         <span className="text-xl md:text-5xl lg:text-2xl font-black text-slate-800 tracking-tight">
@@ -122,11 +122,11 @@ export const RandomGroupNameGenerator = () => {
                 <div className="flex flex-col items-center justify-center text-center py-12 opacity-30 italic">
                   {isGenerating ? (
                     <div className="relative">
-                      <RefreshCw size={64} className="text-indigo-500 animate-spin" />
+                      <RefreshCw size={64} className="text-primary animate-spin" />
                     </div>
                   ) : (
                     <>
-                      <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-400 mb-6">
+                      <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-neutral-400 mb-6">
                         <Users size={48} />
                       </div>
                     </>
@@ -140,7 +140,7 @@ export const RandomGroupNameGenerator = () => {
             <button
               onClick={generateGroups}
               disabled={isGenerating}
-              className="w-full py-5 lg:py-5 bg-indigo-600 text-white rounded-[1.5rem] md:rounded-[2rem] font-black text-xl md:text-4xl lg:text-xl uppercase tracking-[0.2em]  hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 md:gap-6 group italic border-4 border-white shadow-lg"
+              className="w-full py-5 lg:py-5 bg-primary text-white rounded-[1.5rem] md:rounded-[2rem] font-black text-xl md:text-4xl lg:text-xl uppercase tracking-[0.2em]  hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 md:gap-6 group italic border-4 border-white shadow-lg"
             >
               {isGenerating ? (
                 <RefreshCw size={32} className="animate-spin" />

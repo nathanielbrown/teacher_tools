@@ -22,7 +22,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="guessingGame.help.step1" defaultMessage="Select a Topic to start." />
         </p>
@@ -34,7 +34,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="guessingGame.help.step3" defaultMessage="Be quick! You only have 10 seconds per question." />
         </p>
@@ -45,9 +45,9 @@ const getHelpInfo = () => (
 
 const getColorClasses = (color: string) => {
   const classes: Record<string, string> = {
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    rose: 'bg-rose-50 text-rose-600 border-rose-100',
-    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+    emerald: 'bg-success-bg text-success border-success-border',
+    rose: 'bg-caution-bg text-caution border-caution-border',
+    indigo: 'bg-primary/5 text-primary border-primary/20',
     blue: 'bg-blue-50 text-blue-600 border-blue-100'
   };
   return classes[color] || classes.indigo;
@@ -233,7 +233,7 @@ export const GuessingGame = () => {
                <h2 className="text-5xl lg:text-6xl font-black text-slate-800 tracking-tighter uppercase leading-none italic drop-shadow-sm">
                  <FormattedMessage id="guessingGame.title" defaultMessage="Guessing Game" />
                </h2>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] italic">
+               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] italic">
                  <FormattedMessage id="guessingGame.subtitle" defaultMessage="Guess the emoji!" />
                </p>
             </div>
@@ -243,7 +243,7 @@ export const GuessingGame = () => {
                 <button
                   key={key}
                   onClick={() => initGame(key)}
-                  className={`group relative p-6 bg-white border-4 border-slate-50 rounded-[2.5rem] transition-all flex items-center justify-between   hover:border-indigo-100 active:scale-95 overflow-hidden ${isMobile ? 'h-32' : 'h-40'}`}
+                  className={`group relative p-6 bg-surface border-4 border-slate-50 rounded-[2.5rem] transition-all flex items-center justify-between   hover:border-primary/20 active:scale-95 overflow-hidden ${isMobile ? 'h-32' : 'h-40'}`}
                 >
                   <div className="flex items-center gap-6 lg:gap-8 relative z-10">
                     <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-[1.5rem] flex items-center justify-center text-3xl lg:text-4xl not-italic group-hover:scale-110 transition-transform ${getColorClasses(topic.color)}`}>
@@ -251,7 +251,7 @@ export const GuessingGame = () => {
                     </div>
                     <div className="text-left">
                       <div className="font-black text-2xl lg:text-3xl text-slate-800 uppercase tracking-tighter leading-none italic">{topic.name}</div>
-                      <div className="text-slate-400 font-black uppercase text-[10px] tracking-[0.4em] mt-2 italic">
+                      <div className="text-neutral-400 font-black uppercase text-[10px] tracking-[0.4em] mt-2 italic">
                         <FormattedMessage 
                           id="guessingGame.itemsCount" 
                           defaultMessage="{count} Items" 
@@ -260,7 +260,7 @@ export const GuessingGame = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-2xl text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all relative z-10">
+                  <div className="bg-slate-50 p-4 rounded-2xl text-slate-300 group-hover:bg-primary/5 group-hover:text-primary transition-all relative z-10">
                      <ChevronRight size={24} />
                   </div>
                 </button>
@@ -274,19 +274,19 @@ export const GuessingGame = () => {
             animate={{ opacity: 1, scale: 1 }}
             className={`flex-1 flex flex-col items-center justify-center gap-4 w-full max-w-4xl mx-auto ${isMobile ? 'px-0' : 'py-2'}`}
           >
-            <div className={`flex justify-between items-center w-full bg-white border-4 border-slate-50 ${isMobile ? 'rounded-none px-6 py-4' : 'rounded-[2.5rem] px-10 py-4'}`}>
+            <div className={`flex justify-between items-center w-full bg-surface border-4 border-slate-50 ${isMobile ? 'rounded-none px-6 py-4' : 'rounded-[2.5rem] px-10 py-4'}`}>
                <div className="flex items-center gap-4">
                   <span className="text-2xl lg:text-3xl font-black text-slate-800 tabular-nums leading-none italic">{currentQuestionIdx + 1} / {QUESTIONS_PER_GAME}</span>
                </div>
                
                <div className="flex items-center gap-4 bg-slate-50 px-6 lg:px-10 py-3 lg:py-4 rounded-[1.5rem] border-4 border-white ">
-                  <Timer className={`w-6 h-6 ${timeLeft <= 3 ? 'text-rose-500 animate-pulse' : 'text-indigo-600'}`} />
-                  <span className={`text-2xl lg:text-3xl font-black tabular-nums leading-none ${timeLeft <= 3 ? 'text-rose-500' : 'text-slate-800'}`}>{timeLeft}s</span>
+                  <Timer className={`w-6 h-6 ${timeLeft <= 3 ? 'text-caution animate-pulse' : 'text-primary'}`} />
+                  <span className={`text-2xl lg:text-3xl font-black tabular-nums leading-none ${timeLeft <= 3 ? 'text-caution' : 'text-slate-800'}`}>{timeLeft}s</span>
                </div>
 
                <div className="flex items-center gap-4">
                   <Target size={24} className="text-emerald-400" />
-                  <span className="text-2xl lg:text-3xl font-black text-emerald-600 tabular-nums leading-none italic">{score}</span>
+                  <span className="text-2xl lg:text-3xl font-black text-success tabular-nums leading-none italic">{score}</span>
                </div>
             </div>
 
@@ -295,7 +295,7 @@ export const GuessingGame = () => {
                 key={currentQuestionIdx}
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-48 h-48 lg:w-56 lg:h-56 bg-white rounded-[3rem] border-4 border-slate-100 flex items-center justify-center relative"
+                className="w-48 h-48 lg:w-56 lg:h-56 bg-surface rounded-[3rem] border-4 border-slate-100 flex items-center justify-center relative"
               >
                 <span className="text-[5rem] lg:text-[6rem] relative z-10 not-italic">{questions[currentQuestionIdx].correctItem.emoji}</span>
               </motion.div>
@@ -305,7 +305,7 @@ export const GuessingGame = () => {
                   const isSelected = selectedAnswer === option.name;
                   const isCorrectAnswer = option.name === questions[currentQuestionIdx].correctItem.name;
                   
-                  let buttonStyle = "bg-white text-slate-800 border-slate-100 hover:border-indigo-100 ";
+                  let buttonStyle = "bg-surface text-slate-800 border-slate-100 hover:border-primary/20 ";
                   
                   if (isEvaluating) {
                     if (isCorrectAnswer) {
@@ -333,7 +333,7 @@ export const GuessingGame = () => {
 
             <button
               onClick={() => { setStatus('setup'); audioEngine.playTick(settings.soundTheme); }}
-              className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 italic"
+              className="flex items-center gap-2 px-6 py-2 bg-surface border-2 border-slate-100 text-neutral-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-caution-border hover:text-caution transition-all active:scale-95 italic"
             >
               <RotateCcw size={14} /> <FormattedMessage id="guessingGame.quit" defaultMessage="Quit Game" />
             </button>
@@ -343,7 +343,7 @@ export const GuessingGame = () => {
             key="finished"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`flex-1 bg-slate-900 rounded-[5rem] flex flex-col items-center justify-center text-center text-white space-y-12  relative overflow-hidden w-full ${isMobile ? 'p-10' : 'p-20'}`}
+            className={`flex-1 bg-dark-bg rounded-[5rem] flex flex-col items-center justify-center text-center text-white space-y-12  relative overflow-hidden w-full ${isMobile ? 'p-10' : 'p-20'}`}
           >
             <div className="tool-grid-bg-dark opacity-[0.05]" />
             <div className="relative">
@@ -367,7 +367,7 @@ export const GuessingGame = () => {
                    <FormattedMessage 
                      id="guessingGame.finalScore" 
                      defaultMessage="Your Score: {score} / {total}" 
-                     values={{ score: <span className="text-indigo-400 tabular-nums">{score}</span>, total: QUESTIONS_PER_GAME }} 
+                     values={{ score: <span className="text-primary/70 tabular-nums">{score}</span>, total: QUESTIONS_PER_GAME }} 
                    />
                  </p>
                </div>
@@ -375,7 +375,7 @@ export const GuessingGame = () => {
 
              <button
               onClick={() => setStatus('setup')}
-              className="px-16 lg:px-24 py-8 lg:py-10 bg-white text-slate-900 rounded-[4rem] font-black text-2xl lg:text-3xl hover:scale-105 active:scale-95 transition-all -[0_40px_80px_-15px_rgba(255,255,255,0.2)] flex items-center gap-8 uppercase tracking-[0.2em] relative z-10 italic"
+              className="px-16 lg:px-24 py-8 lg:py-10 bg-surface text-slate-900 rounded-[4rem] font-black text-2xl lg:text-3xl hover:scale-105 active:scale-95 transition-all -[0_40px_80px_-15px_rgba(255,255,255,0.2)] flex items-center gap-8 uppercase tracking-[0.2em] relative z-10 italic"
             >
               <RotateCcw size={32} /> <FormattedMessage id="guessingGame.playAgain" defaultMessage="Play Again" />
             </button>

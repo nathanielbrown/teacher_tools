@@ -61,7 +61,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight italic">How to use</h3>
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Choose a <b>sound</b> from the side.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -69,11 +69,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Tap the <b>squares</b> to make music.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">High sounds are at the <b>top</b>.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center text-xs font-black text-amber-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-warning-bg flex items-center justify-center text-xs font-black text-warning shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">The <b>bottom</b> part is for drums.</p>
       </div>
     </div>
@@ -86,11 +86,7 @@ const HELP_INFO = (
 
 // 6. Functions
 const midiToFreq = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
-const getNoteName = (midi: number) => {
-  const name = NOTE_NAMES[midi % 12].replace('#', 'S');
-  const octave = Math.floor(midi / 12) - 1;
-  return `${name}${octave}`;
-};
+
 
 const ShapeIcon = ({ shape, className, size = 16 }: { shape: string, className?: string, size?: number }) => {
   switch (shape) {
@@ -106,7 +102,7 @@ const ShapeIcon = ({ shape, className, size = 16 }: { shape: string, className?:
 
 // 7. Component
 export const SongMaker = () => {
-  const { setHeaderActions, setHelpContent, setOnReset, clearHeader, hasConfig, setHasConfig, isConfigOpen, setIsConfigOpen, setOnConfigToggle } = useHeader();
+  const { setHeaderActions, setHelpContent, setOnReset, clearHeader, setHasConfig, isConfigOpen, setIsConfigOpen, setOnConfigToggle } = useHeader();
   const { settings } = useSettings();
   
   const [selectedInstrument, setSelectedInstrument] = useState(INSTRUMENTS[0]);
@@ -155,7 +151,7 @@ export const SongMaker = () => {
       }
       return newGrid;
     });
-  }, [rows, cols]);
+  }, [rows, cols, setGrid]);
 
   const resetGrid = useCallback(() => {
     // Reset Config and Tempo
@@ -177,7 +173,7 @@ export const SongMaker = () => {
     setIsPlaying(false);
     setActiveStep(-1);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setConfig, setTempo, setGrid]);
 
   const resetGridRef = React.useRef(resetGrid);
   useEffect(() => {
@@ -295,7 +291,7 @@ export const SongMaker = () => {
               exit={{ opacity: 0, x: -20 }}
               className="w-20 lg:w-24 shrink-0 flex flex-col gap-4 py-8 items-center pr-4"
             >
-              <div className="flex items-center justify-center mb-4 text-slate-400">
+              <div className="flex items-center justify-center mb-4 text-neutral-400">
                 <Paintbrush size={24} />
               </div>
               <div className="flex flex-col gap-6">
@@ -303,14 +299,14 @@ export const SongMaker = () => {
                   <div key={inst.id} className="flex flex-col items-center gap-2">
                     <button
                       onClick={() => setSelectedInstrument(inst)}
-                      className={`w-16 lg:w-20 aspect-square rounded-2xl border-4 transition-all flex items-center justify-center group ${selectedInstrument.id === inst.id ? 'bg-white border-indigo-500' : 'bg-white border-white text-slate-400 hover:border-indigo-100'}`}
+                      className={`w-16 lg:w-20 aspect-square rounded-2xl border-4 transition-all flex items-center justify-center group ${selectedInstrument.id === inst.id ? 'bg-surface border-indigo-500' : 'bg-surface border-white text-neutral-400 hover:border-primary/20'}`}
                       title={inst.label}
                     >
                       <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: inst.color }}>
                         <ShapeIcon shape={inst.shape} className="text-white fill-white/20" size={24} />
                       </div>
                     </button>
-                    <span className={`text-[8px] font-black uppercase tracking-[0.15em] text-center leading-none ${selectedInstrument.id === inst.id ? 'text-indigo-600' : 'text-slate-400'}`}>
+                    <span className={`text-[8px] font-black uppercase tracking-[0.15em] text-center leading-none ${selectedInstrument.id === inst.id ? 'text-primary' : 'text-neutral-400'}`}>
                       {inst.label}
                     </span>
                   </div>
@@ -320,7 +316,7 @@ export const SongMaker = () => {
               <div className="flex flex-col gap-2 mt-4 w-full">
                 <button
                   onClick={handleExportMidi}
-                  className="w-full flex flex-col items-center justify-center py-3 bg-indigo-50 text-indigo-500 rounded-2xl border-2 border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-all active:scale-95 group"
+                  className="w-full flex flex-col items-center justify-center py-3 bg-primary/5 text-primary rounded-2xl border-2 border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-95 group"
                   title="Export as MIDI"
                 >
                   <Download size={18} className="mb-1 group-hover:-translate-y-0.5 transition-transform" />
@@ -328,7 +324,7 @@ export const SongMaker = () => {
                 </button>
                 <button
                   onClick={handleExportWav}
-                  className="w-full flex flex-col items-center justify-center py-3 bg-indigo-50 text-indigo-500 rounded-2xl border-2 border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-all active:scale-95 group"
+                  className="w-full flex flex-col items-center justify-center py-3 bg-primary/5 text-primary rounded-2xl border-2 border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-95 group"
                   title="Export as WAV Audio"
                 >
                   <Download size={18} className="mb-1 group-hover:-translate-y-0.5 transition-transform" />
@@ -356,31 +352,31 @@ export const SongMaker = () => {
                 <div className="space-y-5">
                   {/* Bars */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bars</label>
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Bars</label>
                     <input 
                       type="number" min="1" max="16" value={config.bars} 
                       onChange={(e) => setConfig(prev => ({ ...prev, bars: parseInt(e.target.value) || 1 }))}
-                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors"
+                      className="w-full p-2.5 bg-surface border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors"
                     />
                   </div>
 
                   {/* Beats per Bar */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Beats / Bar</label>
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Beats / Bar</label>
                     <input 
                       type="number" min="1" max="16" value={config.beatsPerBar} 
                       onChange={(e) => setConfig(prev => ({ ...prev, beatsPerBar: parseInt(e.target.value) || 1 }))}
-                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors"
+                      className="w-full p-2.5 bg-surface border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors"
                     />
                   </div>
 
                   {/* Splits */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Splits</label>
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Splits</label>
                     <select 
                       value={config.splits}
                       onChange={(e) => setConfig(prev => ({ ...prev, splits: parseInt(e.target.value) }))}
-                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                      className="w-full p-2.5 bg-surface border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
                     >
                       {[1, 2, 3, 4].map(s => (
                         <option key={s} value={s}>{s} {s === 1 ? 'Subdivision' : 'Subdivisions'}</option>
@@ -390,11 +386,11 @@ export const SongMaker = () => {
 
                   {/* Range */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Range</label>
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Range</label>
                     <select 
                       value={config.range}
                       onChange={(e) => setConfig(prev => ({ ...prev, range: parseInt(e.target.value) }))}
-                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                      className="w-full p-2.5 bg-surface border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
                     >
                       {[1, 2, 3].map(o => (
                         <option key={o} value={o}>{o} {o === 1 ? 'Octave' : 'Octaves'}</option>
@@ -404,11 +400,11 @@ export const SongMaker = () => {
 
                   {/* Start Note */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Start</label>
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Start</label>
                     <select 
                       value={config.startNote}
                       onChange={(e) => setConfig(prev => ({ ...prev, startNote: parseInt(e.target.value) }))}
-                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                      className="w-full p-2.5 bg-surface border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
                     >
                       <option value={48}>Low</option>
                       <option value={60}>Middle</option>
@@ -418,11 +414,11 @@ export const SongMaker = () => {
 
                   {/* Scale */}
                   <div className="space-y-1.5 pb-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Scale</label>
+                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Scale</label>
                     <select 
                       value={config.scale}
                       onChange={(e) => setConfig(prev => ({ ...prev, scale: e.target.value }))}
-                      className="w-full p-2.5 bg-white border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
+                      className="w-full p-2.5 bg-surface border-2 border-slate-100 rounded-xl font-black text-slate-700 outline-none focus:border-indigo-400 transition-colors cursor-pointer appearance-none"
                     >
                       {Object.keys(SCALES).map(s => (
                         <option key={s} value={s}>{s}</option>
@@ -452,7 +448,7 @@ export const SongMaker = () => {
                   <button
                     key={i}
                     onClick={() => scrollToBar(i)}
-                    className={`px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest transition-all ${activeBar === i ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400 hover:bg-indigo-50'}`}
+                    className={`px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest transition-all ${activeBar === i ? 'bg-primary text-white' : 'bg-surface text-neutral-400 hover:bg-primary/5'}`}
                   >
                     Bar {i + 1}
                   </button>
@@ -461,7 +457,7 @@ export const SongMaker = () => {
             )}
           </AnimatePresence>
 
-          <div className="flex-1 bg-white rounded-[3rem] border-4 border-white flex flex-col relative overflow-hidden h-full">
+          <div className="flex-1 bg-surface rounded-[3rem] border-4 border-white flex flex-col relative overflow-hidden h-full">
             {/* Timeline Viewport */}
             <motion.div 
               ref={gridRef}
@@ -473,13 +469,13 @@ export const SongMaker = () => {
             >
               <div className="flex min-w-max min-h-full">
                 {/* Note Labels (Sticky Left) */}
-                <div className="w-20 shrink-0 sticky left-0 z-30 bg-white/95 backdrop-blur-md border-r-2 border-slate-50 flex flex-col py-4">
+                <div className="w-20 shrink-0 sticky left-0 z-30 bg-surface/95 backdrop-blur-md border-r-2 border-slate-50 flex flex-col py-4">
                   {notes.map((midi, i) => {
                     const name = NOTE_NAMES[midi % 12];
                     const octave = Math.floor(midi / 12) - 1;
                     return (
                       <div key={i} className="h-10 shrink-0 flex flex-col items-center justify-center leading-none">
-                        <span className="text-[12px] font-black text-slate-400">{name}</span>
+                        <span className="text-[12px] font-black text-neutral-400">{name}</span>
                         <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">{octave > 4 ? 'High' : octave < 4 ? 'Low' : 'Mid'}</span>
                       </div>
                     );
@@ -487,7 +483,7 @@ export const SongMaker = () => {
                   {PERCUSSION.map((perc, i) => (
                     <div 
                       key={perc.id} 
-                      className={`h-10 shrink-0 flex items-center justify-center text-[10px] font-black uppercase text-slate-400
+                      className={`h-10 shrink-0 flex items-center justify-center text-[10px] font-black uppercase text-neutral-400
                         ${i === 0 ? 'border-t-4 border-black mt-1' : ''}
                       `}
                     >
@@ -506,8 +502,8 @@ export const SongMaker = () => {
                       <div 
                         key={c} 
                         className={`flex flex-col min-w-[60px] relative transition-colors duration-200
-                          ${activeStep === c ? 'bg-indigo-50/50' : (Math.floor(c / config.splits) % 2 === 1 ? 'bg-slate-100/30' : '')}
-                          ${isBarStart && c !== 0 ? 'border-l-4 border-indigo-100/50' : 'border-l border-slate-50'}
+                          ${activeStep === c ? 'bg-primary/5/50' : (Math.floor(c / config.splits) % 2 === 1 ? 'bg-slate-100/30' : '')}
+                          ${isBarStart && c !== 0 ? 'border-l-4 border-primary/20/50' : 'border-l border-slate-50'}
                         `}
                       >
                         {isBarStart && (
@@ -544,7 +540,7 @@ export const SongMaker = () => {
                                 </motion.div>
                               )}
                               {activeStep === c && !cellVal && (
-                                <div className="absolute inset-0 bg-indigo-500/10 pointer-events-none" />
+                                <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
                               )}
                             </div>
                           );
@@ -558,18 +554,18 @@ export const SongMaker = () => {
           </div>
 
           {/* Bottom Control Bar */}
-          <div className="bg-white p-4 rounded-[2.5rem] border-4 border-white flex items-center gap-6 shrink-0">
+          <div className="bg-surface p-4 rounded-[2.5rem] border-4 border-white flex items-center gap-6 shrink-0">
             {/* Play Button */}
             <button 
               onClick={() => { setIsPlaying(!isPlaying); audioEngine.playTick(settings.soundTheme); }}
-              className={`flex items-center gap-3 px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 ${isPlaying ? 'bg-rose-500 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+              className={`flex items-center gap-3 px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 ${isPlaying ? 'bg-rose-500 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
             >
               {isPlaying ? <><Square size={16} fill="currentColor" /> Stop</> : <><Play size={16} fill="currentColor" /> Play</>}
             </button>
 
             {/* Tempo Control */}
             <div className="flex-1 flex items-center gap-6 border-l-2 border-slate-50 pl-6">
-              <div className="flex items-center gap-3 text-slate-400 uppercase tracking-widest text-[10px] font-black shrink-0">
+              <div className="flex items-center gap-3 text-neutral-400 uppercase tracking-widest text-[10px] font-black shrink-0">
                 <Clock size={16} />
                 Tempo
               </div>
@@ -580,7 +576,7 @@ export const SongMaker = () => {
                   className="w-full h-2 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
                 />
               </div>
-              <span className="text-2xl font-black text-indigo-600 italic tabular-nums leading-none w-12 text-right">{tempo}</span>
+              <span className="text-2xl font-black text-primary italic tabular-nums leading-none w-12 text-right">{tempo}</span>
             </div>
           </div>
         </div>

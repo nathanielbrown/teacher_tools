@@ -144,7 +144,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, activeTab }) =
                     
                     return (
                       <motion.button
-                        key={tool.id}
+                        key={`${tool.id}-${tool.mainSection}-${tool.section}`}
                         variants={itemVariants}
                         whileHover={{ 
                           scale: 1.05, 

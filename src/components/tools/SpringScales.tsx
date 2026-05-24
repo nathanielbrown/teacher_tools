@@ -48,7 +48,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Spring Scale Dynamics</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Select a <b>Newton Scale</b> from the registry. Each has a different maximum capacity.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -56,11 +56,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Click on <b>Weights</b> in the tray to attach them to the spring hook. Watch it oscillate!</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Enable <b>Force Vectors</b> in the header to visualize the tension and gravity magnitudes.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight"><b>Warning:</b> Exceeding the maximum force will cause structural failure (the spring will snap).</p>
       </div>
     </div>
@@ -172,13 +172,13 @@ export const SpringScales = () => {
       <div className="flex items-center gap-4 italic">
         <button
           onClick={() => { setShowForces(!showForces); audioEngine.playTick(settings.soundTheme); }}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all  ${showForces ? 'bg-indigo-600 text-white' : 'bg-white border-2 border-slate-100 text-slate-300 hover:border-indigo-100 hover:text-indigo-600'}`}
+          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all  ${showForces ? 'bg-primary text-white' : 'bg-surface border-2 border-slate-100 text-slate-300 hover:border-primary/20 hover:text-primary'}`}
         >
           {showForces ? <EyeOff size={14} strokeWidth={3} /> : <Eye size={14} strokeWidth={3} />} {showForces ? 'Hide Vectors' : 'Show Vectors'}
         </button>
         <button
           onClick={resetLab}
-          className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 "
+          className="flex items-center gap-2 px-6 py-2 bg-surface border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all active:scale-95 "
         >
           <RotateCcw size={14} strokeWidth={3} /> Reset
         </button>
@@ -187,7 +187,7 @@ export const SpringScales = () => {
   }, [showForces, resetLab, settings.soundTheme, setHeaderActions]);
 
   return (
-    <div className="tool-container flex flex-col lg:flex-row gap-8 h-full font-['Outfit'] select-none relative bg-white rounded-[4rem] p-4 lg:p-12 italic  overflow-hidden">
+    <div className="tool-container flex flex-col lg:flex-row gap-8 h-full font-['Outfit'] select-none relative bg-surface rounded-[4rem] p-4 lg:p-12 italic  overflow-hidden">
       
       <div className="tool-grid-bg opacity-30 pointer-events-none" />
 
@@ -197,8 +197,8 @@ export const SpringScales = () => {
         
         {/* Telemetry HUD */}
         <div className="absolute top-12 left-12 flex flex-col gap-2 z-20">
-           <div className="flex items-center gap-3 bg-white/80 border-2 border-slate-100 px-6 py-3 rounded-[1.5rem] backdrop-blur-md ">
-              <Activity size={18} className="text-indigo-600" />
+           <div className="flex items-center gap-3 bg-surface/80 border-2 border-slate-100 px-6 py-3 rounded-[1.5rem] backdrop-blur-md ">
+              <Activity size={18} className="text-primary" />
               <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em]">Force Matrix Active</p>
            </div>
         </div>
@@ -206,11 +206,11 @@ export const SpringScales = () => {
         {/* The Scale Assembly */}
         <div className="relative flex flex-col items-center pt-24 z-10 scale-110">
            {/* Support Structure */}
-           <div className="w-80 h-12 bg-slate-900 rounded-full border-4 border-slate-800  relative z-30" />
+           <div className="w-80 h-12 bg-dark-bg rounded-full border-4 border-dark-border  relative z-30" />
 
            <div className="relative flex flex-col items-center -mt-2">
               {/* Scale Body */}
-              <div className="w-56 h-[26rem] bg-white rounded-b-[5rem] border-x-8 border-b-8 border-slate-100 relative z-20 flex flex-col items-center py-12  overflow-hidden">
+              <div className="w-56 h-[26rem] bg-surface rounded-b-[5rem] border-x-8 border-b-8 border-slate-100 relative z-20 flex flex-col items-center py-12  overflow-hidden">
                  <div className="absolute top-4 left-0 right-0 flex justify-between px-10 text-[9px] font-black text-slate-300 uppercase tracking-widest italic opacity-60">
                     <span>Newtons</span>
                     <span>Grams</span>
@@ -220,7 +220,7 @@ export const SpringScales = () => {
                  <div className="absolute left-6 top-20 bottom-16 w-12 border-r-4 border-slate-50 flex flex-col justify-between items-end pr-4">
                     {[...Array(11)].map((_, i) => (
                       <div key={i} className="flex items-center gap-3">
-                         <span className="text-[9px] font-black text-slate-400 tabular-nums">{(selectedScale.maxForce * (1 - i/10)).toFixed(1)}</span>
+                         <span className="text-[9px] font-black text-neutral-400 tabular-nums">{(selectedScale.maxForce * (1 - i/10)).toFixed(1)}</span>
                          <div className={`h-1 bg-slate-200 rounded-full ${i % 5 === 0 ? 'w-6' : 'w-3'}`} />
                       </div>
                     ))}
@@ -229,7 +229,7 @@ export const SpringScales = () => {
                     {[...Array(11)].map((_, i) => (
                       <div key={i} className="flex items-center gap-3">
                          <div className={`h-1 bg-slate-200 rounded-full ${i % 5 === 0 ? 'w-6' : 'w-3'}`} />
-                         <span className="text-[9px] font-black text-slate-400 tabular-nums">{(selectedScale.maxForce * 100 * (1 - i/10)).toFixed(0)}</span>
+                         <span className="text-[9px] font-black text-neutral-400 tabular-nums">{(selectedScale.maxForce * 100 * (1 - i/10)).toFixed(0)}</span>
                       </div>
                     ))}
                  </div>
@@ -237,7 +237,7 @@ export const SpringScales = () => {
                  {/* Measurement Indicator */}
                  <motion.div 
                     animate={{ y: isBroken ? 380 : (extension / 200) * 320 }}
-                    className="w-full h-2 bg-indigo-600 relative z-30 -[0_0_15px_rgba(79,70,229,0.5)]"
+                    className="w-full h-2 bg-primary relative z-30 -[0_0_15px_rgba(79,70,229,0.5)]"
                  />
               </div>
 
@@ -262,7 +262,7 @@ export const SpringScales = () => {
                  {!isBroken && (
                     <div className="relative -mt-6 flex flex-col items-center">
                        {/* Load Hook */}
-                       <div className="w-80 h-4 bg-slate-900 rounded-full  border-2 border-slate-800" />
+                       <div className="w-80 h-4 bg-dark-bg rounded-full  border-2 border-dark-border" />
                        
                        <div className="flex gap-6 mt-6 h-32 items-end">
                           <AnimatePresence>
@@ -295,17 +295,17 @@ export const SpringScales = () => {
            {showForces && totalMass > 0 && !isBroken && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="absolute right-12 top-1/2 -translate-y-1/2 flex flex-col gap-32 z-20">
                  <div className="flex flex-col items-center gap-4">
-                    <div className="bg-white border-4 border-indigo-50 px-8 py-4 rounded-[2rem]  flex flex-col items-center">
-                       <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">Elasticity</span>
-                       <span className="text-3xl font-black text-indigo-600 italic">{totalForce.toFixed(2)}N</span>
+                    <div className="bg-surface border-4 border-indigo-50 px-8 py-4 rounded-[2rem]  flex flex-col items-center">
+                       <span className="text-[10px] font-black text-primary/70 uppercase tracking-widest italic">Elasticity</span>
+                       <span className="text-3xl font-black text-primary italic">{totalForce.toFixed(2)}N</span>
                     </div>
-                    <ArrowUp size={48} strokeWidth={3} className="text-indigo-400 animate-bounce" />
+                    <ArrowUp size={48} strokeWidth={3} className="text-primary/70 animate-bounce" />
                  </div>
                  <div className="flex flex-col items-center gap-4">
                     <ArrowDown size={48} strokeWidth={3} className="text-rose-400 animate-bounce" />
-                    <div className="bg-white border-4 border-rose-50 px-8 py-4 rounded-[2rem]  flex flex-col items-center">
+                    <div className="bg-surface border-4 border-rose-50 px-8 py-4 rounded-[2rem]  flex flex-col items-center">
                        <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest italic">Weight</span>
-                       <span className="text-3xl font-black text-rose-600 italic">{(totalMass * GRAVITY).toFixed(2)}N</span>
+                       <span className="text-3xl font-black text-caution italic">{(totalMass * GRAVITY).toFixed(2)}N</span>
                     </div>
                  </div>
               </motion.div>
@@ -318,16 +318,16 @@ export const SpringScales = () => {
                  <motion.div 
                     initial={{ scale: 0.9, y: 50 }}
                     animate={{ scale: 1, y: 0 }}
-                    className="bg-white p-16 rounded-[5rem]  flex flex-col items-center gap-10 border-[16px] border-rose-50 italic"
+                    className="bg-surface p-16 rounded-[5rem]  flex flex-col items-center gap-10 border-[16px] border-rose-50 italic"
                  >
-                    <div className="w-32 h-32 bg-rose-50 rounded-[3.5rem] flex items-center justify-center text-rose-600 ">
+                    <div className="w-32 h-32 bg-caution-bg rounded-[3.5rem] flex items-center justify-center text-caution ">
                        <AlertCircle size={80} strokeWidth={1.5} />
                     </div>
                     <div className="text-center space-y-4">
                        <h2 className="text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none">Matrix Break</h2>
-                       <p className="text-[12px] font-black text-rose-500 uppercase tracking-[0.4em] mt-2">Elastic Limit Exceeded • Reset Protocol Required</p>
+                       <p className="text-[12px] font-black text-caution uppercase tracking-[0.4em] mt-2">Elastic Limit Exceeded • Reset Protocol Required</p>
                     </div>
-                    <button onClick={resetLab} className="w-full h-24 bg-slate-900 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-rose-600 transition-all  flex items-center justify-center gap-6 active:scale-95">
+                    <button onClick={resetLab} className="w-full h-24 bg-dark-bg text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-xl hover:bg-rose-600 transition-all  flex items-center justify-center gap-6 active:scale-95">
                        <RotateCcw size={32} strokeWidth={3} /> Re-Initialize Scale
                     </button>
                  </motion.div>
@@ -336,12 +336,12 @@ export const SpringScales = () => {
         </AnimatePresence>
 
         {/* Operational Interface Control */}
-        <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-white/80 border-2 border-slate-100 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">
+        <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-surface/80 border-2 border-slate-100 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">
            <div className="text-right">
               <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Mass Application</p>
-              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-2 leading-none">Click Tray Elements</p>
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2 leading-none">Click Tray Elements</p>
            </div>
-           <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
+           <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ">
               <MousePointer2 size={24} strokeWidth={3} />
            </div>
         </div>
@@ -351,13 +351,13 @@ export const SpringScales = () => {
       <div className="w-full lg:w-[450px] shrink-0 flex flex-col gap-8 relative z-20 italic">
         
         {/* Force Measurement Readout */}
-        <div className="bg-slate-900 p-12 rounded-[4rem] border-4 border-slate-800  flex flex-col items-center gap-10 relative overflow-hidden shrink-0">
+        <div className="bg-dark-bg p-12 rounded-[4rem] border-4 border-dark-border  flex flex-col items-center gap-10 relative overflow-hidden shrink-0">
            <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
            
            <div className="flex items-center justify-between w-full relative z-10">
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Real-Time Strain</span>
-              <div className="px-4 py-1 bg-indigo-500/20 rounded-full border border-indigo-500/20">
-                 <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">Live Feed</span>
+              <span className="text-[10px] font-black text-primary/70 uppercase tracking-[0.5em]">Real-Time Strain</span>
+              <div className="px-4 py-1 bg-primary/20 rounded-full border border-indigo-500/20">
+                 <span className="text-[8px] font-black text-primary/70 uppercase tracking-widest">Live Feed</span>
               </div>
            </div>
 
@@ -368,12 +368,12 @@ export const SpringScales = () => {
               </div>
               <div className="w-full space-y-4">
                  <div className="flex items-center justify-between px-2">
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Structural Tolerance</span>
+                    <span className="text-[10px] font-black text-primary/70 uppercase tracking-widest">Structural Tolerance</span>
                     <span className="text-xs font-black text-white tabular-nums">{selectedScale.maxForce}N Limit</span>
                  </div>
-                 <div className="h-6 bg-white/5 rounded-full p-1 border border-white/10 relative group">
+                 <div className="h-6 bg-surface/5 rounded-full p-1 border border-white/10 relative group">
                     <motion.div 
-                      className={`h-full rounded-full -[0_0_15px_rgba(79,70,229,0.5)] ${totalForce > selectedScale.maxForce ? 'bg-rose-600' : 'bg-indigo-600'}`}
+                      className={`h-full rounded-full -[0_0_15px_rgba(79,70,229,0.5)] ${totalForce > selectedScale.maxForce ? 'bg-rose-600' : 'bg-primary'}`}
                       initial={false}
                       animate={{ width: `${Math.min(100, (totalForce / selectedScale.maxForce) * 100)}%` }}
                     />
@@ -385,7 +385,7 @@ export const SpringScales = () => {
         {/* Capacity & Weight Matrix */}
         <div className="flex-1 bg-slate-50/50 p-10 rounded-[4rem] border-4 border-white  flex flex-col gap-8 min-h-0">
            <div className="flex items-center gap-4 shrink-0 border-b-4 border-white pb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
+              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ">
                  <Settings2 size={24} strokeWidth={3} />
               </div>
               <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none">Scale Registry</h4>
@@ -407,25 +407,25 @@ export const SpringScales = () => {
                       }
                     }}
                     disabled={isBroken}
-                    className={`p-6 rounded-[2.5rem] border-4 transition-all text-left flex items-center justify-between italic ${selectedScale.id === scale.id ? 'bg-slate-900 border-indigo-600 text-white  scale-105 z-10' : 'bg-white border-white text-slate-500 hover:border-indigo-100 '}`}
+                    className={`p-6 rounded-[2.5rem] border-4 transition-all text-left flex items-center justify-between italic ${selectedScale.id === scale.id ? 'bg-dark-bg border-indigo-600 text-white  scale-105 z-10' : 'bg-surface border-white text-slate-500 hover:border-primary/20 '}`}
                   >
                     <div className="flex flex-col">
                       <span className="text-xl font-black uppercase tracking-tight">{scale.name}</span>
                       <span className="text-[9px] font-black uppercase tracking-widest mt-1 opacity-60">Threshold: {scale.maxForce} Newtons</span>
                     </div>
-                    {selectedScale.id === scale.id && <div className="w-4 h-4 rounded-full bg-indigo-500 animate-pulse -[0_0_10px_rgba(79,70,229,1)]" />}
+                    {selectedScale.id === scale.id && <div className="w-4 h-4 rounded-full bg-primary animate-pulse -[0_0_10px_rgba(79,70,229,1)]" />}
                   </button>
                 ))}
               </div>
 
-              <div className="w-full h-px bg-white/50 my-8" />
+              <div className="w-full h-px bg-surface/50 my-8" />
 
               <div className="space-y-4">
                  <div className="flex items-center gap-3 ml-4">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                        <Plus size={16} strokeWidth={3} />
                     </div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Weight Tray</span>
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Weight Tray</span>
                  </div>
                  <div className="grid grid-cols-2 gap-3">
                    {WEIGHTS.map(w => (
@@ -433,7 +433,7 @@ export const SpringScales = () => {
                        key={w.id}
                        onClick={() => addWeight(w)}
                        disabled={isBroken || attachedWeights.length >= 4}
-                       className="p-8 bg-white rounded-[2.5rem] border-4 border-white hover:border-indigo-100 transition-all flex flex-col items-center gap-3 group  disabled:opacity-20 hover:scale-[1.02] "
+                       className="p-8 bg-surface rounded-[2.5rem] border-4 border-white hover:border-primary/20 transition-all flex flex-col items-center gap-3 group  disabled:opacity-20 hover:scale-[1.02] "
                      >
                        <span className="text-5xl group-hover:scale-110 transition-transform">{w.emoji}</span>
                        <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest italic">{w.name}</span>
@@ -443,10 +443,10 @@ export const SpringScales = () => {
               </div>
            </div>
 
-           <div className="p-8 bg-indigo-600 rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
+           <div className="p-8 bg-primary rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
               <div className="tool-grid-bg opacity-10 pointer-events-none" />
               <div className="flex items-center gap-4 relative z-10">
-                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white border border-white/20">
+                 <div className="w-10 h-10 rounded-xl bg-surface/20 flex items-center justify-center text-white border border-white/20">
                     <Volume2 size={20} strokeWidth={3} />
                  </div>
                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Theoretical Matrix</h4>
@@ -462,8 +462,8 @@ export const SpringScales = () => {
         </div>
       </div>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-caution-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
   );
 };

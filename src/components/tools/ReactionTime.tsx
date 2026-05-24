@@ -29,19 +29,19 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="reactionTime.help.step1" defaultMessage="Click the large Start Test area to begin the sequence." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="reactionTime.help.step2" defaultMessage="The screen will turn Red—this means WAIT. Don't click yet!" />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="reactionTime.help.step3" defaultMessage="When the screen turns Green, click as fast as you possibly can!" />
         </p>
@@ -151,7 +151,7 @@ export const ReactionTime = () => {
   const getStatusConfig = () => {
     switch (status) {
       case 'idle': return { 
-        bg: 'bg-indigo-600', 
+        bg: 'bg-primary', 
         icon: <Play size={isMobile ? 80 : 120} />, 
         text: intl.formatMessage({ id: 'reactionTime.status.idle.text', defaultMessage: 'Start Test' }), 
         subtext: intl.formatMessage({ id: 'reactionTime.status.idle.subtext', defaultMessage: 'Click when you are ready' }) 
@@ -169,8 +169,8 @@ export const ReactionTime = () => {
         subtext: intl.formatMessage({ id: 'reactionTime.status.ready.subtext', defaultMessage: 'NOW! NOW! NOW!' }) 
       };
       case 'result': return {
-        bg: lastResult === 'failed' ? 'bg-amber-500' : 'bg-slate-900',
-        icon: lastResult === 'failed' ? <AlertTriangle size={isMobile ? 80 : 120} /> : <Timer size={isMobile ? 80 : 120} className="text-indigo-400" />,
+        bg: lastResult === 'failed' ? 'bg-amber-500' : 'bg-dark-bg',
+        icon: lastResult === 'failed' ? <AlertTriangle size={isMobile ? 80 : 120} /> : <Timer size={isMobile ? 80 : 120} className="text-primary/70" />,
         text: lastResult === 'failed' 
           ? intl.formatMessage({ id: 'reactionTime.status.failed.text', defaultMessage: 'Too Early!' }) 
           : intl.formatMessage({ id: 'reactionTime.status.result.text', defaultMessage: '{ms}ms' }, { ms: lastResult }),
@@ -197,7 +197,7 @@ export const ReactionTime = () => {
               onClick={handleClick}
               className={`flex-1 rounded-[3rem] md:rounded-[4rem] border-8 border-white transition-all duration-500 flex flex-col items-center justify-center text-white gap-8 md:gap-12 relative overflow-hidden group ${config.bg}`}
             >
-              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+              <div className="absolute inset-0 bg-surface/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
               <AnimatePresence mode="wait">
                 <motion.div
@@ -237,15 +237,15 @@ export const ReactionTime = () => {
               <button
                 onClick={() => setHistoryPage(p => Math.max(0, p - 1))}
                 disabled={historyPage === 0}
-                className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-30"
+                className="p-2 bg-slate-50 rounded-lg text-neutral-400 disabled:opacity-30"
               >
                 <ChevronLeft size={16} strokeWidth={3} />
               </button>
-              <span className="text-[10px] font-black text-indigo-600">{historyPage + 1}/{totalPages}</span>
+              <span className="text-[10px] font-black text-primary">{historyPage + 1}/{totalPages}</span>
               <button
                 onClick={() => setHistoryPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={historyPage === totalPages - 1}
-                className="p-2 bg-slate-50 rounded-lg text-slate-400 disabled:opacity-30"
+                className="p-2 bg-slate-50 rounded-lg text-neutral-400 disabled:opacity-30"
               >
                 <ChevronRight size={16} strokeWidth={3} />
               </button>
@@ -263,11 +263,11 @@ export const ReactionTime = () => {
                 key={idx}
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className={`flex justify-between items-center p-4 rounded-2xl border-4 transition-all relative min-h-[80px] md:min-h-[90px] ${isMobile ? 'min-w-[120px] flex-col justify-center' : 'w-full'} ${item.failed ? 'bg-rose-50/40 border-rose-100/40 opacity-80' : 'bg-white/80 backdrop-blur-sm border-white shadow-sm'
+                className={`flex justify-between items-center p-4 rounded-2xl border-4 transition-all relative min-h-[80px] md:min-h-[90px] ${isMobile ? 'min-w-[120px] flex-col justify-center' : 'w-full'} ${item.failed ? 'bg-caution-bg/40 border-caution-border/40 opacity-80' : 'bg-surface/80 backdrop-blur-sm border-white shadow-sm'
                   }`}
               >
                 <div className="flex flex-col items-center">
-                  <span className={`font-black ${isMobile ? 'text-lg' : 'text-2xl'} tracking-tighter tabular-nums ${item.failed ? 'text-rose-500' : 'text-slate-800'}`}>
+                  <span className={`font-black ${isMobile ? 'text-lg' : 'text-2xl'} tracking-tighter tabular-nums ${item.failed ? 'text-caution' : 'text-slate-800'}`}>
                     {item.failed 
                       ? <FormattedMessage id="reactionTime.history.miss" defaultMessage="MISS" /> 
                       : intl.formatMessage({ id: 'reactionTime.history.ms', defaultMessage: '{ms}ms' }, { ms: item.ms })}

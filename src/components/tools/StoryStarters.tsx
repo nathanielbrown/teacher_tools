@@ -74,25 +74,25 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="storystarters.help.step1" defaultMessage="Choose your level in settings." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="storystarters.help.step2" defaultMessage="Click the button to get a story idea." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="storystarters.help.step3" defaultMessage="Look at your old ideas in the list." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="storystarters.help.step4" defaultMessage="Start writing your amazing story!" />
         </p>
@@ -185,9 +185,9 @@ export const StoryStarters = () => {
                   
                   <div className="flex items-center justify-center gap-6">
                     <div className="h-1 w-12 bg-slate-100 rounded-full" />
-                    <div className="px-8 py-3 bg-white border-2 border-slate-100 rounded-full flex items-center gap-3 ">
+                    <div className="px-8 py-3 bg-surface border-2 border-slate-100 rounded-full flex items-center gap-3 ">
                       <Star size={18} className="text-amber-400 fill-amber-400" />
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
                         <FormattedMessage id="storystarters.label.level" values={{ n: yearLevel }} />
                       </span>
                     </div>
@@ -211,7 +211,7 @@ export const StoryStarters = () => {
                       <button
                         key={year}
                         onClick={() => { setYearLevel(year); setHasSelectedYear(true); audioEngine.playTick(settings.soundTheme); }}
-                        className={`h-16 md:h-24 rounded-2xl md:rounded-3xl border-4 flex items-center justify-center text-2xl md:text-3xl font-black transition-all bg-white border-slate-100 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 hover:scale-105 `}
+                        className={`h-16 md:h-24 rounded-2xl md:rounded-3xl border-4 flex items-center justify-center text-2xl md:text-3xl font-black transition-all bg-surface border-slate-100 text-neutral-400 hover:border-indigo-400 hover:text-primary hover:scale-105 `}
                       >
                         {year}
                       </button>
@@ -238,7 +238,7 @@ export const StoryStarters = () => {
                 <button
                   onClick={generatePrompt}
                   disabled={isGenerating}
-                  className="group flex items-center gap-4 md:gap-8 h-16 md:h-24 px-8 md:px-12 bg-orange-600 text-white rounded-[2rem] md:rounded-[3rem] font-black text-lg md:text-2xl  hover:bg-slate-900 transition-all tracking-tighter italic uppercase border-4 md:border-8 border-white active:scale-95 disabled:opacity-50"
+                  className="group flex items-center gap-4 md:gap-8 h-16 md:h-24 px-8 md:px-12 bg-orange-600 text-white rounded-[2rem] md:rounded-[3rem] font-black text-lg md:text-2xl  hover:bg-dark-bg transition-all tracking-tighter italic uppercase border-4 md:border-8 border-white active:scale-95 disabled:opacity-50"
                 >
                   {isGenerating && <RefreshCcw size={32} strokeWidth={3} className="animate-spin" />}
                   {isGenerating ? <FormattedMessage id="storystarters.generating" /> : <FormattedMessage id="storystarters.generate" />}
@@ -256,9 +256,9 @@ export const StoryStarters = () => {
           title={intl.formatMessage({ id: 'storystarters.title' })}
         >
           <div className="space-y-6">
-            <div className="bg-slate-900 p-8 rounded-[3rem] border-4 border-slate-800  flex flex-col items-center gap-6 relative overflow-hidden shrink-0">
+            <div className="bg-dark-bg p-8 rounded-[3rem] border-4 border-dark-border  flex flex-col items-center gap-6 relative overflow-hidden shrink-0">
                <div className="flex items-center justify-between w-full relative z-10">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">
+                  <span className="text-[10px] font-black text-primary/70 uppercase tracking-[0.5em]">
                     <FormattedMessage id="storystarters.label.year" />
                   </span>
                       <FormattedMessage id="storystarters.label.level" values={{ n: yearLevel }} />
@@ -271,7 +271,7 @@ export const StoryStarters = () => {
                         key={year}
                         onClick={() => { setYearLevel(year); setPrompt(null); audioEngine.playTick(settings.soundTheme); }}
                         className={`h-16 rounded-2xl border-4 flex items-center justify-center text-xl font-black transition-all ${
-                          yearLevel === year ? 'bg-indigo-600 border-indigo-400 text-white  scale-105' : 'bg-white/5 border-white/5 text-slate-500 hover:text-white hover:bg-white/10'
+                          yearLevel === year ? 'bg-primary border-indigo-400 text-white  scale-105' : 'bg-surface/5 border-white/5 text-slate-500 hover:text-white hover:bg-surface/10'
                         }`}
                       >
                         {year}
@@ -290,11 +290,11 @@ export const StoryStarters = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="w-full bg-white rounded-[3rem] border-4 border-white p-8 space-y-6 relative overflow-hidden"
+              className="w-full bg-surface rounded-[3rem] border-4 border-white p-8 space-y-6 relative overflow-hidden"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                  <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
                     <History size={20} strokeWidth={3} />
                   </div>
                   <h4 className="text-sm font-black text-slate-900 uppercase tracking-tighter italic">
@@ -305,17 +305,17 @@ export const StoryStarters = () => {
                   <button
                     onClick={() => { setHistoryIndex(prev => Math.min(history.length - 1, prev + 1)); audioEngine.playTick(settings.soundTheme); }}
                     disabled={historyIndex >= history.length - 1}
-                    className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 disabled:opacity-30 active:scale-90 transition-all"
+                    className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-neutral-400 disabled:opacity-30 active:scale-90 transition-all"
                   >
                     <ChevronLeft size={24} strokeWidth={3} />
                   </button>
-                  <span className="text-[10px] font-black text-slate-400 tabular-nums">
+                  <span className="text-[10px] font-black text-neutral-400 tabular-nums">
                     {historyIndex + 1} / {history.length}
                   </span>
                   <button
                     onClick={() => { setHistoryIndex(prev => Math.max(0, prev - 1)); audioEngine.playTick(settings.soundTheme); }}
                     disabled={historyIndex <= 0}
-                    className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 disabled:opacity-30 active:scale-90 transition-all"
+                    className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-neutral-400 disabled:opacity-30 active:scale-90 transition-all"
                   >
                     <ChevronRight size={24} strokeWidth={3} />
                   </button>
@@ -354,13 +354,13 @@ export const StoryStarters = () => {
               layout
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="p-6 bg-white rounded-[2rem] border-4 border-white  flex flex-col items-start gap-2 transition-all hover:scale-[1.02]  hover:border-indigo-100"
+              className="p-6 bg-surface rounded-[2rem] border-4 border-white  flex flex-col items-start gap-2 transition-all hover:scale-[1.02]  hover:border-primary/20"
             >
               <div className="flex items-center gap-2">
-                 <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+                 <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-neutral-400">
                     <Star size={14} strokeWidth={3} />
                  </div>
-                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                 <span className="text-[8px] font-black text-neutral-400 uppercase tracking-widest">
                    <FormattedMessage id="storystarters.history.item" />
                  </span>
               </div>

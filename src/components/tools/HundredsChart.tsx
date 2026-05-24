@@ -48,7 +48,7 @@ const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="hundredschart.help.step1" 
@@ -58,7 +58,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="hundredschart.help.step2" 
@@ -68,7 +68,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="hundredschart.help.step3" 
@@ -78,7 +78,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="hundredschart.help.step4" 
@@ -418,7 +418,7 @@ export const HundredsChart = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[100] p-4 lg:p-0 lg:static lg:w-[320px] flex flex-col h-full gap-8 italic overflow-hidden shrink-0 bg-slate-900/10 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none"
+            className="fixed inset-0 z-[100] p-4 lg:p-0 lg:static lg:w-[320px] flex flex-col h-full gap-8 italic overflow-hidden shrink-0 bg-dark-bg/10 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none"
           >
             <SettingsPanel
               isOpen={isConfigOpen}
@@ -430,7 +430,7 @@ export const HundredsChart = () => {
               <div className="space-y-6">
                 {/* Color Selection */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                  <div className="flex items-center gap-2 text-primary opacity-60">
                     <Palette size={14} />
                     <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.tools" defaultMessage="Colors" />
@@ -445,7 +445,7 @@ export const HundredsChart = () => {
                         style={{ backgroundColor: c.id === 'white' || c.id === 'black' ? (c.id === 'white' ? '#f8fafc' : '#1e293b') : c.value }}
                         title={c.label}
                       >
-                        {c.icon && <c.icon size={14} className={c.id === 'white' ? 'text-slate-400' : 'text-white'} />}
+                        {c.icon && <c.icon size={14} className={c.id === 'white' ? 'text-neutral-400' : 'text-white'} />}
                       </button>
                     ))}
                   </div>
@@ -453,7 +453,7 @@ export const HundredsChart = () => {
 
                 {/* Sound Selection */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                  <div className="flex items-center gap-2 text-primary opacity-60">
                     <Volume2 size={14} />
                     <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.sound" defaultMessage="Sound" />
@@ -467,21 +467,21 @@ export const HundredsChart = () => {
                           const currentLang = LANGUAGES.find(l => l.code === speakLanguage) || LANGUAGES[0];
                           speak(currentLang.hello, 1.0, undefined, speakLanguage); 
                         }}
-                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'speak' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'speak' ? 'bg-primary text-white' : 'text-neutral-400 hover:text-slate-600'}`}
                       >
                         <MessageCircle size={12} />
                         <FormattedMessage id="hundredschart.sound.speak" defaultMessage="Speak" />
                       </button>
                       <button
                         onClick={() => { setSoundMode('sound'); audioEngine.playTick(settings.soundTheme); }}
-                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'sound' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'sound' ? 'bg-primary text-white' : 'text-neutral-400 hover:text-slate-600'}`}
                       >
                         <Volume2 size={12} />
                         <FormattedMessage id="hundredschart.sound.sound" defaultMessage="Sound" />
                       </button>
                       <button
                         onClick={() => { setSoundMode('mute'); }}
-                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'mute' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 ${soundMode === 'mute' ? 'bg-primary text-white' : 'text-neutral-400 hover:text-slate-600'}`}
                       >
                         <VolumeX size={12} />
                         <FormattedMessage id="hundredschart.sound.mute" defaultMessage="Mute" />
@@ -492,13 +492,13 @@ export const HundredsChart = () => {
                       <motion.div 
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="grid grid-cols-6 gap-1 p-1 bg-white rounded-xl border border-slate-100"
+                        className="grid grid-cols-6 gap-1 p-1 bg-surface rounded-xl border border-slate-100"
                       >
                         {LANGUAGES.filter(l => availableLangs.includes(l.code)).map(lang => (
                           <button
                             key={lang.code}
                             onClick={() => { setSpeakLanguage(lang.code); speak(lang.hello, 1.0, undefined, lang.code); }}
-                            className={`aspect-square rounded-lg transition-all flex items-center justify-center ${speakLanguage === lang.code ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-slate-50 border-transparent'} border`}
+                            className={`aspect-square rounded-lg transition-all flex items-center justify-center ${speakLanguage === lang.code ? 'bg-primary/5 border-primary/30' : 'hover:bg-slate-50 border-transparent'} border`}
                             title={lang.label}
                           >
                             <FlagIcon country={lang.country} className="w-5 h-5 rounded-sm overflow-hidden" />
@@ -511,7 +511,7 @@ export const HundredsChart = () => {
 
                 {/* Multiples Selection */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                  <div className="flex items-center gap-2 text-primary opacity-60">
                     <Zap size={14} />
                     <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.highlight" defaultMessage="Patterns" />
@@ -522,7 +522,7 @@ export const HundredsChart = () => {
                       <button
                         key={m}
                         onClick={() => { setAnimState(prev => ({ ...prev, multiple: m })); if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme); }}
-                        className={`aspect-square flex items-center justify-center rounded-xl border-2 transition-all font-black text-xs ${animState.multiple === m ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                        className={`aspect-square flex items-center justify-center rounded-xl border-2 transition-all font-black text-xs ${animState.multiple === m ? 'bg-primary border-indigo-600 text-white' : 'bg-surface border-slate-100 text-neutral-400 hover:border-primary/20'}`}
                       >
                         {m}
                       </button>
@@ -532,7 +532,7 @@ export const HundredsChart = () => {
 
                 {/* Speed Selection */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-600 opacity-60">
+                  <div className="flex items-center gap-2 text-primary opacity-60">
                     <Zap size={14} />
                     <label className="text-[10px] font-black uppercase tracking-widest block">
                       <FormattedMessage id="hundredschart.sidebar.animation" defaultMessage="Speed" />
@@ -543,7 +543,7 @@ export const HundredsChart = () => {
                       <button
                         key={s.label}
                         onClick={() => { setAnimSpeed(s.value); if (soundMode !== 'mute') audioEngine.playTick(settings.soundTheme); }}
-                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${animSpeed === s.value ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${animSpeed === s.value ? 'bg-primary text-white' : 'text-neutral-400 hover:text-slate-600'}`}
                       >
                         {s.label}
                       </button>
@@ -564,15 +564,15 @@ export const HundredsChart = () => {
             <button
               onClick={handlePlay}
               disabled={animState.isRunning}
-              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-4 shadow-xl active:scale-90 ${animState.isRunning ? 'bg-slate-50 border-white text-slate-200' : 'bg-white border-white text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700'}`}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-4 active:scale-90 ${animState.isRunning ? 'bg-slate-50 border-white text-slate-200' : 'bg-surface border-white text-primary hover:bg-primary/5 hover:text-primary'}`}
               title="Play Pattern"
             >
               <Play size={40} fill="currentColor" />
             </button>
 
             {/* Chart */}
-            <div className="w-full max-w-xl aspect-square relative z-10 p-4 bg-white rounded-3xl border-4 border-slate-50 shadow-2xl overflow-hidden">
-              <div className="grid grid-cols-10 h-full bg-white rounded-none overflow-hidden border-none ">
+            <div className="w-full max-w-xl aspect-square relative z-10 p-4 bg-surface rounded-3xl border-4 border-slate-50 overflow-hidden">
+              <div className="grid grid-cols-10 h-full bg-surface rounded-none overflow-hidden border-none ">
                 {rows.flat().map(num => (
                   <div key={num} className="aspect-square">
                     <ChartCell
@@ -590,7 +590,7 @@ export const HundredsChart = () => {
             <button
               onClick={handleStop}
               disabled={!animState.isRunning}
-              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-4 shadow-xl active:scale-90 ${!animState.isRunning ? 'bg-slate-50 border-white text-slate-200' : 'bg-white border-white text-rose-600 hover:bg-rose-50 hover:text-rose-700'}`}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-4 active:scale-90 ${!animState.isRunning ? 'bg-slate-50 border-white text-slate-200' : 'bg-surface border-white text-caution hover:bg-caution-bg hover:text-rose-700'}`}
               title="Stop Pattern"
             >
               <Square size={40} fill="currentColor" />
@@ -599,7 +599,7 @@ export const HundredsChart = () => {
 
           <button
             onClick={clearAll}
-            className="flex items-center gap-2 px-12 py-4 bg-white border-2 border-slate-100 rounded-3xl text-sm font-black text-slate-400 hover:border-indigo-100 hover:text-indigo-600 transition-all shadow-lg active:scale-95 uppercase tracking-[0.2em]"
+            className="flex items-center gap-2 px-12 py-4 bg-surface border-2 border-slate-100 rounded-3xl text-sm font-black text-neutral-400 hover:border-primary/20 hover:text-primary transition-all active:scale-95 uppercase tracking-[0.2em]"
           >
             <Eraser size={20} />
             <FormattedMessage id="hundredschart.clearall" defaultMessage="Clear All" />
@@ -607,8 +607,8 @@ export const HundredsChart = () => {
         </div>
       </ToolPanel>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-caution-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
   );
 };

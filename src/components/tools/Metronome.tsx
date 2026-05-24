@@ -29,7 +29,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="metronome.help.step1" 
@@ -39,7 +39,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="metronome.help.step2" 
@@ -173,9 +173,9 @@ export const Metronome = () => {
             >
               <div className="space-y-8">
                 {/* Mute Toggle */}
-                <div className="flex flex-row items-center justify-between px-4 py-3 bg-white border-2 border-slate-100 rounded-[1.5rem]">
+                <div className="flex flex-row items-center justify-between px-4 py-3 bg-surface border-2 border-slate-100 rounded-[1.5rem]">
                   <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-lg ${isMuted ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                    <div className={`p-1.5 rounded-lg ${isMuted ? 'bg-caution-bg text-caution' : 'bg-primary/5 text-primary'}`}>
                       {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
                     </div>
                     <div className="text-[10px] font-black text-slate-900 uppercase">
@@ -186,13 +186,13 @@ export const Metronome = () => {
                     onClick={() => setIsMuted(!isMuted)}
                     className={`w-8 h-5 rounded-full transition-all relative ${isMuted ? 'bg-rose-500' : 'bg-slate-200'}`}
                   >
-                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${isMuted ? 'right-0.5' : 'left-0.5'}`} />
+                    <div className={`absolute top-0.5 w-4 h-4 bg-surface rounded-full transition-all ${isMuted ? 'right-0.5' : 'left-0.5'}`} />
                   </button>
                 </div>
 
                 {/* Beats */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
+                  <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest block text-center opacity-60">
                     <FormattedMessage id="metronome.settings.beats" defaultMessage="Beats" />
                   </label>
                   <div className="grid grid-cols-4 gap-1.5">
@@ -200,7 +200,7 @@ export const Metronome = () => {
                       <button
                         key={num}
                         onClick={() => setBeatsPerMeasure(num)}
-                        className={`py-2 rounded-xl border-2 transition-all font-black text-xs ${beatsPerMeasure === num ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                        className={`py-2 rounded-xl border-2 transition-all font-black text-xs ${beatsPerMeasure === num ? 'bg-primary border-indigo-400 text-white' : 'bg-surface border-slate-100 text-neutral-400 hover:border-primary/20'}`}
                       >
                         {num}
                       </button>
@@ -210,7 +210,7 @@ export const Metronome = () => {
 
                 {/* Sound Themes */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center opacity-60">
+                  <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest block text-center opacity-60">
                     <FormattedMessage id="metronome.settings.sound" defaultMessage="Sound" />
                   </label>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -218,7 +218,7 @@ export const Metronome = () => {
                       <button
                         key={theme}
                         onClick={() => { setTickSound(theme); audioEngine.playTick(theme); }}
-                        className={`py-2 rounded-xl border-2 transition-all font-black text-[8px] uppercase tracking-widest truncate ${tickSound === theme ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                        className={`py-2 rounded-xl border-2 transition-all font-black text-[8px] uppercase tracking-widest truncate ${tickSound === theme ? 'bg-primary border-indigo-400 text-white' : 'bg-surface border-slate-100 text-neutral-400 hover:border-primary/20'}`}
                       >
                         <FormattedMessage id={`metronome.sound.${theme}`} defaultMessage={theme} />
                       </button>
@@ -263,12 +263,12 @@ export const Metronome = () => {
           </div>
 
           {/* Main BPM Display */}
-          <div className={`w-full bg-white/40 backdrop-blur-md rounded-[2.5rem] md:rounded-[4rem] border-4 border-white ${isMobile ? 'p-8' : 'p-12 lg:p-16'} flex flex-col items-center relative overflow-hidden`}>
+          <div className={`w-full bg-surface/40 backdrop-blur-md rounded-[2.5rem] md:rounded-[4rem] border-4 border-white ${isMobile ? 'p-8' : 'p-12 lg:p-16'} flex flex-col items-center relative overflow-hidden`}>
             <div className="relative flex flex-col items-center">
               <div className="flex items-center gap-8 lg:gap-12">
                 <button 
                   onClick={() => setBpm(prev => Math.max(MIN_BPM, prev - 1))}
-                  className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border-2 border-slate-50`}
+                  className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-surface rounded-2xl flex items-center justify-center text-neutral-400 hover:text-primary hover:scale-110 transition-all border-2 border-slate-50`}
                 >
                   <Plus size={isMobile ? 24 : 28} strokeWidth={3} className="rotate-45" />
                 </button>
@@ -277,14 +277,14 @@ export const Metronome = () => {
                   <div className={`${isMobile ? 'text-[8rem]' : 'text-[10rem] md:text-[12rem]'} font-black text-slate-900 tabular-nums leading-none tracking-tighter`}>
                     {bpm}
                   </div>
-                  <div className={`${isMobile ? 'text-xs mt-2' : 'text-sm mt-4'} font-black text-indigo-500 uppercase tracking-[0.8em] ml-4`}>
+                  <div className={`${isMobile ? 'text-xs mt-2' : 'text-sm mt-4'} font-black text-primary uppercase tracking-[0.8em] ml-4`}>
                     <FormattedMessage id="metronome.bpm" defaultMessage="BPM" />
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setBpm(prev => Math.min(MAX_BPM, prev + 1))}
-                  className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border-2 border-slate-50`}
+                  className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-surface rounded-2xl flex items-center justify-center text-neutral-400 hover:text-primary hover:scale-110 transition-all border-2 border-slate-50`}
                 >
                   <Plus size={isMobile ? 24 : 28} strokeWidth={3} />
                 </button>
@@ -330,7 +330,7 @@ export const Metronome = () => {
         </div>
 
         {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50/30 rounded-full blur-[140px] -z-10 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5/30 rounded-full blur-[140px] -z-10 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-50/30 rounded-full blur-[140px] -z-10 pointer-events-none" />
       </ToolPanel>
     </div>

@@ -57,25 +57,25 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberline.help.step1" defaultMessage="Set your numbers in the settings." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberline.help.step2" defaultMessage="Click on any number to add a pin." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberline.help.step3" defaultMessage="Drag from one number to another to make a jump." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="numberline.help.step4" defaultMessage="Click a pin or jump to remove it." />
         </p>
@@ -408,13 +408,13 @@ export const NumberLine = () => {
             </motion.svg>
           </div>
 
-          <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-white/80 border-2 border-slate-100 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">
+          <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-surface/80 border-2 border-slate-100 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">
             <div className="text-right">
               <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mt-2 leading-none">
                 <FormattedMessage id="numberline.status.ready" />
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ">
               <MousePointer2 size={24} strokeWidth={3} />
             </div>
           </div>
@@ -428,12 +428,12 @@ export const NumberLine = () => {
       >
           <div className="space-y-6">
             <div>
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-3">
+              <label className="text-xs font-black text-neutral-400 uppercase tracking-widest block mb-3">
                 <FormattedMessage id="numberline.settings.range" />
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block opacity-70">
+                  <span className="text-[10px] font-black text-primary/70 uppercase tracking-widest block opacity-70">
                     <FormattedMessage id="numberline.settings.start" />
                   </span>
                   <input 
@@ -448,11 +448,11 @@ export const NumberLine = () => {
                         setRange((prev: any) => ({ start: numVal, end: Math.max(numVal, parseFloat(prev.end) || 0) }));
                       }
                     }}
-                    className="w-full bg-white p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-xl md:text-2xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
+                    className="w-full bg-surface p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-xl md:text-2xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
                   />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block opacity-70">
+                  <span className="text-[10px] font-black text-primary/70 uppercase tracking-widest block opacity-70">
                     <FormattedMessage id="numberline.settings.end" />
                   </span>
                   <input 
@@ -467,14 +467,14 @@ export const NumberLine = () => {
                         setRange((prev: any) => ({ start: Math.min(numVal, parseFloat(prev.start) || 0), end: numVal }));
                       }
                     }}
-                    className="w-full bg-white p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-xl md:text-2xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
+                    className="w-full bg-surface p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-xl md:text-2xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-3">
+              <label className="text-xs font-black text-neutral-400 uppercase tracking-widest block mb-3">
                 <FormattedMessage id="numberline.settings.steps" />
               </label>
               <input 
@@ -482,13 +482,13 @@ export const NumberLine = () => {
                 value={step}
                 step="0.1"
                 onChange={(e) => setStep(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
-                className="w-full bg-white p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-2xl md:text-3xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
+                className="w-full bg-surface p-4 md:p-5 rounded-2xl border-4 border-slate-100 outline-none font-black text-2xl md:text-3xl text-slate-900 tabular-nums text-center focus:border-indigo-500/50 transition-all "
               />
             </div>
             
             <button
               onClick={() => { setShowLabels(!showLabels); audioEngine.playTick(settings.soundTheme); }}
-              className={`w-full h-16 md:h-20 rounded-2xl border-4 transition-all flex items-center justify-center gap-4 font-black text-sm uppercase tracking-widest ${showLabels ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white border-slate-100 text-slate-400'}`}
+              className={`w-full h-16 md:h-20 rounded-2xl border-4 transition-all flex items-center justify-center gap-4 font-black text-sm uppercase tracking-widest ${showLabels ? 'bg-primary border-indigo-400 text-white' : 'bg-surface border-slate-100 text-neutral-400'}`}
             >
               {showLabels ? <Eye size={20} strokeWidth={3} /> : <EyeOff size={20} strokeWidth={3} />}
               <FormattedMessage id="numberline.settings.labels" />

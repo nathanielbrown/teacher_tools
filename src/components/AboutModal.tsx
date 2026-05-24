@@ -106,7 +106,7 @@ export const AboutModal = ({ onClose }) => {
       >
         <div className="flex items-center justify-between pb-6 border-b border-slate-100 bg-transparent">
           <div className="flex items-center gap-4">
-            <img src={logo} alt="ClassRex" className="h-12 w-auto object-contain" />
+            <img src={logo} alt="ClassRex" width={48} height={48} className="h-12 w-auto object-contain" />
             <h2 className="text-3xl font-black text-slate-800 tracking-tight">
               <FormattedMessage id="about.title" defaultMessage="About ClassRex" />
             </h2>

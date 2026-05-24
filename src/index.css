@@ -3,7 +3,11 @@
 @import "tailwindcss/utilities";
 @import "./styles/tools.css";
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+/* Self-contained local system font mapping to completely avoid remote Google Fonts */
+@font-face {
+  font-family: 'Outfit';
+  src: local('system-ui'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial');
+}
 
 @font-face {
   font-family: 'QLD Beginners';
@@ -24,6 +28,78 @@
     --color-border: #f1f5f9; /* slate-100 */
     --radius-main: 2.5rem;
     --radius-card: 1.5rem;
+    --radius-inner: 1rem;
+    --radius-button: 9999px;
+
+    /* Card and Border Widths */
+    --border-width-card: 4px;
+    --border-width-display: 8px;
+
+    /* Shadows (none by default to comply with user_global rules) */
+    --shadow-card: none;
+    --shadow-button: none;
+    --shadow-inner: none;
+
+    /* Base solid values */
+    --color-white: #ffffff;
+    --color-black: #000000;
+
+    /* Neutrals / Grays */
+    --color-neutral-50: #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+
+    /* Alert / Status States */
+    --color-success-bg: #ecfdf5; /* emerald-50 */
+    --color-success-border: #d1fae5; /* emerald-100 */
+    --color-success-text: #059669; /* emerald-600 */
+
+    --color-warning-bg: #fffbeb; /* amber-50 */
+    --color-warning-border: #fef3c7; /* amber-100 */
+    --color-warning-text: #d97706; /* amber-600 */
+
+    --color-caution-bg: #fff5f5; /* rose-50 */
+    --color-caution-border: #ffe3e3; /* rose-100 */
+    --color-caution-text: #e11d48; /* rose-600 */
+
+    --color-info-bg: #eef2ff; /* indigo-50 */
+    --color-info-border: #e0e7ff; /* indigo-100 */
+    --color-info-text: #4f46e5; /* indigo-600 */
+
+    /* Dark Mode Defaults */
+    --color-dark-bg: #0f172a;
+    --color-dark-border: #1e293b;
+    --color-dark-text: #ffffff;
+
+    /* Semi-transparent variations */
+    --color-white-opacity-5: rgba(255, 255, 255, 0.05);
+    --color-white-opacity-10: rgba(255, 255, 255, 0.1);
+    --color-white-opacity-30: rgba(255, 255, 255, 0.3);
+    --color-white-opacity-40: rgba(255, 255, 255, 0.4);
+    --color-white-opacity-50: rgba(255, 255, 255, 0.5);
+    --color-white-opacity-60: rgba(255, 255, 255, 0.6);
+
+    --color-black-opacity-5: rgba(0, 0, 0, 0.05);
+    --color-black-opacity-7: rgba(31, 38, 135, 0.07);
+    --color-black-opacity-10: rgba(0, 0, 0, 0.1);
+    --color-black-opacity-25: rgba(0, 0, 0, 0.025);
+    --color-black-opacity-30: rgba(0, 0, 0, 0.3);
+
+    --color-indigo-opacity-20: rgba(99, 102, 241, 0.2);
+
+    /* Behaviour Diamond Custom variables */
+    --diamond-amazing-color: #a855f7;
+    --diamond-great-color: #3b82f6;
+    --diamond-ready-color: #22c55e;
+    --diamond-warning-color: #eab308;
+    --diamond-choice-color: #ef4444;
   }
 
   /* Early Years Theme */
@@ -33,6 +109,54 @@
     --color-accent: #ffa502; 
     --color-background: #f1f2f6;
     --color-text: #2f3542;
+    --color-surface: #ffffff;
+    --color-border: #e4e7eb;
+
+    /* Rounding and borders overrides */
+    --radius-card: 2.5rem;
+    --radius-inner: 1.5rem;
+    --border-width-card: 6px;
+    --border-width-display: 10px;
+
+    /* Neutrals / Grays */
+    --color-neutral-50: #f9fafb;
+    --color-neutral-100: #f3f4f6;
+    --color-neutral-200: #e5e7eb;
+    --color-neutral-300: #d1d5db;
+    --color-neutral-400: #9ca3af;
+    --color-neutral-500: #6b7280;
+    --color-neutral-600: #4b5563;
+    --color-neutral-700: #374151;
+    --color-neutral-800: #1f2937;
+    --color-neutral-900: #111827;
+
+    /* Alert / Status States */
+    --color-success-bg: #eefdf3;
+    --color-success-border: #d1f7dc;
+    --color-success-text: #2ed573;
+
+    --color-warning-bg: #fffaf0;
+    --color-warning-border: #ffe5b4;
+    --color-warning-text: #ffa502;
+
+    --color-caution-bg: #fff0f2;
+    --color-caution-border: #ffd2d6;
+    --color-caution-text: #ff4757;
+
+    --color-info-bg: #f0f8ff;
+    --color-info-border: #d2e9ff;
+    --color-info-text: #1e90ff;
+
+    /* Dark Mode */
+    --color-dark-bg: #2f3542;
+    --color-dark-border: #3e4453;
+
+    /* Behaviour Diamond overrides for early-years */
+    --diamond-amazing-color: #a855f7;
+    --diamond-great-color: #1e90ff;
+    --diamond-ready-color: #2ed573;
+    --diamond-warning-color: #ffa502;
+    --diamond-choice-color: #ff4757;
   }
 
   [data-theme="early-years"] body {
@@ -46,6 +170,48 @@
     --color-accent: #f59e0b; 
     --color-background: #ecfdf5; 
     --color-text: #064e3b; 
+    --color-surface: #ffffff;
+    --color-border: #d1fae5;
+
+    /* Neutrals / Grays */
+    --color-neutral-50: #f0fdf4;
+    --color-neutral-100: #d1fae5;
+    --color-neutral-200: #a7f3d0;
+    --color-neutral-300: #6ee7b7;
+    --color-neutral-400: #34d399;
+    --color-neutral-500: #10b981;
+    --color-neutral-600: #059669;
+    --color-neutral-700: #047857;
+    --color-neutral-800: #065f46;
+    --color-neutral-900: #064e3b;
+
+    /* Alert / Status States */
+    --color-success-bg: #ecfdf5;
+    --color-success-border: #d1fae5;
+    --color-success-text: #059669;
+
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fef3c7;
+    --color-warning-text: #d97706;
+
+    --color-caution-bg: #fff5f5;
+    --color-caution-border: #ffe3e3;
+    --color-caution-text: #e11d48;
+
+    --color-info-bg: #eff6ff;
+    --color-info-border: #dbeafe;
+    --color-info-text: #2563eb;
+
+    /* Dark Mode */
+    --color-dark-bg: #064e3b;
+    --color-dark-border: #047857;
+
+    /* Behaviour Diamond overrides for primary */
+    --diamond-amazing-color: #8b5cf6;
+    --diamond-great-color: #3b82f6;
+    --diamond-ready-color: #10b981;
+    --diamond-warning-color: #f59e0b;
+    --diamond-choice-color: #ef4444;
   }
 
   /* Secondary Theme */
@@ -55,32 +221,152 @@
     --color-accent: #f59e0b; 
     --color-background: #f8fafc; 
     --color-text: #1e293b; 
+    --color-surface: #ffffff;
+    --color-border: #f1f5f9;
+
+    /* Rounding and borders overrides */
+    --radius-main: 1.5rem;
+    --radius-card: 1rem;
+    --radius-inner: 0.5rem;
+    --border-width-card: 2px;
+    --border-width-display: 4px;
+
+    /* Neutrals / Grays */
+    --color-neutral-50: #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+
+    /* Alert / Status States */
+    --color-success-bg: #ecfdf5;
+    --color-success-border: #d1fae5;
+    --color-success-text: #10b981;
+
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fef3c7;
+    --color-warning-text: #f59e0b;
+
+    --color-caution-bg: #fff5f5;
+    --color-caution-border: #ffe3e3;
+    --color-caution-text: #ef4444;
+
+    --color-info-bg: #e0e7ff;
+    --color-info-border: #c7d2fe;
+    --color-info-text: #6366f1;
+
+    /* Dark Mode */
+    --color-dark-bg: #1e1b4b;
+    --color-dark-border: #312e81;
+
+    /* Behaviour Diamond overrides for secondary */
+    --diamond-amazing-color: #818cf8;
+    --diamond-great-color: #6366f1;
+    --diamond-ready-color: #10b981;
+    --diamond-warning-color: #f59e0b;
+    --diamond-choice-color: #ec4899;
   }
 
+  /* Dark Theme */
+  [data-theme="dark"] {
+    --color-primary: #818cf8; /* indigo-400 */
+    --color-secondary: #34d399; /* emerald-400 */
+    --color-accent: #fbbf24; /* amber-400 */
+    --color-background: #0f172a; /* slate-900 */
+    --color-text: #f8fafc; /* slate-50 */
+    --color-surface: #1e293b; /* slate-800 */
+    --color-border: #334155; /* slate-700 */
 
+    /* Rounding and borders */
+    --radius-card: 1.5rem;
+    --radius-inner: 1rem;
+    --border-width-card: 2px;
+    --border-width-display: 4px;
+
+    /* Neutrals / Grays */
+    --color-neutral-50: #0f172a;
+    --color-neutral-100: #1e293b;
+    --color-neutral-200: #334155;
+    --color-neutral-300: #475569;
+    --color-neutral-400: #64748b;
+    --color-neutral-500: #94a3b8;
+    --color-neutral-600: #cbd5e1;
+    --color-neutral-700: #e2e8f0;
+    --color-neutral-800: #f1f5f9;
+    --color-neutral-900: #f8fafc;
+
+    /* Alert / Status States */
+    --color-success-bg: #064e3b;
+    --color-success-border: #047857;
+    --color-success-text: #34d399;
+
+    --color-warning-bg: #78350f;
+    --color-warning-border: #b45309;
+    --color-warning-text: #fbbf24;
+
+    --color-caution-bg: #4c0519;
+    --color-caution-border: #9f1239;
+    --color-caution-text: #f43f5e;
+
+    --color-info-bg: #1e1b4b;
+    --color-info-border: #312e81;
+    --color-info-text: #818cf8;
+
+    /* Semi-transparent variations */
+    --color-white-opacity-5: rgba(15, 23, 42, 0.2);
+    --color-white-opacity-10: rgba(15, 23, 42, 0.4);
+    --color-white-opacity-30: rgba(30, 41, 59, 0.6);
+    --color-white-opacity-40: rgba(30, 41, 59, 0.7);
+    --color-white-opacity-50: rgba(30, 41, 59, 0.8);
+    --color-white-opacity-60: rgba(30, 41, 59, 0.9);
+
+    --color-black-opacity-5: rgba(255, 255, 255, 0.05);
+    --color-black-opacity-7: rgba(255, 255, 255, 0.07);
+    --color-black-opacity-10: rgba(255, 255, 255, 0.1);
+    --color-black-opacity-25: rgba(255, 255, 255, 0.025);
+    --color-black-opacity-30: rgba(255, 255, 255, 0.3);
+
+    --color-indigo-opacity-20: rgba(99, 102, 241, 0.4);
+
+    /* Inverted dark helper variables for dark mode */
+    --color-dark-bg: var(--color-neutral-900); /* Inverts dark backgrounds to light-neutral */
+    --color-dark-border: var(--color-neutral-300); /* Inverts dark borders to light-neutral */
+
+    /* Behaviour Diamond overrides for dark mode */
+    --diamond-amazing-color: #c084fc;
+    --diamond-great-color: #60a5fa;
+    --diamond-ready-color: #34d399;
+    --diamond-warning-color: #fbbf24;
+    --diamond-choice-color: #f87171;
+  }
 }
 
 @layer components {
   .glass-card {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: var(--color-white-opacity-60);
     backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    border: 1px solid var(--color-white-opacity-30);
+    box-shadow: 0 8px 32px 0 var(--color-black-opacity-7);
   }
   
   .premium-shadow {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    box-shadow: 0 10px 15px -3px var(--color-black-opacity-5), 0 4px 6px -2px var(--color-black-opacity-25);
   }
 
   .text-glow {
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 0 15px var(--color-white-opacity-50);
   }
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: 'Outfit', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
 }
@@ -121,7 +407,7 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(226, 232, 240, 0.5);
+  background-color: color-mix(in srgb, var(--color-neutral-200), transparent 50%);
   transition: background-color 0.2s ease;
   border-radius: 20px;
   border: 2px solid transparent;
@@ -129,7 +415,7 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(203, 213, 225, 0.5);
+  background-color: color-mix(in srgb, var(--color-neutral-300), transparent 50%);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -176,3 +462,454 @@ body {
 .grid-cols-14 {
   grid-template-columns: repeat(14, minmax(0, 1fr));
 }
+
+/* Invert Tailwind Slate, Gray, and Neutral colors in Dark Mode to ensure high legibility and premium look */
+[data-theme="dark"] .text-slate-950,
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800,
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-slate-600,
+[data-theme="dark"] .text-neutral-950,
+[data-theme="dark"] .text-neutral-900,
+[data-theme="dark"] .text-neutral-800,
+[data-theme="dark"] .text-neutral-700,
+[data-theme="dark"] .text-neutral-600,
+[data-theme="dark"] .text-gray-950,
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600 {
+  color: var(--color-text) !important;
+}
+
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-neutral-500,
+[data-theme="dark"] .text-gray-500 {
+  color: var(--color-neutral-600) !important;
+}
+
+[data-theme="dark"] .text-slate-400,
+[data-theme="dark"] .text-slate-300,
+[data-theme="dark"] .text-slate-200,
+[data-theme="dark"] .text-neutral-400,
+[data-theme="dark"] .text-neutral-300,
+[data-theme="dark"] .text-neutral-200,
+[data-theme="dark"] .text-gray-400,
+[data-theme="dark"] .text-gray-300,
+[data-theme="dark"] .text-gray-200 {
+  color: var(--color-neutral-400) !important;
+}
+
+/* Background Color Inversions */
+[data-theme="dark"] .bg-white {
+  background-color: var(--color-surface) !important;
+}
+
+[data-theme="dark"] .bg-slate-50,
+[data-theme="dark"] .bg-neutral-50,
+[data-theme="dark"] .bg-gray-50 {
+  background-color: var(--color-background) !important;
+}
+
+[data-theme="dark"] .bg-slate-100,
+[data-theme="dark"] .bg-neutral-100,
+[data-theme="dark"] .bg-gray-100,
+[data-theme="dark"] .bg-slate-200,
+[data-theme="dark"] .bg-neutral-200,
+[data-theme="dark"] .bg-gray-200 {
+  background-color: var(--color-neutral-100) !important;
+}
+
+[data-theme="dark"] .bg-slate-300,
+[data-theme="dark"] .bg-neutral-300,
+[data-theme="dark"] .bg-gray-300 {
+  background-color: var(--color-neutral-200) !important;
+}
+
+/* Solid Canvas Panels with Opacity */
+[data-theme="dark"] .bg-surface\/90,
+[data-theme="dark"] .bg-surface\/80,
+[data-theme="dark"] .bg-surface\/75,
+[data-theme="dark"] .bg-surface\/60,
+[data-theme="dark"] .bg-surface\/50 {
+  background-color: var(--color-surface) !important;
+}
+
+/* Thick transparent backgrounds */
+[data-theme="dark"] .bg-white\/90,
+[data-theme="dark"] .bg-white\/80,
+[data-theme="dark"] .bg-slate-50\/90,
+[data-theme="dark"] .bg-slate-50\/80,
+[data-theme="dark"] .bg-slate-100\/90,
+[data-theme="dark"] .bg-slate-100\/80,
+[data-theme="dark"] .bg-slate-200\/90,
+[data-theme="dark"] .bg-slate-200\/80,
+[data-theme="dark"] .bg-neutral-50\/80,
+[data-theme="dark"] .bg-neutral-100\/80,
+[data-theme="dark"] .bg-gray-50\/80,
+[data-theme="dark"] .bg-gray-100\/80 {
+  background-color: var(--color-white-opacity-60) !important;
+}
+
+/* Medium transparent backgrounds */
+[data-theme="dark"] .bg-white\/70,
+[data-theme="dark"] .bg-white\/60,
+[data-theme="dark"] .bg-white\/50,
+[data-theme="dark"] .bg-slate-50\/70,
+[data-theme="dark"] .bg-slate-50\/60,
+[data-theme="dark"] .bg-slate-50\/50,
+[data-theme="dark"] .bg-slate-100\/70,
+[data-theme="dark"] .bg-slate-100\/60,
+[data-theme="dark"] .bg-slate-100\/50,
+[data-theme="dark"] .bg-slate-200\/70,
+[data-theme="dark"] .bg-slate-200\/60,
+[data-theme="dark"] .bg-slate-200\/50,
+[data-theme="dark"] .bg-neutral-50\/50,
+[data-theme="dark"] .bg-neutral-100\/50,
+[data-theme="dark"] .bg-gray-50\/50,
+[data-theme="dark"] .bg-gray-100\/50 {
+  background-color: var(--color-white-opacity-40) !important;
+}
+
+/* Light transparent backgrounds */
+[data-theme="dark"] .bg-white\/40,
+[data-theme="dark"] .bg-white\/30,
+[data-theme="dark"] .bg-slate-50\/40,
+[data-theme="dark"] .bg-slate-50\/30,
+[data-theme="dark"] .bg-slate-100\/40,
+[data-theme="dark"] .bg-slate-100\/30,
+[data-theme="dark"] .bg-slate-200\/40,
+[data-theme="dark"] .bg-slate-200\/30,
+[data-theme="dark"] .bg-neutral-50\/30,
+[data-theme="dark"] .bg-neutral-100\/30,
+[data-theme="dark"] .bg-gray-50\/30,
+[data-theme="dark"] .bg-gray-100\/30 {
+  background-color: var(--color-white-opacity-30) !important;
+}
+
+/* Thin transparent backgrounds */
+[data-theme="dark"] .bg-white\/20,
+[data-theme="dark"] .bg-white\/10,
+[data-theme="dark"] .bg-white\/5,
+[data-theme="dark"] .bg-slate-50\/20,
+[data-theme="dark"] .bg-slate-50\/10,
+[data-theme="dark"] .bg-slate-50\/5,
+[data-theme="dark"] .bg-slate-100\/20,
+[data-theme="dark"] .bg-slate-100\/10,
+[data-theme="dark"] .bg-slate-100\/5,
+[data-theme="dark"] .bg-slate-200\/20,
+[data-theme="dark"] .bg-slate-200\/10,
+[data-theme="dark"] .bg-slate-200\/5,
+[data-theme="dark"] .bg-neutral-50\/10,
+[data-theme="dark"] .bg-neutral-100\/10,
+[data-theme="dark"] .bg-gray-50\/10,
+[data-theme="dark"] .bg-gray-100\/10 {
+  background-color: var(--color-white-opacity-10) !important;
+}
+
+/* Solid Borders and Opacity Borders Inversion */
+[data-theme="dark"] .border-slate-50,
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-300,
+[data-theme="dark"] .border-slate-400,
+[data-theme="dark"] .border-neutral-50,
+[data-theme="dark"] .border-neutral-100,
+[data-theme="dark"] .border-neutral-200,
+[data-theme="dark"] .border-neutral-300,
+[data-theme="dark"] .border-neutral-400,
+[data-theme="dark"] .border-gray-50,
+[data-theme="dark"] .border-gray-100,
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300,
+[data-theme="dark"] .border-gray-400,
+[data-theme="dark"] .border-white,
+[data-theme="dark"] .border-slate-50\/50,
+[data-theme="dark"] .border-slate-100\/50,
+[data-theme="dark"] .border-slate-200\/50,
+[data-theme="dark"] .border-neutral-200\/50,
+[data-theme="dark"] .border-gray-200\/50,
+[data-theme="dark"] .border-border\/40,
+[data-theme="dark"] .border-white\/50,
+[data-theme="dark"] .border-white\/30,
+[data-theme="dark"] .border-white\/20,
+[data-theme="dark"] .border-white\/10 {
+  border-color: var(--color-border) !important;
+}
+
+/* Hover State Inversions */
+[data-theme="dark"] .hover\:bg-slate-50:hover,
+[data-theme="dark"] .hover\:bg-slate-100:hover,
+[data-theme="dark"] .hover\:bg-slate-200:hover,
+[data-theme="dark"] .hover\:bg-neutral-50:hover,
+[data-theme="dark"] .hover\:bg-neutral-100:hover,
+[data-theme="dark"] .hover\:bg-neutral-200:hover,
+[data-theme="dark"] .hover\:bg-gray-50:hover,
+[data-theme="dark"] .hover\:bg-gray-100:hover,
+[data-theme="dark"] .hover\:bg-gray-200:hover,
+[data-theme="dark"] .hover\:bg-white:hover:hover {
+  background-color: var(--color-neutral-200) !important;
+}
+
+/* Form inputs & controls */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--color-neutral-100) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Hardcoded Alert Text Inversions for high contrast readability */
+[data-theme="dark"] .text-emerald-500,
+[data-theme="dark"] .text-emerald-600,
+[data-theme="dark"] .text-emerald-700,
+[data-theme="dark"] .text-emerald-800,
+[data-theme="dark"] .text-green-500,
+[data-theme="dark"] .text-green-600,
+[data-theme="dark"] .text-green-700,
+[data-theme="dark"] .text-green-800 {
+  color: var(--color-success-text) !important;
+}
+
+[data-theme="dark"] .text-amber-500,
+[data-theme="dark"] .text-amber-600,
+[data-theme="dark"] .text-amber-700,
+[data-theme="dark"] .text-amber-800 {
+  color: var(--color-warning-text) !important;
+}
+
+[data-theme="dark"] .text-rose-500,
+[data-theme="dark"] .text-rose-600,
+[data-theme="dark"] .text-rose-700,
+[data-theme="dark"] .text-rose-800,
+[data-theme="dark"] .text-red-500,
+[data-theme="dark"] .text-red-600,
+[data-theme="dark"] .text-red-700,
+[data-theme="dark"] .text-red-800 {
+  color: var(--color-caution-text) !important;
+}
+
+[data-theme="dark"] .text-blue-500,
+[data-theme="dark"] .text-blue-600,
+[data-theme="dark"] .text-blue-700,
+[data-theme="dark"] .text-blue-800,
+[data-theme="dark"] .text-indigo-500,
+[data-theme="dark"] .text-indigo-600,
+[data-theme="dark"] .text-indigo-700,
+[data-theme="dark"] .text-indigo-800 {
+  color: var(--color-info-text) !important;
+}
+
+/* Enforce "Don't use shadows" globally in dark theme as requested */
+[data-theme="dark"] .shadow-sm,
+[data-theme="dark"] .shadow,
+[data-theme="dark"] .shadow-md,
+[data-theme="dark"] .shadow-lg,
+[data-theme="dark"] .shadow-xl,
+[data-theme="dark"] .shadow-2xl,
+[data-theme="dark"] .shadow-inner,
+[data-theme="dark"] .shadow-slate-200\/50,
+[data-theme="dark"] .shadow-slate-200\/30,
+[data-theme="dark"] .shadow-slate-100\/50,
+[data-theme="dark"] .shadow-indigo-200,
+[data-theme="dark"] .shadow-indigo-500\/25,
+[data-theme="dark"] .shadow-primary\/10,
+[data-theme="dark"] .shadow-secondary\/10,
+[data-theme="dark"] .shadow-accent\/10 {
+  box-shadow: none !important;
+}
+
+/* Custom background color overrides for solid slate/neutral/gray dark colors to provide distinct legibility */
+[data-theme="dark"] .bg-slate-800,
+[data-theme="dark"] .bg-neutral-800,
+[data-theme="dark"] .bg-gray-800 {
+  background-color: var(--color-neutral-200) !important; /* slate-700 (#334155) stands out on slate-800 surface and slate-900 background */
+}
+
+[data-theme="dark"] .bg-slate-900,
+[data-theme="dark"] .bg-neutral-900,
+[data-theme="dark"] .bg-gray-900 {
+  background-color: var(--color-neutral-300) !important; /* slate-600 (#475569) */
+}
+
+[data-theme="dark"] .bg-slate-950,
+[data-theme="dark"] .bg-neutral-950,
+[data-theme="dark"] .bg-gray-950 {
+  background-color: var(--color-neutral-300) !important; /* slate-600 (#475569) */
+}
+
+/* Custom bg-dark-bg button color inversion rules (swapping white text to dark text inside inverted white background) */
+[data-theme="dark"] .bg-dark-bg {
+  background-color: var(--color-dark-bg) !important;
+  color: var(--color-neutral-50) !important;
+}
+
+[data-theme="dark"] .bg-dark-bg.text-white,
+[data-theme="dark"] .bg-dark-bg .text-white {
+  color: var(--color-neutral-50) !important;
+}
+
+[data-theme="dark"] .bg-dark-bg:hover,
+[data-theme="dark"] .hover\:bg-slate-800:hover,
+[data-theme="dark"] .hover\:bg-slate-900:hover {
+  background-color: var(--color-neutral-800) !important;
+  color: var(--color-neutral-50) !important;
+}
+
+/* Hardcoded Alert Background and Border Inversions for High Contrast legibility */
+[data-theme="dark"] .bg-emerald-50,
+[data-theme="dark"] .bg-emerald-100,
+[data-theme="dark"] .bg-green-50,
+[data-theme="dark"] .bg-green-100 {
+  background-color: var(--color-success-bg) !important;
+}
+
+[data-theme="dark"] .bg-emerald-50\/50,
+[data-theme="dark"] .bg-emerald-100\/50,
+[data-theme="dark"] .bg-green-50\/50,
+[data-theme="dark"] .bg-green-100\/50 {
+  background-color: rgba(6, 78, 59, 0.5) !important;
+}
+
+[data-theme="dark"] .border-emerald-100,
+[data-theme="dark"] .border-green-100 {
+  border-color: var(--color-success-border) !important;
+}
+
+[data-theme="dark"] .bg-amber-50,
+[data-theme="dark"] .bg-amber-100,
+[data-theme="dark"] .bg-yellow-50,
+[data-theme="dark"] .bg-yellow-100 {
+  background-color: var(--color-warning-bg) !important;
+}
+
+[data-theme="dark"] .bg-amber-50\/50,
+[data-theme="dark"] .bg-amber-100\/50,
+[data-theme="dark"] .bg-yellow-50\/50,
+[data-theme="dark"] .bg-yellow-100\/50 {
+  background-color: rgba(120, 53, 15, 0.5) !important;
+}
+
+[data-theme="dark"] .border-amber-100,
+[data-theme="dark"] .border-yellow-100 {
+  border-color: var(--color-warning-border) !important;
+}
+
+[data-theme="dark"] .bg-rose-50,
+[data-theme="dark"] .bg-rose-100,
+[data-theme="dark"] .bg-red-50,
+[data-theme="dark"] .bg-red-100 {
+  background-color: var(--color-caution-bg) !important;
+}
+
+[data-theme="dark"] .bg-rose-50\/50,
+[data-theme="dark"] .bg-rose-100\/50,
+[data-theme="dark"] .bg-red-50\/50,
+[data-theme="dark"] .bg-red-100\/50 {
+  background-color: rgba(76, 5, 25, 0.5) !important;
+}
+
+[data-theme="dark"] .border-rose-100,
+[data-theme="dark"] .border-red-100 {
+  border-color: var(--color-caution-border) !important;
+}
+
+[data-theme="dark"] .bg-blue-50,
+[data-theme="dark"] .bg-blue-100,
+[data-theme="dark"] .bg-indigo-50,
+[data-theme="dark"] .bg-indigo-100 {
+  background-color: var(--color-info-bg) !important;
+}
+
+[data-theme="dark"] .bg-blue-50\/50,
+[data-theme="dark"] .bg-blue-100\/50,
+[data-theme="dark"] .bg-indigo-50\/50,
+[data-theme="dark"] .bg-indigo-100\/50 {
+  background-color: rgba(30, 27, 75, 0.5) !important;
+}
+
+[data-theme="dark"] .border-blue-100,
+[data-theme="dark"] .border-indigo-100 {
+  border-color: var(--color-info-border) !important;
+}
+
+/* Invert Tailwind Black utilities in Dark Mode to resolve DailySchedule black text/elements */
+[data-theme="dark"] .text-black {
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .text-black\/80 {
+  color: var(--color-neutral-800) !important;
+}
+[data-theme="dark"] .text-black\/60 {
+  color: var(--color-neutral-600) !important;
+}
+[data-theme="dark"] .text-black\/40 {
+  color: var(--color-neutral-500) !important;
+}
+[data-theme="dark"] .text-black\/20 {
+  color: var(--color-neutral-400) !important;
+}
+[data-theme="dark"] .hover\:text-black:hover {
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .bg-black {
+  background-color: var(--color-neutral-900) !important;
+  color: var(--color-neutral-50) !important;
+}
+[data-theme="dark"] .bg-black.text-white,
+[data-theme="dark"] .bg-black .text-white {
+  color: var(--color-neutral-50) !important;
+}
+[data-theme="dark"] .bg-black\/5 {
+  background-color: var(--color-white-opacity-10) !important;
+}
+[data-theme="dark"] .hover\:bg-black\/5:hover {
+  background-color: var(--color-white-opacity-10) !important;
+}
+[data-theme="dark"] .bg-black\/\[0\.02\] {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+[data-theme="dark"] .bg-black\/\[0\.04\] {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+[data-theme="dark"] .bg-black\/80,
+[data-theme="dark"] .hover\:bg-black\/80:hover {
+  background-color: var(--color-neutral-800) !important;
+  color: var(--color-neutral-100) !important;
+}
+[data-theme="dark"] .border-black {
+  border-color: var(--color-text) !important;
+}
+[data-theme="dark"] .border-black\/5 {
+  border-color: var(--color-border) !important;
+}
+[data-theme="dark"] .border-black\/20 {
+  border-color: var(--color-border) !important;
+}
+[data-theme="dark"] .hover\:border-black\/20:hover {
+  border-color: var(--color-neutral-400) !important;
+}
+[data-theme="dark"] .ring-black {
+  --tw-ring-color: var(--color-text) !important;
+}
+
+/* Invert Analogue Clock SVG colors in Dark Mode to ensure high readability */
+[data-theme="dark"] .group\/clock svg text {
+  fill: var(--color-text) !important;
+}
+[data-theme="dark"] .group\/clock svg text[fill="#1e293b"] {
+  fill: var(--color-text) !important;
+}
+[data-theme="dark"] .group\/clock svg line[stroke="#1e293b"] {
+  stroke: var(--color-text) !important;
+}
+[data-theme="dark"] .group\/clock svg line[stroke="#cbd5e1"] {
+  stroke: var(--color-neutral-300) !important;
+}
+[data-theme="dark"] .group\/clock svg path[fill="#1e293b"],
+[data-theme="dark"] .group\/clock svg circle[fill="#1e293b"] {
+  fill: var(--color-text) !important;
+}
+
+

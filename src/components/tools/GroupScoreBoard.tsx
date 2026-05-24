@@ -22,7 +22,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="groupscoreboard.help.step1" 
@@ -32,7 +32,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-xs font-black text-blue-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-info-bg flex items-center justify-center text-xs font-black text-info shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="groupscoreboard.help.step2" 
@@ -42,7 +42,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="groupscoreboard.help.step3" 
@@ -52,7 +52,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="groupscoreboard.help.step4" 
@@ -96,7 +96,7 @@ export const GroupScoreBoard = () => {
     };
     setGroups([...groups, newGroup]);
     audioEngine.playTick(settings.soundTheme);
-  }, [groups, settings.soundTheme, intl]);
+  }, [groups, settings.soundTheme, intl, setGroups]);
 
   const removeGroup = (id: string) => {
     setGroups(groups.filter(g => g.id !== id));
@@ -133,7 +133,7 @@ export const GroupScoreBoard = () => {
   const resetAllScores = useCallback(() => {
     setGroups(groups.map(g => ({ ...g, score: 0 })));
     audioEngine.playTick(settings.soundTheme);
-  }, [groups, settings.soundTheme]);
+  }, [groups, settings.soundTheme, setGroups]);
 
   useEffect(() => {
     setOnReset(() => resetAllScores);
@@ -179,10 +179,10 @@ export const GroupScoreBoard = () => {
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] flex flex-col overflow-hidden border-4 border-white group/card relative transition-all"
+                    className="bg-surface rounded-[2.5rem] md:rounded-[3.5rem] flex flex-col overflow-hidden border-4 border-white group/card relative transition-all"
                   >
                     {/* Card Header */}
-                    <div className="bg-slate-50/80 px-8 py-3 flex items-center justify-between border-b-4 border-white">
+                    <div className="bg-white px-8 py-3 flex items-center justify-between border-b-4 border-white">
                       <div className="flex items-center gap-4 overflow-hidden flex-1 text-left">
                         {editingId === group.id ? (
                           <input
@@ -191,12 +191,12 @@ export const GroupScoreBoard = () => {
                             onChange={(e) => setEditName(e.target.value)}
                             onBlur={() => saveEdit(group.id)}
                             onKeyDown={(e) => handleKeyPress(e, group.id)}
-                             className="bg-white border-2 md:border-4 border-indigo-100 rounded-xl px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm font-black outline-none w-full text-indigo-600 tracking-widest"
+                             className="bg-white border-2 md:border-4 border-primary/20 rounded-xl px-2 md:px-4 py-1 md:py-2 text-xs md:text-base font-black outline-none w-full text-primary tracking-widest"
                           />
                         ) : (
                           <>
                             <span 
-                               className="text-slate-900 font-black text-xs md:text-sm tracking-widest truncate cursor-pointer hover:text-indigo-600 transition-colors"
+                               className="text-slate-900 font-black text-xs md:text-base tracking-widest truncate cursor-pointer hover:text-primary transition-colors"
                               onClick={() => startEditing(group.id, group.name)}
                             >
                               {group.name}
@@ -215,14 +215,14 @@ export const GroupScoreBoard = () => {
                       </div>
                       <button 
                         onClick={() => removeGroup(group.id)}
-                        className="text-slate-200 hover:text-rose-500 transition-all p-2 hover:bg-rose-50 rounded-xl ml-2"
+                        className="text-slate-200 hover:text-caution transition-all p-2 hover:bg-caution-bg rounded-xl ml-2"
                       >
                         <X size={18} strokeWidth={3} />
                       </button>
                     </div>
 
                     {/* Score Area */}
-                    <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-6 px-4 md:px-8 min-h-[80px] md:min-h-[120px] relative overflow-hidden bg-slate-50">
+                    <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-6 px-4 md:px-8 min-h-[80px] md:min-h-[120px] relative overflow-hidden bg-neutral-50">
                       <div className="tool-grid-bg opacity-10 pointer-events-none" />
                       <AnimatePresence mode="wait">
                         <motion.span
@@ -240,17 +240,17 @@ export const GroupScoreBoard = () => {
                     </div>
 
                     {/* Score Controls */}
-                    <div className="flex gap-2 md:gap-4 p-2 md:p-4 bg-white shrink-0">
+                    <div className="flex gap-2 md:gap-4 p-2 md:p-4 bg-surface shrink-0">
                       <button
                         onClick={() => updateScore(group.id, -1)}
                         disabled={group.score === 0}
-                        className="flex-1 h-14 md:h-12 rounded-[1rem] md:rounded-[1.5rem] flex justify-center items-center bg-slate-50 border-4 border-white text-rose-500 hover:bg-rose-500 hover:text-white disabled:opacity-20 transition-all active:scale-95"
+                        className="flex-1 h-14 md:h-12 rounded-[1rem] md:rounded-[1.5rem] flex justify-center items-center bg-neutral-50 border-4 border-border text-caution hover:bg-caution hover:text-white disabled:opacity-20 transition-all active:scale-95"
                       >
                         <Minus size={isMobile ? 24 : 20} strokeWidth={4} />
                       </button>
                       <button
                         onClick={() => updateScore(group.id, 1)}
-                        className="flex-1 h-14 md:h-12 rounded-[1rem] md:rounded-[1.5rem] flex justify-center items-center bg-slate-50 border-4 border-white text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
+                        className="flex-1 h-14 md:h-12 rounded-[1rem] md:rounded-[1.5rem] flex justify-center items-center bg-neutral-50 border-4 border-border text-success hover:bg-success hover:text-white transition-all active:scale-95"
                       >
                         <Plus size={isMobile ? 24 : 20} strokeWidth={4} />
                       </button>
@@ -263,12 +263,12 @@ export const GroupScoreBoard = () => {
               <motion.button
                 layout
                 onClick={() => addGroup()}
-                className="bg-slate-50/50 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-white transition-all flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px] group/add"
+                className="bg-neutral-50/50 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-dashed border-border hover:border-primary hover:bg-surface transition-all flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px] group/add"
               >
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-[2rem] flex items-center justify-center border-4 border-slate-50 group-hover/add:scale-110 transition-transform group-hover/add:rotate-90">
-                  <Plus size={isMobile ? 28 : 32} strokeWidth={3} className="text-slate-300 group-hover/add:text-indigo-600 transition-colors" />
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-surface rounded-[2rem] flex items-center justify-center border-4 border-background group-hover/add:scale-110 transition-transform group-hover/add:rotate-90">
+                  <Plus size={isMobile ? 28 : 32} strokeWidth={3} className="text-slate-300 group-hover/add:text-primary transition-colors" />
                 </div>
-                <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mt-6 group-hover/add:text-indigo-400">
+                <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mt-6 group-hover/add:text-primary/70">
                   <FormattedMessage id="groupscoreboard.add_group" defaultMessage="Add Group" />
                 </span>
               </motion.button>

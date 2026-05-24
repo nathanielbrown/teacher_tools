@@ -43,7 +43,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage
             id="marblejar.help.step1"
@@ -153,7 +153,7 @@ export const MarbleJar = () => {
       marbleBodiesRef.current.push(newMarble);
       setMarbleCount(prev => prev + 1);
     }
-  }, [isRewarding, marbleCount, settings.soundTheme]);
+  }, [isRewarding, marbleCount, settings.soundTheme, currentPanelWidth, isMobile, setMarbleCount]);
 
   const removeMarbleAtPoint = useCallback((x: number, y: number) => {
     if (isRewarding) return;
@@ -172,7 +172,7 @@ export const MarbleJar = () => {
     } else {
       addMarble(x);
     }
-  }, [isRewarding, marbleCount, addMarble, settings.soundTheme]);
+  }, [isRewarding, marbleCount, addMarble, settings.soundTheme, setMarbleCount]);
 
   const resetJar = useCallback(() => {
     setMarbleCount(0);
@@ -244,7 +244,7 @@ export const MarbleJar = () => {
 
       Matter.World.add(engine.world, [ground, leftWall, rightWall]);
     }
-  }, [settings.soundTheme, JAR_WIDTH, JAR_HEIGHT, setIsConfigOpen, jarStyleId]);
+  }, [settings.soundTheme, JAR_WIDTH, JAR_HEIGHT, setIsConfigOpen, jarStyleId, currentPanelWidth, isMobile, setMarbleCount]);
 
   useEffect(() => {
     const engine = Matter.Engine.create();
@@ -395,7 +395,7 @@ export const MarbleJar = () => {
       cancelAnimationFrame(animationFrameId);
       marbleBodiesRef.current = [];
     };
-  }, [JAR_WIDTH, JAR_HEIGHT, jarStyleId, currentPanelWidth, currentPanelHeight]);
+  }, [JAR_WIDTH, JAR_HEIGHT, jarStyleId, currentPanelWidth, currentPanelHeight, isMobile, setMarbleCount]);
 
   useEffect(() => {
     // Persistence handled by useLocalStorage
@@ -423,7 +423,7 @@ export const MarbleJar = () => {
     if (marbleCount >= target && !isRewarding && marbleCount > 0) {
       triggerReward();
     }
-  }, [marbleCount, target, jarStyleId, JAR_WIDTH, triggerReward, isRewarding]);
+  }, [marbleCount, target, jarStyleId, JAR_WIDTH, triggerReward, isRewarding, currentPanelWidth, currentPanelHeight, isMobile]);
 
   useEffect(() => {
     setHasConfig(true);
@@ -453,7 +453,72 @@ export const MarbleJar = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden">
+    <div className="flex flex-col lg:flex-row gap-8 w-full h-full font-['Outfit'] select-none overflow-hidden relative">
+      <AnimatePresence>
+        {isConfigOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[100] p-4 bg-slate-100/60 backdrop-blur-xl lg:relative lg:inset-auto lg:z-auto lg:p-0 lg:bg-transparent lg:backdrop-blur-none lg:w-[320px] lg:h-full flex flex-col gap-8 italic overflow-hidden shrink-0"
+          >
+            <SettingsPanel
+              isOpen={isConfigOpen}
+              onClose={() => setIsConfigOpen(false)}
+              className="h-full"
+              side="left"
+            >
+              <div className="space-y-10">
+                {/* Goal Setting */}
+                <div className="space-y-6">
+                  <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] block text-center">
+                    <FormattedMessage id="marblejar.settings.goal" defaultMessage="Reward Goal" />
+                  </label>
+                  <div className="flex items-center justify-center gap-8">
+                    <button
+                      onClick={() => { setTarget(t => Math.max(1, t - 5)); audioEngine.playTick(settings.soundTheme); }}
+                      className="p-4 bg-surface rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-primary hover:border-primary/20 active:scale-90 transition-all "
+                    >
+                      <Minus size={20} strokeWidth={4} />
+                    </button>
+                    <span className="text-5xl font-black text-slate-900 tabular-nums italic">{target}</span>
+                    <button
+                      onClick={() => { setTarget(t => Math.min(100, t + 5)); audioEngine.playTick(settings.soundTheme); }}
+                      className="p-4 bg-surface rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-primary hover:border-primary/20 active:scale-90 transition-all "
+                    >
+                      <Plus size={20} strokeWidth={4} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Style Setting */}
+                <div className="space-y-6">
+                  <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] block text-center">
+                    <FormattedMessage id="marblejar.settings.style" defaultMessage="Jar Style" />
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {getJarStyles(isMobile).map(style => (
+                      <button
+                        key={style.id}
+                        onClick={() => { setJarStyleId(style.id); audioEngine.playTick(settings.soundTheme); }}
+                        className={`px-6 py-4 rounded-[1.5rem] border-4 transition-all flex items-center justify-between font-black text-xs uppercase tracking-widest ${jarStyleId === style.id
+                          ? 'bg-primary border-indigo-400 text-white '
+                          : 'bg-surface border-slate-100 text-slate-300 hover:border-primary/20'
+                          }`}
+                      >
+                        <FormattedMessage id={style.nameId} defaultMessage={style.id} />
+                        <RotateCcw size={14} className={jarStyleId === style.id ? 'text-primary/70' : 'opacity-0'} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SettingsPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <ToolPanel 
         className={isConfigOpen && isMobile ? 'hidden' : 'flex-1'} 
         baseWidth={currentPanelWidth} 
@@ -482,7 +547,7 @@ export const MarbleJar = () => {
 
               return (
                 <div
-                  className="relative bg-white/10 backdrop-blur-[2px] border-[10px] border-white/90 shadow-[inset_0_0_80px_rgba(255,255,255,0.5)]"
+                  className="relative bg-surface/10 backdrop-blur-[2px] border-[10px] border-white/90 shadow-[inset_0_0_80px_rgba(255,255,255,0.5)]"
                   style={{
                     width: visualTopWidth,
                     height: JAR_HEIGHT,
@@ -492,8 +557,8 @@ export const MarbleJar = () => {
                 >
                   {/* Optical Effects */}
                   <div className="absolute inset-0 pointer-events-none z-30 bg-gradient-to-tr from-white/10 via-transparent to-white/5" />
-                  <div className="absolute left-8 top-8 bottom-8 w-3 bg-white/10 rounded-full blur-[3px] pointer-events-none z-30 opacity-60" />
-                  <div className="absolute right-12 top-12 w-2 h-20 bg-white/20 rounded-full blur-[1px] pointer-events-none z-30 opacity-40 rotate-6" />
+                  <div className="absolute left-8 top-8 bottom-8 w-3 bg-surface/10 rounded-full blur-[3px] pointer-events-none z-30 opacity-60" />
+                  <div className="absolute right-12 top-12 w-2 h-20 bg-surface/20 rounded-full blur-[1px] pointer-events-none z-30 opacity-40 rotate-6" />
                 </div>
               );
             })()}
@@ -509,7 +574,7 @@ export const MarbleJar = () => {
           {/* Status Display inside ToolPanel */}
           <div className="absolute bottom-10 left-0 right-0 flex items-center justify-center gap-8 md:gap-16 pointer-events-none z-30 italic">
             <div className="flex flex-col items-center">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] mb-2 leading-none">
                 <FormattedMessage id="marblejar.status.marbles" defaultMessage="Marbles" />
               </span>
               <motion.span
@@ -525,10 +590,10 @@ export const MarbleJar = () => {
             <div className="w-px h-20 bg-slate-200" />
 
             <div className="flex flex-col items-center">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] mb-2 leading-none">
                 <FormattedMessage id="marblejar.status.goal" defaultMessage="Goal" />
               </span>
-              <span className="text-6xl md:text-8xl font-black text-indigo-600 italic tracking-tighter leading-none tabular-nums">
+              <span className="text-6xl md:text-8xl font-black text-primary italic tracking-tighter leading-none tabular-nums">
                 {target}
               </span>
             </div>
@@ -548,7 +613,7 @@ export const MarbleJar = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-10 h-10 rounded-full bg-white/40 backdrop-blur-xl border-4 border-white flex items-center justify-center overflow-hidden"
+                className="w-10 h-10 rounded-full bg-surface/40 backdrop-blur-xl border-4 border-white flex items-center justify-center overflow-hidden"
                 style={{ x: '-50%' }}
               >
                 <div className="w-full h-full bg-gradient-to-tr from-slate-200/50 to-transparent" />
@@ -557,78 +622,18 @@ export const MarbleJar = () => {
           )}
 
           {/* Tap Instruction */}
-          <div className="absolute top-8 right-8 flex items-center gap-4 bg-white/80 border-2 border-slate-100 px-6 py-3 rounded-2xl backdrop-blur-md pointer-events-none italic z-30">
+          <div className="absolute top-8 right-8 flex items-center gap-4 bg-surface/80 border-2 border-slate-100 px-6 py-3 rounded-2xl backdrop-blur-md pointer-events-none italic z-30">
             <div className="text-right">
-              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none">
                 <FormattedMessage id="marblejar.status.ready" defaultMessage="Tap to add" />
               </p>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white ">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white ">
               <MousePointer2 size={16} strokeWidth={3} />
             </div>
           </div>
         </div>
       </ToolPanel>
-
-      {/* Sidebar with Settings and Status */}
-      <div className={`transition-all duration-500 shrink-0 ${
-        isConfigOpen 
-          ? (isMobile ? 'fixed inset-0 z-[60] bg-white' : 'w-full lg:w-[400px]') 
-          : 'w-0 opacity-0 pointer-events-none'
-      }`}>
-        {/* Settings Panel */}
-        <SettingsPanel
-          isOpen={isConfigOpen}
-          onClose={() => setIsConfigOpen(false)}
-          className="flex-1 overflow-y-auto"
-        >
-          <div className="space-y-10">
-            {/* Goal Setting */}
-            <div className="space-y-6">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
-                <FormattedMessage id="marblejar.settings.goal" defaultMessage="Reward Goal" />
-              </label>
-              <div className="flex items-center justify-center gap-8">
-                <button
-                  onClick={() => { setTarget(t => Math.max(1, t - 5)); audioEngine.playTick(settings.soundTheme); }}
-                  className="p-4 bg-white rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-indigo-600 hover:border-indigo-100 active:scale-90 transition-all "
-                >
-                  <Minus size={20} strokeWidth={4} />
-                </button>
-                <span className="text-5xl font-black text-slate-900 tabular-nums italic">{target}</span>
-                <button
-                  onClick={() => { setTarget(t => Math.min(100, t + 5)); audioEngine.playTick(settings.soundTheme); }}
-                  className="p-4 bg-white rounded-2xl border-4 border-slate-100 text-slate-300 hover:text-indigo-600 hover:border-indigo-100 active:scale-90 transition-all "
-                >
-                  <Plus size={20} strokeWidth={4} />
-                </button>
-              </div>
-            </div>
-
-            {/* Style Setting */}
-            <div className="space-y-6">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] block text-center">
-                <FormattedMessage id="marblejar.settings.style" defaultMessage="Jar Style" />
-              </label>
-              <div className="grid grid-cols-1 gap-2">
-                {getJarStyles(isMobile).map(style => (
-                  <button
-                    key={style.id}
-                    onClick={() => { setJarStyleId(style.id); audioEngine.playTick(settings.soundTheme); }}
-                    className={`px-6 py-4 rounded-[1.5rem] border-4 transition-all flex items-center justify-between font-black text-xs uppercase tracking-widest ${jarStyleId === style.id
-                      ? 'bg-indigo-600 border-indigo-400 text-white '
-                      : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'
-                      }`}
-                  >
-                    <FormattedMessage id={style.nameId} defaultMessage={style.id} />
-                    <RotateCcw size={14} className={jarStyleId === style.id ? 'text-indigo-400' : 'opacity-0'} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </SettingsPanel>
-      </div>
 
       {/* Reward Overlay */}
       <AnimatePresence>
@@ -642,11 +647,11 @@ export const MarbleJar = () => {
             <motion.div
               initial={{ scale: 0.5, y: 100 }}
               animate={{ scale: 1, y: 0 }}
-              className="bg-white rounded-[4rem] p-12 flex flex-col items-center text-center gap-8 border-8 border-white max-w-xl  relative overflow-hidden italic"
+              className="bg-surface rounded-[4rem] p-12 flex flex-col items-center text-center gap-8 border-8 border-white max-w-xl  relative overflow-hidden italic"
             >
               <div className="relative">
-                <div className="absolute -inset-12 bg-indigo-500 blur-3xl opacity-20 animate-pulse rounded-full" />
-                <div className="w-40 h-40 rounded-[3rem] bg-indigo-600 flex items-center justify-center text-white relative z-10 rotate-3  border-8 border-white">
+                <div className="absolute -inset-12 bg-primary blur-3xl opacity-20 animate-pulse rounded-full" />
+                <div className="w-40 h-40 rounded-[3rem] bg-primary flex items-center justify-center text-white relative z-10 rotate-3  border-8 border-white">
                   <Trophy size={80} strokeWidth={1.5} className=" text-yellow-400" />
                 </div>
                 <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white  animate-bounce z-20 border-4 border-white">
@@ -658,15 +663,15 @@ export const MarbleJar = () => {
                 <h3 className="text-5xl font-black text-slate-900 leading-none uppercase tracking-tighter">
                   <FormattedMessage id="marblejar.reward.title" defaultMessage="Well Done!" />
                 </h3>
-                <div className="w-16 h-1.5 bg-indigo-600 mx-auto rounded-full" />
-                <p className="text-base text-slate-400 font-black uppercase tracking-widest">
+                <div className="w-16 h-1.5 bg-primary mx-auto rounded-full" />
+                <p className="text-base text-neutral-400 font-black uppercase tracking-widest">
                   <FormattedMessage id="marblejar.reward.subtitle" defaultMessage="Goal Reached!" />
                 </p>
               </div>
 
               <button
                 onClick={resetJar}
-                className="w-full h-20 bg-indigo-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg hover:bg-indigo-700 transition-all  flex items-center justify-center gap-4 border-4 border-white active:scale-95"
+                className="w-full h-20 bg-primary text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg hover:bg-primary/90 transition-all  flex items-center justify-center gap-4 border-4 border-white active:scale-95"
               >
                 <RotateCcw size={24} strokeWidth={4} />
                 <FormattedMessage id="marblejar.reward.reset" defaultMessage="Reset Jar" />

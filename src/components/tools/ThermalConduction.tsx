@@ -30,7 +30,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How Heat Moves</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Drag the <b>Blue and Red blocks</b> to move them around.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -38,7 +38,7 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Touch the blocks together to see <b>Heat Flow</b> from hot to cold.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Watch the particles <b>wiggle</b> faster when they are hot!</p>
       </div>
     </div>
@@ -258,8 +258,8 @@ export const ThermalConduction = () => {
   };
 
   return (
-    <div className="tool-container flex flex-col lg:flex-row gap-8 h-full font-['Outfit'] select-none relative bg-white rounded-[4rem] p-4 lg:p-12 italic  overflow-hidden">
-      <div className="flex-1 bg-slate-900 rounded-[4rem] border-[8px] border-slate-800  flex flex-col items-center justify-center relative overflow-hidden group cursor-grab active:cursor-grabbing">
+    <div className="tool-container flex flex-col lg:flex-row gap-8 h-full font-['Outfit'] select-none relative bg-surface rounded-[4rem] p-4 lg:p-12 italic  overflow-hidden">
+      <div className="flex-1 bg-dark-bg rounded-[4rem] border-[8px] border-dark-border  flex flex-col items-center justify-center relative overflow-hidden group cursor-grab active:cursor-grabbing">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)]" />
         <canvas 
           ref={canvasRef} 
@@ -272,8 +272,8 @@ export const ThermalConduction = () => {
       </div>
 
       <div className="w-full lg:w-80 shrink-0 flex flex-col gap-6 relative z-20 italic">
-        <div className="bg-slate-900 p-10 rounded-[3rem]  flex flex-col items-center gap-6 border-4 border-slate-800">
-           <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">Heat Monitor</span>
+        <div className="bg-dark-bg p-10 rounded-[3rem]  flex flex-col items-center gap-6 border-4 border-dark-border">
+           <span className="text-[10px] font-black text-primary/70 uppercase tracking-[0.4em]">Heat Monitor</span>
            <div className="flex items-baseline gap-2">
               <span className="text-6xl font-black text-white italic tabular-nums">
                  {Math.round(blocks.reduce((acc, b) => acc + getAvgEnergy(b), 0) / blocks.length)}
@@ -286,9 +286,9 @@ export const ThermalConduction = () => {
            {blocks.map((block) => {
              const avg = getAvgEnergy(block);
              return (
-               <div key={block.id} className="p-6 bg-white rounded-[2rem] border-2 border-slate-50  space-y-4">
+               <div key={block.id} className="p-6 bg-surface rounded-[2rem] border-2 border-slate-50  space-y-4">
                  <div className="flex justify-between items-center px-2">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{block.label} Unit</span>
+                    <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest">{block.label} Unit</span>
                     <span className="text-2xl font-black text-slate-800 italic">{Math.round(avg)}°C</span>
                  </div>
                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden ">

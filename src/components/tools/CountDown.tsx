@@ -45,7 +45,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="countdown.help.step1" 
@@ -75,7 +75,7 @@ const getHelpInfo = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="countdown.help.step4" 
@@ -128,7 +128,7 @@ export const CountDown = () => {
     setVisualMode('circle');
     setSoundOverride('default');
     audioEngine.playTick(settings.soundTheme);
-  }, [initialMinutes, initialSeconds, settings.soundTheme]);
+  }, [initialMinutes, initialSeconds, settings.soundTheme, setTimeLeft, setTotalTime, setVisualMode, setSoundOverride]);
 
   useEffect(() => {
     setHasConfig(true);
@@ -162,7 +162,7 @@ export const CountDown = () => {
       }, 1000);
     }
     return () => clearInterval(intervalId);
-  }, [isRunning, timeLeft, settings.soundTheme, soundOverride]);
+  }, [isRunning, timeLeft, settings.soundTheme, soundOverride, setTimeLeft]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -173,7 +173,7 @@ export const CountDown = () => {
       }
     }, 0);
     return () => clearTimeout(timeout);
-  }, [initialMinutes, initialSeconds, isRunning, isFinished]);
+  }, [initialMinutes, initialSeconds, isRunning, isFinished, setTimeLeft, setTotalTime]);
 
   const renderVisualization = () => {
     const progress = totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 100;
@@ -190,7 +190,7 @@ export const CountDown = () => {
                 scale: (100 - i) <= (remainingProgress) ? 1 : 0.2,
                 opacity: (100 - i) <= (remainingProgress) ? 1 : 0.1
               }}
-              className="bg-indigo-600 rounded-lg"
+              className="bg-primary rounded-lg"
             />
           ))}
         </div>
@@ -219,8 +219,8 @@ export const CountDown = () => {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center  backdrop-blur-md">
-              {isRunning ? <Pause size={32} className="text-indigo-600" /> : <Play size={32} className="text-emerald-600 ml-1" />}
+            <div className="w-16 h-16 bg-surface/80 rounded-full flex items-center justify-center  backdrop-blur-md">
+              {isRunning ? <Pause size={32} className="text-primary" /> : <Play size={32} className="text-success ml-1" />}
             </div>
           </div>
         </div>
@@ -301,7 +301,7 @@ export const CountDown = () => {
             >
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
+                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest block mb-2">
                     <FormattedMessage id="countdown.settings.visual_mode" defaultMessage="Visual Mode" />
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -311,8 +311,8 @@ export const CountDown = () => {
                         onClick={() => { setVisualMode(mode.id); audioEngine.playTick(settings.soundTheme); }}
                         className={`p-4 rounded-2xl border-4 transition-all flex flex-col items-center gap-2 italic ${
                           visualMode === mode.id 
-                            ? 'bg-indigo-600 border-indigo-400 text-white ' 
-                            : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100'
+                            ? 'bg-primary border-indigo-400 text-white ' 
+                            : 'bg-surface border-slate-100 text-slate-300 hover:border-primary/20'
                         }`}
                       >
                         <mode.icon size={24} />
@@ -325,7 +325,7 @@ export const CountDown = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
+                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest block mb-2">
                     <FormattedMessage id="countdown.settings.alarm_sound" defaultMessage="Alarm Sound" />
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -340,8 +340,8 @@ export const CountDown = () => {
                         }}
                         className={`py-3 px-2 rounded-xl border-2 transition-all text-[10px] font-black uppercase italic tracking-widest truncate ${
                           soundOverride === soundId 
-                            ? 'bg-indigo-600 border-indigo-400 text-white ' 
-                            : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-100'
+                            ? 'bg-primary border-indigo-400 text-white ' 
+                            : 'bg-surface border-slate-100 text-neutral-400 hover:border-primary/20'
                         }`}
                       >
                         <FormattedMessage id={`countdown.sound.${soundId}`} defaultMessage={soundId} />
@@ -363,7 +363,7 @@ export const CountDown = () => {
               <div className="flex flex-col items-center">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setInitialMinutes(m => Math.min(99, m + 1)); audioEngine.playTick(settings.soundTheme); }}
-                  className={`p-2 text-slate-200 hover:text-indigo-500 transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`p-2 text-slate-200 hover:text-primary transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                   <ChevronUp size={64} strokeWidth={4} />
                 </button>
@@ -372,7 +372,7 @@ export const CountDown = () => {
                 </div>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setInitialMinutes(m => Math.max(0, m - 1)); audioEngine.playTick(settings.soundTheme); }}
-                  className={`p-2 text-slate-200 hover:text-indigo-500 transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`p-2 text-slate-200 hover:text-primary transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                   <ChevronDown size={64} strokeWidth={4} />
                 </button>
@@ -383,7 +383,7 @@ export const CountDown = () => {
               <div className="flex flex-col items-center">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setInitialSeconds(s => (s + 1) % 60); audioEngine.playTick(settings.soundTheme); }}
-                  className={`p-2 text-slate-200 hover:text-indigo-500 transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`p-2 text-slate-200 hover:text-primary transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                   <ChevronUp size={64} strokeWidth={4} />
                 </button>
@@ -392,7 +392,7 @@ export const CountDown = () => {
                 </div>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setInitialSeconds(s => (s - 1 + 60) % 60); audioEngine.playTick(settings.soundTheme); }}
-                  className={`p-2 text-slate-200 hover:text-indigo-500 transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`p-2 text-slate-200 hover:text-primary transition-all ${isRunning ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                   <ChevronDown size={64} strokeWidth={4} />
                 </button>
@@ -410,8 +410,8 @@ export const CountDown = () => {
         </div>
       </ToolPanel>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-caution-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
 
   );

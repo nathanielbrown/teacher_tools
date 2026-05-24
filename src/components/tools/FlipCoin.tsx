@@ -25,25 +25,25 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="flipcoin.help.step1" defaultMessage="Click on the screen to flip the coin." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="flipcoin.help.step2" defaultMessage="Wait for the coin to land on heads or tails." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="flipcoin.help.step3" defaultMessage="Check the statistics to see how many times each side landed." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="flipcoin.help.step4" defaultMessage="Use the history list to see your past flips." />
         </p>
@@ -203,14 +203,14 @@ export const FlipCoin = () => {
                   </motion.div>
                 ) : (
                   <div className="flex flex-col items-center gap-6">
-                    <div className="w-64 h-3 bg-white rounded-full overflow-hidden p-1  border border-slate-100">
+                    <div className="w-64 h-3 bg-surface rounded-full overflow-hidden p-1  border border-slate-100">
                       <motion.div 
                         className="h-full bg-amber-500 rounded-full" 
                         animate={{ x: [-150, 150] }} 
                         transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} 
                       />
                     </div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.8em] animate-pulse italic">
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.8em] animate-pulse italic">
                       <FormattedMessage id="flipcoin.status.flipping" />
                     </span>
                   </div>
@@ -219,9 +219,9 @@ export const FlipCoin = () => {
             </div>
 
             {/* Stats Summary under the coin */}
-            <div className="flex gap-12 mt-8 bg-white/40 backdrop-blur-md px-8 py-4 rounded-3xl border border-white/50">
+            <div className="flex gap-12 mt-8 bg-surface/40 backdrop-blur-md px-8 py-4 rounded-3xl border border-white/50">
               <div className="flex flex-col items-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">
                   <FormattedMessage id="flipcoin.stats.total" />
                 </span>
                 <span className="text-3xl font-black text-slate-900 italic tabular-nums">{history.length}</span>
@@ -256,7 +256,7 @@ export const FlipCoin = () => {
           <div className="space-y-8">
             <button
               onClick={reset}
-              className="w-full py-6 bg-white border-4 border-slate-100 text-slate-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all flex items-center justify-center gap-4 "
+              className="w-full py-6 bg-surface border-4 border-slate-100 text-neutral-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all flex items-center justify-center gap-4 "
             >
               <RotateCcw size={20} />
               <FormattedMessage id="emotion.reset" />
@@ -280,7 +280,7 @@ export const FlipCoin = () => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className={`h-16 lg:h-20 flex items-center justify-center rounded-2xl border-4 transition-all hover:scale-105 italic ${
-                h.result === 'heads' ? 'bg-amber-400 border-amber-300 text-amber-900' : 'bg-slate-900 border-slate-700 text-slate-300'
+                h.result === 'heads' ? 'bg-amber-400 border-amber-300 text-amber-900' : 'bg-dark-bg border-slate-700 text-slate-300'
               }`}
             >
                <span className="text-2xl font-black">

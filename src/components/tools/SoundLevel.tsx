@@ -8,14 +8,15 @@ import {
   ShieldCheck, 
   Activity, 
   RefreshCcw,
-  Volume2 as VolumeIcon
+  Volume2 as VolumeIcon,
+  VolumeX
 } from 'lucide-react';
 import { useHeader } from '../../contexts/HeaderContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { audioEngine } from '../../utils/audio';
-import { useIntl, FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import ToolPanel from '../shared/ToolPanel';
-import SettingsPanel from '../shared/SettingsPanel';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // 1. Constants (None)
 
@@ -29,7 +30,7 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="soundlevel.help.step1" 
@@ -39,7 +40,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="soundlevel.help.step2" 
@@ -49,7 +50,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="soundlevel.help.step3" 
@@ -59,7 +60,7 @@ const HelpContent = () => (
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="soundlevel.help.step4" 
@@ -74,14 +75,20 @@ const HelpContent = () => (
 
 // 4. Component
 export const SoundLevel = () => {
-  const intl = useIntl();
-  const { setHeaderActions, setHelpContent, setOnReset, clearHeader, isConfigOpen, setIsConfigOpen } = useHeader();
+  const { 
+    setHeaderActions, 
+    setHelpContent, 
+    setOnReset, 
+    clearHeader 
+  } = useHeader();
   const { settings } = useSettings();
 
   const [volume, setVolume] = useState(0);
   const [threshold, setThreshold] = useState(60);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [permissionError, setPermissionError] = useState<string | null>(null);
+  
+  const [alarmMode, setAlarmMode] = useLocalStorage<'mute' | 'alarm' | 'child'>('soundlevel_alarm_mode', 'alarm');
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
@@ -100,6 +107,18 @@ export const SoundLevel = () => {
   const thresholdRef = useRef(threshold);
   const volumeBuffer = useRef<number[]>([]); 
   const [avgVolume, setAvgVolume] = useState(0);
+
+  const isMonitoringRef = useRef(isMonitoring);
+  const alarmModeRef = useRef(alarmMode);
+  const lastAlarmTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    isMonitoringRef.current = isMonitoring;
+  }, [isMonitoring]);
+
+  useEffect(() => {
+    alarmModeRef.current = alarmMode;
+  }, [alarmMode]);
 
   useEffect(() => {
     thresholdRef.current = threshold;
@@ -128,11 +147,25 @@ export const SoundLevel = () => {
     }
     const currentRollingAvg = volumeBuffer.current.reduce((a, b) => a + b, 0) / volumeBuffer.current.length;
     
-    setVolume(Math.round(smoothedVolume));
+    const roundedSmoothed = Math.round(smoothedVolume);
+    setVolume(roundedSmoothed);
     setAvgVolume(Math.round(currentRollingAvg));
+
+    // Alarm triggering logic
+    if (isMonitoringRef.current && alarmModeRef.current !== 'mute' && roundedSmoothed >= thresholdRef.current) {
+      const nowMs = Date.now();
+      if (nowMs - lastAlarmTimeRef.current > 1500) {
+        lastAlarmTimeRef.current = nowMs;
+        if (alarmModeRef.current === 'alarm') {
+          audioEngine.playAlarm(settings.soundTheme || 'classic');
+        } else if (alarmModeRef.current === 'child') {
+          audioEngine.playChildAlarm(settings.soundTheme || 'classic');
+        }
+      }
+    }
     
     animationRef.current = requestAnimationFrame(() => updateVolumeRef.current());
-  }, []);
+  }, [settings.soundTheme]);
 
   useEffect(() => {
     updateVolumeRef.current = updateVolume;
@@ -254,7 +287,7 @@ export const SoundLevel = () => {
           </AnimatePresence>
 
           <div className="relative w-full max-w-[320px] md:max-w-xl aspect-square flex items-center justify-center z-10">
-            <svg className="absolute inset-0 w-full h-full gauge-svg " viewBox="0 0 100 100">
+            <svg className="absolute w-[92%] h-[92%] left-[4%] top-[4%] gauge-svg overflow-visible" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" fill="none" stroke="#f1f5f9" strokeWidth="8" />
               
               <circle
@@ -267,6 +300,7 @@ export const SoundLevel = () => {
                 cx="50" cy="50" r="45" fill="none"
                 stroke={status === 'danger' ? '#f43f5e' : status === 'warning' ? '#f59e0b' : '#10b981'}
                 strokeWidth="8" strokeDasharray="282.7"
+                strokeDashoffset={282.7}
                 animate={{ strokeDashoffset: 282.7 - (282.7 * volume) / 100 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 60 }}
                 className="-rotate-90 origin-center "
@@ -283,14 +317,14 @@ export const SoundLevel = () => {
               </g>
             </svg>
 
-            <div className="relative z-10 flex flex-col items-center gap-8 bg-white rounded-full w-2/3 h-2/3  border-8 border-white flex items-center justify-center">
+            <div className="relative z-10 flex flex-col items-center gap-8 bg-surface rounded-full w-[62%] h-[62%]  border-8 border-white flex items-center justify-center">
               <motion.div
                 animate={{ scale: status === 'danger' ? [1, 1.1, 1] : 1 }}
                 transition={{ repeat: Infinity, duration: 0.5 }}
                 className={`p-8 rounded-[3.5rem]  ${
-                  status === 'danger' ? 'bg-rose-50 text-rose-600 ' : 
-                  status === 'warning' ? 'bg-amber-50 text-amber-600 ' : 
-                  'bg-emerald-50 text-emerald-600 '
+                  status === 'danger' ? 'bg-caution-bg text-caution ' : 
+                  status === 'warning' ? 'bg-warning-bg text-warning ' : 
+                  'bg-success-bg text-success '
                 }`}
               >
                 {status === 'danger' ? <ShieldAlert size={60} strokeWidth={1.5} /> : 
@@ -300,13 +334,13 @@ export const SoundLevel = () => {
 
               <div className="text-center">
                 <h3 className={`text-8xl font-black tabular-nums leading-none tracking-tighter italic ${
-                  status === 'danger' ? 'text-rose-600' : 
-                  status === 'warning' ? 'text-amber-600' : 
+                  status === 'danger' ? 'text-caution' : 
+                  status === 'warning' ? 'text-warning' : 
                   'text-slate-800'
                 }`}>
                   {volume}
                 </h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mt-2">
+                <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] mt-2">
                    <FormattedMessage id={`soundlevel.status.${status}`} />
                 </p>
               </div>
@@ -319,9 +353,9 @@ export const SoundLevel = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-white/60 backdrop-blur-2xl flex items-center justify-center z-[100]"
+                className="absolute inset-0 bg-surface/60 backdrop-blur-2xl flex items-center justify-center z-[100]"
               >
-                <div className="text-center space-y-8 p-12 bg-white rounded-[4rem] border-8 border-slate-50 ">
+                <div className="text-center space-y-8 p-12 bg-surface rounded-[4rem] border-8 border-slate-50 ">
                   <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem]  flex items-center justify-center mx-auto text-slate-300">
                     <VolumeIcon size={40} strokeWidth={1} />
                   </div>
@@ -332,7 +366,7 @@ export const SoundLevel = () => {
                   </div>
                   <button
                     onClick={startMonitoring}
-                    className="flex items-center justify-center gap-4 w-full h-20 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-xs hover:bg-slate-900 transition-all  active:scale-95"
+                    className="flex items-center justify-center gap-4 w-full h-20 bg-primary text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-xs hover:bg-dark-bg transition-all  active:scale-95"
                   >
                     <Mic size={20} strokeWidth={3} /> <FormattedMessage id="soundlevel.status.initialize" />
                   </button>
@@ -344,19 +378,19 @@ export const SoundLevel = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-0 bg-white/80 backdrop-blur-2xl flex items-center justify-center z-[110] p-12"
+                className="absolute inset-0 bg-surface/80 backdrop-blur-2xl flex items-center justify-center z-[110] p-12"
               >
-                <div className="text-center space-y-8 p-12 bg-white rounded-[4rem] border-[16px] border-rose-50  max-w-lg">
-                  <div className="w-24 h-24 bg-rose-50 text-rose-500 rounded-[2.5rem]  flex items-center justify-center mx-auto">
+                <div className="text-center space-y-8 p-12 bg-surface rounded-[4rem] border-[16px] border-rose-50  max-w-lg">
+                  <div className="w-24 h-24 bg-caution-bg text-caution rounded-[2.5rem]  flex items-center justify-center mx-auto">
                     <AlertTriangle size={48} strokeWidth={2} />
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tighter italic">Error</h3>
-                    <p className="text-slate-400 uppercase tracking-widest text-xs font-black leading-relaxed">{permissionError}</p>
+                    <p className="text-neutral-400 uppercase tracking-widest text-xs font-black leading-relaxed">{permissionError}</p>
                   </div>
                   <button
                     onClick={startMonitoring}
-                    className="flex items-center justify-center gap-4 w-full h-20 bg-slate-900 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-xs hover:bg-rose-600 transition-all  active:scale-95"
+                    className="flex items-center justify-center gap-4 w-full h-20 bg-dark-bg text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-xs hover:bg-rose-600 transition-all  active:scale-95"
                   >
                     <RefreshCcw size={20} strokeWidth={3} /> <FormattedMessage id="soundlevel.status.initialize" />
                   </button>
@@ -364,61 +398,33 @@ export const SoundLevel = () => {
               </motion.div>
             )}
           </AnimatePresence>
+          {/* Quick Alarm Mode Selector */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 p-1.5 bg-slate-50 border-2 border-white rounded-[2rem]">
+            {(['mute', 'alarm', 'child'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => {
+                  setAlarmMode(mode);
+                  audioEngine.playTick(settings.soundTheme);
+                  if (mode === 'child') {
+                    audioEngine.playChildAlarm(settings.soundTheme || 'classic');
+                  } else if (mode === 'alarm') {
+                    audioEngine.playAlarm(settings.soundTheme);
+                  }
+                }}
+                className={`py-2 px-4 rounded-[1.5rem] transition-all font-black text-[9px] uppercase tracking-widest text-center truncate ${
+                  alarmMode === mode
+                    ? 'bg-primary text-white'
+                    : 'text-neutral-400 hover:text-slate-600'
+                }`}
+              >
+                {mode === 'mute' ? 'Mute' : mode === 'alarm' ? 'Alarm' : 'Child Alarm'}
+              </button>
+            ))}
+          </div>
+
         </div>
       </ToolPanel>
-
-      <SettingsPanel
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-        title={intl.formatMessage({ id: 'soundlevel.title' })}
-      >
-        <div className="space-y-8">
-          <div className="p-6 bg-slate-900 rounded-[2.5rem] border-4 border-slate-800  flex flex-col items-center gap-4">
-             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">
-               <FormattedMessage id="soundlevel.label.threshold" />
-             </span>
-             <div className="flex items-baseline gap-2">
-                <span className="text-7xl font-black text-white italic tracking-tighter leading-none tabular-nums">{threshold}</span>
-             </div>
-             <div className="w-full h-px bg-white/10" />
-             <div className="grid grid-cols-2 gap-4 w-full">
-                <div className="p-4 bg-white/5 rounded-[1.5rem] border border-white/5 flex flex-col items-center gap-1">
-                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
-                     <FormattedMessage id="soundlevel.label.average" />
-                   </span>
-                   <span className="text-xl font-black text-indigo-400 italic tabular-nums">{avgVolume}</span>
-                </div>
-                <div className="p-4 bg-white/5 rounded-[1.5rem] border border-white/5 flex flex-col items-center gap-1">
-                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
-                     <FormattedMessage id="soundlevel.label.current" />
-                   </span>
-                   <span className="text-xl font-black text-rose-400 italic tabular-nums">{volume}</span>
-                </div>
-             </div>
-          </div>
-
-          <div className="space-y-4">
-             <div className={`p-6 rounded-[2.5rem] border-4 transition-all flex items-center gap-4 ${status === 'ok' ? 'bg-emerald-600 border-white text-white' : 'bg-white border-white opacity-40'}`}>
-                <ShieldCheck size={24} strokeWidth={3} />
-                <span className="text-xs font-black uppercase tracking-widest">
-                  <FormattedMessage id="soundlevel.status.ok" />
-                </span>
-             </div>
-             <div className={`p-6 rounded-[2.5rem] border-4 transition-all flex items-center gap-4 ${status === 'warning' ? 'bg-amber-500 border-white text-white' : 'bg-white border-white opacity-40'}`}>
-                <AlertTriangle size={24} strokeWidth={3} />
-                <span className="text-xs font-black uppercase tracking-widest">
-                  <FormattedMessage id="soundlevel.status.warning" />
-                </span>
-             </div>
-             <div className={`p-6 rounded-[2.5rem] border-4 transition-all flex items-center gap-4 ${status === 'danger' ? 'bg-rose-600 border-white text-white' : 'bg-white border-white opacity-40'}`}>
-                <ShieldAlert size={24} strokeWidth={3} />
-                <span className="text-xs font-black uppercase tracking-widest">
-                  <FormattedMessage id="soundlevel.status.danger" />
-                </span>
-             </div>
-          </div>
-        </div>
-      </SettingsPanel>
     </div>
   );
 };

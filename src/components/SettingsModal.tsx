@@ -140,25 +140,25 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
       onClick={onClose}
     >
       <div 
-        className="bg-white shadow-2xl rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300"
+        className="bg-surface shadow-2xl rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
       >
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
-          <h2 id="settings-title" className="text-xl font-black text-slate-800 tracking-tight">Settings</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-xl transition-all active:scale-90 text-slate-400 hover:text-slate-600" aria-label="Close Settings">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-background">
+          <h2 id="settings-title" className="text-xl font-black text-text tracking-tight">Settings</h2>
+          <button onClick={onClose} className="p-2 hover:bg-background rounded-xl transition-all active:scale-90 text-text/50 hover:text-text" aria-label="Close Settings">
             <span className="text-xl" aria-hidden="true">❌</span>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-white">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-surface text-text">
           {/* Theme Selection */}
           <section className="space-y-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">Theme</h3>
-              <div className="flex-1 h-px bg-slate-100" />
+              <h3 className="text-lg font-black text-text tracking-tight">Theme</h3>
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
@@ -172,25 +172,25 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                   onClick={() => updateTheme(theme.id)}
                   className={`p-3 rounded-2xl border-2 text-left transition-all duration-300 ${settings.theme === theme.id
                     ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
-                    : 'border-slate-100 bg-white hover:border-primary/30 hover:bg-slate-50'
+                    : 'border-border bg-surface hover:border-primary/30 hover:bg-background'
                     }`}
                   aria-pressed={settings.theme === theme.id}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xl" aria-hidden="true">{theme.emoji}</span>
-                    <span className="font-bold text-slate-800 text-sm">{theme.name}</span>
+                    <span className="font-bold text-text text-sm">{theme.name}</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-medium">{theme.desc}</div>
+                  <div className="text-[10px] text-text/70 font-medium">{theme.desc}</div>
                 </button>
               ))}
             </div>
           </section>
   
-          {/* Year Level Selection */}
+          {/* Year Level Filter Selection */}
           <section className="space-y-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">Year Level Filter</h3>
-              <div className="flex-1 h-px bg-slate-100" />
+              <h3 className="text-lg font-black text-text tracking-tight">Year Level Filter</h3>
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="flex flex-wrap gap-2">
               {['All', 'Prep', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(year => (
@@ -200,7 +200,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                   className={`px-4 py-2 rounded-xl border-2 font-bold text-sm transition-all duration-300 ${
                     settings.selectedYear === year
                       ? 'border-primary bg-primary text-white shadow-md'
-                      : 'border-slate-100 bg-white text-slate-600 hover:border-primary/30 hover:bg-slate-50'
+                      : 'border-border bg-surface text-text hover:border-primary/30 hover:bg-background'
                   }`}
                   aria-pressed={settings.selectedYear === year}
                 >
@@ -208,14 +208,14 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-slate-500 font-medium">Select a year level to only see relevant tools on the dashboard.</p>
+            <p className="text-[10px] text-text/70 font-medium">Select a year level to only see relevant tools on the dashboard.</p>
           </section>
 
           {/* Sound Settings */}
           <section className="space-y-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">Audio Effects</h3>
-              <div className="flex-1 h-px bg-slate-100" />
+              <h3 className="text-lg font-black text-text tracking-tight">Audio Effects</h3>
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {[
@@ -236,7 +236,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                   className={`p-3 rounded-2xl border-2 text-center transition-all duration-300 flex flex-col items-center gap-1 ${
                     settings.soundTheme === theme.id
                       ? 'border-primary bg-primary/5 text-primary shadow-md shadow-primary/5'
-                      : 'border-slate-100 bg-white hover:border-primary/30 text-slate-500 hover:text-primary hover:bg-slate-50'
+                      : 'border-border bg-surface hover:border-primary/30 text-text/70 hover:text-primary hover:bg-background'
                   }`}
                   aria-pressed={settings.soundTheme === theme.id}
                 >
@@ -250,10 +250,10 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
           {/* Language Selection */}
           <section className="space-y-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">
+              <h3 className="text-lg font-black text-text tracking-tight">
                 <FormattedMessage id="settings.language" defaultMessage="Language" />
               </h3>
-              <div className="flex-1 h-px bg-slate-100" />
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
@@ -269,13 +269,13 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                   onClick={() => updateLanguage(lang.id)}
                   className={`p-3 rounded-2xl border-2 text-left transition-all duration-300 ${settings.language === lang.id
                     ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
-                    : 'border-slate-100 bg-white hover:border-primary/30 hover:bg-slate-50'
+                    : 'border-border bg-surface hover:border-primary/30 hover:bg-background'
                     }`}
                   aria-pressed={settings.language === lang.id}
                 >
                   <div className="flex items-center gap-2">
                     <FlagIcon country={lang.country} className="w-6 h-4 shadow-sm rounded-sm" />
-                    <span className="font-bold text-slate-800 text-sm">{lang.name}</span>
+                    <span className="font-bold text-text text-sm">{lang.name}</span>
                   </div>
                 </button>
               ))}
@@ -285,13 +285,13 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
           {/* Data Management */}
           <section className="space-y-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">Data Management</h3>
-              <div className="flex-1 h-px bg-slate-100" />
+              <h3 className="text-lg font-black text-text tracking-tight">Data Management</h3>
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleExport}
-                className="flex-1 flex items-center justify-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+                className="flex-1 flex items-center justify-center space-x-2 bg-background hover:bg-surface border border-border text-text px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
               >
                 <span className="text-xl" aria-hidden="true">📤</span>
                 <span>Export Backup</span>
@@ -299,7 +299,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
 
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-1 flex items-center justify-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+                className="flex-1 flex items-center justify-center space-x-2 bg-background hover:bg-surface border border-border text-text px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
               >
                 <span className="text-xl" aria-hidden="true">📥</span>
                 <span>Import Backup</span>
@@ -315,19 +315,19 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
 
               <button
                 onClick={handleClearData}
-                className="flex-1 flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+                className="flex-1 flex items-center justify-center space-x-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
               >
                 <span className="text-xl" aria-hidden="true">🧹</span>
                 <span>Clear Database</span>
               </button>
             </div>
             
-            <div className="space-y-2 mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+            <div className="space-y-2 mt-4 bg-background p-4 rounded-2xl border border-border">
+              <div className="flex justify-between text-xs font-bold text-text/80 mb-1">
                 <span className="uppercase tracking-wider">Local Storage Usage</span>
                 <span>{(storageUsage / 1024).toFixed(1)} KB / 5.0 MB</span>
               </div>
-              <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+              <div className="h-3 w-full bg-border rounded-full overflow-hidden shadow-inner">
                 <div 
                   className={`h-full transition-all duration-1000 ease-out rounded-full ${
                     storagePercentage > 90 ? 'bg-rose-500' : storagePercentage > 70 ? 'bg-amber-500' : 'bg-emerald-500'
@@ -335,41 +335,41 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                   style={{ width: `${storagePercentage}%` }}
                 />
               </div>
-              <p className="text-[9px] text-slate-400 font-medium">LocalStorage is used to save your settings, classes, and tool data directly in your browser.</p>
+              <p className="text-[9px] text-text/60 font-medium">LocalStorage is used to save your settings, classes, and tool data directly in your browser.</p>
             </div>
           </section>
 
           {/* Class Management */}
           <section className="space-y-4 pb-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">Class Lists</h3>
-              <div className="flex-1 h-px bg-slate-100" />
+              <h3 className="text-lg font-black text-text tracking-tight">Class Lists</h3>
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="space-y-6">
               {/* Add New Class */}
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
-                <h4 className="font-bold text-slate-800 text-md">Create New Class</h4>
+              <div className="bg-background border border-border p-5 rounded-2xl space-y-4">
+                <h4 className="font-bold text-text text-md">Create New Class</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label htmlFor="new-class-name" className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Class Name</label>
+                    <label htmlFor="new-class-name" className="text-xs font-bold text-text/70 ml-1 uppercase tracking-wider">Class Name</label>
                     <input
                       id="new-class-name"
                       type="text"
                       value={newClassName}
                       onChange={(e) => setNewClassName(e.target.value)}
                       placeholder="e.g. Year 3 Red"
-                      className="w-full p-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold shadow-sm"
+                      className="w-full p-3 text-sm bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold shadow-sm"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label htmlFor="new-class-students" className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Students (One per line)</label>
+                    <label htmlFor="new-class-students" className="text-xs font-bold text-text/70 ml-1 uppercase tracking-wider">Students (One per line)</label>
                     <textarea
                       id="new-class-students"
                       value={newClassStudents}
                       onChange={(e) => setNewClassStudents(e.target.value)}
                       placeholder="Alice&#10;Bob&#10;Charlie"
                       rows={3}
-                      className="w-full p-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold shadow-sm"
+                      className="w-full p-3 text-sm bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold shadow-sm"
                     />
                   </div>
                 </div>
@@ -386,14 +386,14 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
               {/* Existing Classes */}
               {settings.classes.length > 0 && (
                 <div className="space-y-3">
-                  <h4 className="font-bold text-slate-800 text-md ml-1">Current Classes</h4>
+                  <h4 className="font-bold text-text text-md ml-1">Current Classes</h4>
                   <div className="grid grid-cols-1 gap-3">
                     {settings.classes.map(cls => (
-                      <div key={cls.id} className="bg-white border border-slate-200 p-4 rounded-2xl flex gap-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div key={cls.id} className="bg-surface border border-border p-4 rounded-2xl flex gap-4 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex-1 space-y-3">
                           <div className="flex items-center justify-between">
-                            <h5 className="text-md font-bold text-slate-800">{cls.name}</h5>
-                            <span className="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                            <h5 className="text-md font-bold text-text">{cls.name}</h5>
+                            <span className="bg-background text-text/70 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
                               {cls.students.length} students
                             </span>
                           </div>
@@ -402,12 +402,12 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                             defaultValue={cls.students.join('\n')}
                             onBlur={(e) => handleUpdateClass(cls.id, e.target.value)}
                             rows={3}
-                            className="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
+                            className="w-full p-3 text-sm bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
                           />
                         </div>
                         <button
                           onClick={() => deleteClass(cls.id)}
-                          className="self-start p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-90"
+                          className="self-start p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all active:scale-90"
                           title="Delete Class"
                           aria-label={`Delete Class ${cls.name}`}
                         >

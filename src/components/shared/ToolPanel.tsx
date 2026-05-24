@@ -80,7 +80,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ layout: { duration: 0.5, type: "spring", bounce: 0.2 } }}
-        className={`bg-slate-50/80 backdrop-blur-xl rounded-[3rem] relative w-full h-full flex flex-col items-center ${alignTop ? 'justify-start' : 'justify-center'} overflow-hidden border-4 border-white ${className}`}
+        className={`bg-surface/80 backdrop-blur-xl rounded-[var(--radius-main)] relative w-full h-full flex flex-col items-center ${alignTop ? 'justify-start' : 'justify-center'} overflow-hidden border-4 border-border/40 ${className}`}
       >
         {/* Background Grid Pattern - Removed as requested */}
 

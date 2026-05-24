@@ -23,7 +23,7 @@ const HELP_INFO = (
         <div key={step} className="flex gap-3 text-left">
           <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
             step === 1 ? 'bg-blue-50 text-blue-600' : 
-            step === 2 ? 'bg-indigo-50 text-indigo-600' : 
+            step === 2 ? 'bg-primary/5 text-primary' : 
             step === 3 ? 'bg-purple-50 text-purple-600' : 
             'bg-green-50 text-green-600'
           }`}>
@@ -57,7 +57,7 @@ export const QRCodeGenerator = () => {
     setBgColor('#ffffff');
     setIsConfigOpen(false);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setText, setFgColor, setBgColor]);
 
   useEffect(() => {
     setHasConfig(true);
@@ -86,8 +86,8 @@ export const QRCodeGenerator = () => {
         {/* QR Code Section - Now at Top */}
         <div className="w-full flex flex-col items-center gap-8 relative z-20">
           <div className="bg-slate-50 p-8 lg:p-12 rounded-[3rem] border-4 border-white flex flex-col items-center gap-8 relative overflow-hidden shrink-0 w-full max-w-2xl mx-auto">
-             <div className="relative p-12 bg-white rounded-[2.5rem] border-4 border-white overflow-hidden flex items-center justify-center group z-10" ref={qrRef}>
-                <div className="absolute inset-0 bg-white" />
+             <div className="relative p-12 bg-surface rounded-[2.5rem] border-4 border-white overflow-hidden flex items-center justify-center group z-10" ref={qrRef}>
+                <div className="absolute inset-0 bg-surface" />
                 <div className="relative z-10">
                    <QRCodeCanvas
                       value={text || " "}
@@ -104,7 +104,7 @@ export const QRCodeGenerator = () => {
              <button
                onClick={handleDownload}
                disabled={!text}
-               className="w-full max-w-md h-20 bg-indigo-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm hover:bg-indigo-500 transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50 relative z-10"
+               className="w-full max-w-md h-20 bg-primary text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm hover:bg-primary transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50 relative z-10"
              >
                <Download size={20} strokeWidth={4} /> <FormattedMessage id="qrcodegenerator.label.download" />
              </button>
@@ -117,7 +117,7 @@ export const QRCodeGenerator = () => {
           >
             <div className="space-y-6">
               <div className="space-y-3 text-left">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-4">
+                 <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest block ml-4">
                    <FormattedMessage id="qrcodegenerator.settings.code_color" />
                  </label>
                  <div className="w-full h-16 rounded-2xl border-4 border-white overflow-hidden relative cursor-pointer group/color">
@@ -135,7 +135,7 @@ export const QRCodeGenerator = () => {
               </div>
 
               <div className="space-y-3 text-left">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-4">
+                 <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest block ml-4">
                    <FormattedMessage id="qrcodegenerator.settings.bg_color" />
                  </label>
                  <div className="w-full h-16 rounded-2xl border-4 border-white overflow-hidden relative cursor-pointer group/color">
@@ -156,17 +156,17 @@ export const QRCodeGenerator = () => {
         </div>
 
         {/* URL Entry Section - Now at Bottom */}
-        <div className="w-full bg-white/50 rounded-[3rem] border-4 border-white flex flex-col relative overflow-hidden group min-h-[300px]">
+        <div className="w-full bg-surface/50 rounded-[3rem] border-4 border-white flex flex-col relative overflow-hidden group min-h-[300px]">
           <div className="flex-1 p-8 lg:p-12 flex flex-col gap-8 relative z-10">
              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
+                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white">
                    <QrCode size={24} strokeWidth={3} />
                 </div>
                 <div className="flex flex-col">
                   <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none text-left">
                     <FormattedMessage id="qrcodegenerator.title" />
                   </h4>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 text-left">
+                  <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mt-1 text-left">
                     <FormattedMessage id="qrcodegenerator.subtitle" />
                   </p>
                 </div>
@@ -176,7 +176,7 @@ export const QRCodeGenerator = () => {
                value={text}
                onChange={(e) => { setText(e.target.value); audioEngine.playTick(settings.soundTheme); }}
                placeholder="Type here..."
-               className="flex-1 w-full p-8 lg:p-12 rounded-[2.5rem] border-4 border-white bg-white/50 focus:bg-white transition-all resize-none text-2xl font-black text-slate-900 outline-none placeholder:text-slate-200 italic custom-scrollbar"
+               className="flex-1 w-full p-8 lg:p-12 rounded-[2.5rem] border-4 border-white bg-surface/50 focus:bg-surface transition-all resize-none text-2xl font-black text-slate-900 outline-none placeholder:text-slate-200 italic custom-scrollbar"
              />
           </div>
         </div>

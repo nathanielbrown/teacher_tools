@@ -30,19 +30,19 @@ const HelpContent = () => (
   <div className="space-y-4 font-['Outfit']">
     <div className="space-y-3 italic">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="wyr.help.step1" defaultMessage="Choose your year level to get started." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">2</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">2</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="wyr.help.step2" defaultMessage="Choose between two different options." />
         </p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="wyr.help.step3" defaultMessage="Discuss your choices with the class!" />
         </p>
@@ -127,10 +127,10 @@ export const WouldYouRather = () => {
       setHeaderActions(
         <div className="flex items-center gap-4 italic">
 
-          <div className="flex bg-white p-1.5 rounded-2xl border-2 border-slate-50">
+          <div className="flex bg-surface p-1.5 rounded-2xl border-2 border-slate-50">
              <div className="px-6 py-2 flex flex-col items-end leading-none">
                 <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Level</span>
-                <span className="text-[11px] font-black text-indigo-600 uppercase tracking-widest mt-1">
+                <span className="text-[11px] font-black text-primary uppercase tracking-widest mt-1">
                    <FormattedMessage id={`wyr.level.${yearLevel}`} defaultMessage={YEAR_LEVELS.find(l => l.id === yearLevel)?.label} />
                 </span>
              </div>
@@ -216,7 +216,7 @@ export const WouldYouRather = () => {
             className="flex-[3] flex flex-col gap-8 relative z-10 min-h-0"
           >
             {/* Main Stage */}
-            <div className="flex-1 flex flex-col gap-8 bg-white p-10 rounded-[3.5rem] border-4 border-slate-50 relative overflow-hidden group">
+            <div className="flex-1 flex flex-col gap-8 bg-surface p-10 rounded-[3.5rem] border-4 border-slate-50 relative overflow-hidden group">
                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-8 items-stretch relative z-10">
                 <AnimatePresence mode="wait">
                   <motion.button
@@ -227,11 +227,11 @@ export const WouldYouRather = () => {
                     onClick={() => handleSelect(0)}
                     className={`group relative ${isMobile ? 'p-6' : 'p-12'} bg-slate-50 border-8 border-white rounded-[5rem] hover:border-indigo-600 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95`}
                   >
-                    <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors uppercase italic tracking-tighter`}>
+                    <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-primary transition-colors uppercase italic tracking-tighter`}>
                       {currentPair ? intl.formatMessage({ id: currentPair[0], defaultMessage: currentPair[0] }) : ""}
                     </p>
                     <div className="absolute bottom-12 right-12 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                      <ChevronRight size={64} className="text-indigo-400" />
+                      <ChevronRight size={64} className="text-primary/70" />
                     </div>
                   </motion.button>
 
@@ -243,7 +243,7 @@ export const WouldYouRather = () => {
                     onClick={() => handleSelect(1)}
                     className={`group relative ${isMobile ? 'p-6' : 'p-12'} bg-slate-50 border-8 border-white rounded-[5rem] hover:border-rose-500 hover:scale-[1.02] transition-all flex flex-col items-center justify-center text-center gap-10 overflow-hidden active:scale-95`}
                   >
-                    <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-rose-600 transition-colors uppercase italic tracking-tighter`}>
+                    <p className={`${isMobile ? 'text-5xl' : 'text-4xl'} font-black text-slate-800 leading-tight group-hover:text-caution transition-colors uppercase italic tracking-tighter`}>
                       {currentPair ? intl.formatMessage({ id: currentPair[1], defaultMessage: currentPair[1] }) : ""}
                     </p>
                     <div className="absolute bottom-12 right-12 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
@@ -258,7 +258,7 @@ export const WouldYouRather = () => {
                 {Array.from({ length: Math.min(questions.length, 10) }).map((_, i) => (
                   <div 
                     key={i} 
-                    className={`h-3 rounded-full transition-all duration-700 border-2 border-white ${i === currentIndex % 10 ? 'w-16 bg-indigo-600' : 'w-4 bg-slate-100'}`}
+                    className={`h-3 rounded-full transition-all duration-700 border-2 border-white ${i === currentIndex % 10 ? 'w-16 bg-primary' : 'w-4 bg-slate-100'}`}
                   />
                 ))}
                </div>
@@ -268,8 +268,8 @@ export const WouldYouRather = () => {
       </AnimatePresence>
 
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-rose-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-caution-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
       </div>
     </ToolPanel>
   );

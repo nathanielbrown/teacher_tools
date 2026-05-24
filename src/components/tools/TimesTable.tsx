@@ -29,7 +29,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Play</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Pick the <b>Tables</b> you want to practice.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -37,11 +37,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Type your answer and press <b>Enter</b>.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">The <b>Grid</b> shows how well you know each answer.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Try to get all the boxes to turn <b>Dark Green</b>!</p>
       </div>
     </div>
@@ -94,11 +94,11 @@ const pickQuestion = (rowsToConsider: number[], states: Record<string, string>):
 };
 
 const getCellColor = (state: string | undefined) => {
-  if (state === 'white' || !state) return 'bg-white border-slate-100';
+  if (state === 'white' || !state) return 'bg-surface border-slate-100';
   if (state === 'orange') return 'bg-orange-500 border-orange-400';
   if (state === 'light-green') return 'bg-emerald-500 border-emerald-400';
   if (state === 'dark-green') return 'bg-emerald-700 border-emerald-600';
-  return 'bg-white border-slate-100';
+  return 'bg-surface border-slate-100';
 };
 
 // 7. Component
@@ -201,7 +201,7 @@ export const TimesTable = () => {
     <ToolPanel className="flex-col gap-4 lg:gap-6 p-4 lg:p-10" baseWidth={1200} baseHeight={900}>
       <div className="w-full flex flex-col lg:flex-row gap-8 items-stretch justify-center">
         {/* Left Column: Question Area */}
-        <div className="flex-1 bg-white rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-100 flex flex-col items-center justify-center p-6 lg:p-12 relative overflow-hidden">
+        <div className="flex-1 bg-surface rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-100 flex flex-col items-center justify-center p-6 lg:p-12 relative overflow-hidden">
           <div className="flex flex-col items-center mb-8 shrink-0">
              <h4 className="text-[14px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Question</h4>
           </div>
@@ -212,7 +212,7 @@ export const TimesTable = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center space-y-8"
               >
-                <div className="w-32 h-32 rounded-[2.5rem] bg-indigo-50 flex items-center justify-center text-indigo-600 mx-auto border-4 border-indigo-100">
+                <div className="w-32 h-32 rounded-[2.5rem] bg-primary/5 flex items-center justify-center text-primary mx-auto border-4 border-primary/20">
                   <Grid size={64} strokeWidth={1.5} />
                 </div>
                 <div className="space-y-4">
@@ -234,14 +234,14 @@ export const TimesTable = () => {
                 </motion.div>
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md relative group">
-                  <div className="absolute inset-0 bg-indigo-500/5 blur-3xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
                   <div className="relative flex items-center">
                     <input
                       ref={inputRef}
                       type="number"
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
-                      className="w-full text-center text-6xl lg:text-8xl font-black p-4 lg:p-8 bg-slate-50 border-4 border-slate-100 rounded-[2.5rem] focus:border-indigo-400 focus:bg-white transition-all tabular-nums placeholder:text-slate-200 outline-none h-32 lg:h-48 flex items-center justify-center leading-none appearance-none"
+                      className="w-full text-center text-6xl lg:text-8xl font-black p-4 lg:p-8 bg-slate-50 border-4 border-slate-100 rounded-[2.5rem] focus:border-indigo-400 focus:bg-surface transition-all tabular-nums placeholder:text-slate-200 outline-none h-32 lg:h-48 flex items-center justify-center leading-none appearance-none"
                       placeholder="?"
                       autoFocus
                     />
@@ -259,8 +259,8 @@ export const TimesTable = () => {
                         exit={{ opacity: 0, scale: 1.1 }}
                         className={`px-12 py-5 rounded-full flex items-center gap-4 border-4 ${
                           feedback.type === 'success' 
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                            : 'bg-rose-50 text-rose-600 border-rose-100'
+                            ? 'bg-success-bg text-success border-success-border' 
+                            : 'bg-caution-bg text-caution border-caution-border'
                         }`}
                       >
                         {feedback.type === 'success' ? <CheckCircle2 size={24} strokeWidth={3} /> : <X size={24} strokeWidth={3} />}
@@ -277,7 +277,7 @@ export const TimesTable = () => {
         </div>
 
         {/* Right Column: Mastery Grid */}
-        <div className="w-full lg:w-[500px] bg-white rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-100 flex flex-col p-6 lg:p-8 justify-center items-center">
+        <div className="w-full lg:w-[500px] bg-surface rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-100 flex flex-col p-6 lg:p-8 justify-center items-center">
           <div className="flex flex-col items-center mb-8 shrink-0">
             <h4 className="text-[14px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Mastery Table</h4>
           </div>
@@ -299,8 +299,8 @@ export const TimesTable = () => {
                       onClick={() => toggleRow(row)}
                       className={`w-8 h-8 lg:w-6 lg:h-6 rounded-lg flex items-center justify-center font-black text-[12px] lg:text-[10px] transition-all border-2 ${
                         selectedRows.includes(row) 
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'
+                          ? 'bg-primary text-white border-indigo-600'
+                          : 'bg-slate-50 text-neutral-400 border-slate-50 hover:bg-slate-100'
                       }`}
                     >
                       {row}
@@ -324,14 +324,14 @@ export const TimesTable = () => {
           <div className="mt-8 pt-8 border-t-4 border-slate-50">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Not Tested', color: 'bg-white border-slate-100' },
+                { label: 'Not Tested', color: 'bg-surface border-slate-100' },
                 { label: 'Needs Work', color: 'bg-orange-500 border-orange-400' },
                 { label: 'Correct', color: 'bg-emerald-500 border-emerald-400' },
                 { label: 'Mastered', color: 'bg-emerald-700 border-emerald-600' }
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`w-4 h-4 rounded-md border-2 ${item.color}`} />
-                  <span className="text-[11px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
+                  <span className="text-[11px] lg:text-[10px] font-black text-neutral-400 uppercase tracking-widest">{item.label}</span>
                 </div>
               ))}
             </div>

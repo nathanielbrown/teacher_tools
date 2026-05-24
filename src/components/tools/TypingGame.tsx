@@ -169,7 +169,7 @@ export const TypingGame = () => {
     setIsPanelVisible(true);
     if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
     audioEngine.playTick(settings.soundTheme);
-  }, [settings.soundTheme]);
+  }, [settings.soundTheme, setIsPanelVisible]);
 
   const updateGame = useCallback((time: number) => {
     if (status !== 'playing') return;
@@ -368,7 +368,7 @@ export const TypingGame = () => {
             {status === 'setup' ? (
               <motion.div key="setup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1 flex flex-col items-center justify-center p-12 text-center gap-12 z-10">
                 <div className="relative">
-                  <div className="w-40 h-40 bg-white rounded-[3rem] flex items-center justify-center text-blue-600 border-4 border-white/20">
+                  <div className="w-40 h-40 bg-surface rounded-[3rem] flex items-center justify-center text-blue-600 border-4 border-white/20">
                     <Ship size={80} strokeWidth={2} />
                   </div>
                   <motion.div 
@@ -389,7 +389,7 @@ export const TypingGame = () => {
                 </div>
                 <button 
                   onClick={startGame} 
-                  className="px-16 py-8 bg-white text-blue-600 rounded-[2.5rem] font-black text-3xl uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-6"
+                  className="px-16 py-8 bg-surface text-blue-600 rounded-[2.5rem] font-black text-3xl uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-6"
                 >
                   <Play size={40} fill="currentColor" strokeWidth={0} /> <FormattedMessage id="typinggame.label.start" defaultMessage="Play" />
                 </button>
@@ -398,7 +398,7 @@ export const TypingGame = () => {
               <div className="flex-1 relative overflow-hidden">
                 {/* HUD */}
                 <div className="absolute top-8 left-10 flex items-center gap-4 z-30">
-                   <div className="px-8 py-4 bg-white/20 backdrop-blur-md rounded-3xl border-2 border-white/20">
+                   <div className="px-8 py-4 bg-surface/20 backdrop-blur-md rounded-3xl border-2 border-white/20">
                       <span className="text-xs font-black text-blue-200 uppercase tracking-widest block mb-1">
                         <FormattedMessage id="typinggame.label.score" defaultMessage="Score" />
                       </span>
@@ -407,7 +407,7 @@ export const TypingGame = () => {
                 </div>
 
                 <div className="absolute top-8 right-10 z-30">
-                   <button onClick={stopGame} className="p-5 bg-white/20 backdrop-blur-md rounded-3xl border-2 border-white/20 text-white hover:bg-rose-500 transition-all">
+                   <button onClick={stopGame} className="p-5 bg-surface/20 backdrop-blur-md rounded-3xl border-2 border-white/20 text-white hover:bg-rose-500 transition-all">
                       <StopCircle size={28} />
                    </button>
                 </div>
@@ -549,9 +549,9 @@ export const TypingGame = () => {
                             </svg>
 
                             {/* Eye */}
-                            <div className={`absolute top-4 ${isRight ? 'right-6' : 'left-6'} w-7 h-7 bg-white rounded-full shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)] flex items-center justify-center`}>
-                               <div className={`w-3.5 h-3.5 bg-slate-900 rounded-full relative ${isRight ? 'ml-2' : 'mr-2'}`}>
-                                  <div className="w-1.5 h-1.5 bg-white rounded-full absolute top-0.5 right-0.5" />
+                            <div className={`absolute top-4 ${isRight ? 'right-6' : 'left-6'} w-7 h-7 bg-surface rounded-full shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)] flex items-center justify-center`}>
+                               <div className={`w-3.5 h-3.5 bg-dark-bg rounded-full relative ${isRight ? 'ml-2' : 'mr-2'}`}>
+                                  <div className="w-1.5 h-1.5 bg-surface rounded-full absolute top-0.5 right-0.5" />
                                </div>
                             </div>
                           </div>
@@ -566,7 +566,7 @@ export const TypingGame = () => {
               </div>
             ) : (
               <motion.div key="end" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col items-center justify-center p-12 text-center gap-12 z-10">
-                 <div className="w-48 h-48 bg-white/20 backdrop-blur-md rounded-[4rem] flex items-center justify-center text-amber-400 border-8 border-white/20">
+                 <div className="w-48 h-48 bg-surface/20 backdrop-blur-md rounded-[4rem] flex items-center justify-center text-amber-400 border-8 border-white/20">
                     <Trophy size={120} strokeWidth={1.5} />
                  </div>
                  <div className="space-y-4">
@@ -579,7 +579,7 @@ export const TypingGame = () => {
                  </div>
                  <button 
                   onClick={startGame} 
-                  className="px-16 py-8 bg-white text-blue-600 rounded-[2.5rem] font-black text-3xl uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-6"
+                  className="px-16 py-8 bg-surface text-blue-600 rounded-[2.5rem] font-black text-3xl uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-6"
                  >
                     <RotateCcw size={40} strokeWidth={3} /> <FormattedMessage id="typinggame.label.restart" defaultMessage="Play Again" />
                  </button>

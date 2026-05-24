@@ -58,7 +58,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Particle Physics Lab</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Select an <b>Element</b> from the sidebar and click/drag on the canvas to paint particles.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -66,11 +66,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Enable <b>Emitter Mode</b> (Infinity icon) to turn any placed pixel into a continuous source.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Observe <b>Complex Interactions</b>: Water creates Steam with Fire, and Lava turns into Stone with Water.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center text-xs font-black text-amber-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-warning-bg flex items-center justify-center text-xs font-black text-warning shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Use <b>Pause</b> to design frozen structures before resuming the simulation logic.</p>
       </div>
     </div>
@@ -335,7 +335,7 @@ export const SandSimulation = () => {
         </button>
         <button
           onClick={clearCanvas}
-          className="flex items-center gap-2 px-6 py-2 bg-white border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all active:scale-95 "
+          className="flex items-center gap-2 px-6 py-2 bg-surface border-2 border-slate-100 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all active:scale-95 "
         >
           <Trash2 size={14} strokeWidth={3} /> Clear
         </button>
@@ -386,18 +386,18 @@ export const SandSimulation = () => {
   };
 
   return (
-    <div className="tool-container flex flex-col lg:flex-row gap-8 h-full font-['Outfit'] select-none relative bg-white rounded-[4rem] p-4 lg:p-12 italic  overflow-hidden">
+    <div className="tool-container flex flex-col lg:flex-row gap-8 h-full font-['Outfit'] select-none relative bg-surface rounded-[4rem] p-4 lg:p-12 italic  overflow-hidden">
       
       <div className="tool-grid-bg opacity-30 pointer-events-none" />
 
       {/* Primary Interaction Surface */}
-      <div className="flex-1 bg-slate-900 rounded-[3.5rem] border-8 border-slate-800  flex flex-col items-center justify-center relative overflow-hidden group cursor-crosshair">
+      <div className="flex-1 bg-dark-bg rounded-[3.5rem] border-8 border-dark-border  flex flex-col items-center justify-center relative overflow-hidden group cursor-crosshair">
         <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
         
         {/* Telemetry HUD */}
         <div className="absolute top-12 left-12 flex flex-col gap-2 z-20">
-           <div className="flex items-center gap-3 bg-white/5 border-2 border-white/10 px-6 py-3 rounded-[1.5rem] backdrop-blur-md ">
-              <Activity size={18} className="text-indigo-400" />
+           <div className="flex items-center gap-3 bg-surface/5 border-2 border-white/10 px-6 py-3 rounded-[1.5rem] backdrop-blur-md ">
+              <Activity size={18} className="text-primary/70" />
               <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.4em]">Entropy Matrix Active</p>
            </div>
         </div>
@@ -412,12 +412,12 @@ export const SandSimulation = () => {
         />
 
         {/* Operational Interface Control */}
-        <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-white/5 border-2 border-white/10 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">
+        <div className="absolute bottom-12 right-12 flex items-center gap-6 z-20 bg-surface/5 border-2 border-white/10 p-8 rounded-[3rem] backdrop-blur-md  pointer-events-none">
            <div className="text-right">
               <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Chemical Impulse</p>
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-2 leading-none">Drag to Atomize</p>
+              <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest mt-2 leading-none">Drag to Atomize</p>
            </div>
-           <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
+           <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ">
               <MousePointer2 size={24} strokeWidth={3} />
            </div>
         </div>
@@ -427,22 +427,22 @@ export const SandSimulation = () => {
       <div className="w-full lg:w-[450px] shrink-0 flex flex-col gap-8 relative z-20 italic">
         
         {/* Particle Control Core */}
-        <div className="bg-slate-900 p-12 rounded-[4rem] border-4 border-slate-800  flex flex-col items-center gap-10 relative overflow-hidden shrink-0">
+        <div className="bg-dark-bg p-12 rounded-[4rem] border-4 border-dark-border  flex flex-col items-center gap-10 relative overflow-hidden shrink-0">
            <div className="tool-grid-bg-dark opacity-10 pointer-events-none" />
            
            <div className="flex items-center justify-between w-full relative z-10">
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Brush Flux</span>
-              <div className="px-4 py-1 bg-indigo-500/20 rounded-full border border-indigo-500/20">
-                 <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">Active Output</span>
+              <span className="text-[10px] font-black text-primary/70 uppercase tracking-[0.5em]">Brush Flux</span>
+              <div className="px-4 py-1 bg-primary/20 rounded-full border border-indigo-500/20">
+                 <span className="text-[8px] font-black text-primary/70 uppercase tracking-widest">Active Output</span>
               </div>
            </div>
 
            <div className="relative z-10 w-full space-y-6">
               <div className="flex justify-between items-end mb-2">
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Magnitude</span>
+                 <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Magnitude</span>
                  <span className="text-4xl font-black text-white italic tabular-nums leading-none">{brushSize}</span>
               </div>
-              <div className="h-6 bg-white/5 rounded-full p-1 border border-white/10 relative group">
+              <div className="h-6 bg-surface/5 rounded-full p-1 border border-white/10 relative group">
                  <input 
                    type="range" min="1" max="10" value={brushSize}
                    onChange={(e) => { setBrushSize(parseInt(e.target.value)); audioEngine.playTick(settings.soundTheme); }}
@@ -457,7 +457,7 @@ export const SandSimulation = () => {
 
               <button
                 onClick={() => { setIsGeneratorMode(!isGeneratorMode); audioEngine.playTick(settings.soundTheme); }}
-                className={`w-full flex items-center justify-between p-6 rounded-[2.5rem] border-4 transition-all active:scale-95 ${isGeneratorMode ? 'bg-indigo-600 border-white text-white ' : 'bg-white/5 border-white/10 text-slate-400 hover:border-indigo-500 hover:text-indigo-400'}`}
+                className={`w-full flex items-center justify-between p-6 rounded-[2.5rem] border-4 transition-all active:scale-95 ${isGeneratorMode ? 'bg-primary border-white text-white ' : 'bg-surface/5 border-white/10 text-neutral-400 hover:border-indigo-500 hover:text-primary/70'}`}
                >
                   <div className="flex items-center gap-4">
                      <InfIcon size={24} strokeWidth={3} className={isGeneratorMode ? 'text-white' : 'text-slate-500'} />
@@ -466,7 +466,7 @@ export const SandSimulation = () => {
                         <span className="text-[11px] font-black uppercase tracking-tight mt-1 opacity-60">{isGeneratorMode ? 'Active Flux' : 'Single Burst'}</span>
                      </div>
                   </div>
-                  <div className={`w-3 h-3 rounded-full ${isGeneratorMode ? 'bg-white animate-pulse -[0_0_10px_white]' : 'bg-white/10'}`} />
+                  <div className={`w-3 h-3 rounded-full ${isGeneratorMode ? 'bg-surface animate-pulse -[0_0_10px_white]' : 'bg-surface/10'}`} />
                </button>
            </div>
         </div>
@@ -474,7 +474,7 @@ export const SandSimulation = () => {
         {/* Alchemy Elements Matrix */}
         <div className="flex-1 bg-slate-50/50 p-10 rounded-[4rem] border-4 border-white  flex flex-col gap-8 min-h-0">
            <div className="flex items-center gap-4 shrink-0 border-b-4 border-white pb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white ">
+              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ">
                  <Settings2 size={24} strokeWidth={3} />
               </div>
               <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none">Material Registry</h4>
@@ -485,20 +485,20 @@ export const SandSimulation = () => {
                 <button
                   key={mat.id}
                   onClick={() => { setSelectedMaterial(mat.id); audioEngine.playTick(settings.soundTheme); }}
-                  className={`group flex flex-col items-center gap-2 p-4 rounded-[2rem] border-4 transition-all duration-300 ${selectedMaterial === mat.id ? 'bg-slate-900 border-indigo-600  scale-105 z-10' : 'bg-white border-white hover:border-indigo-100 '}`}
+                  className={`group flex flex-col items-center gap-2 p-4 rounded-[2rem] border-4 transition-all duration-300 ${selectedMaterial === mat.id ? 'bg-dark-bg border-indigo-600  scale-105 z-10' : 'bg-surface border-white hover:border-primary/20 '}`}
                 >
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: selectedMaterial === mat.id ? mat.color : '#f8fafc' }}>
                     <mat.icon size={24} strokeWidth={3} style={{ color: selectedMaterial === mat.id ? (mat.id === 0 ? '#64748b' : '#fff') : mat.color }} />
                   </div>
-                  <span className={`text-[10px] font-black uppercase tracking-tight text-center ${selectedMaterial === mat.id ? 'text-white' : 'text-slate-400'}`}>{mat.label}</span>
+                  <span className={`text-[10px] font-black uppercase tracking-tight text-center ${selectedMaterial === mat.id ? 'text-white' : 'text-neutral-400'}`}>{mat.label}</span>
                 </button>
               ))}
            </div>
 
-           <div className="p-8 bg-indigo-600 rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
+           <div className="p-8 bg-primary rounded-[3.5rem] text-white space-y-6  relative overflow-hidden shrink-0 mt-auto">
               <div className="tool-grid-bg opacity-10 pointer-events-none" />
               <div className="flex items-center gap-4 relative z-10">
-                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white border border-white/20">
+                 <div className="w-10 h-10 rounded-xl bg-surface/20 flex items-center justify-center text-white border border-white/20">
                     <Volume2 size={20} strokeWidth={3} />
                  </div>
                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Theoretical Matrix</h4>
@@ -514,8 +514,8 @@ export const SandSimulation = () => {
         </div>
       </div>
 
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-emerald-50 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-success-bg rounded-full blur-[150px] opacity-40 -z-10 pointer-events-none" />
     </div>
   );
 };

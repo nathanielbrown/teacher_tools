@@ -38,7 +38,7 @@ const HELP_INFO = (
     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">How to Play</h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Pick a <b>Level</b> (Easy, Medium, or Hard) to start.</p>
       </div>
       <div className="flex gap-3 text-left">
@@ -46,11 +46,11 @@ const HELP_INFO = (
         <p className="text-sm text-slate-600 font-medium leading-tight">Click a <b>Card</b> to see the emoji. Then click another one to find its match!</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-xs font-black text-rose-600 shrink-0">3</div>
+        <div className="w-6 h-6 rounded-lg bg-caution-bg flex items-center justify-center text-xs font-black text-caution shrink-0">3</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">If they match, they stay <b>face up</b>. If not, they hide again.</p>
       </div>
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs font-black text-emerald-600 shrink-0">4</div>
+        <div className="w-6 h-6 rounded-lg bg-success-bg flex items-center justify-center text-xs font-black text-success shrink-0">4</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">Try to find all the pairs in <b>few moves</b>!</p>
       </div>
     </div>
@@ -77,12 +77,69 @@ export const EmojiMatch = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+  const [dimensions, setDimensions] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1000,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800
+  });
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const getCardWidth = () => {
+    const sidebarWidth = isMobile ? 0 : 260;
+    const headerHeight = 80;
+    const padding = 40;
+    
+    const availableWidth = Math.max(320, dimensions.width - sidebarWidth - padding);
+    const availableHeight = Math.max(320, dimensions.height - headerHeight - padding);
+    
+    const baseWidth = 1000;
+    const scale = Math.max(0.1, Math.min(availableWidth / baseWidth, 2));
+    const dynamicHeight = availableHeight / scale;
+    
+    const maxGridWidth = 920;
+    const maxGridHeight = dynamicHeight - 240;
+    
+    const cols = getGridCols();
+    const totalCards = level === 'hard' ? 36 : level === 'medium' ? 16 : 8;
+    const rows = totalCards / cols;
+    
+    const gap = 4;
+    const sizeFromWidth = (maxGridWidth - (cols - 1) * gap) / cols;
+    const sizeFromHeight = (maxGridHeight - (rows - 1) * gap) / rows;
+    
+    const optimalSize = Math.floor(Math.min(sizeFromWidth, sizeFromHeight));
+    const maxSize = isMobile
+      ? (level === 'hard' ? 120 : level === 'medium' ? 180 : 200)
+      : (level === 'hard' ? 100 : level === 'medium' ? 180 : 220);
+      
+    return `${Math.min(optimalSize, maxSize)}px`;
+  };
+
+  const getEmojiSize = () => {
+    const cardWidth = getCardWidth();
+    const numericWidth = parseInt(cardWidth);
+    return `${numericWidth * 0.55}px`;
+  };
+
+  const getGridCols = () => {
+    if (isMobile) {
+      if (level === 'easy') return 2;
+      if (level === 'hard') return 6;
+      return LEVELS[level].cols;
+    }
+    if (level === 'hard') return 9;
+    return LEVELS[level].cols;
+  };
 
   const initGame = useCallback((lvlKey: keyof typeof LEVELS) => {
     const lvl = LEVELS[lvlKey];
@@ -188,14 +245,14 @@ export const EmojiMatch = () => {
                 <button
                   key={key}
                   onClick={() => { initGame(key); audioEngine.playTick(settings.soundTheme); }}
-                  className="group p-8 lg:p-10 bg-white border-4 border-slate-50 rounded-[2.5rem] lg:rounded-[3rem] hover:border-indigo-100 transition-all flex flex-col items-center gap-4 lg:gap-6 active:scale-95 shadow-sm"
+                  className="group p-8 lg:p-10 bg-surface border-4 border-slate-50 rounded-[2.5rem] lg:rounded-[3rem] hover:border-primary/20 transition-all flex flex-col items-center gap-4 lg:gap-6 active:scale-95"
                 >
                   <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform" style={{ color: lvl.color }}>
                     <lvl.icon size={isMobile ? 28 : 32} />
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-2xl lg:text-3xl font-black text-slate-800 uppercase tracking-tighter">{lvl.name}</span>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{lvl.label}</span>
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">{lvl.label}</span>
                   </div>
                 </button>
               ))}
@@ -209,9 +266,9 @@ export const EmojiMatch = () => {
             className="w-full max-w-2xl flex flex-col items-center gap-10 lg:gap-12 text-center italic px-4"
           >
             <div className="space-y-6">
-              <div className="w-32 h-32 lg:w-40 lg:h-40 bg-amber-400 rounded-[2.5rem] lg:rounded-[3rem] flex items-center justify-center text-white mx-auto relative border-8 border-white/20 rotate-12 shadow-md">
+              <div className="w-32 h-32 lg:w-40 lg:h-40 bg-amber-400 rounded-[2.5rem] lg:rounded-[3rem] flex items-center justify-center text-white mx-auto relative border-8 border-white/20 rotate-12">
                 <Trophy size={isMobile ? 60 : 80} />
-                <div className="absolute -top-3 -right-3 lg:-top-4 lg:-right-4 w-12 h-12 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center text-amber-500 border-4 border-amber-50 animate-bounce">
+                <div className="absolute -top-3 -right-3 lg:-top-4 lg:-right-4 w-12 h-12 lg:w-16 lg:h-16 bg-surface rounded-full flex items-center justify-center text-amber-500 border-4 border-amber-50 animate-bounce">
                   <Star fill="currentColor" size={isMobile ? 24 : 32} />
                 </div>
               </div>
@@ -241,38 +298,38 @@ export const EmojiMatch = () => {
               </button>
               <button
                 onClick={() => initGame(level)}
-                className="flex-1 py-4 lg:py-6 bg-indigo-600 text-white font-black text-lg rounded-2xl hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest shadow-sm"
+                className="flex-1 py-4 lg:py-6 bg-primary text-white font-black text-lg rounded-2xl hover:bg-primary/90 transition-all active:scale-95 uppercase tracking-widest"
               >
                 Play Again
               </button>
             </div>
           </motion.div>
         ) : (
-          <div className="w-full h-full flex flex-col items-center gap-6 lg:gap-10 italic px-4">
+          <div className={`w-full h-full flex flex-col items-center justify-center gap-[10px] italic ${isMobile ? 'px-0' : 'px-4'}`}>
             {/* HUD */}
-            <div className="w-full max-w-3xl flex items-center justify-between px-8 lg:px-12 py-4 lg:py-6 bg-white/80 backdrop-blur-xl rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50 shadow-sm">
+            <div className="w-full max-w-3xl flex items-center justify-between px-8 lg:px-12 py-4 lg:py-6 bg-surface/80 backdrop-blur-xl rounded-[2.5rem] lg:rounded-[3rem] border-4 border-slate-50">
               <div className="flex items-center gap-8 lg:gap-12">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Moves</span>
+                  <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Moves</span>
                   <span className="text-2xl lg:text-3xl font-black text-slate-800 tabular-nums leading-none mt-1">{moves}</span>
                 </div>
                 <div className="w-px h-8 lg:h-10 bg-slate-100" />
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Found</span>
-                  <span className="text-2xl lg:text-3xl font-black text-indigo-600 tabular-nums leading-none mt-1">{matched.length / 2} / {cards.length / 2}</span>
+                  <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Found</span>
+                  <span className="text-2xl lg:text-3xl font-black text-primary tabular-nums leading-none mt-1">{matched.length / 2} / {cards.length / 2}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 lg:gap-4 bg-slate-800 px-6 lg:px-8 py-2 lg:py-3 rounded-2xl shadow-inner">
-                <Timer size={isMobile ? 18 : 20} className="text-indigo-400" />
+              <div className="flex items-center gap-3 lg:gap-4 bg-slate-800 px-6 lg:px-8 py-2 lg:py-3 rounded-2xl">
+                <Timer size={isMobile ? 18 : 20} className="text-primary/70" />
                 <span className="text-xl lg:text-2xl tabular-nums font-black text-white">{elapsed}s</span>
               </div>
             </div>
 
             {/* Grid */}
             <div 
-              className="grid gap-3 lg:gap-6 w-fit mx-auto overflow-y-auto pr-1 max-h-[75vh] p-4 no-scrollbar"
+              className={`grid gap-[4px] mx-auto overflow-y-auto pr-1 max-h-[85%] py-[2px] no-scrollbar w-fit ${isMobile ? 'px-0' : 'px-4'}`}
               style={{ 
-                gridTemplateColumns: `repeat(${LEVELS[level].cols}, 1fr)`,
+                gridTemplateColumns: `repeat(${getGridCols()}, 1fr)`,
               }}
             >
               {cards.map((card, idx) => {
@@ -284,7 +341,7 @@ export const EmojiMatch = () => {
                     key={idx}
                     onClick={() => handleCardClick(idx)}
                     className="aspect-square cursor-pointer"
-                    style={{ perspective: '1000px', width: level === 'hard' ? '90px' : level === 'medium' ? '120px' : '150px' }}
+                    style={{ perspective: '1000px', width: getCardWidth() }}
                   >
                     <motion.div
                       animate={{ 
@@ -298,20 +355,21 @@ export const EmojiMatch = () => {
                       {/* Back */}
                       <div 
                         className={`absolute inset-0 rounded-[1.5rem] lg:rounded-[2rem] border-4 flex items-center justify-center transition-all ${
-                          isMatched ? 'bg-indigo-50 border-indigo-100 text-indigo-200' : 'bg-white border-slate-100 text-slate-200 hover:border-indigo-200'
+                          isMatched ? 'bg-primary/5 border-primary/20 text-indigo-200' : 'bg-surface border-slate-100 text-slate-200 hover:border-primary/30'
                         }`}
                         style={{ backfaceVisibility: 'hidden' }}
                       >
-                         <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-slate-50 shadow-inner" />
+                         <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-slate-50" />
                       </div>
                       
                       {/* Front */}
                       <div 
-                        className="absolute inset-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] border-8 border-white flex items-center justify-center text-4xl lg:text-6xl not-italic shadow-sm"
+                        className="absolute inset-0 bg-surface rounded-[1.5rem] lg:rounded-[2rem] border-8 border-white flex items-center justify-center not-italic"
                         style={{ 
                           backfaceVisibility: 'hidden', 
                           transform: 'rotateY(180deg)',
-                          backgroundColor: isMatched ? '#f8fafc' : 'white'
+                          backgroundColor: isMatched ? '#f8fafc' : 'white',
+                          fontSize: getEmojiSize()
                         }}
                       >
                         {card.emoji}

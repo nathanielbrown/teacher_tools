@@ -41,7 +41,7 @@ const HelpContent = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage id="mabblocks.help.step1" defaultMessage="Click a <b>Block</b> to add it." values={{ b: (chunks: React.ReactNode) => <b>{chunks}</b> }} />
         </p>
@@ -345,7 +345,7 @@ export const MABBlocks = () => {
               <button
                 key={type.id}
                 onClick={() => addBlock(type)}
-                className="w-full h-48 bg-white rounded-2xl border-4 border-white flex flex-col items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all group"
+                className="w-full h-48 bg-surface rounded-2xl border-4 border-white flex flex-col items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all group"
               >
                 <div className="flex items-center justify-center h-40">
                   {renderBlockVisual(type.id, type.color)}
@@ -360,39 +360,39 @@ export const MABBlocks = () => {
             <div className="flex bg-slate-100/50 p-1 rounded-xl">
               <button 
                 onClick={() => setMode('move')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all ${mode === 'move' ? 'bg-white text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all ${mode === 'move' ? 'bg-surface text-primary' : 'text-neutral-400 hover:text-slate-600'}`}
               >
                 <MousePointer2 size={12} />
                 <FormattedMessage id="mabblocks.mode.move" defaultMessage="Move" />
               </button>
               <button 
                 onClick={() => setMode('cut')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all ${mode === 'cut' ? 'bg-white text-rose-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all ${mode === 'cut' ? 'bg-surface text-caution' : 'text-neutral-400 hover:text-slate-600'}`}
               >
                 <Scissors size={12} />
                 <FormattedMessage id="mabblocks.mode.cut" defaultMessage="Cut" />
               </button>
             </div>
 
-            <button onClick={regroupBlocks} className="w-full py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:border-indigo-100 hover:text-indigo-600 transition-all">
+            <button onClick={regroupBlocks} className="w-full py-2 bg-surface border-2 border-slate-100 text-neutral-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:border-primary/20 hover:text-primary transition-all">
               <FormattedMessage id="mabblocks.action.sort" defaultMessage="Sort" />
             </button>
-            <button onClick={mergeAndSort} className="w-full py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:border-emerald-100 hover:text-emerald-600 transition-all">
+            <button onClick={mergeAndSort} className="w-full py-2 bg-surface border-2 border-slate-100 text-neutral-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:border-success-border hover:text-success transition-all">
               <FormattedMessage id="mabblocks.action.mergesort" defaultMessage="Merge + Sort" />
             </button>
-            <button onClick={resetBlocks} className="w-full py-2 bg-white border-2 border-slate-100 text-slate-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:border-rose-100 hover:text-rose-600 transition-all">
+            <button onClick={resetBlocks} className="w-full py-2 bg-surface border-2 border-slate-100 text-neutral-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:border-caution-border hover:text-caution transition-all">
               <FormattedMessage id="mabblocks.action.clear" defaultMessage="Reset" />
             </button>
           </div>
           
-          <div className="mt-auto p-4 bg-indigo-50 rounded-2xl text-indigo-600 flex flex-col items-center gap-0 border-4 border-white">
+          <div className="mt-auto p-4 bg-primary/5 rounded-2xl text-primary flex flex-col items-center gap-0 border-4 border-white">
             <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Total</span>
             <div className="text-3xl font-black tabular-nums">{totalValue}</div>
           </div>
         </div>
 
         {/* Assembly Stage */}
-        <div className="flex-1 flex flex-col bg-white/50 backdrop-blur-sm rounded-[3rem] border-4 border-white overflow-hidden relative">
+        <div className="flex-1 flex flex-col bg-surface/50 backdrop-blur-sm rounded-[3rem] border-4 border-white overflow-hidden relative">
           <div className="flex-1 flex relative">
             {[ 
               { id: 'flat', label: '100s', ratio: 3 }, 

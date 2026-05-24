@@ -19,7 +19,7 @@ const getHelpInfo = () => (
     </h3>
     <div className="space-y-3">
       <div className="flex gap-3 text-left">
-        <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs font-black text-indigo-600 shrink-0">1</div>
+        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center text-xs font-black text-primary shrink-0">1</div>
         <p className="text-sm text-slate-600 font-medium leading-tight">
           <FormattedMessage 
             id="clock.help.step1" 
@@ -225,7 +225,7 @@ export const AnalogueDigitalClock = () => {
           <div className={`flex flex-col items-center w-full ${isMobile ? 'gap-4' : 'gap-6 md:gap-10'}`}>
             {/* 1. Analogue Clock */}
             <div className="w-[300px] md:w-[450px] aspect-square relative group/clock">
-              <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center border-8 border-indigo-100 transition-transform duration-700 group-hover/clock:scale-[1.02]">
+              <div className="relative w-full h-full rounded-full bg-surface flex items-center justify-center border-8 border-primary/20 transition-transform duration-700 group-hover/clock:scale-[1.02]">
                 <svg
                   ref={svgRef}
                   viewBox="0 0 100 100"
@@ -328,13 +328,13 @@ export const AnalogueDigitalClock = () => {
             <div className="flex bg-slate-100 p-1.5 md:p-2 rounded-2xl border-2 border-white backdrop-blur-md">
               <button 
                 onClick={() => { setIsEditing(false); setTime(new Date()); audioEngine.playTick(settings.soundTheme); }} 
-                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${!isEditing ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${!isEditing ? 'bg-primary text-white ' : 'text-neutral-400 hover:text-slate-600'}`}
               >
                 <FormattedMessage id="clock.controls.now" defaultMessage="Time Now" />
               </button>
               <button 
                 onClick={() => { setIsEditing(true); audioEngine.playTick(settings.soundTheme); }} 
-                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${isEditing ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-6 md:px-8 py-2 md:py-3 text-[10px] font-black transition-all uppercase tracking-[0.2em] rounded-xl italic ${isEditing ? 'bg-primary text-white ' : 'text-neutral-400 hover:text-slate-600'}`}
               >
                 <FormattedMessage id="clock.controls.set" defaultMessage="Set Time" />
               </button>
@@ -344,7 +344,7 @@ export const AnalogueDigitalClock = () => {
           {/* Right Side: Digital & Word Clocks */}
           <div className={`flex flex-col items-center w-full max-w-xl ${isMobile ? 'gap-4' : 'gap-6 md:gap-10'}`}>
             {/* 3. Digital Clock */}
-            <div className="w-full bg-white rounded-[2rem] md:rounded-[2.5rem] border-4 border-white flex items-center justify-center py-6 md:py-10 px-4 md:px-10 gap-3 md:gap-6 relative">
+            <div className="w-full bg-surface rounded-[2rem] md:rounded-[2.5rem] border-4 border-white flex items-center justify-center py-6 md:py-10 px-4 md:px-10 gap-3 md:gap-6 relative">
               {/* Hours with Arrows */}
               <div className="relative flex flex-col items-center group/edit">
                 <AnimatePresence>
@@ -354,7 +354,7 @@ export const AnalogueDigitalClock = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       onClick={() => adjustHours(1)} 
-                      className="absolute -top-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                      className="absolute -top-12 text-slate-300 hover:text-primary transition-colors p-2"
                     >
                       <ChevronUp size={32} strokeWidth={3} />
                     </motion.button>
@@ -372,7 +372,7 @@ export const AnalogueDigitalClock = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       onClick={() => adjustHours(-1)} 
-                      className="absolute -bottom-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                      className="absolute -bottom-12 text-slate-300 hover:text-primary transition-colors p-2"
                     >
                       <ChevronDown size={32} strokeWidth={3} />
                     </motion.button>
@@ -380,7 +380,7 @@ export const AnalogueDigitalClock = () => {
                 </AnimatePresence>
               </div>
 
-              <div className="text-5xl lg:text-7xl font-black text-indigo-600 animate-pulse">:</div>
+              <div className="text-5xl lg:text-7xl font-black text-primary animate-pulse">:</div>
 
               {/* Minutes with Arrows */}
               <div className="relative flex flex-col items-center group/edit">
@@ -391,14 +391,14 @@ export const AnalogueDigitalClock = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       onClick={() => adjustMinutes(1)} 
-                      className="absolute -top-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                      className="absolute -top-12 text-slate-300 hover:text-primary transition-colors p-2"
                     >
                       <ChevronUp size={32} strokeWidth={3} />
                     </motion.button>
                   )}
                 </AnimatePresence>
 
-                <div className="text-5xl md:text-6xl lg:text-8xl font-black tabular-nums tracking-tighter text-indigo-600 italic">
+                <div className="text-5xl md:text-6xl lg:text-8xl font-black tabular-nums tracking-tighter text-primary italic">
                   {time.getMinutes().toString().padStart(2, '0')}
                 </div>
 
@@ -409,7 +409,7 @@ export const AnalogueDigitalClock = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       onClick={() => adjustMinutes(-1)} 
-                      className="absolute -bottom-12 text-slate-300 hover:text-indigo-600 transition-colors p-2"
+                      className="absolute -bottom-12 text-slate-300 hover:text-primary transition-colors p-2"
                     >
                       <ChevronDown size={32} strokeWidth={3} />
                     </motion.button>
@@ -418,7 +418,7 @@ export const AnalogueDigitalClock = () => {
               </div>
 
               <div className="text-3xl md:text-5xl lg:text-7xl font-black text-slate-300">:</div>
-              <div className="text-3xl md:text-4xl lg:text-6xl font-black tabular-nums text-rose-500 italic">
+              <div className="text-3xl md:text-4xl lg:text-6xl font-black tabular-nums text-caution italic">
                 {time.getSeconds().toString().padStart(2, '0')}
               </div>
 
@@ -431,17 +431,17 @@ export const AnalogueDigitalClock = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       onClick={toggleAMPM}
-                      className="absolute -top-10 text-indigo-400 hover:text-indigo-600 transition-colors"
+                      className="absolute -top-10 text-primary/70 hover:text-primary transition-colors"
                     >
                       <ChevronUp size={24} strokeWidth={3} />
                     </motion.button>
                   )}
                 </AnimatePresence>
 
-                <span className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">
+                <span className="text-xs font-black text-neutral-400 uppercase tracking-widest leading-none">
                   <FormattedMessage id="clock.status" defaultMessage="Status" />
                 </span>
-                <span className={`text-xl lg:text-3xl font-black text-indigo-600 uppercase italic ${isEditing ? 'cursor-pointer hover:scale-110' : ''}`} onClick={isEditing ? toggleAMPM : undefined}>
+                <span className={`text-xl lg:text-3xl font-black text-primary uppercase italic ${isEditing ? 'cursor-pointer hover:scale-110' : ''}`} onClick={isEditing ? toggleAMPM : undefined}>
                   {time.getHours() >= 12 ? 'PM' : 'AM'}
                 </span>
 
@@ -452,7 +452,7 @@ export const AnalogueDigitalClock = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       onClick={toggleAMPM}
-                      className="absolute -bottom-10 text-indigo-400 hover:text-indigo-600 transition-colors"
+                      className="absolute -bottom-10 text-primary/70 hover:text-primary transition-colors"
                     >
                       <ChevronDown size={24} strokeWidth={3} />
                     </motion.button>
@@ -462,7 +462,7 @@ export const AnalogueDigitalClock = () => {
             </div>
 
             {/* 4. Word Clock */}
-            <div className="w-full bg-white rounded-[2rem] md:rounded-[2.5rem] border-4 border-slate-200 flex items-center justify-center py-6 md:py-10 lg:py-14">
+            <div className="w-full bg-surface rounded-[2rem] md:rounded-[2.5rem] border-4 border-slate-200 flex items-center justify-center py-6 md:py-10 lg:py-14">
               <h2 className="w-full text-xl md:text-3xl lg:text-5xl font-black text-slate-800 tracking-tight italic uppercase px-6 md:px-8 leading-tight min-h-[2.5em] flex items-center justify-center text-center">
                 {getTimeInWords(time, intl)}
               </h2>

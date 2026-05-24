@@ -61,10 +61,17 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab, onTabChange, currentTool }) => {
   const intl = useIntl();
+  const { settings } = useSettings();
 
   const toolGroups = React.useMemo(() => {
     const dynamicGroups = tools.reduce<ToolGroup[]>((acc, tool) => {
       if (tool.hidden) return acc;
+      if (settings.selectedYear !== 'All') {
+        const yearNum = settings.selectedYear === 'Prep' ? 0 : parseInt(settings.selectedYear);
+        if (yearNum < tool.yearRange[0] || yearNum > tool.yearRange[1]) {
+          return acc;
+        }
+      }
       let group = acc.find(g => g.title === tool.section && g.mainSection === tool.mainSection);
       if (!group) {
         group = {
@@ -93,7 +100,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
       },
       ...dynamicGroups.filter(g => g.title !== 'Word Management')
     ];
-  }, [intl]);
+  }, [intl, settings.selectedYear]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
@@ -130,7 +137,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
   }, [setSidebarMode]);
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-  const { settings } = useSettings();
   const {
     headerActions, headerInfo, helpContent, clearHeader,
     activeOverlay, setActiveOverlay, isFullscreen
@@ -160,6 +166,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
   };
 
   const filteredGroups = toolGroups.filter(group => {
+    if (group.items.length === 0) return false;
     if (group.mainSection === 'All') return true;
     return group.mainSection === activeTab;
   });
@@ -186,7 +193,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               if (rest.length > 0 && title.length < 40) {
                 return (
                   <p key={i}>
-                    <strong className="text-white">{title}:</strong>
+                    <strong className="text-slate-800">{title}:</strong>
                     {rest.join(':')}
                   </p>
                 );
@@ -219,9 +226,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                 whileHover={{ rotate: 15, scale: 1.1 }}
                 src={logo}
                 alt="ClassRex"
+                width={40}
+                height={40}
                 className="h-10 w-auto object-contain drop-shadow-md"
               />
-              <span className="text-2xl font-medium text-slate-800 tracking-tighter">
+              <span className="text-2xl font-medium text-text tracking-tighter">
                 ClassRex
               </span>
             </button>
@@ -288,11 +297,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                             const isActive = tool.id === currentTool;
                             return (
                               <button
-                                key={tool.id}
+                                key={`${tool.id}-${'mainSection' in tool ? tool.mainSection : ''}-${'section' in tool ? tool.section : ''}`}
                                 onClick={() => onNavigate(tool.id)}
                                 className={`group relative flex items-center transition-all duration-300 w-full px-4 py-1.5 space-x-3 rounded-2xl ${isActive
                                     ? `bg-${themeColor} text-white shadow-xl shadow-${themeColor}/30 scale-[1.02] z-10`
-                                    : `hover:bg-white/60 text-slate-500 ${settings.theme === 'early-years' ? '' : `hover:text-${themeColor}`}`
+                                    : `hover:bg-surface/60 text-text/70 ${settings.theme === 'early-years' ? '' : `hover:text-${themeColor}`}`
                                   }`}
                                 aria-current={isActive ? 'page' : undefined}
                               >
@@ -319,11 +328,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="p-4 border-t border-slate-100 flex justify-center">
+          <div className="p-4 border-t border-border flex justify-center">
             {/* Sidebar Footer - Only Dashboard link now */}
             <button
               onClick={() => onNavigate('home')}
-              className="p-3 text-slate-300 hover:text-indigo-500 transition-all rounded-2xl hover:bg-indigo-50/80 active:scale-90"
+              className="p-3 text-text/40 hover:text-indigo-500 transition-all rounded-2xl hover:bg-background active:scale-90"
               title="Go to Dashboard"
             >
               <Home size={24} strokeWidth={3} />
@@ -345,13 +354,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
             {/* Dashboard Link */}
             <button
               onClick={() => onNavigate('home')}
-              className="bg-white/90 backdrop-blur-xl shadow-2xl border border-white/40 p-4 rounded-r-2xl text-slate-600 hover:bg-slate-50 transition-all active:scale-95 group flex items-center justify-center overflow-hidden"
+              className="bg-surface/90 backdrop-blur-xl shadow-2xl border border-border/40 p-4 rounded-r-2xl text-text/80 hover:bg-background transition-all active:scale-95 group flex items-center justify-center overflow-hidden"
               title="Go to Dashboard"
             >
               <motion.img
                 whileHover={{ rotate: 15, scale: 1.1 }}
                 src={logo}
                 alt="ClassRex"
+                width={32}
+                height={32}
                 className="h-8 w-auto object-contain drop-shadow-sm"
               />
             </button>
@@ -359,7 +370,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
             {/* Expand Toggle */}
             <button
               onClick={() => setSidebarMode('full')}
-              className={`bg-white/90 backdrop-blur-xl shadow-2xl border border-white/40 p-5 rounded-r-[3rem] text-${themeColor} hover:bg-${themeColor} hover:text-white transition-all group active:scale-95 flex items-center justify-center`}
+              className={`bg-surface/90 backdrop-blur-xl shadow-2xl border border-border/40 p-5 rounded-r-[3rem] text-${themeColor} hover:bg-${themeColor} hover:text-white transition-all group active:scale-95 flex items-center justify-center`}
               title="Show Sidebar"
             >
               <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
@@ -374,11 +385,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               <div className="flex items-center gap-2 md:gap-6">
                 <button
                   onClick={() => setSidebarMode('full')}
-                  className="lg:hidden p-2 sm:p-3 rounded-2xl hover:bg-slate-100 text-slate-600 active:scale-90 -ml-2 sm:ml-0"
+                  className="lg:hidden p-2 sm:p-3 rounded-2xl hover:bg-background text-text/80 active:scale-90 -ml-2 sm:ml-0"
                 >
                   <Menu size={28} strokeWidth={3} />
                 </button>
-                <img src={logo} alt="ClassRex" className="h-8 w-auto object-contain lg:hidden" />
+                <img src={logo} alt="ClassRex" width={32} height={32} className="h-8 w-auto object-contain lg:hidden" />
 
                 {/* Privacy Badges - Visible on Desktop Top Left */}
                 <div className="hidden lg:flex items-center gap-6">
@@ -390,19 +401,21 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                       whileHover={{ scale: 1.1, rotate: -10 }}
                       src={logo}
                       alt="ClassRex"
+                      width={48}
+                      height={48}
                       className="h-12 w-auto object-contain drop-shadow-md"
                     />
-                    <span className="text-2xl font-black text-slate-800 tracking-tighter">ClassRex</span>
+                    <span className="text-2xl font-black text-text tracking-tighter">ClassRex</span>
                   </div>
-                  <div className="flex items-center bg-slate-50/50 rounded-2xl p-1.5 border border-slate-100 gap-1">
+                  <div className="flex items-center bg-background/50 rounded-2xl p-1.5 border border-border gap-1">
                     <div className="flex items-center justify-center p-1">
                       <NoCookieIcon />
                     </div>
-                    <div className="w-px h-6 bg-slate-200" />
+                    <div className="w-px h-6 bg-border" />
                     <div className="flex items-center justify-center p-1">
                       <NoCloudIcon />
                     </div>
-                    <div className="w-px h-6 bg-slate-200" />
+                    <div className="w-px h-6 bg-border" />
                     <div className="flex items-center justify-center p-1" title="Current Language">
                       <FlagIcon
                         country={
@@ -503,7 +516,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                       onClick={() => onTabChange(tab)}
                       className={`px-8 py-3.5 rounded-[1.25rem] font-black text-xs uppercase tracking-widest transition-all duration-500 border-2 relative overflow-hidden group ${isTabActive
                           ? `bg-${tabColorClass} border-${tabColorClass} text-white shadow-xl shadow-${tabColorClass}/30 scale-105 z-10`
-                          : `bg-transparent border-transparent text-slate-400 hover:text-${tabColorClass} hover:bg-white`
+                          : `bg-transparent border-transparent text-text/60 hover:text-${tabColorClass} hover:bg-surface`
                         }`}
                       aria-current={isTabActive ? 'page' : undefined}
                     >
@@ -522,7 +535,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
               <div className="flex items-center gap-0 md:gap-2">
                 <button
                   onClick={() => setActiveOverlay('about')}
-                  className={`p-2 md:p-3 rounded-2xl transition-all active:scale-90 ${activeOverlay === 'about' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-100/80 text-slate-600'} -mr-1 md:mr-0`}
+                  className={`p-2 md:p-3 rounded-2xl transition-all active:scale-90 ${activeOverlay === 'about' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-surface text-text/80'} -mr-1 md:mr-0`}
                   title="About ClassRex"
                 >
                   {settings.theme === 'early-years' ? (
@@ -534,7 +547,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
 
                 <button
                   onClick={() => onNavigate('config')}
-                  className={`p-2 md:p-3 rounded-2xl transition-all active:scale-90 ${currentTool === 'config' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-100/80 text-slate-600'}`}
+                  className={`p-2 md:p-3 rounded-2xl transition-all active:scale-90 ${currentTool === 'config' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-surface text-text/80'}`}
                   title={intl.formatMessage({ id: 'nav.settings', defaultMessage: 'Settings' })}
                 >
                   {settings.theme === 'early-years' ? (
@@ -564,7 +577,88 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
                 {headerActions}
               </ToolHeader>
             )}
-            {children}
+            
+            {activeOverlay === 'help' && currentToolMetadata && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="w-full flex-1 flex flex-col justify-start items-center py-4"
+                onClick={() => setActiveOverlay(null)}
+              >
+                <div
+                  className="w-full bg-white rounded-[2rem] p-6 md:p-10 border-4 border-slate-100 flex flex-col gap-6 md:gap-8 max-h-[85vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header of Panel */}
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <h3 className="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
+                      {settings.theme === 'early-years' ? (
+                        <span className="text-xl leading-none">❓</span>
+                      ) : (
+                        <HelpCircle size={24} className="text-indigo-600" />
+                      )}
+                      <span>
+                        <FormattedMessage id="header.tooltip.help" defaultMessage="Help & Info" />
+                      </span>
+                    </h3>
+                    <button
+                      onClick={() => setActiveOverlay(null)}
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+                      title="Close"
+                      aria-label="Close"
+                    >
+                      <X size={20} strokeWidth={2.5} />
+                    </button>
+                  </div>
+
+                  {/* Two-Column Responsive Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                    {/* Column 1: Info (Left) */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-black text-indigo-600 pb-2 border-b-2 border-indigo-50 flex items-center gap-2">
+                        {settings.theme === 'early-years' ? (
+                          <span className="text-lg leading-none">ℹ️</span>
+                        ) : (
+                          <Info size={18} strokeWidth={2.5} />
+                        )}
+                        <span>Information</span>
+                      </h4>
+                      <div className="text-slate-600 font-medium leading-relaxed space-y-3">
+                        {headerInfo || (
+                          <FormattedMessage 
+                            id={`tool.${currentToolMetadata.id}.info`} 
+                            defaultMessage={typeof currentToolMetadata.infoContent === 'string' ? currentToolMetadata.infoContent : undefined}
+                          >
+                            {(txt) => renderOverlayContent(txt || currentToolMetadata.infoContent)}
+                          </FormattedMessage>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Column 2: Help (Right) */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-black text-rose-600 pb-2 border-b-2 border-rose-50 flex items-center gap-2">
+                        {settings.theme === 'early-years' ? (
+                          <span className="text-lg leading-none">❓</span>
+                        ) : (
+                          <HelpCircle size={18} strokeWidth={2.5} />
+                        )}
+                        <span>How to Use</span>
+                      </h4>
+                      <div className="text-slate-600 font-medium leading-relaxed space-y-3">
+                        {renderOverlayContent(helpContent || currentToolMetadata.helpContent)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            <div className={activeOverlay === 'help' ? 'hidden' : 'contents'}>
+              {children}
+            </div>
           </motion.div>
         </main>
       </div>
@@ -572,58 +666,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeTab,
       {/* Modals & Overlays */}
       <AnimatePresence>
         {activeOverlay === 'about' && <AboutModal onClose={() => setActiveOverlay(null)} />}
-
-        {(activeOverlay === 'info' || activeOverlay === 'help') && (
-          <div
-            className="fixed inset-0 z-[100] pointer-events-none"
-            onClick={() => setActiveOverlay(null)}
-          >
-            <div className="max-w-7xl mx-auto w-full h-full relative px-10">
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-48 md:top-64 right-12 md:right-16 w-[calc(100vw-4rem)] md:w-96 bg-slate-800 text-white p-8 rounded-[3rem] shadow-2xl pointer-events-auto text-sm leading-relaxed border border-white/10 premium-shadow"
-                onClick={(e) => e.stopPropagation()}
-                role="dialog"
-                aria-modal="true"
-                aria-label={activeOverlay === 'info' ? 'Tool Information' : 'How to Use'}
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-white/10">
-                      {activeOverlay === 'info' ? <Info size={16} className="text-white" /> : <HelpCircle size={16} className="text-white" />}
-                    </div>
-                    <span className="font-black tracking-widest text-xs uppercase text-white/70">
-                      {activeOverlay === 'info' ? 'Tool Information' : 'How to Use'}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setActiveOverlay(null)}
-                    className="text-white/40 hover:text-white transition-colors"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <div className="space-y-4 text-slate-300 font-medium overflow-y-auto max-h-[60vh] custom-scrollbar pr-2">
-                  {activeOverlay === 'info' ? (
-                    headerInfo || (currentToolMetadata ? (
-                      <FormattedMessage 
-                        id={`tool.${currentToolMetadata.id}.info`} 
-                        defaultMessage={typeof currentToolMetadata.infoContent === 'string' ? currentToolMetadata.infoContent : undefined}
-                      >
-                        {(txt) => renderOverlayContent(txt || currentToolMetadata.infoContent)}
-                      </FormattedMessage>
-                    ) : null)
-                  ) : (
-                    helpContent || currentToolMetadata?.helpContent
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        )}
       </AnimatePresence>
 
       {/* Mobile Sidebar Overlay */}

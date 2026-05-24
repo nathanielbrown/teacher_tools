@@ -140,7 +140,7 @@ export const Abacus = () => {
         <div className="w-full grid grid-cols-10 px-[18px] lg:px-[24px] h-64 md:h-40">
           {COLUMN_CONFIG.map((conf, idx) => (
             <div key={idx} className="relative flex flex-col items-center justify-end h-full pb-1">
-              <span className="absolute bottom-0 left-1/2 transform -rotate-90 transition-transform origin-left whitespace-nowrap text-[32px] md:text-[20px] font-black text-slate-400 uppercase tracking-tighter">
+              <span className="absolute bottom-0 left-1/2 transform -rotate-90 transition-transform origin-left whitespace-nowrap text-[32px] md:text-[20px] font-black text-neutral-400 uppercase tracking-tighter">
                 {conf.label}
               </span>
             </div>
@@ -250,14 +250,14 @@ export const Abacus = () => {
         </div>
 
         {/* Total Aggregator */}
-         <div className="mt-1">
-            <div className="px-6 py-1.5 bg-white rounded-2xl border-2 lg:border-4 border-slate-100 relative overflow-hidden group">
+         <div className="mt-8 lg:mt-12">
+            <div className="px-12 py-4 md:px-16 md:py-6 bg-surface rounded-[2.5rem] border-4 border-slate-100 relative overflow-hidden group">
                <div className="tool-grid-bg opacity-10 pointer-events-none" />
                <div className="flex flex-col items-center relative z-10">
-                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.5em] mb-1">
+                  <span className="text-xs md:text-sm font-black text-primary uppercase tracking-[0.5em] mb-2">
                     <FormattedMessage id="abacus.total" defaultMessage="Total" />
                   </span>
-                  <span className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tabular-nums tracking-tighter leading-none italic">
+                  <span className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 tabular-nums tracking-tighter leading-none italic">
                      {totalValue.toLocaleString()}
                   </span>
                </div>
@@ -265,8 +265,8 @@ export const Abacus = () => {
          </div>
       </div>
 
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-rose-50 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-caution-bg rounded-full blur-[120px] opacity-40 -z-10 pointer-events-none" />
     </ToolPanel>
   );
 };
